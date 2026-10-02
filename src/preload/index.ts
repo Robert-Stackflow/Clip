@@ -25,7 +25,7 @@ const api:API={
   exportAttachment:(id,index)=>invoke('export-attachment',id,index),contentInfo:(id,readFiles=false)=>invoke('content-info',id,readFiles),exportFormat:(id,name)=>invoke('export-format',id,name),
   editImage:id=>invoke('image-open',id),captureWindows:()=>invoke('capture-windows'),screenshotWindow:token=>invoke('screenshot-window',token),
   addFiles:()=>invoke('add-files'),dropFiles:files=>invoke('drop-files',files.map(file=>webUtils.getPathForFile(file))),drag:id=>ipcRenderer.send('clipper:drag',id),exportImage:id=>invoke('export-image',id),
-  ocrStatus:()=>invoke('ocr-status'),ocr:(id,language)=>invoke('ocr',id,language),cancelOcr:()=>invoke('cancel-ocr'),saveOcr:text=>invoke('save-ocr',text),openScrollCapture:()=>invoke('scroll-open'),screens:()=>invoke('screens'),screenshot:(mode,display)=>invoke('screenshot',mode,display),
+  ocrStatus:()=>invoke('ocr-status'),ocr:(id,language)=>invoke('ocr',id,language),cancelOcr:()=>invoke('cancel-ocr'),saveOcr:text=>invoke('save-ocr',text),openScrollCapture:displayId=>invoke('scroll-open',displayId),screens:()=>invoke('screens'),screenshot:(mode,display)=>invoke('screenshot',mode,display),
   settings:value=>invoke('settings',value),backup:mode=>invoke('backup',mode),clear:()=>invoke('clear'),hide:()=>invoke('hide'),quit:()=>invoke('quit'),onChange:callback=>{const listener=()=>callback();ipcRenderer.on('clipper:changed',listener);return()=>ipcRenderer.removeListener('clipper:changed',listener);},onNotice:callback=>{const listener=(_e:unknown,text:string)=>callback(text);ipcRenderer.on('clipper:notice',listener);return()=>ipcRenderer.removeListener('clipper:notice',listener);}
 };
 contextBridge.exposeInMainWorld('clipper',api);

@@ -15,8 +15,14 @@ export class TrayHistory{
   this.ensure();const query=validateTrayQuery(value),store=this.store(),category=query.category&&query.category!=='favorites'?store.categories.find(c=>c.id===query.category):undefined;
   if(query.category&&query.category!=='favorites'&&!category)throw new Error(TRAY_CATEGORY_MISSING+': '+tr('分类已不存在'));
   this.generation++;this.tickets.clear();const terms=query.text.toLocaleLowerCase().split(/\s+/).filter(Boolean),needsText=!!(terms.length||category?.contains);
-  const projection=needsText?`,json_extract(c.data,'$.payload.text') AS body,(SELECT group_concat(value,char(10)) FROM json_each(c.data,'$.payload.files')) AS paths,(SELECT group_concat(json_extract(value,'$.name'),char(10)) FROM json_each(c.data,'$.payload.attachments')) AS attachments`:'';
-  const rows=store.db.prepare(`SELECT json_remove(c.data,'$.payload','$.thumbnail') AS summary${projection} FROM clips c ORDER BY updated DESC,id ASC`).iterate() as Iterable<{summary:string;body?:string;paths?:string;attachments?:string}>;
+  // Use the existing rebuildable projections. Opening Recent must never parse
+  // every full PNG or attachment just to remove it again inside SQLite.
+  const indexed=!!store.db.prepare("SELECT 1 FROM sqlite_master WHERE name='clip_list_cache'").get();
+  const summary=indexed?"json_remove(i.data,'$.thumbnail')":"json_remove(c.data,'$.payload','$.thumbnail')";
+  const payload=indexed?'p.payload':"json_extract(c.data,'$.payload')";
+  const projection=needsText?`,json_extract(${payload},'$.text') AS body,(SELECT group_concat(value,char(10)) FROM json_each(${payload},'$.files')) AS paths,(SELECT group_concat(json_extract(value,'$.name'),char(10)) FROM json_each(${payload},'$.attachments')) AS attachments`:'';
+  const unfiltered=query.kind==='all'&&!query.category&&!terms.length;
+  const rows=store.db.prepare(`SELECT ${summary} AS summary${projection} FROM clips c ${indexed?'JOIN clip_list_cache i ON i.id=c.id':''} ${indexed&&needsText?'JOIN clip_preview_cache p ON p.id=c.id':''} ORDER BY c.updated DESC,c.id ASC ${unfiltered?'LIMIT '+TRAY_LIMIT:''}`).iterate() as Iterable<{summary:string;body?:string;paths?:string;attachments?:string}>;
   const items:TrayState['items']=[],previews=new Map<string,{hash:string;key:string}>();let total=0;
   for(const row of rows){const item=JSON.parse(row.summary) as Clip,content=[item.title,row.body,row.paths,row.attachments].join('\n').toLocaleLowerCase();
    if(query.kind!=='all'&&item.kind!==query.kind||query.category==='favorites'&&!item.favorite)continue;
@@ -26,6 +32,7 @@ export class TrayHistory{
    const previous=this.previews.get(item.id),preview=previous?.hash===item.hash?previous:{hash:item.hash,key:randomUUID()};previews.set(item.id,preview);
    items.push({token,previewKey:preview.key,id:item.id,kind:item.kind,title:item.title,preview:item.preview,source:item.source,updatedAt:item.updatedAt,favorite:item.favorite,pinned:item.pinned,bytes:item.bytes,draggable:item.kind==='image'||item.kind==='files'});
   }
+  if(unfiltered)total=Number((store.db.prepare('SELECT count(*) AS n FROM clips').get() as {n:number}).n);
   this.previews=previews;return {items,total,categories:store.categories.map(c=>({id:c.id,name:c.name}))};
  }
  private ensure(){if(!this.active)throw new Error(tr('托盘面板已关闭，请重新打开'));}

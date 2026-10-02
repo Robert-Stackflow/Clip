@@ -90,3 +90,6 @@ export * from '../src/main/capture-writer';
 export * from '../src/main/window-state';
 
 export * from '../src/shared/renderer-assets';
+
+export * from '../src/main/scroll-sampler';
+export * from '../src/shared/scroll-placement';

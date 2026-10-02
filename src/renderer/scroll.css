@@ -13,16 +13,17 @@ figcaption{font-size:calc(12px * var(--text-scale,1));color:var(--muted);margin-
 .preview-scroll{height:calc(100vh - 310px);min-height:180px;overflow:auto;background:var(--soft);border:1px solid var(--line);border-radius:10px;text-align:center}
 #preview{max-width:100%;display:block;margin:auto}
 #message{margin-top:12px;font-size:calc(12px * var(--text-scale,1));color:#aa674e;overflow-wrap:anywhere}
-html[data-compact=true] main{padding:20px 24px}
+html[data-compact=true] main{padding:14px 18px;display:flex;flex-direction:column;overflow:auto}
 html[data-compact=true] h1{font-size:calc(18px * var(--text-scale,1))}
-html[data-compact=true] .buttons{justify-content:flex-start;margin-top:16px}
+html[data-compact=true] .buttons{justify-content:space-between;margin-top:14px;gap:5px;flex-wrap:nowrap}html[data-compact=true] .buttons button{min-height:30px;padding:5px 10px;font-size:12px}
 html[data-compact=true] .help{margin:12px 0}
-html[data-compact=true] #message{margin-top:6px}
+html[data-compact=true] #message{order:2;margin:10px 0 0;font-size:11px;line-height:1.7;color:var(--muted)}
+.scroll-status{display:flex;align-items:center;gap:8px;margin-bottom:7px}.scroll-status strong{font-size:13px;font-weight:550}.scroll-status>button{margin-left:auto;min-height:28px;font-size:11px;padding:4px 8px}.scroll-status-dot{width:7px;height:7px;border-radius:50%;background:#72947b;box-shadow:0 0 0 4px color-mix(in srgb,#72947b 12%,transparent)}.scroll-status-dot.paused{background:var(--muted);box-shadow:none}#progress{font-size:11px;color:var(--muted);margin:0}
+#setup .capture-start{max-width:640px;margin:24px auto;padding:28px;border:1px solid var(--line);border-radius:18px}#setup .guide{gap:8px;font-size:12px;line-height:1.8;color:var(--muted)}#capture .capture-start{padding:0;border:0;border-radius:0}#capture{flex-shrink:0}
 #overlap-range{font-size:calc(12px * var(--text-scale,1));color:var(--muted)}
 
 
 .seam-label{font-size:calc(12px * var(--text-scale,1));color:var(--muted);margin-bottom:8px}
 #seam{display:block;max-width:100%;max-height:140px;margin:0 auto;border:1px solid var(--line);border-radius:7px}
 .pair img{height:calc(100vh - 620px);min-height:130px}
-
 

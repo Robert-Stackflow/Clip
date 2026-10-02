@@ -1950,5 +1950,19 @@ export const english:Readonly<Record<string,string>>={
   "色彩": "Saturation and brightness",
   "色调": "Hue",
   "十六进制颜色": "Hex color",
-  "选择颜色": "Choose color"
+  "选择颜色": "Choose color",
+  "正在加载记录…": "Loading recent history…",
+  "预览加载失败，请重新选择记录": "Preview could not be loaded. Select the item again.",
+  "记录加载失败": "History could not be loaded",
+  "暂时无法读取记录": "Recent history is temporarily unavailable",
+  "自动拼接中": "Capturing automatically",
+  "补拍一屏": "Capture once",
+  "3. 缓慢向下滚动，停稳后会自动拼接。结束时点击“完成预览”。": "3. Scroll down slowly. Frames are stitched when the content settles. Select Finish to preview.",
+  "缓慢向下滚动，停稳后会自动拼接": "Scroll down slowly. Frames are stitched when the content settles.",
+  "已暂停自动拼接，可补拍一屏或撤销": "Automatic stitching is paused. Capture once or undo the last frame.",
+  "请将控制窗口移到选区外，再继续自动拼接；也可补拍一屏": "Move the controls outside the capture region and resume, or capture once.",
+  "请先开始长截图": "Start a scrolling capture first",
+  "最后一屏需要对齐；确认拼接后再完成预览": "The last frame needs alignment. Confirm the join, then finish to preview.",
+  "Esc 完成预览": "Esc to finish and preview",
+  "控制条即将隐藏，缓慢滚动；按 Esc 完成预览": "The controls will hide shortly. Scroll slowly, then press Esc to finish and preview."
 };

@@ -67,7 +67,7 @@ export interface API {
   editImage(id:string):Promise<void>;captureWindows():Promise<{token:string;name:string;thumbnail:string}[]>;screenshotWindow(token:string):Promise<string|null>;
   exportImage(id:string):Promise<string|null>;
   ocrStatus():Promise<OcrStatus>; ocr(id:string,language:string):Promise<OcrResult>; cancelOcr():Promise<void>; saveOcr(text:string):Promise<string>;
-  openScrollCapture():Promise<void>;screens():Promise<CaptureScreen[]>; screenshot(mode:'region'|'screen',displayId:number):Promise<string|null>;
+  openScrollCapture(displayId?:number):Promise<void>;screens():Promise<CaptureScreen[]>; screenshot(mode:'region'|'screen',displayId:number):Promise<string|null>;
   settings(value:Settings):Promise<void>; backup(mode:'import'|'export'):Promise<string|null>;
   clear():Promise<void>; hide():Promise<void>; quit():Promise<void>;
   onChange(callback:()=>void):()=>void;
