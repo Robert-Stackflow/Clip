@@ -1,6 +1,7 @@
+const generated=require('./generated-fixtures.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),{createHash}=require('node:crypto');
 const {Store,StorageManager,RecoveryManager,BackupManager,encodeBackup,decodeBackup,exportInWorker,defaults}=require('../work/test-exports.cjs');
-const folder=()=>fs.mkdtemp(path.resolve('work/recovery-'));
+const folder=()=>generated.mkdtemp(path.resolve('work/recovery-'));
 const sha=async file=>createHash('sha256').update(await fs.readFile(file)).digest('hex');
 const worker=path.resolve('work/test-backup-worker.cjs');
 test('startup detects damaged/default and future databases without mutating source',async()=>{

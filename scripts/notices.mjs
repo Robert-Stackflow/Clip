@@ -12,4 +12,4 @@ for(const name of new Set(['electron','image-size','koffi','lucide','@koromix/ko
 }
 output.push(await readFile('licenses/SQLite3MultipleCiphers.txt','utf8'));
 output.push(rustNotices);
-await writeFile('THIRD_PARTY_NOTICES.txt',output.join('\n'));
+await writeFile('THIRD_PARTY_NOTICES.txt',output.join('\n').replaceAll('\r\n','\n'));

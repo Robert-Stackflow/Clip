@@ -1,13 +1,13 @@
 const {chromium}=require('@playwright/test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),esbuild=require('esbuild');
 const {setup}=require('./renderer-fixture.cjs'),{extra}=require('./ui-028-fixture.cjs');
-const baseline='C:/Users/ruida/Documents/Codex/2026-10-01/c/outputs/Clipper-0.40.0-win-x64/resources/app.asar';
-const asar=require('@electron/asar'),archive=process.env.CLIPPER_OPTIONS_ASAR,out='work/options-044';fs.mkdirSync(out,{recursive:true});
+const baseline=process.env.CLIPPER_OPTIONS_BASELINE_ASAR;
+const asar=require('@electron/asar'),archive=process.env.CLIPPER_OPTIONS_ASAR,out=process.env.CLIPPER_TEST_OUTPUT_DIR||'work/current/options-044';fs.mkdirSync(out,{recursive:true});
 const fixture=()=>{window.fontCalls=[];window.releaseFont=[];window.fontDelay=false;const fonts=Array.from({length:2400},(_,i)=>({family:'Font '+String(i).padStart(4,'0'),label:'Font '+String(i).padStart(4,'0'),aliases:['Group '+(i%8)]}));const api={installedFonts:async()=>fonts,uiFontSource:async family=>{fontCalls.push(family);if(fontDelay)await new Promise(resolve=>releaseFont.push(resolve));return null;}};Object.assign(window.clipperAppearance,api);window.one=api;};
 const readAsset=(mode,file)=>mode==='before'||archive?asar.extractFile(mode==='before'?baseline:archive,('dist/renderer/'+file).replaceAll('/','\\')):fs.readFileSync('dist/renderer/'+file);
 const cases=[],perf=[];let browser;
 (async()=>{browser=await chromium.launch({channel:'msedge',headless:true});const controller=(await esbuild.build({stdin:{contents:"import {customControls} from './tests/fixtures/one-044/src/renderer/controls';import {setupFontPicker} from './tests/fixtures/one-044/src/renderer/font-picker';window.reference={customControls,setupFontPicker};",resolveDir:process.cwd()},nodePaths:[path.resolve('node_modules')],bundle:true,platform:'browser',outfile:'work/options-041/reference.js',write:false})).outputFiles;
 const js=controller.find(f=>!f.path.endsWith('.css')).text;
-for(const mode of ['after','reference','before']){
+for(const mode of ['after','reference',...(baseline?['before']:[])]){
  const context=await browser.newContext({viewport:{width:1240,height:800}});for(const fn of [setup,extra,fixture])await context.addInitScript(fn,'zh-CN');
  await context.route('https://clipper.test/**',async route=>{const file=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:file==='one-reference.js'?js:readAsset(mode==='reference'?'after':mode,file),contentType:file.endsWith('.html')?'text/html':file.endsWith('.css')?'text/css':'text/javascript'});});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('https://clipper.test/index.html');await page.waitForSelector('#copy');await page.locator('[data-page=settings]').click();await page.locator('.section-nav button').filter({hasText:'外观'}).click();
@@ -42,6 +42,6 @@ for(const mode of ['after','reference','before']){
  }
  assert.deepEqual(errors,[],mode);await context.close();
 }
-const summary=Object.fromEntries(['before','after','reference'].map(mode=>{const rows=perf.filter(r=>r.mode===mode);return [mode,{medianMs:rows.map(r=>r.ms).sort((a,b)=>a-b)[1],styleMutations:rows.map(r=>r.styleMutations),classMutations:rows.map(r=>r.classMutations)}];}));
-const result={passed:true,version:'0.44.0',referenceVersion:JSON.parse(fs.readFileSync('tests/fixtures/one-044/package.json')).version,cases:cases.length,results:cases,performance:{fonts:2400,moves:200,trials:3,summary,raw:perf,scope:'Headless production renderer and pinned actual One controller; UI font source synthetic; diagnostic timings, no full app memory or physical input.'},packaged:!!archive,systemClipboard:false,desktopInput:false};fs.writeFileSync(out+(archive?'/packaged.json':'/results.json'),JSON.stringify(result,null,2));console.log(JSON.stringify({passed:true,cases:cases.length,summary}));
+const summary=Object.fromEntries([...(baseline?['before']:[]),'after','reference'].map(mode=>{const rows=perf.filter(r=>r.mode===mode);return [mode,{medianMs:rows.map(r=>r.ms).sort((a,b)=>a-b)[1],styleMutations:rows.map(r=>r.styleMutations),classMutations:rows.map(r=>r.classMutations)}];}));
+const result={passed:true,version:'0.44.0',referenceVersion:JSON.parse(fs.readFileSync('tests/fixtures/one-044/package.json')).version,cases:cases.length,results:cases,baselineCompared:!!baseline,performance:{fonts:2400,moves:200,trials:3,summary,raw:perf,scope:'Headless production renderer and pinned actual One controller; UI font source synthetic; diagnostic timings, no full app memory or physical input.'},packaged:!!archive,systemClipboard:false,desktopInput:false};fs.writeFileSync(out+(archive?'/packaged.json':'/results.json'),JSON.stringify(result,null,2));console.log(JSON.stringify({passed:true,cases:cases.length,summary}));
 })().catch(e=>{console.error(e);process.exitCode=1;}).finally(async()=>{await browser?.close();});

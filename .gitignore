@@ -9,4 +9,8 @@ outputs/
 .env.*
 !.env.example
 dev-data/
-src/native/document-info/target/
+native/document-info/target/
+verification/
+*.obj
+*.pdb
+*.ilk

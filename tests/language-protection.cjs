@@ -1,8 +1,9 @@
+const generated=require('./generated-fixtures.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),{randomUUID,createHash}=require('node:crypto');
 const api=require('../work/test-exports.cjs');
-const base=path.resolve('work/temporary'),password='保存的备份与历史密码-0123456789',raw='保存 设置 <img> {{日期}} ⟦0⟧';
+const base=generated.directory,password='保存的备份与历史密码-0123456789',raw='保存 设置 <img> {{日期}} ⟦0⟧';
 const vault={available:async()=>true,encrypt:async value=>'fixture:'+Buffer.from(value).toString('base64'),decrypt:async value=>Buffer.from(value.slice(8),'base64').toString()};
-async function folder(){await fs.mkdir(base,{recursive:true});return fs.mkdtemp(path.join(base,'language-protection-'));}
+async function folder(){await fs.mkdir(base,{recursive:true});return generated.mkdtemp(path.join(base,'language-protection-'));}
 async function cleanup(root){const target=await fs.realpath(root),allowed=await fs.realpath(base);assert.equal(path.dirname(target).toLowerCase(),allowed.toLowerCase());assert.match(path.basename(target),/^language-protection-/);await fs.rm(target,{recursive:true,force:true});}
 async function both(run){const old=process.env.CLIPPER_UI_LANGUAGE;try{for(const language of ['zh-CN','en']){api.setInterfaceLanguage(language);process.env.CLIPPER_UI_LANGUAGE=language;await run(language,(zh,en)=>language==='en'?en:zh);}}finally{api.setInterfaceLanguage('zh-CN');if(old===undefined)delete process.env.CLIPPER_UI_LANGUAGE;else process.env.CLIPPER_UI_LANGUAGE=old;}}
 

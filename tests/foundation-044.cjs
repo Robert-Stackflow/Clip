@@ -1,4 +1,5 @@
 const {chromium}=require('@playwright/test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
+const out=process.env.CLIPPER_TEST_OUTPUT_DIR||'work/current/foundation-044';
 const {setup}=require('./renderer-fixture.cjs'),{extra}=require('./ui-028-fixture.cjs');
 const markup=`<aside id="foundation" style="position:fixed;inset:60px 20px 20px auto;width:420px;overflow:auto;padding:18px;background:var(--surface);z-index:5;display:flex;flex-direction:column;gap:12px">
 <button id="base-button">Action</button><button id="base-primary" class="primary">Save</button><button id="base-quiet" class="quiet">More</button><button id="base-icon" class="icon-button quiet" aria-label="More">+</button>
@@ -13,7 +14,7 @@ const markup=`<aside id="foundation" style="position:fixed;inset:60px 20px 20px 
 <nav class="settings-nav"><button id="base-nav" class="quiet active">Appearance</button></nav></aside>`;
 const names=['button','primary','quiet','icon','input','textarea','checkbox','switch','number','shortcut','range','select','tab','theme','color','card','row','nav'];
 const props=['backgroundColor','color','borderTopWidth','borderTopColor','borderTopLeftRadius','paddingLeft','paddingRight','paddingTop','paddingBottom','fontSize','lineHeight','opacity','minHeight','boxShadow'];
-(async()=>{await fs.mkdir('work/foundation-044',{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true}),results=[];try{
+(async()=>{await fs.mkdir(out,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true}),results=[];try{
 const css=(await fs.readFile('tests/fixtures/one-044/src/renderer/styles.css','utf8'))+(await fs.readFile('tests/fixtures/one-044/src/renderer/components.css','utf8'));
 const controller=(await require('esbuild').build({stdin:{contents:"import {setupSegments} from './tests/fixtures/one-044/src/renderer/segments.ts';setupSegments();",resolveDir:process.cwd()},bundle:true,write:false,platform:'browser'})).outputFiles[0].text;
 for(const theme of ['light','dark']){
@@ -27,9 +28,9 @@ for(const theme of ['light','dark']){
   for(const page of [actual,reference]){await page.evaluate(()=>{document.activeElement?.blur();document.querySelectorAll('#foundation button,#foundation input,#foundation textarea').forEach(e=>e.disabled=false);});await page.mouse.move(1,1);if(state==='hover')await page.locator('#base-'+name).hover({timeout:5000});if(state==='focus')await page.locator('#base-'+name).evaluate(e=>e.focus());if(state==='disabled')await page.locator('#base-'+name).evaluate(e=>{if('disabled'in e)e.disabled=true;});}
   const read=(e,props)=>{const s=getComputedStyle(e);return Object.fromEntries(props.map(k=>[k,s[k]]));};const a=await actual.locator('#base-'+name).evaluate(read,props),b=await reference.locator('#base-'+name).evaluate(read,props);assert.deepEqual(a,b,theme+' '+name+' '+state);results.push({theme,name,state});
  }
- await actual.screenshot({path:'work/foundation-044/'+theme+'.png'});await context.close();
+ await actual.screenshot({path:out+'/'+theme+'.png'});await context.close();
 }
 const entries=['index','tray','shelf','image-editor','recorder','scroll','selection','unlock','recovery','capture'];
 for(const name of entries){const html=await fs.readFile('dist/renderer/'+name+'.html','utf8');assert.equal((html.match(/href="one-ui.css"/g)||[]).length,1,name);assert.equal((html.match(/<link rel="stylesheet"/g)||[]).length,2,name);}
-await fs.writeFile('work/foundation-044/results.json',JSON.stringify({passed:true,version:'0.44.0',referenceVersion:JSON.parse(await fs.readFile('tests/fixtures/one-044/package.json')).version,cases:results.length,components:names,desktopEntries:entries,oneSharedStylesheet:true,systemClipboard:false,desktopInput:false,results},null,2));console.log(JSON.stringify({passed:true,cases:results.length,components:names.length,desktopEntries:entries.length}));
+await fs.writeFile(path.join(out,'results.json'),JSON.stringify({passed:true,version:'0.44.0',referenceVersion:JSON.parse(await fs.readFile('tests/fixtures/one-044/package.json')).version,cases:results.length,components:names,desktopEntries:entries,oneSharedStylesheet:true,systemClipboard:false,desktopInput:false,results},null,2));console.log(JSON.stringify({passed:true,cases:results.length,components:names.length,desktopEntries:entries.length}));
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

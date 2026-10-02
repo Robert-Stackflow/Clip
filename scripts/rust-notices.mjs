@@ -1,7 +1,7 @@
 import {spawnSync} from 'node:child_process';
 import {readFile,writeFile,readdir} from 'node:fs/promises';
 import {dirname,join} from 'node:path';
-const metadata=spawnSync('cargo',['metadata','--manifest-path','src/native/document-info/Cargo.toml','--locked','--offline','--format-version','1'],{encoding:'utf8',windowsHide:true,maxBuffer:8*1024*1024});
+const metadata=spawnSync('cargo',['metadata','--manifest-path','native/document-info/Cargo.toml','--locked','--offline','--format-version','1'],{encoding:'utf8',windowsHide:true,maxBuffer:8*1024*1024});
 if(metadata.status!==0)throw new Error(metadata.stderr||'Cargo metadata failed');
 const output=['Clipper document information helper — Rust dependencies','The following dependency versions are locked in Cargo.lock.',''];
 const missing=[];
@@ -14,5 +14,5 @@ for(const pkg of JSON.parse(metadata.stdout).packages.filter(p=>p.source).sort((
  if(!found)missing.push(pkg.name);
 }
 if(missing.length)throw new Error('Missing Rust license texts: '+missing.join(', '));
-await writeFile('licenses/Rust-dependencies.txt',output.join('\n'));
-export const rustNotices=output.join('\n');
+export const rustNotices=output.join('\n').replaceAll('\r\n','\n');
+await writeFile('licenses/Rust-dependencies.txt',rustNotices);

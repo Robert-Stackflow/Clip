@@ -1,7 +1,8 @@
+const generated=require('./generated-fixtures.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),{randomBytes}=require('node:crypto'),{DatabaseSync}=require('node:sqlite');
 const {Store,HistoryVault,StorageManager,HistoryLockedError,RecoveryManager,inspectDatabase,exportInWorker,decodeBackup,encodeBackup}=require('../work/test-exports.cjs');
 const pass='fixture password for protected history',newPass='replacement password for protected history';
-const folder=()=>fs.mkdtemp(path.resolve('work/vault-'));
+const folder=()=>generated.mkdtemp(path.resolve('work/vault-'));
 const hash=async file=>require('node:crypto').createHash('sha256').update(await fs.readFile(file)).digest('hex');
 const encrypt=async manager=>{const preview=await manager.prepareEncryption(pass);await manager.encrypt(preview.token,preview.recoveryKey);return preview;};
 const close=manager=>{manager.store?.close();manager.vault.lock();manager.cancelEncryption();};

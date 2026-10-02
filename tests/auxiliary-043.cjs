@@ -1,6 +1,6 @@
 const fs=require('fs'),path=require('path'),assert=require('assert/strict'),{chromium}=require('@playwright/test'),asar=require('@electron/asar');
 const {setup}=require('./renderer-fixture.cjs'),{extra}=require('./ui-028-fixture.cjs'),{prepare}=require('./auxiliary-043-fixture.cjs');
-const archive=process.env.CLIPPER_AUXILIARY_ASAR,out='work/auxiliary-043',results=[],errors=[];
+const archive=process.env.CLIPPER_AUXILIARY_ASAR,out=process.env.CLIPPER_TEST_OUTPUT_DIR||'work/current/auxiliary-043',results=[],errors=[];
 const read=name=>archive?asar.extractFile(archive,('dist/renderer/'+name).replaceAll('/','\\')):fs.readFileSync('dist/renderer/'+name);
 const pass=name=>results.push(name),delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 (async()=>{fs.mkdirSync(out,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true});try{

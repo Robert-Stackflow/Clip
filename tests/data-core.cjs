@@ -1,6 +1,7 @@
+const generated=require('./generated-fixtures.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
 const {Store,StorageManager,BackupManager,encodeBackup,decodeBackup,isEncryptedBackup,validateBackupOptions,validateBackup,defaults}=require('../work/test-exports.cjs');
-const folder=()=>fs.mkdtemp(path.resolve('work/data-'));
+const folder=()=>generated.mkdtemp(path.resolve('work/data-'));
 const fakeVault={available:async()=>true,encrypt:async v=>'unit-fixture:'+Buffer.from(v).toString('base64'),decrypt:async v=>Buffer.from(v.slice(13),'base64').toString()};
 const script={id:'old',name:'script',description:'fixture',code:'return input;',timeoutMs:100,permission:'selected-text',updatedAt:1};
 test('migration preserves every table and identity, old files, later writes and restart location',async()=>{

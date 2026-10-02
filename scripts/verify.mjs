@@ -1,0 +1,28 @@
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {writeFile,stat} from 'node:fs/promises';
+import {join} from 'node:path';
+import {beginCase,repository} from './workspace.mjs';
+
+const execute=promisify(execFile);
+// These checks use headless browser fixtures and never operate the daily clipboard.
+const supported=new Set(['foundation-044','options-044','chrome-044','collection-042','auxiliary-043']);
+const names=process.argv.slice(2);
+if(!names.length)throw Error('Specify a verification name, for example: npm run verify -- foundation-044');
+for(const name of names) {
+ if(!supported.has(name))throw Error('This verification is not supported by the isolated runner: '+name);
+ await stat(join(repository,'tests',name+'.cjs'));
+ const work=await beginCase(name),started=Date.now();
+ try{
+  const result=await execute(process.execPath,['tests/'+name+'.cjs'],{
+   cwd:repository,windowsHide:true,timeout:600000,maxBuffer:4*1024*1024,
+   env:{...process.env,TEMP:work.temp,TMP:work.temp,CLIPPER_TEST_OUTPUT_DIR:work.output,CLIPPER_TEST_FIXTURE_DIR:work.fixtures}
+  });
+  await writeFile(join(work.output,'run.log'),result.stdout+result.stderr);
+  console.log(JSON.stringify({test:name,result:'PASS',elapsedMs:Date.now()-started,output:work.output}));
+ }catch(error){
+  await writeFile(join(work.output,'run.log'),(error.stdout||'')+(error.stderr||'')+'\n'+String(error));
+  console.error('Verification failed: '+name+'; see '+join(work.output,'run.log'));process.exitCode=1;
+ }finally{await work.close();}
+ if(process.exitCode)break;
+}

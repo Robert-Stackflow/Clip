@@ -1,7 +1,8 @@
+const generated=require('./generated-fixtures.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),{randomUUID,createHash}=require('node:crypto');
 const {Store,StorageManager,CheckpointManager,CheckpointRecovery,RecoveryManager,HistoryVault,openDatabase,recoveryJob,cancelRecoveryJobs,setInterfaceLanguage}=require('../work/test-exports.cjs');
 const currentVersion=require('../package.json').version;
-const folder=()=>fs.mkdtemp(path.resolve('work/checkpoint-'));
+const folder=()=>generated.mkdtemp(path.resolve('work/checkpoint-'));
 const sha=async file=>createHash('sha256').update(await fs.readFile(file)).digest('hex');
 async function source(encrypted=false){const root=await folder(),id=randomUUID(),vault=new HistoryVault(),protection=encrypted?await vault.prepare('checkpoint fixture password'):undefined;if(protection)await fs.writeFile(path.join(root,'history-vault.json'),JSON.stringify(protection.record));const store=new Store(path.join(root,'history.sqlite'),false,false,protection?.key);store.setMeta('profile-id',id);store.setMeta('application-version','0.24.0');return {root,id,store,protection};}
 test('startup checkpoints before schema migration, pruning and version writes; a matching restart creates no duplicate',async()=>{

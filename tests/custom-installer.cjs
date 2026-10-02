@@ -23,7 +23,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
   const asar = path.join(folder, 'build/win-unpacked/resources/app.asar');
   const buildLog = fs.openSync(path.join(folder, 'custom-build.log'), 'w');
   try {
-    assert.equal(await run('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', path.resolve('installer-ui/build.ps1'),
+    assert.equal(await run('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', path.resolve('build/installer-ui/build.ps1'),
       '-Payload', payload, '-AppAsar', asar, '-Output', fixture, '-VerificationProduct', name, '-VerificationDirectory', installed],
       { stdio: ['ignore', buildLog, buildLog] }), 0, 'Front end compilation');
   } finally { fs.closeSync(buildLog); }

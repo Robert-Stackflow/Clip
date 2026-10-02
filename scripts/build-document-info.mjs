@@ -9,7 +9,7 @@ const sdkVersion=(await readdir(sdk)).filter(n=>/^\d+(\.\d+)+$/.test(n)).sort((a
 const ucrt=join(sdk,sdkVersion,'ucrt/x64');await access(join(ucrt,'libucrt.lib'));
 await mkdir('work',{recursive:true});const command=resolve('work/build-document-info.cmd');
 // Rust's MSVC discovery needs the complete SDK environment on a cold build.
-await writeFile(command,`@echo off\r\ncall "${located.stdout.trim()}\\VC\\Auxiliary\\Build\\vcvars64.bat" >nul\r\nif errorlevel 1 exit /b 1\r\nset "RUSTFLAGS=-C target-feature=+crt-static"\r\ncargo build --release --locked --jobs 2 --manifest-path src/native/document-info/Cargo.toml --target-dir work/document-info-build\r\nexit /b %errorlevel%\r\n`);
+await writeFile(command,`@echo off\r\ncall "${located.stdout.trim()}\\VC\\Auxiliary\\Build\\vcvars64.bat" >nul\r\nif errorlevel 1 exit /b 1\r\nset "RUSTFLAGS=-C target-feature=+crt-static"\r\ncargo build --release --locked --jobs 2 --manifest-path native/document-info/Cargo.toml --target-dir work/document-info-build\r\nexit /b %errorlevel%\r\n`);
 const result=spawnSync('cmd.exe',['/d','/c',command],{stdio:'inherit',windowsHide:true,env:{...process.env,CARGO_ENCODED_RUSTFLAGS:['-C','target-feature=+crt-static','-L',`native=${ucrt}`].join('\x1f')}});
 if(result.status!==0)throw new Error('Document information helper build failed');
 await mkdir('dist/native',{recursive:true});

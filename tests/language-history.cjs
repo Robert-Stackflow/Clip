@@ -1,7 +1,8 @@
+const generated=require('./generated-fixtures.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
 const a=require('../work/test-exports.cjs'),raw='保存 设置 <img> ⟦0⟧',source='保存.exe',png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aH3sAAAAASUVORK5CYII=';
-const base=path.resolve('work/temporary');
-async function folder(){await fs.mkdir(base,{recursive:true});return fs.mkdtemp(path.join(base,'language-history-'));}
+const base=generated.directory;
+async function folder(){await fs.mkdir(base,{recursive:true});return generated.mkdtemp(path.join(base,'language-history-'));}
 async function cleanup(root){const target=await fs.realpath(root),allowed=await fs.realpath(base);assert.equal(path.dirname(target).toLowerCase(),allowed.toLowerCase());assert.match(path.basename(target),/^language-history-/);await fs.rm(target,{recursive:true,force:true});}
 async function both(fn){try{for(const language of ['zh-CN','en']){a.setInterfaceLanguage(language);await fn(language,(zh,en)=>language==='en'?en:zh);}}finally{a.setInterfaceLanguage('zh-CN');}}
 const messages=[];

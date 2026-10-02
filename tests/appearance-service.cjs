@@ -1,5 +1,6 @@
+const generated=require('./generated-fixtures.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os'),vm=require('node:vm');
-async function service(t){const dir=await fs.mkdtemp(path.join(os.tmpdir(),'clipper-appearance-ipc-'));t.after(()=>fs.rm(dir,{recursive:true,force:true}));const file=path.join(dir,'appearance.json'),handlers=new Map(),windows=[];
+async function service(t){const dir=await generated.mkdtemp(path.join(os.tmpdir(),'clipper-appearance-ipc-'));t.after(()=>fs.rm(dir,{recursive:true,force:true}));const file=path.join(dir,'appearance.json'),handlers=new Map(),windows=[];
  const electron={app:{on:()=>{}},session:{defaultSession:{protocol:{handle:()=>{}}},fromPartition:()=>({protocol:{handle:()=>{}}})},net:{fetch:()=>{}},BrowserWindow:{fromWebContents:sender=>windows.find(w=>w.webContents===sender),getAllWindows:()=>windows},ipcMain:{handle:(name,fn)=>handlers.set(name,fn)}};
  const module={exports:{}};vm.runInNewContext(await fs.readFile('work/test-appearance-service.cjs','utf8'),{module,exports:module.exports,require:name=>name==='electron'?electron:require(name),Buffer,URL,console},{filename:'appearance-service-test.cjs'});
  const app=new module.exports.AppearanceService(file);await app.init();

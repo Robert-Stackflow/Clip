@@ -1,6 +1,7 @@
+const generated=require('./generated-fixtures.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),{randomUUID,createHash}=require('node:crypto');
 const {StorageManager,ProgramRollbackManager,HistoryVault,openDatabase,copyRawDatabase,prepareRollbackData,recoveryJob}=require('../work/test-exports.cjs');
-const folder=()=>fs.mkdtemp(path.resolve('work/program-core-')),sha=async file=>createHash('sha256').update(await fs.readFile(file)).digest('hex');
+const folder=()=>generated.mkdtemp(path.resolve('work/program-core-')),sha=async file=>createHash('sha256').update(await fs.readFile(file)).digest('hex');
 async function fixture(encrypted=false,protectedCurrent=false){
  const root=await folder(),data=path.join(root,'data'),program=path.join(root,'installed');await fs.mkdir(path.join(program,'resources'),{recursive:true});await fs.writeFile(path.join(program,'resources/app.asar'),'new program bytes');const old=new StorageManager(data,undefined,'0.25.0'),source=await old.start();source.add({text:'ROLLBACK_PRIVATE_MARKER'},'fixture');source.setMeta('ai-profiles',{secret:'retain-private-config'});source.setMeta('lan-config',{enabled:true,peers:[{id:'private-old-peer'}]});source.db.exec('CREATE TABLE custom(id INTEGER PRIMARY KEY,value TEXT); INSERT INTO custom VALUES(1,\'original custom data\'); PRAGMA user_version=2');
  let key;if(encrypted){const p=await old.prepareEncryption('original rollback fixture password');key=p.recoveryKey;await old.encrypt(p.token,p.recoveryKey);}

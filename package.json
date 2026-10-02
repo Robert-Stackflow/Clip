@@ -7,12 +7,13 @@
   "main": "dist/main/index.cjs",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "dev": "npm run start",
+    "dev": "node scripts/dev.mjs",
     "start": "npm run build && electron .",
     "typecheck": "tsc --noEmit",
     "test": "node scripts/test.mjs",
+    "test:dev": "node --test tests/development-policy.cjs && node tests/development-watch.cjs",
     "test:ui": "npm run build && node tests/electron.cjs",
-    "package": "npm run build && electron-builder --win dir",
+    "package": "node scripts/package.mjs",
     "test:integration": "npm run build && node tests/integration.cjs",
     "test:advanced": "npm run build && node tests/advanced-ui.cjs",
     "test:capture": "npm run build && node tests/capture.cjs",
@@ -43,14 +44,16 @@
     "test:language:media": "npm run build && node tests/language-media-layout.cjs",
     "test:language:entry": "npm run build && node tests/language-entry-layout.cjs",
     "test:language:format": "npm run build && node tests/language-format-layout.cjs",
-    "package:installer": "npm run build && electron-builder --win nsis --x64 --publish never",
-    "package:installer:custom": "npm run package:installer && powershell -NoProfile -ExecutionPolicy Bypass -File installer-ui/build.ps1",
+    "package:installer": "node scripts/package.mjs --installer",
+    "package:installer:custom": "node scripts/package.mjs --custom-installer",
     "test:redesign": "npm run build && node tests/redesign-layout.cjs && node tests/redesign-electron.cjs && node tests/language-text-behavior.cjs && node tests/language-dialog-behavior.cjs && node tests/language-data-behavior.cjs",
     "test:redesign:performance": "npm run build && node tests/redesign-performance.cjs",
     "test:updates": "node scripts/test-updates.mjs && node tests/update-native.cjs && npm run build && node tests/update-layout.cjs",
     "test:program-versions": "node scripts/test-program-versions.mjs && node tests/program-versions-native.cjs && npm run build && node tests/program-versions-ui.cjs",
     "test:checkpoints": "node scripts/test-checkpoints.mjs && npm run build && node tests/checkpoint-ui.cjs",
-    "test:ui-028": "npm run build && node tests/ui-028.cjs && node scripts/build-native-ui-test.mjs && node tests/native-ui-028.cjs"
+    "test:ui-028": "npm run build && node tests/ui-028.cjs && node scripts/build-native-ui-test.mjs && node tests/native-ui-028.cjs",
+    "verify": "node scripts/verify.mjs",
+    "test:workflow": "node --test tests/development-policy.cjs tests/release-workflow.cjs tests/workspace-workflow.cjs"
   },
   "dependencies": {
     "@codemirror/commands": "6.11.1",
@@ -91,6 +94,7 @@
     },
     "files": [
       "dist/**/*",
+      "!dist/**/*.map",
       "package.json",
       "!node_modules/better-sqlite3-multiple-ciphers/deps/**/*",
       "!node_modules/better-sqlite3-multiple-ciphers/src/**/*",
