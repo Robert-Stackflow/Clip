@@ -48,7 +48,7 @@ export function keyedMarkup(root:HTMLElement,rows:readonly {key:string;html:stri
   for(const row of rows){
    let entry=entries.get(row.key);
    if(!entry){const node=parse(row.html).firstElementChild as HTMLElement;entry={node,html:row.html};entries.set(row.key,entry);}
-   else if(entry.html!==row.html){const previous=parse(entry.html).firstElementChild!,next=parse(row.html).firstElementChild!;if(same(entry.node,next))patch(entry.node,previous,next);else{const node=next as HTMLElement;entry.node.replaceWith(node);entry.node=node;}entry.html=row.html;}
+   else if(entry.html!==row.html){const previous=parse(entry.html).firstElementChild!,next=parse(row.html).firstElementChild!;if(same(entry.node,next))patch(entry.node,previous,next);else{const node=next as HTMLElement;entry.node.replaceWith(node);if(cursor===entry.node)cursor=node;entry.node=node;}entry.html=row.html;}
    if(entry.node!==cursor)root.insertBefore(entry.node,cursor);
    cursor=entry.node.nextSibling;
   }

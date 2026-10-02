@@ -40,7 +40,7 @@ function setupFormatting({epoch,raw}){
      assert.equal(await page.locator('[data-id="text"] .row-title').textContent(),raw);assert.equal(await page.locator('#injected-sidebar').count(),0);
      const expectedDate=await page.evaluate(epoch=>new Date(epoch).toLocaleDateString(document.documentElement.lang==='en'?'en-US':'zh-CN',{month:'short',day:'numeric'}),epoch);
      assert.ok((await page.locator('[data-id="text"] .row-meta').textContent()).includes(expectedDate));
-     const expectedCount=await page.evaluate(count=>new Intl.NumberFormat(document.documentElement.lang==='en'?'en-US':'zh-CN').format(count),count);assert.ok((await page.locator('#result-count').textContent()).includes(expectedCount));
+     assert.equal(await page.locator('#result-count,.collection-footer').count(),0);
      if(width===860&&count===1000&&font==='mono'&&scale===150&&density==='compact'){
       await page.screenshot({path:`work/language-format/sidebar-${language}-150.png`});await page.locator('#pause-nav').click();
       await page.waitForFunction(()=>fixture.state.settings.paused);assert.equal(await page.locator('#pause-nav').getAttribute('title'),language==='en'?'Resume capture':'恢复记录');

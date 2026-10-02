@@ -8,6 +8,7 @@ for($sample=0;$sample -lt $Samples;$sample++){
  $roots=@($inventory | Where-Object {
   $_.ExecutablePath -and $_.CommandLine -notmatch '\s--type=' -and (
    ($_.Name -eq 'One.exe' -and $_.ExecutablePath.StartsWith('D:\Repositories\One\release\',[StringComparison]::OrdinalIgnoreCase)) -or
+   ($_.Name -eq 'electron.exe' -and $_.ExecutablePath -eq 'D:\Repositories\One\node_modules\electron\dist\electron.exe') -or
    ($_.Name -eq 'Clipper.exe' -and $_.ExecutablePath.StartsWith($clipperRoot+'\release\',[StringComparison]::OrdinalIgnoreCase)) -or
    ($_.Name -eq 'electron.exe' -and $_.ExecutablePath -eq ($clipperRoot+'\node_modules\electron\dist\electron.exe'))
   )
@@ -22,7 +23,7 @@ for($sample=0;$sample -lt $Samples;$sample++){
    [pscustomobject]@{Pid=$process.ProcessId;Role=$role;CounterAvailable=($null -ne $counter);PrivateWorkingBytes=$(if($counter){[long]$counter.WorkingSetPrivate}else{$null});WorkingBytes=$(if($counter){[long]$counter.WorkingSet}else{$null});PrivateCommittedBytes=$(if($counter){[long]$counter.PrivateBytes}else{$null})}
   })
   $complete=@($members | Where-Object {-not $_.CounterAvailable}).Count -eq 0
-  $name=if($root.Name -eq 'One.exe'){'One release'}elseif($root.Name -eq 'Clipper.exe'){'Clipper release'}else{'Clipper development'}
+  $name=if($root.Name -eq 'One.exe'){'One release'}elseif($root.Name -eq 'Clipper.exe'){'Clipper release'}elseif($root.ExecutablePath.StartsWith('D:\Repositories\One\',[StringComparison]::OrdinalIgnoreCase)){'One development'}else{'Clipper development'}
   $records.Add([pscustomobject]@{Sample=$sample;At=[DateTime]::UtcNow.ToString('o');Application=$name;RootPid=$root.ProcessId;Executable=$root.ExecutablePath;Complete=$complete;PrivateWorkingBytes=$(if($complete){[long](($members | Measure-Object PrivateWorkingBytes -Sum).Sum)}else{$null});PrivateCommittedBytes=$(if($complete){[long](($members | Measure-Object PrivateCommittedBytes -Sum).Sum)}else{$null});Processes=$members})
  }
  if($sample -lt $Samples-1){Start-Sleep -Milliseconds $IntervalMs}

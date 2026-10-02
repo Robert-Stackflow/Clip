@@ -1,12 +1,14 @@
 import {t} from '../shared/i18n';
 import {icon} from './ui';
 import {bindSearchFields} from './one-search';
+import {openAnchoredPopover,closeAnchoredPopover} from './anchored-popover';
 
 /** Move live controls into One's rail, content stage and command bar. */
 export function collectionLayout(root:HTMLElement){
  bindSearchFields(root);
- const collection=root.querySelector<HTMLElement>('.collection')!,workspace=collection.querySelector<HTMLElement>('.workspace')!,results=collection.querySelector<HTMLElement>('#results')!,footer=collection.querySelector<HTMLElement>('.collection-footer')!;
- const rail=document.createElement('section');rail.className='collection-rail';rail.setAttribute('aria-label',t('剪贴板记录'));results.before(rail);rail.append(results,footer);
+ const collection=root.querySelector<HTMLElement>('.collection')!,workspace=collection.querySelector<HTMLElement>('.workspace')!,results=collection.querySelector<HTMLElement>('#results')!;
+ const rail=document.createElement('section');rail.className='collection-rail';rail.setAttribute('aria-label',t('剪贴板记录'));results.before(rail);rail.append(results);
+ const drop=collection.querySelector<HTMLElement>('#shelf-drop');if(drop)workspace.append(drop);
  const toolbar=collection.querySelector<HTMLElement>('.collection-toolbar')!,filter=collection.querySelector<HTMLElement>('.filterbar')!,controls=document.createElement('div');controls.className='collection-controls';toolbar.before(controls);controls.append(toolbar,filter);const source=collection.querySelector<HTMLElement>('#source-filters');if(source)filter.append(source);
  workspace.classList.add('collection-canvas');collection.querySelectorAll<HTMLElement>('.heading-actions>button:not(.primary)').forEach(button=>button.classList.add('quiet'));
 }
@@ -19,10 +21,13 @@ export function detailLayout(root:HTMLElement,bind=true){
 }
 const boundMore=new WeakSet<HTMLDetailsElement>(),boundMoreButtons=new WeakSet<HTMLButtonElement>();
 export function bindDetailLayout(root:HTMLElement){const more=root.querySelector<HTMLDetailsElement>('.detail-more');if(!more)return;
- if(!boundMore.has(more)){boundMore.add(more);more.addEventListener('toggle',()=>more.querySelector('summary')?.setAttribute('aria-expanded',String(more.open)));}
+ const sync=()=>{const anchor=more.querySelector<HTMLElement>('summary')!,popup=more.querySelector<HTMLElement>('.preview-menu')!;anchor.setAttribute('aria-expanded',String(more.open));if(more.open)openAnchoredPopover(popup,anchor);else closeAnchoredPopover(popup);};
+ if(!boundMore.has(more)){boundMore.add(more);more.addEventListener('toggle',sync);}sync();
+ const info=root.querySelector<HTMLElement>('#record-info'),anchor=root.querySelector<HTMLElement>('#record-info-toggle');if(info&&anchor&&!info.hidden)openAnchoredPopover(info,anchor,360,340);
  for(const button of more.querySelectorAll('button'))if(!boundMoreButtons.has(button)){boundMoreButtons.add(button);button.addEventListener('click',()=>more.open=false);}
 }
-function closePreviewPopovers(except?:Element){for(const more of document.querySelectorAll<HTMLDetailsElement>('.detail-more[open]'))if(!except?.closest('.detail-more')||except.closest('.detail-more')!==more)more.open=false;for(const info of document.querySelectorAll<HTMLElement>('.record-info:not([hidden])'))if(except?.closest('.detail-meta')!==info.parentElement){info.hidden=true;info.parentElement?.querySelector('button')?.setAttribute('aria-expanded','false');}}
+export function toggleRecordInfo(info:HTMLElement,anchor:HTMLElement){info.hidden=!info.hidden;anchor.setAttribute('aria-expanded',String(!info.hidden));if(info.hidden)closeAnchoredPopover(info);else openAnchoredPopover(info,anchor,360,340);}
+function closePreviewPopovers(except?:Element){for(const more of document.querySelectorAll<HTMLDetailsElement>('.detail-more[open]'))if(!except?.closest('.detail-more')||except.closest('.detail-more')!==more){more.open=false;const popup=more.querySelector<HTMLElement>('.preview-menu');if(popup)closeAnchoredPopover(popup);}for(const info of document.querySelectorAll<HTMLElement>('.record-info:not([hidden])'))if(except?.closest('.detail-meta')!==info.parentElement){info.hidden=true;closeAnchoredPopover(info);info.parentElement?.querySelector('button')?.setAttribute('aria-expanded','false');}}
 document.addEventListener('pointerdown',event=>closePreviewPopovers(event.target as Element));
 document.addEventListener('click',event=>{const target=event.target as Element;if(target.closest('.detail-more>summary')||target.closest('#record-info-toggle'))closePreviewPopovers(target);});
 document.addEventListener('keydown',event=>{const target=event.target as HTMLElement,more=target.closest<HTMLDetailsElement>('.detail-more[open]'),info=document.querySelector<HTMLElement>('.record-info:not([hidden])');if(event.key==='Escape'&&(more||info||document.querySelector('.detail-more[open]'))){event.preventDefault();event.stopImmediatePropagation();const button=more?.querySelector<HTMLElement>('summary')||info?.parentElement?.querySelector<HTMLElement>('button')||document.querySelector<HTMLElement>('.detail-more[open]>summary');closePreviewPopovers();button?.focus();return;}if(more&&['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();event.stopPropagation();const buttons=Array.from(more.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')),index=buttons.indexOf(target as HTMLButtonElement),next=event.key==='Home'?0:event.key==='End'?buttons.length-1:(index+(event.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length;buttons[next]?.focus();}},true);
