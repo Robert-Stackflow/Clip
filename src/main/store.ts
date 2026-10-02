@@ -48,18 +48,19 @@ export class Store {
   matchesHash(id:string,hash:string):boolean{return (this.db.prepare('SELECT hash FROM clips WHERE id=?').get(id) as {hash?:string}|undefined)?.hash===hash;}
   bytes(){return Number((this.db.prepare(this.indexed?'SELECT (SELECT coalesce(sum(i.bytes),0) FROM clips c JOIN clip_list_cache i ON i.id=c.id)+(SELECT coalesce(sum(i.bytes),0) FROM snippets s JOIN snippet_list_cache i ON i.id=s.id) AS n':'SELECT (SELECT coalesce(sum(length(CAST(data AS BLOB))),0) FROM clips)+(SELECT coalesce(sum(length(CAST(data AS BLOB))),0) FROM snippets) AS n').get() as any).n);}
   save(item:Detail){if(!this.onChange){this.db.prepare('INSERT OR REPLACE INTO clips VALUES(?,?,?,?)').run(item.id,item.hash,item.updatedAt,JSON.stringify(item));return;}const previous=this.find(item.id);this.db.exec('SAVEPOINT store_save');try{this.db.prepare('INSERT OR REPLACE INTO clips VALUES(?,?,?,?)').run(item.id,item.hash,item.updatedAt,JSON.stringify(item));this.onChange(previous,item);this.db.exec('RELEASE store_save');}catch(e){this.db.exec('ROLLBACK TO store_save; RELEASE store_save');throw e;}}
-  add(value:Payload,source:string,thumbnail?:string,metadata?:Partial<Detail>,prune=true):Detail{
-    return this.addPrepared(prepareCapture(value),source,thumbnail,metadata,prune);
+  add(value:Payload,source:string,thumbnail?:string,metadata?:Partial<Detail>,prune=true,publication?:{retained:boolean}):Detail{
+    return this.addPrepared(prepareCapture(value),source,thumbnail,metadata,prune,publication);
   }
-  addPrepared(token:PreparedCapture,source:string,thumbnail?:string,metadata?:Partial<Detail>,prune=true):Detail{
+  addPrepared(token:PreparedCapture,source:string,thumbnail?:string,metadata?:Partial<Detail>,prune=true,publication?:{retained:boolean}):Detail{
     const prepared=preparedCaptures.get(token);if(!prepared)throw new Error(tr('内容校验已失效'));preparedCaptures.delete(token);const {payload,hash}=prepared;
     const existing=this.db.prepare('SELECT data FROM clips WHERE hash=?').get(hash) as any;
-    if(existing){const item:Detail=JSON.parse(existing.data);item.updatedAt=Math.max(item.updatedAt,metadata?.updatedAt||Date.now());if(metadata){item.favorite ||= !!metadata.favorite;item.pinned ||= !!metadata.pinned;item.tags=[...new Set([...item.tags,...(metadata.tags||[])])].slice(0,12);}this.save(item);return item;}
+    if(existing){const item:Detail=JSON.parse(existing.data);item.updatedAt=Math.max(item.updatedAt,metadata?.updatedAt||Date.now());if(metadata){item.favorite ||= !!metadata.favorite;item.pinned ||= !!metadata.pinned;item.tags=[...new Set([...item.tags,...(metadata.tags||[])])].slice(0,12);}if(publication){item.shared=true;if(publication.retained)item.syncRetained=true;}this.save(item);return item;}
     const now=Date.now(),kind=classify(payload),text=payload.text||payload.files?.join('\n')||payload.attachments?.map(a=>a.name).join('\n')||(kind==='image'?tr('图片'):tr('富文本内容'));
     const item:Detail={id:randomUUID(),hash,kind,title:kind==='image'?tr('剪贴板图片'):kind==='files'?(payload.attachments?(payload.attachments.some(a=>a.directory)?tr`${payload.attachments.length} 项文件与文件夹 · ${payload.attachments[0].name}`:tr`${payload.attachments.length} 个附件 · ${payload.attachments[0].name}`):tr`${payload.files!.length} 个文件 · ${payload.files![0].split('\\').pop()}`):text.trim().split(/\r?\n/)[0].slice(0,100),preview:text.slice(0,240),source:source.slice(0,256),createdAt:metadata?.createdAt||now,updatedAt:metadata?.updatedAt||now,favorite:!!metadata?.favorite,pinned:!!metadata?.pinned,tags:metadata?.tags||[],bytes:contentBytes(payload),payload,thumbnail};
     // Restore and undo preserve saved labels across language changes; legacy backups may omit them.
     if(typeof metadata?.title==='string'&&metadata.title.length<=33000)item.title=metadata.title;
     if(typeof metadata?.preview==='string'&&metadata.preview.length<=240)item.preview=metadata.preview;
+    if(publication){item.shared=true;if(publication.retained)item.syncRetained=true;}
     if(this.bytes()+contentBytes(item)>MAX_TOTAL)throw new Error(tr('本地历史已达到 256 MiB，请删除不需要的内容'));
     this.save(item);if(prune)this.prune();return item;
   }

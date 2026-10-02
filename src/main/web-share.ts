@@ -51,7 +51,7 @@ export class WebShareService {
  remove(id:string){if(this.pool.delete(id))this.notify();}
  capture(item:Detail|ClipPreview){if(this.server&&this.follow&&this.pool.size<100&&this.eligible(item))this.publish(item.id);}
  private eligible(item:Detail|ClipPreview){return !item.localOnly&&!item.payload.files&&!item.payload.attachments&&!!(item.payload.text||item.payload.png)&&!isInvitation(item.payload.text||'');}
- observe(previous:Detail|undefined,next?:Detail){if(!this.pool.size)return;if(previous?.localOnly!==next?.localOnly)this.dirtyPrivacy.add((next||previous)!.id);queueMicrotask(()=>{if(this.server)this.reconcile();});}
+ observe(previous:Pick<Detail,'id'|'localOnly'>|undefined,next?:Pick<Detail,'id'|'localOnly'>){if(!this.pool.size)return;if(previous?.localOnly!==next?.localOnly)this.dirtyPrivacy.add((next||previous)!.id);queueMicrotask(()=>{if(this.server)this.reconcile();});}
  reconcile(){if(!this.pool.size)return;const ids=[...this.pool.values()].map(e=>e.clipId),rows=this.store().db.prepare(`SELECT id,hash FROM clips WHERE id IN (${ids.map(()=>'?').join(',')})`).all(...ids) as {id:string;hash:string}[],known=new Map(rows.map(r=>[r.id,r.hash]));let changed=false;
   for(const [id,e] of this.pool){if(known.get(e.clipId)!==e.hash||this.dirtyPrivacy.has(e.clipId)&&!this.eligible(this.store().get(e.clipId))){this.pool.delete(id);changed=true;}}this.dirtyPrivacy.clear();if(changed)this.notify();
  }

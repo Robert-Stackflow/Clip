@@ -1,6 +1,7 @@
 import {SyncError} from '../shared/sync-errors';
 import {t as tr} from '../shared/i18n';
-import {createHash,randomUUID} from 'node:crypto';
+import {randomUUID} from 'node:crypto';
+import {payloadDigest} from './payload-digest';
 import {Store} from './store';
 import {payloadSyncVersion} from '../shared/formats';
 import {validatePayload} from '../shared/core';
@@ -29,8 +30,8 @@ export class SyncLedger {
   if(record.deleted){const localId=existing?.localId;if(existing)Object.assign(existing,record,{localId:undefined});else entries.push(record);this.persist(entries);
    if(localId&&!entries.some(e=>!e.deleted&&e.localId===localId)){const clip=s.find(localId);if(clip?.shared&&!clip.localOnly){if(clip.syncRetained){clip.shared=false;clip.syncRetained=false;s.save(clip);}else s.delete(localId);}}return true;
   }
-  if(existing)return false;const valid=validatePayload(payload);if(valid.files)throw new SyncError('SYNC_FILE_RECEIVE_DENIED');const hash=createHash('sha256').update(JSON.stringify(valid)).digest('hex');if(hash!==record.hash)throw new SyncError('SYNC_CONTENT_MISMATCH');
-  const same=s.db.prepare('SELECT data FROM clips WHERE hash=?').get(hash) as any;if(same&&JSON.parse(same.data).localOnly){entries.push({...record,deleted:true});this.persist(entries);return true;}
-  const retain=!!same&&!JSON.parse(same.data).shared;const clip=s.add(valid,'局域网同步',this.thumbnail(valid),undefined,false);if(retain)clip.syncRetained=true;clip.shared=true;s.save(clip);entries.push({...record,localId:clip.id,minimumVersion:payloadSyncVersion(valid)});this.persist(entries);return true;
+  if(existing)return false;const valid=validatePayload(payload);if(valid.files)throw new SyncError('SYNC_FILE_RECEIVE_DENIED');const hash=payloadDigest(valid);if(hash!==record.hash)throw new SyncError('SYNC_CONTENT_MISMATCH');
+  const row=s.db.prepare('SELECT id FROM clips WHERE hash=?').get(hash) as {id:string}|undefined,same=row?s.identity(row.id):undefined;if(same?.localOnly){entries.push({...record,deleted:true});this.persist(entries);return true;}
+  const retain=!!same&&!same.shared;const clip=s.add(valid,'局域网同步',this.thumbnail(valid),undefined,false,{retained:retain});entries.push({...record,localId:clip.id,minimumVersion:payloadSyncVersion(valid)});this.persist(entries);return true;
  });}
 }
