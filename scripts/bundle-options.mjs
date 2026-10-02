@@ -8,7 +8,7 @@ export const bundles=[
   ['script-worker',['quickjs-emscripten','better-sqlite3-multiple-ciphers']],
   ['backup-worker',['better-sqlite3-multiple-ciphers']],['recovery-worker',['better-sqlite3-multiple-ciphers']],
   ['scroll-worker',[]],['metadata-worker',['koffi']],['sync-files-worker',['koffi']],
-  ['search-worker',['better-sqlite3-multiple-ciphers']],['preview-image-worker',['better-sqlite3-multiple-ciphers']],
+  ['sync-item-worker',['better-sqlite3-multiple-ciphers']],['search-worker',['better-sqlite3-multiple-ciphers']],['preview-image-worker',['better-sqlite3-multiple-ciphers']],
   ['capture-writer-worker',['better-sqlite3-multiple-ciphers']]
  ].map(([name,external])=>({name,restart:true,options:{...node,entryPoints:['src/main/'+name+'.ts'],outfile:'dist/main/'+name+'.cjs',external}})),
  {name:'preload',restart:true,options:{...node,entryPoints:['tray','index','capture','recovery','unlock','shelf','selection','recorder','scroll','image-editor'].map(name=>'src/preload/'+name+'.ts'),outdir:'dist/preload',outExtension:{'.js':'.cjs'},external:['electron']}},

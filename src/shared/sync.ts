@@ -1,5 +1,6 @@
 import {SyncError} from './sync-errors';
 import {t as tr} from './i18n';
+export const MAX_SYNC_BODY=24*1024*1024;
 export interface SyncRecord {id:string;hash:string;createdAt:number;deleted:boolean}
 export interface SyncPeer {id:string;name:string;host:string;port:number;fingerprint:string}
 export interface SyncOptions {enabled:boolean;name:string;autoNew:boolean;autoFiles?:boolean}

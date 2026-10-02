@@ -1,6 +1,7 @@
 import {t as tr} from './i18n';
 export const syncErrors={
  SYNC_ORIGIN_UNSUPPORTED:'请求来源不受支持',
+ SYNC_ITEM_BUSY:'正在准备其他同步内容，请稍后重试',
  SYNC_STOPPED:'同步已停止或信任已改变',
  SYNC_INVITE_CONSUMED:'配对码无效、已使用或已过期',
  SYNC_IDENTITY_CONFLICT:'设备身份冲突',

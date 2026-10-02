@@ -93,3 +93,5 @@ export * from '../src/shared/renderer-assets';
 
 export * from '../src/main/scroll-sampler';
 export * from '../src/shared/scroll-placement';
+
+export * from '../src/main/sync-item-reader';

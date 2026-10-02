@@ -1964,5 +1964,8 @@ export const english:Readonly<Record<string,string>>={
   "请先开始长截图": "Start a scrolling capture first",
   "最后一屏需要对齐；确认拼接后再完成预览": "The last frame needs alignment. Confirm the join, then finish to preview.",
   "Esc 完成预览": "Esc to finish and preview",
-  "控制条即将隐藏，缓慢滚动；按 Esc 完成预览": "The controls will hide shortly. Scroll slowly, then press Esc to finish and preview."
+  "控制条即将隐藏，缓慢滚动；按 Esc 完成预览": "The controls will hide shortly. Scroll slowly, then press Esc to finish and preview.",
+  "正在准备其他同步内容，请稍后重试": "Preparing other sync items. Try again shortly.",
+  "读取同步内容超时，请重试": "Reading the sync item timed out. Try again.",
+  "无法读取同步内容": "Could not read the sync item."
 };
