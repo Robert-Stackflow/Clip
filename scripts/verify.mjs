@@ -5,8 +5,8 @@ import {join} from 'node:path';
 import {beginCase,repository} from './workspace.mjs';
 
 const execute=promisify(execFile);
-// These checks use headless browser fixtures and never operate the daily clipboard.
-const supported=new Set(['foundation-044','options-044','chrome-044','collection-042','auxiliary-043','application-segments-ui','collection-polish-ui']);
+// These checks use isolated browser/Electron fixtures and never operate the daily clipboard.
+const supported=new Set(['foundation-044','options-044','chrome-044','collection-042','auxiliary-043','application-segments-ui','collection-polish-ui','utility-pages-ui','media-controls-ui']);
 const names=process.argv.slice(2);
 if(!names.length)throw Error('Specify a verification name, for example: npm run verify -- foundation-044');
 for(const name of names) {

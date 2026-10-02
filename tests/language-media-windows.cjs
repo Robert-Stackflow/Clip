@@ -17,7 +17,7 @@ function fixture(language){
  return {...api,state,event,call,ctx,item};
 }
 const plain=value=>JSON.parse(JSON.stringify(value)),tick=()=>new Promise(resolve=>setImmediate(resolve));
-function secure(window,language){const prefs=window.options.webPreferences;assert.deepEqual(plain(prefs.additionalArguments),['--clipper-ui-language='+language]);for(const key of ['sandbox','contextIsolation','webSecurity'])assert.equal(prefs[key],true);assert.equal(prefs.nodeIntegration,false);assert.deepEqual(plain(window.openHandler()),{action:'deny'});}
+function secure(window,language){const prefs=window.options.webPreferences;assert.notEqual(window.protected,true,'Auxiliary windows must remain visible through remote desktop');assert.deepEqual(plain(prefs.additionalArguments),['--clipper-ui-language='+language]);for(const key of ['sandbox','contextIsolation','webSecurity'])assert.equal(prefs[key],true);assert.equal(prefs.nodeIntegration,false);assert.deepEqual(plain(window.openHandler()),{action:'deny'});}
 test('OCR uses only known owned codes, preserves raw output and removes temporary images on success and cancellation',async()=>{
  for(const language of ['zh-CN','en']){
   for(const code of ['OCR_IMAGE_MISSING','OCR_LANGUAGE_UNAVAILABLE','UNKNOWN','__proto__']){const api=fixture(language);api.state.ocr.push({value:{error:raw,code}});const result=await api.ocrStatus();assert.equal(result.error,api.ocrErrorSource(code)?api.t(api.ocrErrorSource(code)):raw);assert.equal(api.state.childCalls[0].options.windowsHide,true);assert.equal(api.state.childCalls[0].options.timeout,30000);assert.equal(api.ocrErrorSource({}),undefined);}
@@ -52,6 +52,9 @@ after(()=>{fs.mkdirSync('work/language-media',{recursive:true});fs.writeFileSync
 
 test('snapshot reuses the captured image without an intermediate PNG encode/decode',async()=>{
  const api=fixture('zh-CN'),service=new api.CaptureService(),source=api.state.sources.find(s=>s.display_id==='1');let encodes=0;const original=source.thumbnail.toPNG;source.thumbnail.toPNG=()=>{encodes++;return original();};const result=await service.snapshot(1);assert.equal(result.image,source.thumbnail);assert.equal(encodes,0);service.cancel();
+});
+test('whole-display capture preserves the source PNG after remote-view compatibility changes',async()=>{
+ const api=fixture('zh-CN'),capture=new api.CaptureService();try{assert.equal((await capture.take('screen',1,[])).png,png.toString('base64'));assert.equal(capture.active,false);}finally{capture.cancel();}
 });
 
 test('image editor shares atomic overwrite/cancel behavior and checks hashes without repeated payload reads',async()=>{

@@ -30,6 +30,7 @@ export class WebShareService {
  constructor(private store:()=>Store,private changed:()=>void,private enqueue:<T>(fn:()=>T|Promise<T>)=>Promise<T>,private thumbnail:(p:Payload)=>string|undefined,private assets:string,private options:{addresses?:()=>string[];now?:()=>number;publicImage?:(png:string)=>Buffer}={}){}
  private now(){return this.options.now?.()??Date.now();}
  private addresses(){return this.options.addresses?.()??localAddresses();}
+ get running(){return !!this.server&&this.expires>this.now();}
  state():WebState {this.expire();this.reconcile();return {running:!!this.server,addresses:this.addresses(),origin:this.origin,invitation:this.invitation?this.origin+'/#clipper-web='+this.invitation.token:'',inviteExpires:this.invitation?.expires||0,expires:this.expires,fingerprint:this.fingerprint,follow:this.follow,error:this.error,items:[...this.pool.values()].map(e=>({...e.meta,clipId:e.clipId})),clients:[...this.clients.values()].map(({id,name,host,code,approved,allowSend})=>({id,name,host,code,approved,allowSend}))};}
  async start(value:WebOptions){
   if(!value||!privateAddress(value.host)||!this.addresses().includes(value.host)||!Number.isInteger(value.minutes)||value.minutes<5||value.minutes>120||typeof value.follow!=='boolean')throw new Error(tr('请选择本机地址与 5–120 分钟的时长'));

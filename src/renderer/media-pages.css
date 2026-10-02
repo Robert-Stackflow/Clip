@@ -1,0 +1,114 @@
+/* Auxiliary media windows share One's segments and button states. */
+.record-mode.tabs,.record-source-toolbar>.source-tabs.tabs{height:40px;padding:3px;gap:2px;border-radius:999px;margin:0;flex-shrink:0}
+.record-mode.tabs>button,.record-source-toolbar>.source-tabs.tabs>button{height:34px;min-height:34px;padding:5px 15px;border:0;border-radius:999px;background:transparent;font-size:var(--control-font)}
+.record-mode.tabs>button:hover,.record-source-toolbar>.source-tabs.tabs>button:hover{background:var(--hover)}
+.record-source-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.record-source-toolbar>.region-row{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:6px;margin:0;padding:0;min-width:0}
+.record-source-toolbar #region-label{margin-right:8px;font-size:calc(11px * var(--text-scale,1))}
+.record-workbench .region-row>button,.record-heading>#refresh{min-height:32px;font-size:calc(12px * var(--text-scale,1));padding:5px 10px}
+.record-workbench .region-row>button:hover,.record-heading>#refresh:hover{background:var(--hover)}
+.record-heading>#refresh{border:1px solid var(--line)}
+.record-source-toolbar .region-row>button:disabled{opacity:.4}
+/* Reserve one row for commands; the tool strip can scroll at smaller sizes. */
+.editor-commandbar{align-items:center;min-width:0;gap:12px;padding:6px 16px}
+.editor-commandbar>.toolbar{flex-wrap:nowrap;overflow:auto;min-width:0;scrollbar-width:none;align-items:center;margin:0}
+.editor-commandbar>.toolbar::-webkit-scrollbar{display:none}
+.editor-commandbar>.toolbar>button,.editor-commandbar>.toolbar>.divider{flex-shrink:0}
+.editor-commandbar>.actions{display:flex;flex-direction:row;align-items:center;flex-wrap:nowrap;flex-shrink:0;gap:2px;margin:0;padding:0}
+.editor-commandbar button{height:32px;min-height:32px;line-height:1;padding:5px 9px}
+.editor-commandbar button.quiet:hover{background:var(--hover)}
+.editor-commandbar button.active{background:var(--selected)}
+.image-workbench #viewport{scrollbar-width:none;padding:24px;box-sizing:border-box}
+.image-workbench #viewport::-webkit-scrollbar{display:none}
+.editor-footer button.quiet:hover{background:var(--hover)}
+/* A compact mode row replaces the framed form row in the screenshot dialog. */
+.one-form-dialog.one-dialog:has(.capture-toolbar){width:720px}
+.capture-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.one-dialog .capture-toolbar>.type-choices.tabs{flex-wrap:nowrap;max-width:100%;overflow:auto;border-radius:999px;height:40px}
+.one-dialog .capture-toolbar>.tabs>button{height:34px;min-height:34px;padding:5px 12px;flex-shrink:0;font-size:calc(12px * var(--text-scale,1))}
+.capture-toolbar>#capture-refresh{min-height:32px;flex-shrink:0;font-size:calc(12px * var(--text-scale,1))}
+.capture-toolbar>#capture-refresh:hover{background:var(--hover)}
+#capture-window-panel .capture-windows{margin-top:0;scrollbar-gutter:stable;max-height:min(390px,45vh)}
+#capture-displays .screen-choices button:hover,.capture-window-choice:hover{background:var(--hover)}
+/* Region selection keeps a clear floating toolbar with shared button feedback. */
+body[data-view=capture] #capture-actions{gap:6px;padding:8px 10px;max-width:calc(100vw - 32px);white-space:nowrap;animation:capture-toolbar-in .18s var(--ease)}
+body[data-view=capture] #capture-actions button{height:34px;min-height:34px;padding:5px 12px;background:var(--soft);color:var(--fg);border:1px solid transparent}
+body[data-view=capture] #capture-actions button:hover{background:var(--hover)}
+body[data-view=capture] #capture-actions button.primary{background:var(--accent);color:var(--on-accent)}
+body[data-view=capture] #capture-actions button.primary:hover{background:color-mix(in srgb,var(--accent) 90%,var(--surface))}
+body[data-view=capture] #dimensions{color:var(--muted);margin-right:8px}
+@keyframes capture-toolbar-in{from{opacity:0;translate:0 6px}to{opacity:1;translate:0 0}}
+@media(prefers-reduced-motion:reduce){body[data-view=capture] #capture-actions{animation:none}}
+/* Only the four action buttons interrupt the draggable shelf title bar. */
+body[data-view=shelf]>header.shelf-header{height:44px;padding:0 10px 0 12px;gap:4px;-webkit-app-region:drag}
+body[data-view=shelf] .shelf-header>strong{flex-shrink:0;margin-right:12px}
+body[data-view=shelf] .shelf-header>.toolbar{flex:0 0 auto;margin-left:auto;gap:4px;-webkit-app-region:drag}
+body[data-view=shelf] .shelf-header>.window-controls{margin:0;gap:0;-webkit-app-region:drag}
+body[data-view=shelf] .shelf-header button{width:28px;height:28px;min-height:28px;padding:5px;-webkit-app-region:no-drag}
+body[data-view=shelf] #window-minimize,body[data-view=shelf] #window-maximize{display:none}
+body[data-view=shelf]>main{height:calc(100vh - 44px)}
+body[data-view=shelf] #drop-hint{inset:44px 8px 8px}
+/* The color panel uses the same surface, corners and top-layer positioning as menus. */
+.image-workbench .color-picker-control{display:inline-flex;min-width:0}
+.image-workbench .color-picker-trigger{height:32px;min-height:32px;padding:5px 8px;gap:7px;border:1px solid var(--line);font-size:10px;font-variant-numeric:tabular-nums}
+.color-picker-trigger:hover{background:var(--hover)}
+.color-picker-swatch{width:16px;height:16px;border-radius:5px;background:var(--picked-color);border:1px solid #80808040}
+.color-picker-panel.preview-popover{position:fixed;inset:auto;margin:0;box-sizing:border-box;padding:14px;border-radius:16px;background:var(--surface);border:1px solid var(--line);color:var(--fg);box-shadow:0 12px 38px #0002;overflow:auto}
+.color-picker-plane{height:150px;position:relative;border-radius:10px;background:linear-gradient(to top,#000,transparent),linear-gradient(to right,#fff,transparent),var(--picked-hue);touch-action:none;cursor:crosshair;outline-offset:3px}
+.color-picker-marker{position:absolute;left:var(--picked-x);top:var(--picked-y);width:12px;height:12px;border:2px solid white;border-radius:50%;translate:-50% -50%;box-shadow:0 0 0 1px #0006;pointer-events:none}
+.color-picker-panel .color-picker-hue{display:block;width:100%;height:12px;margin:18px 0;appearance:none;border:0;padding:0;border-radius:999px;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);cursor:pointer}
+.color-picker-panel input.color-picker-hue::-webkit-slider-runnable-track{height:12px;border-radius:999px;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
+.color-picker-panel input.color-picker-hue::-webkit-slider-thumb{appearance:none;width:18px;height:18px;margin-top:-3px;background:var(--surface);border:2px solid white;border-radius:50%;box-shadow:0 1px 5px #0005}
+.color-picker-presets{display:grid;grid-template-columns:repeat(8,1fr);gap:7px;margin-bottom:14px}
+.color-picker-presets button{height:22px;min-height:22px;padding:0;background:var(--preset-color);border-radius:50%;border:1px solid #80808030;outline-offset:2px}
+.color-picker-presets button:hover{scale:1.12;background:var(--preset-color)}
+.color-picker-presets button[aria-pressed=true]{outline:2px solid var(--fg)}
+.color-picker-panel .color-picker-hex{display:flex;align-items:center;gap:12px;font-size:11px;color:var(--muted)}
+.color-picker-hex input{min-width:0;flex:1;height:32px;font-family:monospace;font-size:12px;padding:5px 9px}
+.image-text-editor{position:absolute;z-index:3;resize:none;margin:0;padding:2px 3px;background:color-mix(in srgb,var(--surface) 80%,transparent);border:1px dashed var(--accent);border-radius:3px;line-height:1.3;font-family:'Segoe UI','Microsoft YaHei UI',sans-serif;overflow:auto;min-width:0;box-shadow:0 0 0 2px var(--surface)}
+.image-transform-clip{position:fixed;z-index:5;overflow:hidden;pointer-events:none;contain:paint}
+.image-transform-preview{position:absolute;pointer-events:none;box-shadow:0 4px 20px #0002;transform-origin:center}
+/* Display cards carry a readable name and dimensions without another form frame. */
+#capture-displays .screen-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;padding:2px}
+#capture-displays .screen-choices>button{display:flex;align-items:center;justify-content:flex-start;gap:14px;min-width:0;min-height:92px;height:auto;padding:16px;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;position:relative;transition:background .16s,border-color .16s}
+.screen-choice-icon{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border-radius:10px;background:var(--soft);color:var(--muted)}
+.screen-choice-icon svg{width:23px;height:23px}
+.screen-choice-copy{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0}
+.screen-choice-copy strong{font-size:var(--control-font);font-weight:550;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#capture-displays .screen-choices small{margin:0;font-size:calc(11px * var(--text-scale,1));line-height:1.5;color:var(--muted)}
+#capture-displays .screen-choices>button.active{border-color:color-mix(in srgb,var(--fg) 32%,var(--line));background:var(--soft);box-shadow:none}
+#capture-window-panel .capture-windows{padding:3px;gap:12px}
+#capture-window-panel .capture-window-choice{border-radius:12px;transition:background .16s,border-color .16s}
+#capture-window-panel .capture-window-choice.active{outline:0;border-color:color-mix(in srgb,var(--fg) 32%,var(--line));box-shadow:none;background:var(--soft)}
+/* Recorder setup is one command row followed by source and settings cards. */
+.record-workbench #setup>.record-heading{margin-bottom:20px;gap:16px}
+.record-heading>#start{min-height:34px;padding:6px 16px}
+.record-workbench #setup>.recording-layout{grid-template-columns:minmax(0,1fr) 268px;gap:20px;align-items:start;flex:0 1 auto;overflow:auto;padding:0 2px 4px;scrollbar-gutter:stable}
+.record-workbench .record-source-card,.record-workbench .record-audio-card{padding:18px;border:1px solid var(--line);border-radius:18px;min-width:0}
+.record-card-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.record-card-heading h2{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:550;margin:0}
+.record-card-heading h2 svg{width:17px;height:17px;color:var(--muted)}
+.record-card-heading>#refresh{min-height:30px;height:30px;padding:4px 8px;font-size:11px}
+.record-card-heading>#refresh:hover{background:var(--hover)}
+.record-source-card>.record-source-toolbar{margin-bottom:16px;gap:10px}
+.record-source-card #sources{max-height:min(470px,calc(100vh - 268px));min-height:180px;padding:2px;scrollbar-gutter:stable;gap:12px}
+.record-source-card #sources button{padding:10px;border:1px solid transparent;border-radius:12px;gap:10px;transition:background .16s,border-color .16s}
+.record-source-card #sources button:hover{background:var(--hover)}
+.record-source-card #sources button[aria-pressed=true]{outline:0;border-color:color-mix(in srgb,var(--fg) 32%,var(--line));background:var(--soft);box-shadow:none}
+.record-source-card #sources img{height:150px;border-radius:8px;background:var(--stage)}
+.record-source-card #sources span{font-size:11px;padding:0 2px}
+.record-workbench .recording-options>.settings-card{padding:18px;border:1px solid var(--line);border-radius:18px;display:block}
+.recording-options .record-card-heading{margin-bottom:14px}
+.record-workbench .recording-options .sounds{gap:12px;flex-direction:column}
+.record-workbench .recording-options .sounds label{min-height:28px;font-size:12px}
+.record-workbench .recording-options .sounds>.custom-select-wrap{width:100%}
+.record-workbench .recording-options .fields{margin-top:18px;padding-top:18px;gap:14px}
+.record-workbench .recording-options .fields label{flex-wrap:nowrap;font-size:12px}
+.record-workbench .recording-options .fields .custom-select-wrap{max-width:142px;min-width:0}
+.record-workbench .recording-options .field{padding-top:16px;font-size:12px}
+.record-audio-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:320px;text-align:center}
+#audio-brand{display:grid;place-items:center;width:64px;height:64px;border-radius:20px;background:var(--soft);color:var(--muted)}
+#audio-brand svg{width:28px;height:28px}
+.record-audio-card h2{font-size:19px;margin:0}
+.record-audio-card p{max-width:280px;font-size:12px;line-height:1.8;color:var(--muted);margin:0}
+@media(max-width:800px){.record-workbench #setup>.recording-layout{grid-template-columns:1fr;overflow:auto}.record-source-card #sources img{height:130px}.record-source-card #sources{max-height:320px}.record-audio-card{min-height:220px}.record-workbench .recording-options>.settings-card{padding:16px}}

@@ -59,3 +59,4 @@ input[type=range]{appearance:none;height:24px;min-height:24px;padding:0;border:0
 
 /* One option-list empty state. */
 .select-empty{padding:10px 14px;font-size:12px;color:var(--muted);white-space:nowrap}
+.section-nav.settings-nav button{align-items:center;min-height:40px;gap:10px}.section-nav.settings-nav .icon{width:16px;height:16px;flex:0 0 16px;color:var(--muted)}.section-nav.settings-nav .section-nav-label{min-width:0;line-height:1.5}.section-nav.settings-nav button.active .icon{color:var(--fg)}

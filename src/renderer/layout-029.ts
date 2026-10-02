@@ -47,11 +47,11 @@ export function utilityLayout(page:string){
   }
   if(page==='data'){
    const children=Array.from(panel.children);let batch:Element[]=[];const flush=()=>{group(batch);batch=[];};
-   for(const child of children){if(child.classList.contains('tools-section-heading')||child.id==='history-vault'||child.classList.contains('backup-status')||child.id==='backup-entries'){flush();}else batch.push(child);}flush();
+   for(const child of children){if(child.classList.contains('tools-section-heading')||child.id==='history-vault'||child.classList.contains('backup-status')||child.id==='backup-entries'||child.classList.contains('checkpoint-workbench')){flush();}else batch.push(child);}flush();
   }
   if(page==='sync')panel.querySelector<HTMLElement>('#sync-live')?.classList.add('device-workbench');
  }
- if(page==='web'){
+ if(page==='web'&&!root.querySelector('.web-setup-panel,.web-content-card')){
   const body=root.querySelector<HTMLElement>('.tools-scroll')!,layout=body.querySelector<HTMLElement>('.sharing-layout');
   if(layout){layout.classList.add('web-workbench');for(const section of Array.from(layout.children)){
    const children=Array.from(section.children),title=children.findIndex(node=>node.classList.contains('section-label'));if(title>=0)group(children.slice(title+1),'settings-card web-card');
