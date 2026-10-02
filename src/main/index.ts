@@ -1,3 +1,4 @@
+import {AppIcons} from './app-icons';
 import {rendererAssetAllowed} from '../shared/renderer-assets';
 import {development,developmentHidden,developmentMessage,installDevelopmentBridge} from './development';
 import {CaptureWriter,CaptureCancelledError,heavyCapture} from './capture-writer';
@@ -8,7 +9,7 @@ import {confirmWindow} from './window-confirm';
 import {t as tr} from '../shared/i18n';
 import {languageStore} from './language-bootstrap';
 import {initLanguageService} from './language-service';
-import {interfaceLanguageArguments} from '../shared/i18n';
+import {setInterfaceLanguage,interfaceLanguageArguments} from '../shared/i18n';
 import {AppearanceService} from './appearance-service';
 import {TrayPanel} from './tray-panel';
 import {trayMenuTemplate} from './tray-menu';
@@ -113,6 +114,7 @@ function notice(e:unknown){if(secured||quitting)return;status=String(e instanceo
 function broadcast(){if(secured||quitting)return;webService?.reconcile();for(const w of windows())if(w!==trayPanel?.window)notifyCollectionWindow(w);trayPanel?.changed();}
 function dark(){return store.settings.theme==='dark'||store.settings.theme==='system'&&nativeTheme.shouldUseDarkColors;}
 function appearance(){if(secured||quitting)return;for(const w of windows()){w.setBackgroundColor(dark()?'#181818':'#ffffff');}recorder?.refreshAppearance();broadcast();}
+const appIcons=new AppIcons(()=>activeStore());
 function state(){const bindings=new Map(efficiency.options().bindings.map(b=>[b.id,b.shortcut]));return {stack:stack.state(),clips:store.list(),snippets:store.snippetList().map(s=>({...s,shortcut:bindings.get(s.id)||''})),queue:store.queue,shelf:store.shelf,categories:store.categories,settings:store.settings,desktop:desktop?.options||desktopDefaults,dark:dark(),native:nativeAvailable(),status,hotkeyError,bytes:store.bytes()};}
 function rememberTarget(){const f=foregroundTarget();if(f&&f.pid!==process.pid){lastTarget=f.hwnd;lastTargetPid=f.pid;}}
 function trayTarget(){rememberTarget();const target=windowInfo(lastTarget);return target&&target.pid===lastTargetPid&&target.pid!==process.pid?target:undefined;}
@@ -148,7 +150,7 @@ function id(v:unknown):string{if(typeof v!=='string'||! /^[0-9a-f-]{36}$/.test(v
 function handle(name:string,fn:(...args:any[])=>unknown,serialized=true,scope:'main'|'shelf'|'selection'|'tray'='main'){ipcMain.handle('clipper:'+name,(event,...args)=>{
   if(quitting||secured)throw new Error(tr('历史已锁定或正在退出，请先解锁'));if(updateService?.installing&&name!=='update-state')throw new Error('UPDATE_BUSY');if(programRollback?.installing&&!['update-state','vault-lock'].includes(name))throw new Error(tr('正在准备程序回退'));
   const w=windows().find(w=>w.webContents===event.sender);if(!w||event.senderFrame!==event.sender.mainFrame||(scope==='tray'?(w!==trayPanel?.window||event.senderFrame.url!=='clipper://app/tray.html'):scope==='selection'?(w!==selection?.window||event.senderFrame.url!=='clipper://app/selection.html'):scope==='shelf'?(w!==desktop?.shelf||event.senderFrame.url!=='clipper://app/shelf.html'):!event.senderFrame.url.startsWith('clipper://app/index.html')))throw new Error(tr('拒绝访问'));
-  if(['preview','snippet-preview','preview-release'].includes(name))return background(Promise.resolve().then(()=>{activeStore();return fn(args[0],w.webContents.id);}));if(name==='search')return background(Promise.resolve().then(()=>{activeStore();return fn(args[0],args[1],w.webContents.id);}));if(name==='vault-lock')return fn(...args);if(name==='stack-running'&&args[0]===false)return fn(...args);if(name==='settings'){const next=validateSettings(args[0]);if(next.paused||JSON.stringify(next.excludedApps)!==JSON.stringify(store.settings.excludedApps)){stack.stop();cancelAttachments();}}return background(serialized?enqueue(()=>fn(...args)):Promise.resolve().then(()=>{activeStore();return fn(...args);}));
+  if(name==='language-reload')return fn(w);if(['preview','snippet-preview','preview-release'].includes(name))return background(Promise.resolve().then(()=>{activeStore();return fn(args[0],w.webContents.id);}));if(name==='search')return background(Promise.resolve().then(()=>{activeStore();return fn(args[0],args[1],w.webContents.id);}));if(name==='vault-lock')return fn(...args);if(name==='stack-running'&&args[0]===false)return fn(...args);if(name==='settings'){const next=validateSettings(args[0]);if(next.paused||JSON.stringify(next.excludedApps)!==JSON.stringify(store.settings.excludedApps)){stack.stop();cancelAttachments();}}return background(serialized?enqueue(()=>fn(...args)):Promise.resolve().then(()=>{activeStore();return fn(...args);}));
 });}
 async function backup(mode:unknown){if(mode==='export'){
   const result=await dialog.showSaveDialog(main,{title:tr('导出 Clipper 备份'),defaultPath:`Clipper-${new Date().toISOString().slice(0,10)}.json`,filters:[{name:tr('Clipper 备份'),extensions:['json']}]});if(result.canceled||!result.filePath)return null;
@@ -168,7 +170,9 @@ function ipc(){
   handle('program-version-preview',(token,password,newPassword,mode)=>programRollback!.preview(token,password,newPassword,mode));
   handle('program-version-cancel',()=>programRollback!.cancel());
   handle('program-version-commit',(token,proof)=>backupManager.exclusive(async()=>{const epoch=sessionEpoch;if(!updateAllowed(true))throw new Error(tr('请先保存或关闭捕获与图片编辑，并完成资料操作'));await programRollback!.commit(token,proof,()=>updateAllowed(true)&&sessionEpoch===epoch);setTimeout(()=>app.quit(),0);}));
-  handle('language-save',value=>languageStore.save(value));
+  handle('app-icons',names=>appIcons.get(names),false);
+  handle('language-reload',(window:BrowserWindow)=>{setTimeout(()=>{if(!window.isDestroyed())window.webContents.reload();},0);},false);
+  handle('language-save',async value=>{const result=await languageStore.save(value);setInterfaceLanguage(result.current);process.env.CLIPPER_UI_LANGUAGE=result.current;trayMenu();return result;});
   handle('appearance-save',value=>appearanceService.save(value));
   handle('tray-open',()=>{if(secured){show();return;}trayPanel?.open(tray.getBounds());},false);
   handle('tray-state',query=>trayPanel!.state(query),false,'tray');handle('tray-preview',token=>trayPanel!.preview(token),false,'tray');handle('tray-use',(token,paste)=>trayPanel!.use(token,paste),false,'tray');handle('tray-hide',()=>trayPanel!.close(),false,'tray');handle('tray-main',()=>trayPanel!.main(),false,'tray');
@@ -266,7 +270,7 @@ function ipc(){
   handle('backup',mode=>mode==='export'?background(backup(mode)):enqueue(()=>backup(mode)),false);handle('clear',()=>{store.clear();broadcast();});handle('hide',()=>{for(const w of windows())w.hide();},false);handle('quit',()=>app.quit(),false);
 }
 async function poll(){if(secured||quitting||programRollback?.installing)return;if(systemPaused){lastSequence=sequence();return;}if(vaultSetup){lastSequence=sequence();if(Date.now()>=vaultSetupExpires){storageManager.cancelEncryption();vaultSetup=false;}return;}const epoch=sessionEpoch,stackEpoch=stack.epoch;rememberTarget();const seq=sequence();if(seq===lastSequence)return;if(store.settings.paused){lastSequence=seq;return;}const source=owner()||foreground();if(source?.pid===process.pid||store.settings.excludedApps.includes((source?.name||'').toLowerCase())||privateClipboard()){lastSequence=seq;return;}
-  try{let payload=await capture();if(secured||systemPaused||epoch!==sessionEpoch||sequence()!==seq)return;if(payload){const original=store,live=()=>!secured&&!quitting&&!systemPaused&&!changingStore&&!vaultSetup&&storeOpen&&epoch===sessionEpoch&&store===original&&sequence()===seq;const name=source?.name||'未知应用',thumb=thumbnail(payload);let item:Detail|import('../shared/preview').ClipPreview;if(heavyCapture(payload)){const pending=captureWriter.run(join(storageManager.directory,'history.sqlite'),payload,name,thumb,storageManager.vault.copyKey(),live);payload=null;item=await pending;if(!live())return;}else item=store.add(payload,name,thumb,undefined,false);status='';try{stack.capture(item,stackEpoch,source?.name||'未知应用');}catch(error){notice(error);trayMenu();}store.prune();syncService.capture(item);webService.capture(store.preview(item.id));broadcast();}lastSequence=seq;}catch(e){if(e instanceof CaptureCancelledError)return;if(/^(附件读取已取消|剪贴板已改变)$/.test(e instanceof Error?e.message:String(e)))return;if(/忙|正在|temporarily|busy/i.test(String(e)))return;lastSequence=seq;notice(e);}
+  try{let payload=await capture();if(secured||systemPaused||epoch!==sessionEpoch||sequence()!==seq)return;if(payload){const original=store,live=()=>!secured&&!quitting&&!systemPaused&&!changingStore&&!vaultSetup&&storeOpen&&epoch===sessionEpoch&&store===original&&sequence()===seq;appIcons.remember(source);const name=source?.name||'未知应用',thumb=thumbnail(payload);let item:Detail|import('../shared/preview').ClipPreview;if(heavyCapture(payload)){const pending=captureWriter.run(join(storageManager.directory,'history.sqlite'),payload,name,thumb,storageManager.vault.copyKey(),live);payload=null;item=await pending;if(!live())return;}else item=store.add(payload,name,thumb,undefined,false);status='';try{stack.capture(item,stackEpoch,source?.name||'未知应用');}catch(error){notice(error);trayMenu();}store.prune();syncService.capture(item);webService.capture(store.preview(item.id));broadcast();}lastSequence=seq;}catch(e){if(e instanceof CaptureCancelledError)return;if(/^(附件读取已取消|剪贴板已改变)$/.test(e instanceof Error?e.message:String(e)))return;if(/忙|正在|temporarily|busy/i.test(String(e)))return;lastSequence=seq;notice(e);}
 }
 async function activateStore(){checkpointRecovery?.cancel();checkpointRecovery=new CheckpointRecovery(storageManager,thumbnail);programRollback?.cancel();programRollback=new ProgramRollbackManager(storageManager,programVersionContext(storageManager.defaultDirectory,app.getVersion()));
   if(development){store.saveSettings({...store.settings,paused:true});store.setMeta('selection-options',{...validateSelection(store.meta('selection-options',selectionDefaults)),enabled:false});store.setMeta('desktop-options',{...validateDesktop(store.meta('desktop-options',desktopDefaults)),dockEnabled:false,shelfTop:false});}

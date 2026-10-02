@@ -1,7 +1,7 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),{randomUUID}=require('node:crypto');
 const {Store,SyncService,syncRequest,privateAddress,SyncLedger,SyncDiscovery}=require('../work/test-exports.cjs');
 const vault={available:async()=>true,encrypt:async s=>'unit:'+Buffer.from(s).toString('base64'),decrypt:async s=>Buffer.from(s.slice(5),'base64').toString()};
-async function device(name){const store=new Store(':memory:'),service=new SyncService(()=>store,vault,()=>{},fn=>Promise.resolve().then(fn),undefined,{bindHost:'127.0.0.1',discovery:false});await service.configure({name,enabled:true,autoNew:false});return {store,service,close:async()=>{await service.stop();store.close();}};}
+async function device(name,options={bindHost:'127.0.0.1',discovery:false}){const store=new Store(':memory:'),service=new SyncService(()=>store,vault,()=>{},fn=>Promise.resolve().then(fn),undefined,options);await service.configure({name,enabled:true,autoNew:false});return {store,service,close:async()=>{await service.stop();store.close();}};}
 const pair=async(a,b)=>{await b.service.join(a.service.invite('127.0.0.1'));const request=a.service.state().pending[0];assert.ok(request);a.service.approve(request.id,true);await b.service.tick();assert.equal(b.service.state().peers.length,1);};
 const identity=async d=>{const s=d.store.meta('lan-config',{});return {id:s.id,cert:s.cert,fingerprint:s.fingerprint,key:await vault.decrypt(s.secret)};};
 const peer=d=>{const s=d.service.state();return {id:s.id,name:s.name,host:'127.0.0.1',port:s.port,fingerprint:s.fingerprint};};
@@ -40,7 +40,21 @@ test('pair cancellation after approval removes provisional trust; expired codes 
 });
 test('actual UDP multicast discovers both isolated device announcements without clipboard content',async()=>{
  const errors=[],first={id:randomUUID(),name:'Clipper discovery test A',host:'127.0.0.1',port:48301,fingerprint:'1'.repeat(64)},second={...first,id:randomUUID(),name:'Clipper discovery test B',port:48302,fingerprint:'2'.repeat(64)},a=new SyncDiscovery(()=>first,()=>{},e=>errors.push(e)),b=new SyncDiscovery(()=>second,()=>{},e=>errors.push(e));
- try{a.start();b.start();const until=Date.now()+7000;while(Date.now()<until&&(!a.list().length||!b.list().length))await new Promise(r=>setTimeout(r,100));assert.equal(a.list()[0]?.id,second.id);assert.equal(b.list()[0]?.id,first.id);assert.deepEqual(errors,[]);}finally{a.stop();b.stop();}
+ try{a.start();b.start();const until=Date.now()+7000;while(Date.now()<until&&(!a.list().some(peer=>peer.id===second.id)||!b.list().some(peer=>peer.id===first.id)))await new Promise(r=>setTimeout(r,100));assert(a.list().some(peer=>peer.id===second.id));assert(b.list().some(peer=>peer.id===first.id));assert.deepEqual(errors,[]);}finally{a.stop();b.stop();}
+});
+
+test('actual LAN discovery addresses support pinned TLS approval and exact attachment transfer between isolated stores',async t=>{
+ const a=await device('Clipper isolated discovery A',{});let b;
+ try{
+  const started=performance.now();b=await device('Clipper isolated discovery B',{});
+  const until=Date.now()+7000;while(Date.now()<until&&(!a.service.state().nearby.some(peer=>peer.id===b.service.state().id)||!b.service.state().nearby.some(peer=>peer.id===a.service.state().id)))await new Promise(resolve=>setTimeout(resolve,50));
+  const nearby=b.service.state().nearby.find(peer=>peer.id===a.service.state().id);assert(nearby,'A private interface must be discovered');assert.notEqual(nearby.host,'127.0.0.1');assert(a.service.state().addresses.includes(nearby.host));assert.equal(nearby.fingerprint,a.service.state().fingerprint);
+  const discoveredMs=performance.now()-started;await b.service.join(a.service.invite(nearby.host));const pending=a.service.state().pending[0];assert(pending);assert.equal(b.service.state().peers.length,0);a.service.approve(pending.id,true);await b.service.tick();assert.equal(b.service.state().peers.length,1);assert.equal(b.service.state().peers[0].fingerprint,a.service.state().fingerprint);
+  const payload={attachments:[{name:'Private folder',data:'',directory:true},{name:'Private folder\\exact.bin',data:Buffer.alloc(8192,17).toString('base64')}]},item=a.store.add(payload,'Isolated network fixture');await a.service.share(item.id);
+  const transferred=performance.now();await b.service.tick();const attachmentTransferMs=performance.now()-transferred;assert.deepEqual(b.store.all().find(clip=>clip.hash===item.hash)?.payload,payload);assert.equal(b.service.state().peers[0].error,'');assert.equal(b.service.state().error,'');
+  const reply=b.store.add({text:'Isolated return '+randomUUID()},'Isolated network fixture');await b.service.share(reply.id);await a.service.tick();assert.equal(a.store.all().find(clip=>clip.hash===reply.hash)?.payload.text,reply.payload.text);assert.equal(a.service.state().peers[0].error,'');
+  t.diagnostic(JSON.stringify({discoveredMs,attachmentTransferMs,attachmentBytes:8192,scope:'Same physical Windows host, private NIC multicast and TLS; does not prove two physical devices or firewall compatibility'}));
+ }finally{await a.close();if(b)await b.close();}
 });
 test('deduplication does not let a remote deletion erase a pre-existing local copy',async()=>{
  const a=await device('A'),b=await device('B');try{const local=b.store.add({text:'already mine'},'local fixture');b.store.update(local.id,{favorite:true,tags:['local tag']});const published=a.store.add({text:'already mine'},'fixture');a.service.share(published.id);await pair(a,b);assert.equal(b.store.list().length,1);a.store.delete(published.id);await b.service.tick();assert.equal(b.store.get(local.id).payload.text,'already mine');assert.equal(b.store.get(local.id).favorite,true);assert.deepEqual(b.store.get(local.id).tags,['local tag']);assert.equal(b.store.get(local.id).shared,false);}finally{await a.close();await b.close();}

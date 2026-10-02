@@ -1,7 +1,7 @@
 import type {Clip} from './types';
 /** Keep queue slot identity while filtering, without comparing every slot to every row. */
-export function collectionItems(clips:readonly Clip[],byID:ReadonlyMap<string,Clip>,page:string,queue:readonly string[],shelf:readonly string[],kind:string,matches:ReadonlySet<string>|null){
- const accept=(clip:Clip)=>(kind==='all'||clip.kind===kind)&&(!matches||matches.has(clip.id));
+export function collectionItems(clips:readonly Clip[],byID:ReadonlyMap<string,Clip>,page:string,queue:readonly string[],shelf:readonly string[],kind:string,matches:ReadonlySet<string>|null,source=''){
+ const accept=(clip:Clip)=>(!source||clip.source.trim().toLowerCase()===source)&&(kind==='all'||clip.kind===kind)&&(!matches||matches.has(clip.id));
  const items:Clip[]=[],indices:number[]=[];
  if(page==='stack'||page==='shelf'){
   const ids=page==='stack'?queue:shelf;

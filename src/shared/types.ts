@@ -21,10 +21,12 @@ export interface State { stack:import('./stack').StackState; clips: Clip[]; snip
 export type BatchAction='delete'|'favorite'|'enqueue'|'shelf'|'unshelf'|'tag';
 export type ClipAction = 'favorite'|'pin'|'delete'|'enqueue'|'dequeue'|'up'|'down'|'split';
 export interface API {
+  appIcons(names:string[]):Promise<Record<string,string|null>>;
   programVersions():Promise<import('./program-versions').ProgramVersionEntry[]>;deleteProgramVersion(id:string):Promise<void>;chooseProgramVersion(id:string):Promise<import('./program-versions').ProgramRollbackChoice>;previewProgramVersion(token:string,password?:string,newPassword?:string,mode?:'password'|'recovery'):Promise<import('./program-versions').ProgramRollbackPreview>;rollbackProgramVersion(token:string,proof?:string):Promise<void>;cancelProgramRollback():Promise<void>;
   updateState():Promise<import('./updates').UpdateState>; configureUpdates(automatic:boolean):Promise<import('./updates').UpdateState>;
   checkUpdate():Promise<import('./updates').UpdateState>; downloadUpdate():Promise<import('./updates').UpdateState>; cancelUpdate():Promise<import('./updates').UpdateState>;
   installUpdate():Promise<import('./updates').UpdateState>; showUpdateDownload():Promise<void>; onUpdate(callback:(state:import('./updates').UpdateState)=>void):()=>void;
+  reloadLanguage():Promise<void>;
   configureLanguage(value:import('./language').LanguageChoice):Promise<import('./language').LanguageState>;
   configureAppearance(value:import('./appearance').UIAppearance):Promise<import('./appearance').AppearanceState>;
   stackState():Promise<import('./stack').StackState>; configureStack(value:import('./stack').StackOptions):Promise<void>; setStackRunning(value:boolean):Promise<void>; previewStack(order:'oldest'|'newest'):Promise<import('./stack').StackPreview>; commitStack(token:string):Promise<number>; cancelStackPreview():Promise<void>; reverseStack():Promise<void>;

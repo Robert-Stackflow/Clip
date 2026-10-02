@@ -1,6 +1,7 @@
 import {t as tr} from '../shared/i18n';
 import {openDatabase,type DatabaseConnection} from './database';
 import { createHash, randomUUID } from 'node:crypto';
+import {zstdCompressSync,zstdDecompressSync,constants as zlibConstants} from 'node:zlib';
 import { defaults, classify, validatePayload, validateSettings, validateTags, validateBackup, MAX_TOTAL, MAX_TEXT, contentBytes } from '../shared/core';
 import type { Clip, Detail, Payload, Settings, Snippet, Category, BatchAction } from '../shared/types';
 import { validateCategory, templateVariables } from '../shared/advanced';
@@ -15,11 +16,15 @@ export function prepareCapture(value:unknown):PreparedCapture{const payload=vali
 export class Store {
   private closed=false;private indexed=false;
   onChange?: (previous:Detail|undefined,next?:Detail)=>void;
-  db:DatabaseConnection; settings:Settings; queue:string[]; shelf:string[]; categories:Category[]; undoItems:Detail[]=[];
+  db:DatabaseConnection; settings:Settings; queue:string[]; shelf:string[]; categories:Category[];
   constructor(path:string,prune=true,private readOnly=false,key?:Uint8Array,initialized=false){
     this.db=openDatabase(path,readOnly,key);try{if(initialized)this.db.exec('PRAGMA busy_timeout=5000; PRAGMA synchronous=NORMAL; PRAGMA secure_delete=ON;');if(readOnly)this.db.exec('BEGIN');const version=Number((this.db.prepare('PRAGMA user_version').get() as any).user_version);if(version>7)throw new Error(tr('数据库来自较新版本，请使用新版 Clipper'));
     if(!readOnly&&!initialized)this.db.exec('PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL; PRAGMA secure_delete=ON; CREATE TABLE IF NOT EXISTS clips(id TEXT PRIMARY KEY,hash TEXT NOT NULL UNIQUE,updated INTEGER NOT NULL,data TEXT NOT NULL); CREATE INDEX IF NOT EXISTS clips_recent ON clips(updated DESC); CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY,value TEXT NOT NULL); CREATE TABLE IF NOT EXISTS snippets(id TEXT PRIMARY KEY,data TEXT NOT NULL); PRAGMA user_version=7;');
     if(!readOnly&&!initialized){initializeListIndex(this.db);initializePreviewIndex(this.db);this.indexed=true;}else if(initialized){if(version!==7)throw new Error(tr('内容校验已失效'));this.db.prepare('SELECT i.data,p.payload FROM clip_list_cache i JOIN clip_preview_cache p ON p.id=i.id LIMIT 0').all();this.indexed=true;}
+    // The single deletion snapshot stays in SQLite memory, including for an
+    // encrypted history. It never becomes a plaintext temporary file or part
+    // of the persistent database/backup, and closing the connection discards it.
+    if(!readOnly)this.db.exec('PRAGMA temp_store=MEMORY;CREATE TEMP TABLE clipper_delete_undo(position INTEGER PRIMARY KEY,data BLOB NOT NULL);');
     this.settings=validateSettings({...defaults,...this.meta('settings',{})});this.queue=this.meta('queue',[]).filter((id:unknown)=>typeof id==='string'&&this.has(id));this.shelf=this.meta('shelf',[]).filter((id:unknown)=>typeof id==='string'&&this.has(id));this.categories=this.meta('categories',[]);if(prune&&!readOnly)this.prune();
     }catch(e){try{this.db.close();}catch{}throw e;}
   }
@@ -61,8 +66,11 @@ export class Store {
       const payload=validatePayload({text});const hash=createHash('sha256').update(JSON.stringify(payload)).digest('hex');const dup=this.db.prepare('SELECT id FROM clips WHERE hash=? AND id<>?').get(hash,id);if(dup)throw new Error(tr('已有相同内容的记录'));item.payload=payload;item.hash=hash;item.kind=classify(payload);item.title=text.trim().split(/\r?\n/)[0].slice(0,100);item.preview=text.slice(0,240);item.bytes=contentBytes(payload);
     }if(this.bytes()-Buffer.byteLength(JSON.stringify(this.get(id)))+contentBytes(item)>MAX_TOTAL)throw new Error(tr('历史容量已满'));this.save(item);}
   delete(id:string){this.batch([id],'delete');}
-  undo(){if(!this.undoItems.length)throw new Error(tr('没有可撤销的删除'));this.db.exec('BEGIN');try{for(const i of this.undoItems)this.add(i.payload,i.source,i.thumbnail,{...i,updatedAt:Date.now()},false);this.db.exec('COMMIT');this.undoItems=[];}catch(e){this.db.exec('ROLLBACK');throw e;}}
-  clear(){const removable=this.all().filter(i=>!this.protected(i));this.undoItems=removable;this.db.exec('BEGIN');try{for(const i of removable)this.db.prepare('DELETE FROM clips WHERE id=?').run(i.id);this.db.exec('COMMIT');}catch(e){this.db.exec('ROLLBACK');throw e;}}
+  private rememberDeletion(id:string){const row=this.db.prepare('SELECT data FROM clips WHERE id=?').get(id),data=zstdCompressSync(row.data,{params:{[zlibConstants.ZSTD_c_compressionLevel]:1}});try{this.db.prepare('INSERT INTO temp.clipper_delete_undo(data) VALUES(?)').run(data);}finally{data.fill(0);}}
+  private deletedDetail(data:Uint8Array):Detail{const bytes=zstdDecompressSync(data,{maxOutputLength:MAX_TOTAL});try{return JSON.parse(bytes.toString('utf8'));}finally{bytes.fill(0);}}
+  get undoItems():Detail[]{return this.readOnly?[]:[...this.db.prepare('SELECT data FROM temp.clipper_delete_undo ORDER BY position').iterate()].map(row=>this.deletedDetail(row.data));}
+  undo(){if(this.readOnly||!this.db.prepare('SELECT 1 FROM temp.clipper_delete_undo LIMIT 1').get())throw new Error(tr('没有可撤销的删除'));this.db.exec('BEGIN');try{const next=this.db.prepare('SELECT position,data FROM temp.clipper_delete_undo WHERE position>? ORDER BY position LIMIT 1');let position=0;for(let row=next.get(position);row;row=next.get(position)){position=row.position;const i=this.deletedDetail(row.data);this.add(i.payload,i.source,i.thumbnail,{...i,updatedAt:Date.now()},false);}this.db.exec('DELETE FROM temp.clipper_delete_undo;COMMIT');}catch(e){this.db.exec('ROLLBACK');throw e;}}
+  clear(){const removable=this.list().filter(i=>!this.protected(i));this.db.exec('BEGIN');try{this.db.exec('DELETE FROM temp.clipper_delete_undo');const remove=this.db.prepare('DELETE FROM clips WHERE id=?');for(const i of removable){this.rememberDeletion(i.id);remove.run(i.id);}this.db.exec('COMMIT');}catch(e){this.db.exec('ROLLBACK');throw e;}}
   protected(i:Clip){return i.favorite||i.pinned||i.shared||this.queue.includes(i.id)||this.shelf.includes(i.id);}
   prune(){const cutoff=Date.now()-this.settings.retentionDays*86400000;let count=0;const removable=this.list().filter(i=>!this.protected(i));for(const i of removable){count++;if(count>this.settings.maxItems||i.updatedAt<cutoff)this.db.prepare('DELETE FROM clips WHERE id=?').run(i.id);}}
   setQueue(ids:string[]){this.queue=[...ids].filter(id=>this.has(id)).slice(0,200);this.setMeta('queue',this.queue);}
@@ -84,22 +92,22 @@ export class Store {
   saveCategory(value:unknown){const c=validateCategory(value);if(c.id&&!this.categories.some(x=>x.id===c.id))throw new Error(tr('分类已不存在'));if(!c.id&&this.categories.length>=50)throw new Error(tr('最多 50 个自定义分类'));const category:Category={...c,id:c.id||randomUUID()};const next=[...this.categories.filter(x=>x.id!==category.id),category];this.setMeta('categories',next);this.categories=next;}
   removeCategory(id:string){const next=this.categories.filter(x=>x.id!==id);this.setMeta('categories',next);this.categories=next;}
   batch(ids:string[],action:BatchAction,tags:string[]=[]){
-    if(!Array.isArray(ids)||!ids.length||ids.length>500||ids.some(x=>typeof x!=='string'))throw new Error(tr('一次选择 1–500 条记录'));const unique=[...new Set(ids)],items=unique.map(id=>this.get(id));
+    if(!Array.isArray(ids)||!ids.length||ids.length>500||ids.some(x=>typeof x!=='string'))throw new Error(tr('一次选择 1–500 条记录'));const unique=[...new Set(ids)];if(unique.some(id=>!this.has(id)))throw new Error(tr('记录已不存在'));
     const queue=[...this.queue],shelf=[...this.shelf];const validTags=validateTags(tags);this.db.exec('SAVEPOINT batch_change');
     try{switch(action){
-      case 'delete':for(const item of items){this.onChange?.(item);this.db.prepare('DELETE FROM clips WHERE id=?').run(item.id);}this.setQueue(this.queue.filter(x=>!unique.includes(x)));this.shelf=this.shelf.filter(x=>!unique.includes(x));this.setMeta('shelf',this.shelf);break;
-      case 'favorite':for(const i of items)this.update(i.id,{favorite:true});break;
-      case 'tag':for(const i of items)this.update(i.id,{tags:validateTags([...new Set([...i.tags,...validTags])])});break;
+      case 'delete':{this.db.exec('DELETE FROM temp.clipper_delete_undo');const remove=this.db.prepare('DELETE FROM clips WHERE id=?');for(const id of unique){this.rememberDeletion(id);if(this.onChange)this.onChange(this.get(id));remove.run(id);}this.setQueue(this.queue.filter(x=>!unique.includes(x)));this.shelf=this.shelf.filter(x=>!unique.includes(x));this.setMeta('shelf',this.shelf);break;}
+      case 'favorite':for(const id of unique)this.update(id,{favorite:true});break;
+      case 'tag':for(const id of unique){const item=this.get(id);item.tags=validateTags([...new Set([...item.tags,...validTags])]);this.save(item);}break;
       case 'enqueue':{const next=this.meta('stack-options',{}).duplicates?[...this.queue,...unique]:[...new Set([...this.queue,...unique])];if(next.length>200)throw new Error(tr('堆栈最多 200 项'));this.setQueue(next);break;}
       case 'shelf':{const next=[...new Set([...this.shelf,...unique])];if(next.length>200)throw new Error(tr('拖拽容器最多 200 项'));this.setMeta('shelf',next);this.shelf=next;break;}
       case 'unshelf':this.shelf=this.shelf.filter(x=>!unique.includes(x));this.setMeta('shelf',this.shelf);break;
       default:throw new Error(tr('批量操作无效'));
-    }this.db.exec('RELEASE batch_change');if(action==='delete')this.undoItems=items;
+    }this.db.exec('RELEASE batch_change');
     }catch(e){this.db.exec('ROLLBACK TO batch_change; RELEASE batch_change');this.queue=queue;this.shelf=shelf;throw e;}
   }
   backup(){return {format:'clipper-backup',version:7,exportedAt:new Date().toISOString(),clips:this.all(),snippets:this.snippets(),categories:this.categories,scripts:this.meta('text-scripts',[])};}
   import(value:unknown,thumbnail:(p:Payload)=>string|undefined=()=>undefined){const data=validateBackup(value),previousCategories=[...this.categories];this.db.exec('BEGIN');try{for(const c of data.clips)this.add(c.payload,c.source,thumbnail(c.payload),c,false);const snippets=this.snippets();for(const s of data.snippets)if(!snippets.some(x=>x.title===s.title&&JSON.stringify(x.payload)===JSON.stringify(s.payload))){this.saveSnippet({title:s.title,payload:s.payload},thumbnail(s.payload));snippets.push(s);}for(const c of data.categories)if(!this.categories.some(x=>x.name===c.name&&x.kind===c.kind&&x.contains===c.contains&&x.source===c.source&&x.tag===c.tag))this.saveCategory({...c,id:undefined});if(data.scripts.length){const scripts=this.meta('text-scripts',[]);for(const script of data.scripts)if(!scripts.some((s:any)=>s.name===script.name&&s.code===script.code))scripts.push({...script,id:randomUUID(),updatedAt:Date.now()});if(scripts.length>100||Buffer.byteLength(JSON.stringify(scripts))>4*1024*1024)throw new Error(tr('合并后脚本超过容量限制'));this.setMeta('text-scripts',scripts);}this.db.exec('COMMIT');return data.clips.length;}catch(e){this.db.exec('ROLLBACK');this.categories=previousCategories;throw e;}}
-  close(){if(this.closed)return;try{this.db.exec(this.readOnly?'ROLLBACK':'PRAGMA wal_checkpoint(TRUNCATE)');}finally{this.closed=true;this.undoItems=[];this.categories=[];this.queue=[];this.shelf=[];this.onChange=undefined;this.db.close();}}
+  close(){if(this.closed)return;try{this.db.exec(this.readOnly?'ROLLBACK':'PRAGMA wal_checkpoint(TRUNCATE)');}finally{this.closed=true;this.categories=[];this.queue=[];this.shelf=[];this.onChange=undefined;this.db.close();}}
 }
 
 function cleanPreview(value:PreviewPayload){for(const key of Object.keys(value) as (keyof PreviewPayload)[])if(value[key]===null)delete value[key];return value;}

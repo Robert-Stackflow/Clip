@@ -11,7 +11,7 @@ export function sectionLayout(root:HTMLElement, labels:string[], starts:HTMLElem
     const panel=document.createElement('section');panel.className='section-panel';panel.id=storageKey+'-panel-'+i;
     const begin=nodes.indexOf(starts[i]),end=i+1<starts.length?nodes.indexOf(starts[i+1]):nodes.length;
     nodes.slice(Math.max(0,begin),end).forEach(node=>panel.append(node));
-    if(root.closest('.settings-page')){const rows=Array.from(panel.querySelectorAll<HTMLElement>(':scope > .setting-row')).filter(row=>!row.querySelector('.theme-modes'));if(rows.length){const card=document.createElement('div');card.className='settings-card';rows[0].before(card);rows.forEach(row=>card.append(row));}panel.querySelector('#updates')?.classList.add('settings-card','update-settings-card');}
+    if(root.closest('.settings-page')){const rows=Array.from(panel.querySelectorAll<HTMLElement>(':scope > .setting-row')).filter(row=>!row.querySelector('.theme-modes'));if(rows.length){const separate=rows.some(row=>row.querySelector('#max-items,#clear-history'));if(separate){for(const row of rows){const card=document.createElement('section');card.className='settings-card';row.before(card);card.append(row);}}else{const card=document.createElement('section');card.className='settings-card';rows[0].before(card);rows.forEach(row=>card.append(row));}}panel.querySelector('#updates')?.classList.add('settings-card','update-settings-card');}
     const button=document.createElement('button');button.type='button';button.className='quiet';button.textContent=label;button.dataset.section=String(i);button.setAttribute('aria-controls',panel.id);
     button.onclick=()=>select(i);nav.append(button);content.append(panel);return panel;
   });

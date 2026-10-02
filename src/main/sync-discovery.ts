@@ -4,7 +4,7 @@ import {networkInterfaces} from 'node:os';
 import {privateAddress,syncPeer,type SyncPeer} from '../shared/sync';
 
 const group='239.255.77.77',port=47382,expiry=20000;
-type Discovered=SyncPeer&{seen:number};
+type Discovered=SyncPeer&{endpoints:Map<string,number>};
 
 export function localAddresses(){
  return [...new Set(Object.values(networkInterfaces()).flatMap(rows=>rows||[])
@@ -25,7 +25,7 @@ export class SyncDiscovery {
 
  list(){
   this.expire();
-  return [...this.found.values()].map(({seen,...peer})=>peer);
+  return [...this.found.values()].map(({endpoints,...peer})=>peer);
  }
 
  start(){
@@ -43,8 +43,15 @@ export class SyncDiscovery {
     this.expire();
     const previous=this.found.get(peer.id);
     if(this.found.size>=64&&!previous)return;
-    this.found.set(peer.id,{...peer,seen:Date.now()});
-    if(!previous||previous.name!==peer.name||previous.host!==peer.host||previous.port!==peer.port||previous.fingerprint!==peer.fingerprint)this.notify();
+    const endpoints=previous?.endpoints||new Map<string,number>();
+    if(!endpoints.has(peer.host)&&endpoints.size>=8)return;
+    endpoints.set(peer.host,Date.now());
+    // Keep a live route stable when the same device advertises several NICs.
+    // Every route expires independently, so a removed NIC cannot remain alive
+    // merely because another NIC keeps broadcasting the same device identity.
+    const next={...peer,host:previous?.host||peer.host,endpoints};
+    this.found.set(peer.id,next);
+    if(!previous||previous.name!==next.name||previous.host!==next.host||previous.port!==next.port||previous.fingerprint!==next.fingerprint)this.notify();
     // A newly started device learns about an already running device promptly.
     if(!previous&&!this.replyTimer)this.replyTimer=setTimeout(()=>{
      this.replyTimer=undefined;
@@ -81,7 +88,11 @@ export class SyncDiscovery {
 
  private expire(){
   const now=Date.now();let changed=false;
-  for(const [id,value]of this.found)if(now-value.seen>=expiry){this.found.delete(id);changed=true;}
+  for(const [id,value]of this.found){
+   for(const [host,seen]of value.endpoints)if(now-seen>=expiry)value.endpoints.delete(host);
+   if(!value.endpoints.size){this.found.delete(id);changed=true;}
+   else if(!value.endpoints.has(value.host)){value.host=value.endpoints.keys().next().value!;changed=true;}
+  }
   if(changed)this.notify();
  }
 

@@ -40,10 +40,10 @@ app.whenReady().then(async()=>{
   const next=phase==='default'?'en':phase==='english'?'zh-CN':'system';
   const state=await main.webContents.executeJavaScript('window.clipper.configureLanguage('+JSON.stringify(next)+')');
   assert.equal(state.choice,next);
-  assert.equal(state.current,expected);
+  assert.equal(state.current,resolveLanguage(next,preferred));
   assert.equal(state.next,resolveLanguage(next,preferred));
-  assert.equal(state.restartRequired,state.next!==expected);
-  for(const window of windows)assert.equal(await window.webContents.executeJavaScript('window.clipperLanguage.current'),expected);
+  assert.equal(state.restartRequired,false);
+  for(const window of windows)assert.equal(await window.webContents.executeJavaScript('window.clipperLanguage.current'),expected);await main.webContents.reload();await new Promise<void>(resolve=>main.webContents.once('did-finish-load',()=>resolve()));assert.equal(await main.webContents.executeJavaScript('window.clipperLanguage.current'),state.current);
   writeFileSync(output,JSON.stringify({passed:true,phase,current:expected,preferred,checked,state},null,2));
   clearTimeout(timeout);
   for(const window of windows)window.destroy();

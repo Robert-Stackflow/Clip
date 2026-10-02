@@ -1,3 +1,4 @@
+import {appIdentity,hydrateAppIcons} from './source-apps';
 import {t as tr} from '../shared/i18n';
 import {icon} from './ui';
 import {enabledOption,focusOption,revealOption} from './option-list';
@@ -10,7 +11,7 @@ export function onRemoval(node:HTMLElement,dispose:()=>void){disposers.set(node,
 export function customControls(root: HTMLElement) {
   for (const select of root.querySelectorAll<HTMLSelectElement>('select')) {
     if(select.dataset.customControl)continue;select.dataset.customControl='true';
-    let options = [...select.options].map(option => ({ label: option.text, value: option.value, disabled: option.disabled }));
+    let options = [...select.options].map(option => ({ label: option.text, value: option.value, disabled: option.disabled,source:option.dataset.sourceApp }));
     const button = document.createElement('button'); button.type = 'button'; button.className = 'custom-select'; button.id = (select.id||'select-'+crypto.randomUUID())+'-trigger';
     button.setAttribute('role','combobox'); button.setAttribute('aria-haspopup','listbox'); button.setAttribute('aria-expanded','false');
     button.setAttribute('aria-label', select.getAttribute('aria-label') || select.closest('label')?.textContent?.trim() || tr('选择'));
@@ -19,7 +20,7 @@ export function customControls(root: HTMLElement) {
     let focused:HTMLElement|null=null,selected:HTMLElement|null=null;
     Object.defineProperty(button,'value',{ get:()=>select.value, set:(next:string)=>{select.value=next;sync();} });
     const sync=()=>{
-      const next=[...select.options].map(option=>({label:option.text,value:option.value,disabled:option.disabled}));
+      const next=[...select.options].map(option=>({label:option.text,value:option.value,disabled:option.disabled,source:option.dataset.sourceApp}));
       if(menu&&(!button.isConnected||select.disabled||select.hidden||JSON.stringify(next)!==JSON.stringify(options)))close();
       options=next;value=select.value;label.textContent=select.selectedOptions[0]?.text||tr('没有可选项');button.disabled=select.disabled;wrapper.hidden=select.hidden;
       if(menu){const node=menu.children[select.selectedIndex] as HTMLElement|undefined;if(selected!==node){selected?.setAttribute('aria-selected','false');node?.setAttribute('aria-selected','true');selected=node||null;}}
@@ -41,9 +42,9 @@ export function customControls(root: HTMLElement) {
     const choose = (index: number) => { if(!options[index]||options[index].disabled)return; select.value=options[index].value;sync(); close(); button.focus(); select.dispatchEvent(new Event('change',{bubbles:true})); };
     const position = () => { if(!menu)return;const rect=button.getBoundingClientRect(),width=Math.max(rect.width,120),height=Math.min(248,menu.scrollHeight);menu.style.minWidth=width+'px';menu.style.left=Math.max(8,Math.min(rect.left,window.innerWidth-width-8))+'px';menu.style.top=(rect.bottom+height+5>window.innerHeight?Math.max(8,rect.top-height-5):rect.bottom+5)+'px'; };
     const open = () => {if(menu)return;sync();if(button.disabled)return; closeActive?.(); closeActive=close;activeAnchor=button; menu=document.createElement('div'); menu.className='select-popup'; menu.setAttribute('role','listbox'); menu.id=button.id+'-options'; button.setAttribute('aria-controls',menu.id); button.setAttribute('aria-expanded','true');
-      options.forEach((option,index)=>{const node=document.createElement('div');node.setAttribute('role','option');node.setAttribute('aria-label',option.label);node.id=menu!.id+'-'+index;node.textContent=option.label;node.insertAdjacentHTML('beforeend',icon('check'));node.setAttribute('aria-disabled',String(option.disabled));node.setAttribute('aria-selected',String(option.value===value));if(option.value===value)selected=node;node.addEventListener('pointerdown',event=>event.preventDefault());node.addEventListener('pointerenter',()=>{if(!option.disabled)activate(index);});node.addEventListener('click',()=>choose(index));menu!.append(node);});
+      options.forEach((option,index)=>{const node=document.createElement('div');node.setAttribute('role','option');node.setAttribute('aria-label',option.label);node.id=menu!.id+'-'+index;node.textContent=option.label;if(option.source){node.classList.add('source-option');node.insertAdjacentHTML('afterbegin',appIdentity(option.source));}node.insertAdjacentHTML('beforeend',icon('check'));node.setAttribute('aria-disabled',String(option.disabled));node.setAttribute('aria-selected',String(option.value===value));if(option.value===value)selected=node;node.addEventListener('pointerdown',event=>event.preventDefault());node.addEventListener('pointerenter',()=>{if(!option.disabled)activate(index);});node.addEventListener('click',()=>choose(index));menu!.append(node);});
       if(!options.length){const empty=document.createElement('div');empty.className='select-empty';empty.role='status';empty.textContent=tr('没有可选项');menu.append(empty);}
-      modal=button.closest('dialog');menu.popover='manual';(modal||document.body).append(menu);menu.showPopover();modal?.addEventListener('close',close);position();const at=options.findIndex(option=>option.value===value),next=enabledOption(options,Math.max(0,at),1);activate(next>=0?next:enabledOption(options,options.length-1,-1)); document.addEventListener('pointerdown',outside,true); window.addEventListener('resize',close); document.addEventListener('scroll',position,true);
+      modal=button.closest('dialog');menu.popover='manual';(modal||document.body).append(menu);menu.showPopover();void hydrateAppIcons(menu);modal?.addEventListener('close',close);position();const at=options.findIndex(option=>option.value===value),next=enabledOption(options,Math.max(0,at),1);activate(next>=0?next:enabledOption(options,options.length-1,-1)); document.addEventListener('pointerdown',outside,true); window.addEventListener('resize',close); document.addEventListener('scroll',position,true);
     };
     button.addEventListener('click',()=>{if(menu)close();else open()});
     button.addEventListener('keydown',event=>{

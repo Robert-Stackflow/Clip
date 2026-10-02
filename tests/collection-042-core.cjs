@@ -12,3 +12,5 @@ test('Stack filtering performs one membership lookup per slot on a large queue',
  const count=30000,queue=Array.from({length:count},(_,i)=>i%2?'b':'a');let reads=0;const lookup={get:id=>{reads++;return map.get(id);}};
  const result=collectionItems(clips,lookup,'stack',queue,[],'text',null);assert.equal(reads,count);assert.equal(result.items.length,count/2);assert.equal(result.indices.at(-1),count-2);
 });
+
+test('Source filtering combines favorites, kind and search while preserving duplicate slot identity',()=>{const records=[{...a,source:'Code.exe'},{...b,source:'Snipaste.exe'},{...c,source:'CODE.exe'}],lookup=new Map(records.map(item=>[item.id,item]));assert.deepEqual(collectionItems(records,lookup,'history',[],[],'text',new Set(['c']),'code.exe').items,[records[2]]);assert.deepEqual(collectionItems(records,lookup,'favorites',[],[],'all',null,'code.exe').items,[records[2]]);assert.deepEqual(collectionItems(records,lookup,'stack',['a','b','a','c'],[],'all',null,'code.exe').indices,[0,2,3]);assert.deepEqual(collectionItems(records,lookup,'shelf',[],['a','b'],'all',null,'snipaste.exe').items,[records[1]]);});

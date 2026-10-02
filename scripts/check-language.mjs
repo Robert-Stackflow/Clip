@@ -24,6 +24,7 @@ scopes.push('src/main/history-search.ts','src/main/search-worker.ts','src/render
 scopes.push('src/main/preview-images.ts','src/main/preview-image-worker.ts','src/renderer/image-preview.ts');
 scopes.push('src/renderer/text-preview.ts','src/renderer/text-preview-worker.ts');
 scopes.push('src/shared/base64.ts','src/main/base64-file.ts','src/main/collection-window.ts','src/main/image-drag-files.ts','src/main/image-export.ts','src/main/clipboard-blocks.ts');
+scopes.push('src/renderer/application-segments.ts');
 scopes.push('src/renderer/dialog-shell.ts','src/main/capture-writer.ts','src/main/capture-writer-worker.ts');
 const required=inventory.entries.filter(entry=>(scopes.includes(entry.file)||checkedLabelSources.some(table=>table.file===entry.file&&table.values.includes(entry.value)))&&!entry.property&&!retained(entry)),missing=required.filter(entry=>!catalog.has(entry.value));
 const pending=[...new Set(inventory.entries.filter(entry=>!catalog.has(entry.value)&&!retained(entry)).map(entry=>entry.value))];
