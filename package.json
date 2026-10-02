@@ -1,6 +1,6 @@
 {
   "name": "clipper-desktop",
-  "version": "0.46.9",
+  "version": "0.46.10",
   "private": true,
   "description": "Windows 本地剪贴板工作台",
   "author": "Clipper",
@@ -23,7 +23,7 @@
     "test:vault": "npm run build && node tests/vault-ui.cjs && node tests/vault-boundaries.cjs",
     "test:desktop": "npm run build && node tests/desktop-ui.cjs && node tests/desktop-drag.cjs",
     "test:selection": "npm run build && node tests/selection-ui.cjs && node tests/selection-auto.cjs && node scripts/test.mjs && node tests/selection-native.cjs",
-    "test:recording": "npm run build && node tests/recording-ui.cjs && node tests/recording-audio.cjs && node tests/recording-boundaries.cjs",
+    "test:recording": "npm run build && node tests/recording-ui.cjs && node tests/recording-audio.cjs && node tests/recording-boundaries.cjs && node tests/recording-microphones-ui.cjs && node tests/recording-microphone-electron.cjs",
     "test:region": "npm run build && node tests/recording-region.cjs",
     "test:scroll": "npm run build && node tests/scroll-ui.cjs && node tests/scroll-boundaries.cjs",
     "test:image": "npm run build && node tests/window-capture.cjs && node tests/image-pointer-electron.cjs && node tests/image-pointer-ui.cjs && node tests/image-editor-boundaries.cjs",
@@ -54,7 +54,8 @@
     "test:ui-028": "npm run build && node tests/ui-028.cjs && node scripts/build-native-ui-test.mjs && node tests/native-ui-028.cjs",
     "verify": "node scripts/verify.mjs",
     "test:workflow": "node --test tests/development-policy.cjs tests/release-workflow.cjs tests/workspace-workflow.cjs",
-    "test:collection-settings": "npm run build && node scripts/verify.mjs application-segments-ui && node tests/collection-settings-ui.cjs && node tests/settings-live.cjs && node tests/app-icons-runtime.cjs"
+    "test:collection-settings": "npm run build && node scripts/verify.mjs application-segments-ui && node tests/collection-settings-ui.cjs && node tests/settings-live.cjs && node tests/app-icons-runtime.cjs",
+    "test:recording:memory": "npm run build && node tests/recording-residency.cjs"
   },
   "dependencies": {
     "@codemirror/commands": "6.11.1",
@@ -91,7 +92,7 @@
     "productName": "Clipper",
     "electronDist": "node_modules/electron/dist",
     "directories": {
-      "output": "release/0.46.9"
+      "output": "release/0.46.10"
     },
     "files": [
       "dist/**/*",
