@@ -2,15 +2,129 @@ import {t as tr} from '../shared/i18n';
 import {createSocket,type Socket} from 'node:dgram';
 import {networkInterfaces} from 'node:os';
 import {privateAddress,syncPeer,type SyncPeer} from '../shared/sync';
-const group='239.255.77.77',port=47382;
-export function localAddresses(){return [...new Set(Object.values(networkInterfaces()).flatMap(v=>v||[]).filter(v=>v.family==='IPv4'&&!v.internal&&privateAddress(v.address)).map(v=>v.address))];}
+
+const group='239.255.77.77',port=47382,expiry=20000;
+type Discovered=SyncPeer&{seen:number};
+
+export function localAddresses(){
+ return [...new Set(Object.values(networkInterfaces()).flatMap(rows=>rows||[])
+  .filter(row=>row.family==='IPv4'&&!row.internal&&privateAddress(row.address)).map(row=>row.address))];
+}
+
 export class SyncDiscovery {
- private socket:Socket|undefined;private timer:NodeJS.Timeout|undefined;private found=new Map<string,SyncPeer&{seen:number}>();
+ private socket:Socket|undefined;
+ private timer:NodeJS.Timeout|undefined;
+ private notifyTimer:NodeJS.Timeout|undefined;
+ private replyTimer:NodeJS.Timeout|undefined;
+ private announcing:Socket|undefined;
+ private memberships=new Set<string>();
+ private found=new Map<string,Discovered>();
+ private unavailable=false;
+
  constructor(private self:()=>SyncPeer,private changed:()=>void,private error:(value:string)=>void){}
- list(){const now=Date.now();for(const [id,value] of this.found)if(now-value.seen>=20000)this.found.delete(id);return [...this.found.values()].map(({seen,...peer})=>peer);}
- start(){const socket=this.socket=createSocket({type:'udp4',reuseAddr:true});socket.on('error',()=>this.error(tr('附近发现不可用，可使用配对码连接')));socket.on('message',(bytes,info)=>{if(bytes.length>2048||!privateAddress(info.address))return;try{const packet=JSON.parse(bytes.toString());if(packet.protocol!=='clipper-lan/1')return;const peer=syncPeer({...packet.device,host:info.address});if(peer.id===this.self().id)return;if(this.found.size>=64&&!this.found.has(peer.id))return;this.found.set(peer.id,{...peer,seen:Date.now()});this.changed();}catch{}});
-  socket.bind(port,'0.0.0.0',()=>{if(this.socket!==socket)return;try{socket.setMulticastTTL(1);socket.setMulticastLoopback(true);socket.addMembership(group);this.announce();this.timer=setInterval(()=>this.announce(),5000);}catch{this.error(tr('附近发现不可用，可使用配对码连接'));}});
+
+ list(){
+  this.expire();
+  return [...this.found.values()].map(({seen,...peer})=>peer);
  }
- private announce(){try{const device=this.self(),bytes=Buffer.from(JSON.stringify({protocol:'clipper-lan/1',device}));this.socket?.send(bytes,port,group,()=>{});}catch{}}
- stop(){clearInterval(this.timer);const socket=this.socket;this.socket=undefined;if(socket)try{socket.close();}catch{}this.found.clear();}
+
+ start(){
+  if(this.socket)return;
+  const socket=this.socket=createSocket({type:'udp4',reuseAddr:true});
+  socket.on('error',()=>{if(this.socket===socket)this.availability(false);});
+  socket.on('message',(bytes,info)=>{
+   if(this.socket!==socket||bytes.length>2048||!privateAddress(info.address))return;
+   try{
+    const packet=JSON.parse(bytes.toString());
+    if(packet.protocol!=='clipper-lan/1')return;
+    // Only the transport's source address is used to connect to the sender.
+    const peer=syncPeer({...packet.device,host:info.address});
+    if(peer.id===this.self().id)return;
+    this.expire();
+    const previous=this.found.get(peer.id);
+    if(this.found.size>=64&&!previous)return;
+    this.found.set(peer.id,{...peer,seen:Date.now()});
+    if(!previous||previous.name!==peer.name||previous.host!==peer.host||previous.port!==peer.port||previous.fingerprint!==peer.fingerprint)this.notify();
+    // A newly started device learns about an already running device promptly.
+    if(!previous&&!this.replyTimer)this.replyTimer=setTimeout(()=>{
+     this.replyTimer=undefined;
+     if(this.socket===socket)void this.announce(socket);
+    },200);
+   }catch{}
+  });
+  socket.bind(port,'0.0.0.0',()=>{
+   if(this.socket!==socket)return;
+   try{
+    socket.setMulticastTTL(1);
+    socket.setMulticastLoopback(true);
+    void this.announce(socket);
+    this.timer=setInterval(()=>void this.announce(socket),5000);
+   }catch{this.availability(false);}
+  });
+ }
+
+ private availability(available:boolean){
+  const unavailable=!available;
+  if(this.unavailable===unavailable)return;
+  this.unavailable=unavailable;
+  this.error(unavailable?tr('附近发现不可用，可使用配对码连接'):'');
+ }
+
+ private notify(){
+  if(this.notifyTimer)return;
+  const socket=this.socket;
+  this.notifyTimer=setTimeout(()=>{
+   this.notifyTimer=undefined;
+   if(this.socket===socket)this.changed();
+  },50);
+ }
+
+ private expire(){
+  const now=Date.now();let changed=false;
+  for(const [id,value]of this.found)if(now-value.seen>=expiry){this.found.delete(id);changed=true;}
+  if(changed)this.notify();
+ }
+
+ private interfaces(socket:Socket){
+  const addresses=new Set(localAddresses());
+  for(const address of this.memberships)if(!addresses.has(address)){
+   try{socket.dropMembership(group,address);}catch{}
+   this.memberships.delete(address);
+  }
+  for(const address of addresses)if(!this.memberships.has(address)){
+   try{socket.addMembership(group,address);this.memberships.add(address);}catch{}
+  }
+  return [...this.memberships];
+ }
+
+ private async announce(socket:Socket){
+  if(this.socket!==socket||this.announcing===socket)return;
+  this.announcing=socket;
+  try{
+   this.expire();
+   const addresses=this.interfaces(socket),identity=syncPeer(this.self());
+   let sent=false;
+   for(const address of addresses){
+    if(this.socket!==socket)return;
+    try{
+     socket.setMulticastInterface(address);
+     const bytes=Buffer.from(JSON.stringify({protocol:'clipper-lan/1',device:{...identity,host:address}}));
+     // The multicast interface belongs to the socket. Finish this send before
+     // selecting another interface, including when Node queues the datagram.
+     await new Promise<void>((resolve,reject)=>socket.send(bytes,port,group,error=>error?reject(error):resolve()));
+     sent=true;
+    }catch{}
+   }
+   if(this.socket===socket)this.availability(sent);
+  }catch{if(this.socket===socket)this.availability(false);}
+  finally{if(this.announcing===socket)this.announcing=undefined;}
+ }
+
+ stop(){
+  clearInterval(this.timer);clearTimeout(this.notifyTimer);clearTimeout(this.replyTimer);
+  this.timer=this.notifyTimer=this.replyTimer=undefined;
+  const socket=this.socket;this.socket=undefined;this.announcing=undefined;
+  this.memberships.clear();this.found.clear();this.unavailable=false;
+  if(socket)try{socket.close();}catch{}
+ }
 }
