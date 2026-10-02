@@ -1,0 +1,94 @@
+{
+  "name": "clipper-desktop",
+  "version": "0.19.0",
+  "private": true,
+  "description": "Windows 本地剪贴板工作台",
+  "author": "Clipper",
+  "main": "dist/main/index.cjs",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "npm run start",
+    "start": "npm run build && electron .",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/test.mjs",
+    "test:ui": "npm run build && node tests/electron.cjs",
+    "package": "npm run build && electron-builder --win dir",
+    "test:integration": "npm run build && node tests/integration.cjs",
+    "test:advanced": "npm run build && node tests/advanced-ui.cjs",
+    "test:capture": "npm run build && node tests/capture.cjs",
+    "test:drag": "npm run build && node tests/drag.cjs",
+    "test:text-tools": "npm run build && node tests/text-tools-ui.cjs && node tests/text-tools-boundaries.cjs",
+    "test:data": "npm run build && node tests/data-ui.cjs",
+    "test:vault": "npm run build && node tests/vault-ui.cjs && node tests/vault-boundaries.cjs",
+    "test:desktop": "npm run build && node tests/desktop-ui.cjs && node tests/desktop-drag.cjs",
+    "test:selection": "npm run build && node tests/selection-ui.cjs && node tests/selection-auto.cjs && node scripts/test.mjs && node tests/selection-native.cjs",
+    "test:recording": "npm run build && node tests/recording-ui.cjs && node tests/recording-audio.cjs && node tests/recording-boundaries.cjs",
+    "test:region": "npm run build && node tests/recording-region.cjs",
+    "test:scroll": "npm run build && node tests/scroll-ui.cjs && node tests/scroll-boundaries.cjs",
+    "test:image": "npm run build && node tests/window-capture.cjs && node tests/image-editor-ui.cjs && node tests/image-editor-boundaries.cjs",
+    "test:formats": "npm run build && node tests/formats-ui.cjs && node tests/formats-boundaries.cjs",
+    "test:attachments": "npm run build && node tests/attachments-ui.cjs && node tests/attachments-boundaries.cjs",
+    "test:metadata": "npm run build && node scripts/test.mjs && node tests/metadata-ui.cjs && node tests/metadata-boundaries.cjs",
+    "test:efficiency": "npm run build && node scripts/test.mjs && node tests/efficiency-ui.cjs && node tests/efficiency-boundaries.cjs",
+    "test:stack": "npm run build && node tests/stack-ui.cjs && node tests/stack-boundaries.cjs",
+    "test:folders": "npm run build && node tests/folders-ui.cjs && node tests/folders-boundaries.cjs",
+    "test:tray": "npm run build && node tests/tray-ui.cjs && node tests/tray-boundaries.cjs && node tests/tray-drag.cjs && node tests/tray-native.cjs"
+  },
+  "dependencies": {
+    "@peculiar/x509": "2.1.0",
+    "@xmldom/xmldom": "0.9.12",
+    "better-sqlite3-multiple-ciphers": "13.0.3",
+    "exifr": "7.1.3",
+    "image-size": "2.0.4",
+    "koffi": "3.3.2",
+    "lucide": "1.49.0",
+    "music-metadata": "11.16.1",
+    "pdf-lib": "1.17.1",
+    "quickjs-emscripten": "0.32.0",
+    "reflect-metadata": "0.2.2",
+    "yauzl": "3.4.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.0",
+    "@types/node": "22.16.0",
+    "@types/yauzl": "3.4.0",
+    "electron": "44.5.1",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.28.2",
+    "typescript": "5.9.3"
+  },
+  "build": {
+    "appId": "local.clipper.desktop",
+    "productName": "Clipper",
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "release/0.19.0"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json",
+      "!node_modules/better-sqlite3-multiple-ciphers/deps/**/*",
+      "!node_modules/better-sqlite3-multiple-ciphers/src/**/*",
+      "!node_modules/better-sqlite3-multiple-ciphers/prebuilds/darwin-*.node",
+      "!node_modules/better-sqlite3-multiple-ciphers/prebuilds/linux-*.node",
+      "!node_modules/better-sqlite3-multiple-ciphers/prebuilds/linuxmusl-*.node",
+      "!node_modules/better-sqlite3-multiple-ciphers/prebuilds/win32-arm64.node"
+    ],
+    "asarUnpack": [
+      "node_modules/koffi/**/*",
+      "dist/main/ocr.ps1",
+      "node_modules/better-sqlite3-multiple-ciphers/prebuilds/win32-x64.node",
+      "dist/native/SelectionHost.exe",
+      "dist/native/AttachmentHost.exe"
+    ],
+    "extraFiles": [
+      "README.md",
+      "docs/**/*",
+      "THIRD_PARTY_NOTICES.txt"
+    ],
+    "win": {
+      "target": "dir",
+      "icon": "assets/clipper.ico"
+    }
+  }
+}

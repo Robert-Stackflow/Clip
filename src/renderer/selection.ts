@@ -1,0 +1,13 @@
+import './selection.css';
+import {createElement,Copy,BookmarkPlus,Languages,AlignLeft,Code,EyeOff,X,type IconNode} from 'lucide';
+import type {SelectionAPI,SelectionView,SelectionAction} from '../shared/selection';
+declare global{interface Window{clipperSelection:SelectionAPI}}
+const api=window.clipperSelection,q=(id:string)=>document.getElementById(id)!;
+const icon=(value:IconNode)=>createElement(value,{'aria-hidden':'true','stroke-width':1.7}).outerHTML;
+let state:SelectionView|null=null,busy=false,version=0;
+const actions:[SelectionAction,string,IconNode][]=[['copy','复制',Copy],['save','保存',BookmarkPlus],['translate','翻译',Languages],['summarize','总结',AlignLeft],['script','脚本',Code],['exclude','忽略此应用',EyeOff]];
+q('actions').innerHTML=actions.map(([key,label,node])=>`<button data-action="${key}" title="${label}" aria-label="${label}">${icon(node)}${key==='exclude'?'':`<span>${label}</span>`}</button>`).join('');q('close').innerHTML=icon(X);q('close').onclick=()=>void api.hide();
+async function refresh(){const current=++version;let next:SelectionView|null=null;try{next=await api.state();}catch{}if(current!==version)return;const previous=state?.token;state=next;if(!next){q('text').textContent='';q('text').title='';q('source').textContent='';q('status').textContent='';return;}document.documentElement.dataset.theme=next.dark?'dark':'light';q('text').textContent=next.preview;q('text').title=next.preview;q('source').textContent=`${next.characters} 字符 · ${next.source.replace(/\.exe$/i,'')}`;q('status').textContent='';if(next.keyboard&&previous!==next.token)q('actions').querySelector<HTMLButtonElement>('button')?.focus();}
+document.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(button=>button.onclick=async()=>{if(!state||busy)return;busy=true;const token=state.token;document.querySelectorAll<HTMLButtonElement>('button').forEach(b=>b.disabled=true);try{await api.action(token,button.dataset.action as SelectionAction);}catch(e){q('status').textContent=String((e as Error).message).replace(/^Error invoking remote method '[^']+': Error: /,'');}finally{busy=false;document.querySelectorAll<HTMLButtonElement>('button').forEach(b=>b.disabled=false);}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();void api.hide();}if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){const buttons=[...q('actions').querySelectorAll<HTMLButtonElement>('button')],index=buttons.indexOf(document.activeElement as HTMLButtonElement);if(index<0)return;e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?buttons.length-1:(index+(e.key==='ArrowRight'?1:-1)+buttons.length)%buttons.length;buttons[next].focus();}});
+api.onChange(()=>void refresh());void refresh();
