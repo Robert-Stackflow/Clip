@@ -17,7 +17,7 @@ export class SharePublisher {
   const live=()=>{try{return valid();}catch{return false;}};
   if(!live()||this.jobs.length>=4){source.key?.fill(0);return Promise.reject(new Error(t(!live()?'文件共享已取消':'正在保存另一组共享文件，请稍后重试')));}
   return new Promise((resolve,reject)=>{
-   const flag=new Int32Array(new SharedArrayBuffer(4));let worker:Worker|undefined,done=false,release!:()=>void,commitResolve:((result:Published)=>void)|undefined,commitReject:((error:Error)=>void)|undefined;
+   const flag=new Int32Array(new SharedArrayBuffer(4));let worker:Worker|undefined,done=false,committed=false,release!:()=>void,commitResolve:((result:Published)=>void)|undefined,commitReject:((error:Error)=>void)|undefined;
    const stopped=new Promise<void>(r=>release=r);
    const retire=()=>{source.key?.fill(0);this.jobs.splice(this.jobs.indexOf(job),1);if(this.active===job)this.active=undefined;release();this.next();};
    const finish=(error?:Error,result?:Published)=>{if(done)return;done=true;clearTimeout(timer);clearInterval(monitor);const complete=()=>{retire();error?reject(error):resolve(result!);};if(worker)void worker.terminate().then(complete,complete);else complete();};
@@ -29,8 +29,10 @@ export class SharePublisher {
     worker.on('message',message=>{
      if(done)return;
      if(message?.prepared){void enqueue(()=>{if(done||!live()||Atomics.load(flag,0)!==0)throw new Error(t('文件共享已取消'));return new Promise<Published>((r,j)=>{commitResolve=r;commitReject=j;worker!.postMessage({commit:true});});}).then(result=>finish(undefined,result),error=>{commitReject=undefined;cancel(error);});return;}
-     const error=message?.code?new SyncError(message.code):new Error(message?.error||t('无法保存共享文件'));if(message?.ok)commitResolve?.({id:message.id,mutations:message.mutations});else{commitReject?.(error);finish(error);}
-    });const failed=(error:Error)=>{commitReject?.(error);finish(error);};worker.once('error',failed);worker.once('exit',()=>failed(new Error(t('共享文件读取进程已停止'))));
+     const error=message?.code?new SyncError(message.code):new Error(message?.error||t('无法保存共享文件'));if(message?.ok){committed=!!commitResolve&&Atomics.load(flag,0)===3;commitResolve?.({id:message.id,mutations:message.mutations});}else{commitReject?.(error);finish(error);}
+    });const failed=(error:Error)=>{commitReject?.(error);finish(error);};worker.once('error',failed);
+    // Worker exit can drain its final message before the write queue's Promise settles.
+    worker.once('exit',code=>{if(code!==0||!committed)failed(new Error(t('共享文件读取进程已停止')));});
    }};
    this.jobs.push(job);this.next();
   });

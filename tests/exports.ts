@@ -98,3 +98,5 @@ export * from '../src/shared/scroll-placement';
 
 export * from '../src/main/sync-item-reader';
 export * from '../src/shared/image-marks';
+
+export * from '../src/main/recording-sources-protocol';

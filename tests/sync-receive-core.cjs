@@ -70,3 +70,9 @@ test('stop after the commit decision waits for completion instead of interruptin
   const receiver=new SyncReceiver(file,5000),pending=receiver.run({source:f.source},Uint8Array.from(Buffer.from(JSON.stringify(value))),5,()=>true,serial,()=>undefined);for(let i=0;i<200;i++){if(await fs.stat(marker).catch(()=>false))break;await new Promise(r=>setTimeout(r,10));}assert(await fs.stat(marker));await receiver.stop();assert.equal((await pending).changed,true);assert.equal(f.store.meta('accepted-fixture',false),true);assert.equal(receiver.stats().workers,0);
  }finally{await f.close();}
 });
+test('committed incoming item survives worker exit before the write queue releases its result',async()=>{
+ const threads=require('node:worker_threads'),Original=threads.Worker,f=await fixture();let flag;
+ threads.Worker=class extends Original{constructor(...args){super(...args);flag=new Int32Array(args[1].workerData.flag);}};
+ try{const value=wire({rtf:'exact incoming bytes '.repeat(5000)}),enqueue=fn=>{const pending=fn(),deadline=Date.now()+5000;while(Atomics.load(flag,0)!==3&&Date.now()<deadline)Atomics.wait(flag,0,Atomics.load(flag,0),20);assert.equal(Atomics.load(flag,0),3);Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,200);return pending.then(result=>new Promise(resolve=>setTimeout(()=>resolve(result),50)));};const result=await f.receiver.run({source:f.source},Uint8Array.from(Buffer.from(JSON.stringify(value))),5,()=>true,enqueue,()=>undefined);assert(result.changed);assert.equal(f.store.list().length,1);assert.deepEqual(f.store.get(f.store.list()[0].id).payload,value.payload);assert.equal(f.receiver.stats().workers,0);
+ }finally{threads.Worker=Original;await f.close();}
+});

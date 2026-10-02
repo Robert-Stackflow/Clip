@@ -20,7 +20,7 @@ export class SyncReceiver {
    if(bytes.byteOffset!==0||bytes.byteLength!==bytes.buffer.byteLength){const owned=Uint8Array.from(bytes);bytes.fill(0);bytes=owned;}
    const flag=new Int32Array(new SharedArrayBuffer(4)),key=source.key?Uint8Array.from(source.key):undefined;let worker:Worker;
    try{worker=new Worker(this.workerFile,{workerData:{source:source.source,key,bytes,version,expected,flag:flag.buffer,language:interfaceLanguage()},transferList:[bytes.buffer as ArrayBuffer],resourceLimits:{maxOldGenerationSizeMb:192}});}catch(error){if(bytes.byteLength)bytes.fill(0);reject(error);return;}finally{key?.fill(0);source.key?.fill(0);}
-   let done=false,prepared=false,release!:()=>void,commitResolve:((value:ReceivedSyncItem)=>void)|undefined,commitReject:((error:Error)=>void)|undefined;
+   let done=false,prepared=false,committed=false,release!:()=>void,commitResolve:((value:ReceivedSyncItem)=>void)|undefined,commitReject:((error:Error)=>void)|undefined;
    const stopped=new Promise<void>(r=>release=r),job={cancel:()=>cancel(new SyncError('SYNC_STOPPED')),stopped};this.jobs.add(job);
    const finish=(error?:Error,result?:ReceivedSyncItem)=>{if(done)return;done=true;clearTimeout(timer);clearInterval(monitor);void worker.terminate().then(retire,retire);function retire(){release();error?reject(error):result?resolve(result):reject(new SyncError('SYNC_STOPPED'));}void stopped.then(()=>this.jobs.delete(job));};
    // 2 is the commit decision. Cancellation wins before it, or waits for the atomic commit after it.
@@ -37,9 +37,11 @@ export class SyncReceiver {
      });})().then(result=>finish(undefined,result),error=>{commitReject=undefined;cancel(error);});return;
     }
     const error=message?.code?new SyncError(message.code):new Error(message?.error||t('记录未完成，请重试'));
-    if(message?.ok){commitResolve?.({changed:message.changed,mutations:message.mutations});}else{commitReject?.(error);finish(error);}
+    if(message?.ok){committed=!!commitResolve&&Atomics.load(flag,0)===3;commitResolve?.({changed:message.changed,mutations:message.mutations});}else{commitReject?.(error);finish(error);}
    });
-   const failed=(error:Error)=>{commitReject?.(error);finish(error);};worker.once('error',failed);worker.once('exit',()=>failed(new SyncError('SYNC_STOPPED')));
+   const failed=(error:Error)=>{commitReject?.(error);finish(error);};worker.once('error',failed);
+   // A confirmed COMMIT and its result survive normal exit while the write queue settles.
+   worker.once('exit',code=>{if(code!==0||!committed)failed(new SyncError('SYNC_STOPPED'));});
   });
  }
 }
