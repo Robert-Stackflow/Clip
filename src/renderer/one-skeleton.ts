@@ -2,7 +2,8 @@
 export function migrateOneSkeleton(root:HTMLElement=document.body){
  const find=(selector:string)=>[...(root.matches(selector)?[root]:[]),...root.querySelectorAll<HTMLElement>(selector)];
  for(const span of find('.switch>span'))span.classList.add('switch-track');
- for(const tabs of find('#filters,.source-tabs,.mode,.segmented,.type-choices'))tabs.classList.add('tabs');
+ // A record filter is a segment; stack status and clear actions are a toolbar.
+ for(const tabs of find('#filters:has(>button[data-kind]),.source-tabs,.mode,.segmented,.type-choices'))tabs.classList.add('tabs');
  for(const input of find('.hotkey-input,input[data-value][readonly],#replies-shortcut')){
   if(input.closest('.shortcut-control'))continue;const field=document.createElement('span');field.className='shortcut-control';input.before(field);field.append(input);
  }

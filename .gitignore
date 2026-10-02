@@ -3,3 +3,10 @@ dist/
 release/
 work/
 *.log
+outputs/
+.cache/
+.env
+.env.*
+!.env.example
+dev-data/
+src/native/document-info/target/

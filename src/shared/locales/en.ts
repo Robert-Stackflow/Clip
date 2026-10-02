@@ -262,6 +262,8 @@ export const english:Readonly<Record<string,string>>={
   "⟦0⟧ 分钟前": "⟦0⟧ min ago",
   "⟦0⟧ 小时前": "⟦0⟧ hr ago",
   "<div class=\"category-heading\"><span>自定义分类</span>⟦0⟧</div>⟦1⟧": "<div class=\"category-heading\"><span>Categories</span>⟦0⟧</div>⟦1⟧",
+  "<div class=\"category-heading\"><span>自定义分类</span>⟦0⟧</div>": "<div class=\"category-heading\"><span>Categories</span>⟦0⟧</div>",
+  "<span class=\"filter-note\">⟦0⟧ 项待粘贴</span>": "<span class=\"filter-note\">⟦0⟧ items queued</span>",
   "新建分类": "New category",
   "快捷回复设置": "Quick reply settings",
   "新建回复": "New reply",
