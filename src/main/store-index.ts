@@ -29,5 +29,23 @@ export function initializeListIndex(db:DatabaseConnection){
  END;
  DELETE FROM clip_source_cache WHERE id NOT IN (SELECT id FROM clip_list_cache);
  INSERT INTO clip_source_cache SELECT id,coalesce(json_extract(data,'$.source'),'') FROM clip_list_cache WHERE id NOT IN (SELECT id FROM clip_source_cache);
+ CREATE TABLE IF NOT EXISTS clip_retention_cache(id TEXT PRIMARY KEY,updated INTEGER NOT NULL,protected INTEGER NOT NULL);
+ CREATE INDEX IF NOT EXISTS clip_retention_order ON clip_retention_cache(protected,updated DESC);
+ CREATE TRIGGER IF NOT EXISTS clip_retention_insert AFTER INSERT ON clip_list_cache BEGIN
+  INSERT OR REPLACE INTO clip_retention_cache VALUES(new.id,coalesce(json_extract(new.data,'$.updatedAt'),0),
+   coalesce(json_extract(new.data,'$.favorite'),0) OR coalesce(json_extract(new.data,'$.pinned'),0) OR coalesce(json_extract(new.data,'$.shared'),0));
+ END;
+ CREATE TRIGGER IF NOT EXISTS clip_retention_update AFTER UPDATE ON clip_list_cache BEGIN
+  DELETE FROM clip_retention_cache WHERE id=old.id AND old.id<>new.id;
+  INSERT OR REPLACE INTO clip_retention_cache VALUES(new.id,coalesce(json_extract(new.data,'$.updatedAt'),0),
+   coalesce(json_extract(new.data,'$.favorite'),0) OR coalesce(json_extract(new.data,'$.pinned'),0) OR coalesce(json_extract(new.data,'$.shared'),0));
+ END;
+ CREATE TRIGGER IF NOT EXISTS clip_retention_delete AFTER DELETE ON clip_list_cache BEGIN
+  DELETE FROM clip_retention_cache WHERE id=old.id;
+ END;
+ DELETE FROM clip_retention_cache WHERE id NOT IN (SELECT id FROM clip_list_cache);
+ INSERT INTO clip_retention_cache SELECT id,coalesce(json_extract(data,'$.updatedAt'),0),
+  coalesce(json_extract(data,'$.favorite'),0) OR coalesce(json_extract(data,'$.pinned'),0) OR coalesce(json_extract(data,'$.shared'),0)
+  FROM clip_list_cache WHERE id NOT IN (SELECT id FROM clip_retention_cache);
  RELEASE list_index;`);
 }

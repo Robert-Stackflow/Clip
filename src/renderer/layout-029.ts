@@ -10,9 +10,11 @@ export function collectionLayout(root:HTMLElement){
  const rail=document.createElement('section');rail.className='collection-rail';rail.setAttribute('aria-label',t('剪贴板记录'));results.before(rail);rail.append(results);
  const drop=collection.querySelector<HTMLElement>('#shelf-drop');if(drop)workspace.append(drop);
  const toolbar=collection.querySelector<HTMLElement>('.collection-toolbar')!,filter=collection.querySelector<HTMLElement>('.filterbar')!,controls=document.createElement('div');controls.className='collection-controls';toolbar.before(controls);controls.append(toolbar,filter);const source=collection.querySelector<HTMLElement>('#source-filters');if(source)filter.append(source);
+ const filterActions=document.createElement('div');filterActions.id='filter-actions';filterActions.className='collection-filter-actions';filterActions.hidden=true;filter.append(filterActions);
  workspace.classList.add('collection-canvas');collection.querySelectorAll<HTMLElement>('.heading-actions>button:not(.primary)').forEach(button=>button.classList.add('quiet'));
 }
 export function detailLayout(root:HTMLElement,bind=true){
+ const identity=root.querySelector<HTMLElement>('.preview-heading>.detail-kind'),application=identity?.querySelector<HTMLElement>(':scope>.source-icon');if(identity&&application){const name=application.nextSibling,group=document.createElement('span');group.className='preview-application';application.before(group);group.append(application);if(name?.nodeType===Node.TEXT_NODE){const label=document.createElement('span');label.textContent=name.textContent;group.append(label);name.remove();}}
  const top=root.querySelector<HTMLElement>('.detail-top'),actions=root.querySelector<HTMLElement>('.detail-actions'),meta=root.querySelector<HTMLElement>('.detail-meta'),more=root.querySelector<HTMLDetailsElement>('.detail-more'),tools=top?.querySelector<HTMLElement>('.detail-tools');
  if(!top||!actions)return;const footer=document.createElement('div');footer.className='preview-commandbar';actions.before(footer);footer.append(actions);
  if(meta&&tools){tools.append(meta);const toggle=meta.querySelector<HTMLButtonElement>('button')!;toggle.className='icon-button quiet';toggle.title=toggle.getAttribute('aria-label')||t('记录信息');toggle.setAttribute('aria-label',t('记录信息'));toggle.innerHTML=icon('lucide:info');}

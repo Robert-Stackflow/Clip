@@ -25,7 +25,7 @@ export function applicationSegments(root:HTMLElement,entries:SourceEntry[],selec
    if(!parent.clientWidth)return;
    const size=(entry:SourceEntry)=>widths.get(entry.key)||100,total=current.reduce((sum,entry)=>sum+size(entry),0)+Math.max(0,current.length-1)*3+6,width=Math.max(140,Math.min(available,total));
    root.style.width=width+'px';
-   const all=current[0],selectedEntry=current.find(entry=>entry.key===active),budget=width-6-(total>width+.5?33:0),visible:SourceEntry[]=[all];
+   const all=current[0],selectedEntry=current.find(entry=>entry.key===active),budget=width-6-(total>width+.5?37:0),visible:SourceEntry[]=[all];
    compactAll=size(all)>budget||!!selectedEntry&&selectedEntry!==all&&size(all)+size(selectedEntry)+3>budget;
    let used=compactAll?30:size(all);forced='';
    const byKey=new Map(current.slice(1).map(entry=>[entry.key,entry])),ranked:SourceEntry[]=[];
