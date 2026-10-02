@@ -2,6 +2,8 @@ import {appIdentity,hydrateAppIcons} from './source-apps';
 import {t as tr} from '../shared/i18n';
 import {icon} from './ui';
 import {enabledOption,focusOption,revealOption} from './option-list';
+const selectLoaders=new WeakMap<HTMLSelectElement,()=>Promise<void>>();
+export function setSelectLoader(select:HTMLSelectElement,loader:()=>Promise<void>){selectLoaders.set(select,loader);}
 let closeActive: (() => void) | null = null;
 let activeAnchor:HTMLElement|null=null;
 const disposers=new Map<HTMLElement,()=>void>();
@@ -17,11 +19,11 @@ export function customControls(root: HTMLElement) {
     button.setAttribute('aria-label', select.getAttribute('aria-label') || select.closest('label')?.textContent?.trim() || tr('选择'));
     const label = document.createElement('span');button.append(label);button.insertAdjacentHTML('beforeend',icon('chevron-down')); 
     let value = select.value; let menu: HTMLDivElement | null = null; let modal:HTMLDialogElement|null=null;let active = 0; let prefix = ''; let typedAt = 0;let menuWidth=0;
-    let focused:HTMLElement|null=null,selected:HTMLElement|null=null;
+    let focused:HTMLElement|null=null,selected:HTMLElement|null=null;let opening=0,loading=false;
     Object.defineProperty(button,'value',{ get:()=>select.value, set:(next:string)=>{select.value=next;sync();} });
     const sync=()=>{
       const next=[...select.options].map(option=>({label:option.text,value:option.value,disabled:option.disabled,source:option.dataset.sourceApp}));
-      if(menu&&(!button.isConnected||select.disabled||select.hidden||JSON.stringify(next)!==JSON.stringify(options)))close();
+      if(((menu||loading)&&(!button.isConnected||select.disabled||select.hidden))||(menu&&JSON.stringify(next)!==JSON.stringify(options)))close();
       options=next;value=select.value;label.textContent=select.dataset.displayLabel?tr(select.dataset.displayLabel):select.selectedOptions[0]?.text||tr('没有可选项');button.disabled=select.disabled;wrapper.hidden=select.hidden;
       if(menu){const node=menu.children[select.selectedIndex] as HTMLElement|undefined;if(selected!==node){selected?.setAttribute('aria-selected','false');node?.setAttribute('aria-selected','true');selected=node||null;}}
     };
@@ -30,7 +32,7 @@ export function customControls(root: HTMLElement) {
     select.addEventListener('change',sync);const optionObserver=new MutationObserver(sync);optionObserver.observe(select,{subtree:true,childList:true,attributes:true,characterData:true});onRemoval(wrapper,()=>{optionObserver.disconnect();close();});sync();
     const updateOptions=(event:Event)=>{close();const next=(event as CustomEvent<{label:string;value:string;disabled?:boolean}[]>).detail,current=select.value;select.replaceChildren(...next.map(option=>{const node=new Option(option.label,option.value);node.disabled=!!option.disabled;return node;}));select.value=next.some(option=>option.value===current)?current:next[0]?.value||'';sync();};
     button.addEventListener('one:options',updateOptions);select.addEventListener('one:options',updateOptions);
-    const close = () => { menu?.remove(); menu=null;menuWidth=0;focused=selected=null;modal?.removeEventListener('close',close);modal=null; button.setAttribute('aria-expanded','false'); button.removeAttribute('aria-controls'); button.removeAttribute('aria-activedescendant'); document.removeEventListener('pointerdown',outside,true); window.removeEventListener('resize',close); document.removeEventListener('scroll',position,true); if(closeActive===close){closeActive=null;activeAnchor=null;} };
+    const close = () => { opening++;loading=false;prefix='';typedAt=0;button.removeAttribute('aria-busy');menu?.remove(); menu=null;menuWidth=0;focused=selected=null;modal?.removeEventListener('close',close);modal=null; button.setAttribute('aria-expanded','false'); button.removeAttribute('aria-controls'); button.removeAttribute('aria-activedescendant'); document.removeEventListener('pointerdown',outside,true); window.removeEventListener('resize',close); document.removeEventListener('scroll',position,true); if(closeActive===close){closeActive=null;activeAnchor=null;} };
     const outside = (event: PointerEvent) => { if(event.target!==button && !button.contains(event.target as Node) && !menu?.contains(event.target as Node))close(); };
     const activate = (index: number) => {
       active=index;const option=index>=0&&!options[index]?.disabled?menu?.children[index] as HTMLElement|undefined:undefined;
@@ -46,18 +48,32 @@ export function customControls(root: HTMLElement) {
       const height=menu.getBoundingClientRect().height;
       menu.style.left=Math.max(8,Math.min(rect.left,window.innerWidth-menuWidth-8))+'px';menu.style.top=(rect.bottom+height+5>window.innerHeight?Math.max(8,rect.top-height-5):rect.bottom+5)+'px';
     };
-    const open = () => {if(menu)return;sync();if(button.disabled)return; closeActive?.(); closeActive=close;activeAnchor=button; menu=document.createElement('div'); menu.className='select-popup'; menu.setAttribute('role','listbox'); menu.id=button.id+'-options'; button.setAttribute('aria-controls',menu.id); button.setAttribute('aria-expanded','true');
+    const open = () => {if(menu)return;sync();if(button.disabled)return;const search=prefix,searchAt=typedAt;closeActive?.();prefix=search;typedAt=searchAt;closeActive=close;activeAnchor=button; menu=document.createElement('div'); menu.className='select-popup'; menu.setAttribute('role','listbox'); menu.id=button.id+'-options'; button.setAttribute('aria-controls',menu.id); button.setAttribute('aria-expanded','true');
       options.forEach((option,index)=>{const node=document.createElement('div');node.setAttribute('role','option');node.setAttribute('aria-label',option.label);node.id=menu!.id+'-'+index;if(option.source){menu!.classList.add('source-select-popup');node.classList.add('source-option');node.innerHTML=appIdentity(option.source);const text=document.createElement('span');text.className='source-option-label';text.textContent=option.label;node.append(text);node.title=option.label;}else node.textContent=option.label;node.insertAdjacentHTML('beforeend',icon('check'));node.setAttribute('aria-disabled',String(option.disabled));node.setAttribute('aria-selected',String(option.value===value));if(option.value===value)selected=node;node.addEventListener('pointerdown',event=>event.preventDefault());node.addEventListener('pointerenter',()=>{if(!option.disabled)activate(index);});node.addEventListener('click',()=>choose(index));menu!.append(node);});
       if(!options.length){const empty=document.createElement('div');empty.className='select-empty';empty.role='status';empty.textContent=tr('没有可选项');menu.append(empty);}
-      modal=button.closest('dialog');menu.popover='manual';(modal||document.body).append(menu);menu.showPopover();void hydrateAppIcons(menu);modal?.addEventListener('close',close);position();const at=options.findIndex(option=>option.value===value),next=enabledOption(options,Math.max(0,at),1);activate(next>=0?next:enabledOption(options,options.length-1,-1)); document.addEventListener('pointerdown',outside,true); window.addEventListener('resize',close); document.addEventListener('scroll',position,true);
+      modal=button.closest('dialog');menu.popover='manual';(modal||document.body).append(menu);menu.showPopover();void hydrateAppIcons(menu);modal?.addEventListener('close',close);position();const at=options.findIndex(option=>option.value===value),next=enabledOption(options,Math.max(0,at),1);activate(next>=0?next:enabledOption(options,options.length-1,-1));if(prefix&&Date.now()-typedAt<700){const index=options.findIndex(option=>!option.disabled&&option.label.toLowerCase().startsWith(prefix));if(index>=0)activate(index);} document.addEventListener('pointerdown',outside,true); window.addEventListener('resize',close); document.addEventListener('scroll',position,true);
     };
-    button.addEventListener('click',()=>{if(menu)close();else open()});
+    const requestOpen=async()=>{
+      if(menu||loading)return;
+      const loader=selectLoaders.get(select);if(!loader){open();return;}
+      if(button.disabled||!button.isConnected||!button.getClientRects().length)return;
+      closeActive?.();closeActive=close;activeAnchor=button;
+      const revision=++opening;loading=true;button.setAttribute('aria-busy','true');
+      modal=button.closest('dialog');modal?.addEventListener('close',close);
+      document.addEventListener('pointerdown',outside,true);window.addEventListener('resize',close);
+      try{
+        await loader();
+        if(revision===opening&&!button.disabled&&button.isConnected&&button.getClientRects().length)open();
+      }catch(error){select.dispatchEvent(new CustomEvent('one:load-error',{detail:error}));}
+      finally{if(revision===opening){loading=false;button.removeAttribute('aria-busy');if(!menu)close();}}
+    };
+    button.addEventListener('click',()=>{if(menu||loading)close();else void requestOpen()});
     button.addEventListener('keydown',event=>{
       event.stopPropagation();if(event.isComposing)return;
       if(event.key==='Escape'){event.preventDefault();close();return} if(event.key==='Tab'){close();return}
-      if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();if(!menu){open();return}if(event.key==='Home')move(0,1);else if(event.key==='End')move(options.length-1,-1);else{const direction=event.key==='ArrowDown'?1:-1;move(active<0?direction>0?0:options.length-1:active+direction,direction);}return}
-      if((event.key==='Enter'||event.key===' ')&&menu){event.preventDefault();choose(active);return}
-      if(event.key.length===1&&!event.ctrlKey&&!event.altKey){event.preventDefault();if(Date.now()-typedAt>700)prefix='';prefix+=event.key.toLowerCase();typedAt=Date.now();open();const index=options.findIndex(option=>!option.disabled&&option.label.toLowerCase().startsWith(prefix));if(index>=0)activate(index)}
+      if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();if(!menu){void requestOpen();return}if(event.key==='Home')move(0,1);else if(event.key==='End')move(options.length-1,-1);else{const direction=event.key==='ArrowDown'?1:-1;move(active<0?direction>0?0:options.length-1:active+direction,direction);}return}
+      if(event.key==='Enter'||event.key===' '){event.preventDefault();if(menu)choose(active);else void requestOpen();return}
+      if(event.key.length===1&&!event.ctrlKey&&!event.altKey){event.preventDefault();if(Date.now()-typedAt>700)prefix='';prefix+=event.key.toLowerCase();typedAt=Date.now();void requestOpen();const index=options.findIndex(option=>!option.disabled&&option.label.toLowerCase().startsWith(prefix));if(index>=0)activate(index)}
     });
     select.labels?.forEach(label=>label.addEventListener('click',event=>{if(event.target instanceof Element&&!event.target.closest('button,input,textarea,select')){event.preventDefault();button.focus();}}));
   }
