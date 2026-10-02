@@ -13,10 +13,18 @@ body[data-view=selection] main{padding:8px;border:0;box-shadow:none;background:v
 @media(max-width:800px){.section-layout.settings-layout{grid-template-columns:1fr;gap:14px}.collection-canvas.workspace{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}.collection-toolbar .view-buttons .custom-select-wrap{display:none}.sharing-layout.web-workbench{grid-template-columns:1fr}.editor-commandbar{align-items:flex-start}.editor-commandbar .actions{flex-direction:column}.image-workbench .editor-layout{grid-template-columns:minmax(0,1fr) 156px}.image-workbench #viewport{padding:16px}.image-workbench footer.editor-footer{padding:10px 12px;flex-wrap:wrap;gap:8px}.editor-footer .status{flex:1 0 100%}.editor-footer .actions{margin-left:auto}.record-workbench .recording-layout{grid-template-columns:1fr}.recording-options .settings-card{display:grid;grid-template-columns:1fr 1fr;gap:16px}.recording-options .fields{padding:0;margin:0;border:0}.recording-options .field{grid-column:1/-1}.scroll-workbench .media-result-head{flex-wrap:wrap}.scroll-workbench .media-result-head .field{margin-left:0}.sync-pair-grid{grid-template-columns:1fr}}
 @media(max-width:550px){.collection-canvas.workspace{grid-template-columns:1fr}.collection-canvas .content-stage{display:none}.collection-toolbar .view-buttons{display:none}.page-heading{flex-wrap:wrap}.modal-fields>.field,.web-setup .field{grid-template-columns:1fr;gap:8px}.backup-status{grid-template-columns:1fr}.image-workbench .editor-layout{grid-template-columns:1fr}.image-workbench .editor-tools{border:0;padding:8px 12px;max-height:160px}.image-workbench .options label{display:inline-flex;gap:12px;padding:8px}.image-workbench #hint{display:none}.crop-actions{flex-direction:row;margin-top:8px}.recording-options .settings-card{grid-template-columns:1fr}.recording-options .field{grid-column:auto}}
 
-.one-tooltip{background:var(--fg);color:var(--surface);border:0;border-radius:7px;padding:6px 10px}
-
 /* One delegated tooltip styling. */
-.one-tooltip{position:fixed;z-index:2147483647;pointer-events:none;max-width:min(340px,calc(100vw - 16px));padding:7px 10px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:#272727;color:#fff;font-size:calc(11px * var(--text-scale,1));font-weight:400;line-height:1.45;box-shadow:0 3px 12px #00000012;opacity:0;transform:translateY(3px);transition:opacity 120ms ease,transform 160ms cubic-bezier(.2,.8,.2,1);overflow-wrap:anywhere;user-select:none}
+.one-tooltip{position:fixed;z-index:2147483647;pointer-events:none;max-width:min(340px,calc(100vw - 16px));padding:7px 10px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:#272727;color:#fff;font-size:calc(11px * var(--text-scale,1));font-weight:400;line-height:1.45;box-shadow:0 3px 12px #00000012;opacity:0;--tooltip-x:0px;--tooltip-y:3px;transform:translate(var(--tooltip-x),var(--tooltip-y));transition:opacity 120ms ease,transform 160ms cubic-bezier(.2,.8,.2,1);overflow-wrap:anywhere;user-select:none}
+.one-tooltip::before{content:"";position:absolute;width:8px;height:8px;background:inherit;border:inherit;border-width:0;transform:rotate(45deg)}
+.one-tooltip[data-side=top]::before{left:calc(var(--tooltip-arrow) - 4px);bottom:-5px;border-right-width:1px;border-bottom-width:1px}
+.one-tooltip[data-side=bottom]{--tooltip-y:-3px}
+.one-tooltip[data-side=bottom]::before{left:calc(var(--tooltip-arrow) - 4px);top:-5px;border-top-width:1px;border-left-width:1px}
+.one-tooltip[data-side=right]{--tooltip-x:-3px;--tooltip-y:0px}
+.one-tooltip[data-side=right]::before{top:calc(var(--tooltip-arrow) - 4px);left:-5px;border-left-width:1px;border-bottom-width:1px}
+.one-tooltip[data-side=left]{--tooltip-x:3px;--tooltip-y:0px}
+.one-tooltip[data-side=left]::before{top:calc(var(--tooltip-arrow) - 4px);right:-5px;border-top-width:1px;border-right-width:1px}
+.one-tooltip.visible{transform:translate(0,0);opacity:1}
+@media(prefers-reduced-motion:reduce){.one-tooltip{transition:none;transform:none}}
 
 html[data-toast-position^=bottom] body:is([data-view=image-editor],[data-view=recorder],[data-view=scroll]) .feedback-toast{bottom:84px}
 
