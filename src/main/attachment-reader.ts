@@ -1,0 +1,11 @@
+import {attachmentErrorSource} from '../shared/attachment-errors';
+import {t as tr} from '../shared/i18n';
+import {spawn,type ChildProcessWithoutNullStreams} from 'node:child_process';
+import {validateAttachments,type Attachment} from '../shared/attachments';
+import {sequence,limitAttachmentProcess} from './native';
+export class AttachmentReader {
+ private child?:ChildProcessWithoutNullStreams;private cancelPending?:()=>void;
+ constructor(private executable:string,private timeout=8000){}
+ read(expected:number):Promise<Attachment[]>{this.cancel();return new Promise((resolve,reject)=>{let settled=false,buffer='',bytes=0,release=()=>{};const child=spawn(this.executable,[],{windowsHide:true,stdio:'pipe'});this.child=child;const finish=(error?:Error,value?:Attachment[])=>{if(settled)return;settled=true;clearTimeout(timer);clearInterval(watch);this.cancelPending=undefined;if(this.child===child)this.child=undefined;child.stdin.destroy();child.stdout.destroy();child.stderr.destroy();child.kill();release();error?reject(error):resolve(value!);};const timer=setTimeout(()=>finish(new Error(tr('目标应用未及时提供附件，已取消读取'))),this.timeout),watch=setInterval(()=>{if(sequence()!==expected)finish(new Error(tr('剪贴板已改变')));},80);this.cancelPending=()=>finish(new Error(tr('附件读取已取消')));child.stdout.setEncoding('utf8');child.stderr.resume();child.on('error',()=>finish(new Error(tr('Windows 附件接口无法启动'))));child.stdin.on('error',()=>finish(new Error(tr('Windows 附件接口已中断'))));child.stdout.on('data',(chunk:string)=>{bytes+=Buffer.byteLength(chunk);if(bytes>17*1024*1024){finish(new Error(tr('附件接口输出超过限制')));return;}buffer+=chunk;});child.on('close',()=>{if(settled)return;try{if(sequence()!==expected)throw new Error(tr('剪贴板已改变'));const value=JSON.parse(buffer);if(value.error){const source=attachmentErrorSource(value.code);throw new Error(source?tr(source):String(value.error).slice(0,256));}finish(undefined,validateAttachments(value.attachments));}catch(e){finish(e instanceof SyntaxError?new Error(tr('附件接口返回无效数据')):e as Error);}});try{if(!child.pid)throw new Error(tr('Windows 附件接口无法启动'));release=limitAttachmentProcess(child.pid);child.stdin.end(JSON.stringify({sequence:expected})+'\n');}catch(e){finish(e as Error);}});}
+ cancel(){this.cancelPending?.();}
+}

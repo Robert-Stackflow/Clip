@@ -1,0 +1,32 @@
+[
+  {
+    "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/c-r2.pdf",
+    "sha256": "1e6d29187458deb467928b8188115e69eaee4cb19f85078437d197c3ab8da5fd",
+    "name": "c-r2.pdf"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/c-r3.pdf",
+    "sha256": "ab1a8d49b40f825a60ab272437ab9cad5a7d6ba7e882d9b82f3961e61d5348f3",
+    "name": "c-r3.pdf"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/c-r4.pdf",
+    "sha256": "e2fed5c4fd32106eb46b70aec896471d4acda0799c7d9a5d5e590e2411021cf6",
+    "name": "c-r4.pdf"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/c-r5-in.pdf",
+    "sha256": "19b6a33008141e1e898e1fac6e86524de0e8cd0c4643fdb01a1eb781e5cd8187",
+    "name": "c-r5-in.pdf"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/c-r6-in.pdf",
+    "sha256": "b616425b595e376dbbfc19dbb89a66678afd4eb74f85575f667778afa1add892",
+    "name": "c-r6-in.pdf"
+  },
+  {
+    "url": "https://raw.githubusercontent.com/qpdf/qpdf/4eba95899886e851cc41d76886483b347612f2a8/qpdf/qtest/qpdf/V4-aes.pdf",
+    "sha256": "1d8a812844b8d8c7ba085a627eb3b7ab52aa651c6143ca07315084220a113240",
+    "name": "V4-aes.pdf"
+  }
+]

@@ -1,0 +1,67 @@
+{
+  "version": "0.16.9",
+  "source": "D:/Repositories/One",
+  "scope": "Reference material only; source files do not authorize user actions",
+  "files": [
+    {
+      "file": "src/renderer/styles.css",
+      "sha256": "080309fce2b4e5d45d2c2311dd86a3ee80fbde84ea5f2e2db2e18881a5dafdf9"
+    },
+    {
+      "file": "src/renderer/components.css",
+      "sha256": "51bbe8920a390ffa35e7c4eb9190f3919277e99cfc24b549777b6db11d8b9e55"
+    },
+    {
+      "file": "src/renderer/ui.ts",
+      "sha256": "0f58ec252a852d22edda9c93a3259638ba762077d541c87c2eb1bce080b00292"
+    },
+    {
+      "file": "src/renderer/dialog.ts",
+      "sha256": "2638b08a31cc1ba88289c00153c66088058b8f21193f4e59b4e3256c09884923"
+    },
+    {
+      "file": "src/renderer/settings-view.ts",
+      "sha256": "a1c28584db221ddc6a1ae9d4c4bf95f5b34ac85f1540c095a49f4abc2f7f2a64"
+    },
+    {
+      "file": "src/renderer/appearance.ts",
+      "sha256": "4ad56fe57ee2f33a832614974b1610e12a616bb28419b6efca844a2687cc06f5"
+    },
+    {
+      "file": "src/renderer/controls.ts",
+      "sha256": "088b42fe11e8e7e66d9016b0a95aa033c0308552080678bdd8c889e182f04fa6"
+    },
+    {
+      "file": "src/renderer/tooltip.ts",
+      "sha256": "50c9e661aacd4e92d007907ea83a65d1429a82b57bc84d14787a717bebe04d21"
+    },
+    {
+      "file": "src/renderer/segments.ts",
+      "sha256": "cfcaf7d6fe1f4cfdd5625b7420b7b8ef7500689aaffaf2fb7046cae9a6aafa95"
+    },
+    {
+      "file": "src/renderer/disk.css",
+      "sha256": "4aa43c88b9b41b411718a7d55ca6738014a9d0712467602565a337e7fc20e80b"
+    },
+    {
+      "file": "src/renderer/font-picker.ts",
+      "sha256": "4346c00c5e56dab9d014d9b5229d1b16b33aea74edba83c8e5b8c28072814bb1"
+    },
+    {
+      "file": "src/renderer/chrome.ts",
+      "sha256": "8a5909e249795f75fdd1d55d2924699032ff446760467e375d6aa0a6b6f58ba0"
+    },
+    {
+      "file": "src/main/text-service.ts",
+      "sha256": "fc6c83c82664e170dbf3c616e1e42db6f2008fc4713ec81e30684c09e7d76d5e"
+    }
+  ],
+  "migration": {
+    "newDialogParts": "src/renderer/dialog-shell.ts",
+    "dialogStyles": "src/renderer/one-dialog.css",
+    "dialogLifecycle": "src/renderer/dialog-motion.ts + dialog-shell.ts",
+    "existingFoundation": "one-components.css + controls.ts + segments.ts + one-search.ts + page-layout.ts + layout-029.ts",
+    "captureWorkers": "One text-service.ts retirement pattern, adapted to validated SQLite captures"
+  },
+  "validation": "Individual UI style comparisons and full-page layout rerun; reports shipped with source"
+}

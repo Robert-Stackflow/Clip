@@ -1,0 +1,4 @@
+import {contextBridge,ipcRenderer} from 'electron';
+import type {ChromeAPI,WindowState,WindowConfirmation} from '../shared/chrome';
+const api:ChromeAPI={state:()=>ipcRenderer.invoke('clipper:chrome-state'),action:kind=>ipcRenderer.invoke('clipper:chrome-action',kind),onChange:callback=>{const fn=(_event:unknown,state:WindowState)=>callback(state);ipcRenderer.on('clipper:chrome-changed',fn);return()=>ipcRenderer.removeListener('clipper:chrome-changed',fn);},onConfirm:callback=>{const fn=(_event:unknown,request:WindowConfirmation)=>callback(request);ipcRenderer.on('clipper:window-confirm',fn);return()=>ipcRenderer.removeListener('clipper:window-confirm',fn);},answerConfirm:(token,response)=>ipcRenderer.invoke('clipper:window-confirm-answer',token,response)};
+contextBridge.exposeInMainWorld('clipperChrome',api);

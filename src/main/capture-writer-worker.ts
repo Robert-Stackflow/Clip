@@ -1,0 +1,8 @@
+import {parentPort,workerData} from 'node:worker_threads';
+import {Store,prepareCapture,type PreparedCapture} from './store';
+import {setInterfaceLanguage,t} from '../shared/i18n';
+setInterfaceLanguage(workerData.language);const flag=new Int32Array(workerData.flag),key:Uint8Array|undefined=workerData.key;let store:Store|undefined,prepared:PreparedCapture|undefined;
+const close=()=>{try{store?.db.close();}catch{}store=undefined;prepared=undefined;key?.fill(0);};
+try{prepared=prepareCapture(workerData.payload);workerData.payload=undefined;if(Atomics.load(flag,0)!==0)throw new Error(t('记录已取消'));store=new Store(workerData.source,false,false,key,true);key?.fill(0);parentPort!.postMessage({prepared:true});}
+catch(error){close();parentPort!.postMessage({ok:false,cancelled:Atomics.load(flag,0)===1,error:error instanceof Error?error.message:String(error)});}
+parentPort!.once('message',message=>{if(message!=='commit'||!store||!prepared){close();return;}let transaction=false;try{if(Atomics.load(flag,0)!==0)throw new Error(t('记录已取消'));store.db.exec('BEGIN IMMEDIATE');transaction=true;if(Atomics.load(flag,0)!==0)throw new Error(t('记录已取消'));const item=store.addPrepared(prepared,workerData.name,workerData.thumbnail,undefined,false);prepared=undefined;if(Atomics.compareExchange(flag,0,0,2)!==0)throw new Error(t('记录已取消'));store.db.exec('COMMIT');transaction=false;Atomics.store(flag,0,3);const preview=store.preview(item.id);close();parentPort!.postMessage({ok:true,item:preview});}catch(error){if(transaction)try{store?.db.exec('ROLLBACK');}catch{}close();parentPort!.postMessage({ok:false,cancelled:Atomics.load(flag,0)===1,error:error instanceof Error?error.message:String(error)});}});

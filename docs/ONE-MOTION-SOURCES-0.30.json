@@ -1,0 +1,22 @@
+{
+  "version": "0.15.2",
+  "sources": [
+    {
+      "file": "components.css",
+      "sha256": "65e46e9bef8912a5e09ff94e13aa802072c2e2f2fa2334d65877022e07b581ae"
+    },
+    {
+      "file": "segments.ts",
+      "sha256": "a640b881670e490606e91a7a036723c0900e5307e1570d43ae2fc6e50645f002"
+    },
+    {
+      "file": "dialog.ts",
+      "sha256": "d6f389e96f70138981a97e6d014108bab5784a529a7b694261cd4b4396aab646"
+    },
+    {
+      "file": "styles.css",
+      "sha256": "080309fce2b4e5d45d2c2311dd86a3ee80fbde84ea5f2e2db2e18881a5dafdf9",
+      "section": "dialog foundation"
+    }
+  ]
+}

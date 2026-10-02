@@ -1,0 +1,74 @@
+{
+  "referenceVersion": "0.16.7",
+  "files": [
+    {
+      "file": "src/renderer/ui.ts",
+      "sha256": "0f58ec252a852d22edda9c93a3259638ba762077d541c87c2eb1bce080b00292"
+    },
+    {
+      "file": "src/renderer/styles.css",
+      "sha256": "080309fce2b4e5d45d2c2311dd86a3ee80fbde84ea5f2e2db2e18881a5dafdf9"
+    },
+    {
+      "file": "src/renderer/components.css",
+      "sha256": "51bbe8920a390ffa35e7c4eb9190f3919277e99cfc24b549777b6db11d8b9e55"
+    },
+    {
+      "file": "src/renderer/controls.ts",
+      "sha256": "088b42fe11e8e7e66d9016b0a95aa033c0308552080678bdd8c889e182f04fa6"
+    },
+    {
+      "file": "src/renderer/segments.ts",
+      "sha256": "cfcaf7d6fe1f4cfdd5625b7420b7b8ef7500689aaffaf2fb7046cae9a6aafa95"
+    },
+    {
+      "file": "src/renderer/tooltip.ts",
+      "sha256": "50c9e661aacd4e92d007907ea83a65d1429a82b57bc84d14787a717bebe04d21"
+    },
+    {
+      "file": "src/renderer/chrome.ts",
+      "sha256": "d05d36fac3dbc30925143c9d0f9db6beef9b0a662695f54923db1f3a41ccc9ea"
+    },
+    {
+      "file": "src/renderer/settings-view.ts",
+      "sha256": "a1c28584db221ddc6a1ae9d4c4bf95f5b34ac85f1540c095a49f4abc2f7f2a64"
+    },
+    {
+      "file": "src/renderer/appearance.ts",
+      "sha256": "4ad56fe57ee2f33a832614974b1610e12a616bb28419b6efca844a2687cc06f5"
+    },
+    {
+      "file": "src/renderer/font-picker.ts",
+      "sha256": "4346c00c5e56dab9d014d9b5229d1b16b33aea74edba83c8e5b8c28072814bb1"
+    },
+    {
+      "file": "src/renderer/font-runtime.ts",
+      "sha256": "0664c974e1b9f1e58e424b6c4f4a88fa5fe341996ce0df1b26da8aa03e57c10a"
+    },
+    {
+      "file": "src/renderer/disk.css",
+      "sha256": "4aa43c88b9b41b411718a7d55ca6738014a9d0712467602565a337e7fc20e80b"
+    },
+    {
+      "file": "src/renderer/maintenance-view.ts",
+      "sha256": "21f5904a0707df8d93b26900ee9589201173724a9636fa3d67c56752d7e3674f"
+    },
+    {
+      "file": "src/renderer/preview-redesign.css",
+      "sha256": "4651cde652bc86d4a8d1b3acb5b8b9389fb5124f242715134eaf17c8b9c9b0af"
+    },
+    {
+      "file": "src/renderer/preview-view.ts",
+      "sha256": "27236fda418601e0badfe3cc51870b6d7d4d43f69427390b1084e7b6d1081599"
+    },
+    {
+      "file": "src/main/preview-service.ts",
+      "sha256": "c2daa330a791f0acde940399cf69b824011898d4ca55bf9d150bf4cc61d42088"
+    },
+    {
+      "file": "src/main/index.ts",
+      "sha256": "8244ef2f45be2d8c3e30daedcefa922fde8bf970b3a882a91bfc4f6a0cd4df56"
+    }
+  ],
+  "adaptation": "Current actual One source reviewed. Existing component/layout migration retained; common icon registration now shared, clear uses X, dynamic root components normalized. Image preview uses opaque URLs, worker read/decode of encrypted database, bounded stream and owner lifecycle; loading surface from preview-redesign.css. File ownership, capture metadata caches, bilingual error/retry and clipboard authority are Clipper adapters."
+}

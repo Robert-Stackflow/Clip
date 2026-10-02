@@ -1,0 +1,19 @@
+/* One/src/renderer/disk.css filter-field and refinement.css focus treatment.
+   Height, scaled text and clear actions adapt its anatomy to Clipper's workspaces. */
+.filter-field{display:flex;align-items:center;gap:9px;flex:1;padding:0 10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--field-radius);color:var(--muted);min-width:0;height:32px}
+.filter-field input{flex:1;border:0!important;background:transparent!important;font-size:calc(12px * var(--text-scale,1));outline:none!important;padding-inline:0!important;border-radius:0!important;min-width:0;width:0;box-shadow:none!important;appearance:none}
+.filter-field input::-webkit-search-cancel-button,.filter-field input::-webkit-search-decoration{appearance:none}
+.filter-field>.icon{width:16px;height:16px}
+.filter-field:focus-within{border-color:color-mix(in srgb,var(--fg) 30%,var(--surface))}
+.filter-field:has(input:focus-visible){outline:none!important;box-shadow:none!important;border-color:color-mix(in srgb,var(--fg) 36%,var(--surface))}
+.filter-field .icon-button{width:26px;height:26px;min-height:26px;border:0;padding:5px;flex-shrink:0;color:var(--muted)}
+.collection-toolbar>.filter-field{height:36px;min-height:36px}
+.filter-field:hover{border-color:color-mix(in srgb,var(--fg) 15%,var(--surface))}
+.filter-field:focus-within{border-color:color-mix(in srgb,var(--fg) 36%,var(--surface))}
+.filter-field input{height:calc(var(--control-height) - 2px)}
+.filter-field button{background:transparent;border:0;box-shadow:none}
+.filter-field button:hover{background:var(--hover)}
+.filter-field button:focus-visible{outline:1px solid var(--focus);outline-offset:-1px}
+html[data-density=compact] .collection-toolbar>.filter-field{height:32px;min-height:32px}
+.recent-header>.filter-field{height:32px;flex:1;-webkit-app-region:no-drag}
+.web-card>.filter-field{margin:14px 0}

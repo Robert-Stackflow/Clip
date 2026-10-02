@@ -1,0 +1,2 @@
+@import './recovery.css';
+main{max-width:600px}#unlock-form{display:flex;flex-direction:column;gap:8px;margin:8px 0 16px}#unlock-form>.primary{align-self:flex-start;min-width:120px;margin-top:8px}#use-recovery{align-self:flex-start;padding-left:0}#hello{margin-top:8px}footer{margin-top:20px}

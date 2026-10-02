@@ -1,0 +1,11 @@
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{execFileSync}=require('node:child_process');
+(async()=>{fs.mkdirSync('work/clipboard-033',{recursive:true});const esbuild=require('esbuild');
+ for(const [name,root]of [['before',path.resolve(process.env.CLIPPER_CLIPBOARD_BASELINE||'D:/Repositories/Clipper/work/delivery-0.32.0')],['after',process.cwd()]]){
+  await esbuild.build({entryPoints:[path.join(root,'src/main/clipboard.ts')],outfile:'work/clipboard-033/'+name+'.cjs',bundle:true,platform:'node',external:['electron','./native','./attachment-runtime']});
+  await esbuild.build({entryPoints:[path.join(root,'src/main/native.ts')],outfile:'work/clipboard-033/'+name+'-native.cjs',bundle:true,platform:'node',external:['koffi']});
+ }
+ await esbuild.build({entryPoints:['src/main/stitch.ts'],outfile:'work/clipboard-033/frame.cjs',bundle:true,platform:'node'});
+ const env={...process.env};delete env.ELECTRON_RUN_AS_NODE;for(const name of ['before','after'])execFileSync(require('electron'),['tests/clipboard-033-host.cjs',name],{env,stdio:'inherit',windowsHide:true,timeout:60000});
+ const before=JSON.parse(fs.readFileSync('work/clipboard-033/before.json')),after=JSON.parse(fs.readFileSync('work/clipboard-033/after.json'));assert(before.passed&&after.passed);assert.deepEqual(after.image.formats,before.image.formats);assert.deepEqual(after.original.formats,before.original.formats);assert.equal(before.image.imageDecodes,2);assert.equal(after.image.imageDecodes,1);assert.equal(after.original.largestBase64Buffer,196608);assert.equal(before.capture.imageDecodes,2);assert.equal(after.capture.imageDecodes,1);assert.equal(after.capture.thumbnail,before.capture.thumbnail);assert(after.cancelledWithoutOpening&&after.recoveredAfterCancel);
+ fs.writeFileSync('work/clipboard-033/results.json',JSON.stringify({passed:true,before,after,scope:'Actual Electron nativeImage and actual private Windows GlobalAlloc/Lock/Move/Free. Clipboard open/empty/set/read are adapters; no system clipboard, windows or input. Buffer measurements count only direct base64 decode buffers, not full application memory.'},null,2));
+})().catch(e=>{console.error(e);process.exitCode=1;});

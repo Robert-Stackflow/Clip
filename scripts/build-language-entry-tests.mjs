@@ -1,0 +1,7 @@
+import {transform,build} from 'esbuild';import {readFile,writeFile} from 'node:fs/promises';
+const source=await readFile('src/main/index.ts','utf8');
+const hooks=`\nexport const entryTest={ipc,handle,backup,protectDataFile,activeStore,switchStore,id};
+export function setEntryFixture(value:any){if(value.store)store=value.store;if(value.main)main=value.main;if(value.storage)storageManager=value.storage;if(value.backup)backupManager=value.backup;if(value.editor)imageEditor=value.editor;if(value.recorder)recorder=value.recorder;if(value.scroll)scrollCapture=value.scroll;if(value.capture)captureService=value.capture;if(value.integration)integrationService=value.integration;if(value.desktop)desktop=value.desktop;if(value.tray)tray=value.tray;if(value.updates)updateService=value.updates;if(value.programRollback)programRollback=value.programRollback;if(value.checkpointRecovery)checkpointRecovery=value.checkpointRecovery;if(value.web)webService=value.web;if(value.sync)syncService=value.sync;if(value.systemPaused!==undefined)systemPaused=value.systemPaused;if(value.sessionEpoch!==undefined)sessionEpoch=value.sessionEpoch;secured=!!value.secured;storeOpen=true;}
+`;
+const result=await transform(source+hooks,{loader:'ts',format:'cjs',target:'node22'});await writeFile('work/test-language-entry.cjs',result.code);
+await build({entryPoints:['src/main/attachment-reader.ts'],outfile:'work/test-language-attachment-reader.cjs',bundle:true,platform:'node',target:'node22',external:['./native']});

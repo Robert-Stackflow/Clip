@@ -1,0 +1,56 @@
+{
+  "referenceRoot": "D:/Repositories/One",
+  "referenceVersion": "0.16.2",
+  "capturedAt": "2026-10-01T19:44:43.622Z",
+  "purpose": "Read-only source audit. Migration acquisition baselines remain 0.15.1/0.15.2; this records sources used for current parity and layout review, not a claim that all files are copied verbatim.",
+  "files": [
+    {
+      "file": "package.json",
+      "sha256": "5cdf327c2084fb5f5fa641b5709d70cbf011b063c37133b90b4998a7ab7d4d26"
+    },
+    {
+      "file": "src/renderer/styles.css",
+      "sha256": "080309fce2b4e5d45d2c2311dd86a3ee80fbde84ea5f2e2db2e18881a5dafdf9"
+    },
+    {
+      "file": "src/renderer/components.css",
+      "sha256": "65e46e9bef8912a5e09ff94e13aa802072c2e2f2fa2334d65877022e07b581ae"
+    },
+    {
+      "file": "src/renderer/controls.ts",
+      "sha256": "088b42fe11e8e7e66d9016b0a95aa033c0308552080678bdd8c889e182f04fa6"
+    },
+    {
+      "file": "src/renderer/segments.ts",
+      "sha256": "a640b881670e490606e91a7a036723c0900e5307e1570d43ae2fc6e50645f002"
+    },
+    {
+      "file": "src/renderer/tooltip.ts",
+      "sha256": "50c9e661aacd4e92d007907ea83a65d1429a82b57bc84d14787a717bebe04d21"
+    },
+    {
+      "file": "src/renderer/chrome.ts",
+      "sha256": "d05d36fac3dbc30925143c9d0f9db6beef9b0a662695f54923db1f3a41ccc9ea"
+    },
+    {
+      "file": "src/renderer/dialog.ts",
+      "sha256": "d6f389e96f70138981a97e6d014108bab5784a529a7b694261cd4b4396aab646"
+    },
+    {
+      "file": "src/renderer/settings-view.ts",
+      "sha256": "a1c28584db221ddc6a1ae9d4c4bf95f5b34ac85f1540c095a49f4abc2f7f2a64"
+    },
+    {
+      "file": "src/renderer/appearance.ts",
+      "sha256": "4ad56fe57ee2f33a832614974b1610e12a616bb28419b6efca844a2687cc06f5"
+    },
+    {
+      "file": "src/renderer/disk.css",
+      "sha256": "4aa43c88b9b41b411718a7d55ca6738014a9d0712467602565a337e7fc20e80b"
+    },
+    {
+      "file": "src/renderer/refinement.css",
+      "sha256": "7deb30c4be495c20ae92f82ddd34fd6aa2b691cbd759262035f7885f5606cdc8"
+    }
+  ]
+}

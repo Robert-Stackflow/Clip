@@ -1,0 +1,24 @@
+function setupText(){
+ const base=window.clipper;fixture.calls=[];
+ const profile={id:'remote',revision:'revision-original',name:'中文服务 <img id="injected-profile">',kind:'openai',baseUrl:'https://example.invalid/v1',model:'中文模型',maxTokens:2048,timeoutSeconds:30,temperature:null,tokenField:'max_completion_tokens',hasKey:true,local:false};
+ fixture.ai={profiles:[profile,{...profile,id:'local',name:'保存 本机',kind:'ollama',baseUrl:'http://127.0.0.1:11434',local:true,hasKey:false}],defaultId:'remote',secureStorage:true};
+ fixture.scripts=[{id:'script',name:'保存 <img id="injected-script">',description:'中文说明 {{姓名}}',code:'// 中文注释\nreturn input + " 保存";',timeoutMs:1500,permission:'selected-text',updatedAt:1700000000000},{id:'script-two',name:'第二个脚本',description:'',code:'return input.trim();',timeoutMs:500,permission:'selected-text',updatedAt:1700000001000}];
+ fixture.integration={registered:false,pending:null};fixture.aiResult={text:'中文结果 <img id="injected-output">',model:'中文模型',outputTokens:1234,truncated:false};
+ fixture.models=['中文模型','保存 <img id="injected-model">'];
+ const call=(name,result)=>async(...args)=>{fixture.calls.push([name,...args]);if(fixture.fail===name)throw Error('外部错误：保存 设置');if(fixture.block===name)await new Promise((resolve,reject)=>{fixture.release=resolve;fixture.reject=reject;});return typeof result==='function'?result(...args):result;};
+ const overrides={aiState:async()=>fixture.ai,scripts:async()=>fixture.scripts,integrations:async()=>fixture.integration,
+  aiProfile:call('profile-save',value=>{const existing=fixture.ai.profiles.find(p=>p.id===value.id);if(existing)Object.assign(existing,value);else fixture.ai.profiles.push({...value,id:'new-profile',revision:'new-revision',hasKey:!!value.apiKey,local:value.kind!=='openai'});}),defaultAIProfile:call('profile-default',id=>fixture.ai.defaultId=id),removeAIProfile:call('profile-remove',id=>fixture.ai.profiles=fixture.ai.profiles.filter(p=>p.id!==id)),
+  aiModels:call('models',()=>fixture.models),aiCancel:call('ai-cancel',()=>{if(fixture.reject){fixture.reject(Error('外部取消：保存'));fixture.reject=null;}}),aiRun:call('ai-run',()=>fixture.aiResult),
+  saveScript:call('script-save',value=>{const existing=fixture.scripts.find(s=>s.id===value.id);if(existing)Object.assign(existing,value);else fixture.scripts.push({...value,id:'new-script',updatedAt:1800000000000});}),removeScript:call('script-remove',id=>fixture.scripts=fixture.scripts.filter(s=>s.id!==id)),scriptBackup:call('script-backup','外部文件结果：保存.json'),runScript:call('script-run','脚本结果 保存 <img id="injected-result">'),cancelScript:call('script-cancel',()=>{if(fixture.reject){fixture.reject(Error('外部取消：设置'));fixture.reject=null;}}),applyText:call('apply',null),registerIntegration:call('register',value=>fixture.integration.registered=value),resolveExternal:call('external-resolve',(id,allowed)=>{const value=fixture.integration.pending;fixture.integration.pending=null;return allowed?value.intent:null;})
+ };window.clipper=new Proxy(overrides,{get:(object,key)=>key in object?object[key]:base[key]});
+}
+async function openTextView(page,name){
+ if(name==='empty'||name==='ai-setup')await page.evaluate(()=>{fixture.ai.profiles=[];fixture.scripts=[];});
+ if(name==='ai-local')await page.evaluate(()=>fixture.ai.defaultId='local');
+ if(name.startsWith('external-')){await page.evaluate(action=>{fixture.integration.pending={id:'external-token',intent:{action,text:'保存 <img id="injected-external"> {{姓名}}'}};fixture.refresh();},name.slice(9));await page.waitForSelector('dialog[open]');return;}
+ if(['ai-remote','ai-local','ai-custom','ai-setup','script-run'].includes(name)){await page.locator('.detail-more').evaluate(el=>el.open=true);await page.locator(name==='script-run'?'#run-script':'#translate').click();await page.waitForSelector('dialog[open]');if(name==='ai-custom')await page.locator('#run-ai-action').selectOption('custom');return;}
+ await page.locator('[data-page="tools"]').click();await page.waitForSelector('#new-ai-profile',{state:'attached'});await page.locator('.section-nav button').first().click();
+ if(name.startsWith('script'))await page.locator('.section-nav button').nth(1).click();
+ const selector={profile:'#new-ai-profile','profile-edit':'[data-ai-edit="remote"]',models:'[data-ai-models="remote"]','profile-delete':'[data-ai-remove="remote"]',script:'#new-script','script-edit':'[data-script-edit="script"]','script-delete':'[data-script-remove="script"]'}[name];if(selector){await page.locator(selector).click();await page.waitForSelector('dialog[open]');if(name==='models')await page.waitForFunction(()=>!document.getElementById('models-select').disabled);}
+}
+module.exports={setupText,openTextView};

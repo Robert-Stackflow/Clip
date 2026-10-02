@@ -1,0 +1,7 @@
+import ts from 'typescript';
+import {readFile,writeFile} from 'node:fs/promises';
+const file='src/shared/locales/en.ts',source=await readFile(file,'utf8'),tree=ts.createSourceFile(file,source,ts.ScriptTarget.Latest,true),values={};
+function visit(node){if(ts.isVariableDeclaration(node)&&node.name.getText(tree)==='english'&&node.initializer&&ts.isObjectLiteralExpression(node.initializer))for(const property of node.initializer.properties){if(!ts.isPropertyAssignment(property)||!ts.isStringLiteral(property.initializer))throw new Error('Invalid catalog entry');const key=property.name.text;if(Object.hasOwn(values,key))throw new Error('Duplicate catalog key');values[key]=property.initializer.text;}ts.forEachChild(node,visit);}visit(tree);
+const slots=value=>[...value.matchAll(/⟦(\d+)⟧/g)].map(m=>m[1]).sort().join(',');
+for(const input of process.argv.slice(2)){const additions=JSON.parse(await readFile(input,'utf8'));for(const [key,value] of Object.entries(additions)){if(typeof value!=='string'||!value.trim()||slots(key)!==slots(value))throw new Error('Invalid message: '+key);if(Object.hasOwn(values,key)&&values[key]!==value)throw new Error('Conflicting translation: '+key);values[key]=value;}}
+await writeFile(file,'// Product messages only. User data never enters this catalog.\nexport const english:Readonly<Record<string,string>>='+JSON.stringify(values,null,2)+';\n');console.log('Catalog entries: '+Object.keys(values).length);

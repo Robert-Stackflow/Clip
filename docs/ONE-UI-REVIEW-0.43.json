@@ -1,0 +1,146 @@
+{
+  "referenceRoot": "D:/Repositories/One",
+  "referenceVersion": "0.16.15",
+  "clipperVersion": "0.43.0",
+  "referenceFiles": [
+    {
+      "file": "package.json",
+      "bytes": 4110,
+      "sha256": "3984cc094f07ea27ed9c0342dc8c110555939ed4d975d07d136a9986fe9e0983"
+    },
+    {
+      "file": "src/renderer/styles.css",
+      "bytes": 36705,
+      "sha256": "8b5c8db444e3ece6280f76c9a1ce258e8422d96b101b14fbe154e34cb5686581"
+    },
+    {
+      "file": "src/renderer/components.css",
+      "bytes": 3822,
+      "sha256": "51bbe8920a390ffa35e7c4eb9190f3919277e99cfc24b549777b6db11d8b9e55"
+    },
+    {
+      "file": "src/renderer/disk-view.ts",
+      "bytes": 24700,
+      "sha256": "e07440d959f90c80faea059619f457147a70da879084f1e7c020e624aaefebdf"
+    },
+    {
+      "file": "src/renderer/disk.css",
+      "bytes": 6542,
+      "sha256": "4aa43c88b9b41b411718a7d55ca6738014a9d0712467602565a337e7fc20e80b"
+    },
+    {
+      "file": "src/renderer/refinement.css",
+      "bytes": 10437,
+      "sha256": "7deb30c4be495c20ae92f82ddd34fd6aa2b691cbd759262035f7885f5606cdc8"
+    },
+    {
+      "file": "src/renderer/interface-refinement.css",
+      "bytes": 13601,
+      "sha256": "918a4f69b4a4f3a6fa3af7a12ccbacfc2cf39b1d35eea7e179b8234844393e6b"
+    },
+    {
+      "file": "src/renderer/controls.ts",
+      "bytes": 7843,
+      "sha256": "73099413b5a25aa2358b2b14c548c64b5e7c091314423193d68b201db6bab7e9"
+    },
+    {
+      "file": "src/renderer/segments.ts",
+      "bytes": 4679,
+      "sha256": "cfcaf7d6fe1f4cfdd5625b7420b7b8ef7500689aaffaf2fb7046cae9a6aafa95"
+    },
+    {
+      "file": "src/renderer/tooltip.ts",
+      "bytes": 2991,
+      "sha256": "50c9e661aacd4e92d007907ea83a65d1429a82b57bc84d14787a717bebe04d21"
+    },
+    {
+      "file": "src/renderer/dialog.ts",
+      "bytes": 4074,
+      "sha256": "2638b08a31cc1ba88289c00153c66088058b8f21193f4e59b4e3256c09884923"
+    },
+    {
+      "file": "src/renderer/settings-view.ts",
+      "bytes": 3328,
+      "sha256": "a1c28584db221ddc6a1ae9d4c4bf95f5b34ac85f1540c095a49f4abc2f7f2a64"
+    },
+    {
+      "file": "src/renderer/appearance.ts",
+      "bytes": 6959,
+      "sha256": "4ad56fe57ee2f33a832614974b1610e12a616bb28419b6efca844a2687cc06f5"
+    },
+    {
+      "file": "src/renderer/font-picker.ts",
+      "bytes": 9510,
+      "sha256": "2e6851440d0cecc905da59be07e982568aa54980d88b36dba799768b6b5e2ef2"
+    },
+    {
+      "file": "src/renderer/chrome.ts",
+      "bytes": 1560,
+      "sha256": "8a5909e249795f75fdd1d55d2924699032ff446760467e375d6aa0a6b6f58ba0"
+    },
+    {
+      "file": "src/renderer/preview-view.ts",
+      "bytes": 30315,
+      "sha256": "da9d160a63f6d0b7c57e0b5b4c0138f7faffec1df8202b70a6e90abfacd5c8b7"
+    },
+    {
+      "file": "src/renderer/preview-chrome.css",
+      "bytes": 5260,
+      "sha256": "b1b7f11922a3dbee0ab158f8739f54a45d35bc7b8f9dfc544aa5d0a286c4f4df"
+    },
+    {
+      "file": "src/renderer/window-visibility.ts",
+      "bytes": 973,
+      "sha256": "38badfc210610b60f20abffe106ad692fd54a066ca9463c725033dae0124c3a6"
+    },
+    {
+      "file": "src/renderer/option-list.ts",
+      "bytes": 944,
+      "sha256": "ce5bb4ff42155f5456012a1f400cdec01f1a3a65896e3966252eed7bb02427ed"
+    },
+    {
+      "file": "src/renderer/ui.ts",
+      "bytes": 4312,
+      "sha256": "0f58ec252a852d22edda9c93a3259638ba762077d541c87c2eb1bce080b00292"
+    },
+    {
+      "file": "src/renderer/font-runtime.ts",
+      "bytes": 1728,
+      "sha256": "0664c974e1b9f1e58e424b6c4f4a88fa5fe341996ce0df1b26da8aa03e57c10a"
+    },
+    {
+      "file": "src/shared/fonts.ts",
+      "bytes": 1117,
+      "sha256": "785378de8830b1cdec7c023d986b7e01a8649998fa2d3c9d27189d1c84fa7085"
+    },
+    {
+      "file": "src/renderer/font-picker.css",
+      "bytes": 1306,
+      "sha256": "e89fc0389e6fbbc0a4023ed46f0a7afff8f53069d1bc321168834f258cbb76cb"
+    }
+  ],
+  "pinnedSource": "tests/fixtures/one-043",
+  "implemented": [
+    "option-list.ts copied exactly",
+    "controls enabled keyboard navigation and two-row updates",
+    "font-picker two-row updates, list-only scrolling and animation-frame preview",
+    "select-empty style copied exactly",
+    "font-picker.css copied exactly, including positioned font list"
+  ],
+  "compatibility": [
+    "Hidden native select retained for existing form values/options/change handlers",
+    "Clipper localization and removal/modal lifecycle preserved"
+  ],
+  "remaining": "Other One surfaces continue to be checked individually; this iteration does not claim all product pages match One.",
+  "referenceCheckedAt": "2026-10-02T02:19:30.269Z",
+  "referenceChanged": [
+    "package.json",
+    "src/renderer/preview-view.ts"
+  ],
+  "currentWork": [
+    "Keep One segmented buttons and row elements in recent history and drag shelf during updates",
+    "Separate opaque preview identity from fresh tray action capabilities",
+    "Suspend hidden shelf rows and coalesce progressive updates",
+    "Migrate One 0.16.15 global keyboard guards for open dialogs"
+  ]
+}

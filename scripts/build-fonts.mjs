@@ -1,0 +1,12 @@
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {resolve,join} from 'node:path';
+const run=promisify(execFile);
+await mkdir('dist/native',{recursive:true});await mkdir('work',{recursive:true});
+const vswhere=join(process.env['ProgramFiles(x86)']||'C:\\Program Files (x86)','Microsoft Visual Studio/Installer/vswhere.exe');
+const {stdout}=await run(vswhere,['-latest','-products','*','-requires','Microsoft.VisualStudio.Component.VC.Tools.x86.x64','-property','installationPath'],{windowsHide:true});
+const installation=stdout.trim();if(!installation)throw new Error('Visual Studio C++ x64 is required for FontHost');
+const script=resolve('work/build-fonts.cmd');
+await writeFile(script,`@echo off\r\ncall "${installation}\\VC\\Auxiliary\\Build\\vcvars64.bat" >nul\r\nif errorlevel 1 exit /b 1\r\ncl /nologo /std:c++20 /EHsc /MT /O2 /utf-8 /DUNICODE /D_UNICODE src\\native\\FontHost.cpp /Fe:dist\\native\\FontHost.exe /Fo:work\\font-host.obj /link dwrite.lib\r\n`);
+await run('cmd.exe',['/d','/c',script],{cwd:resolve('.'),windowsHide:true});

@@ -1,0 +1,9 @@
+/* One's shared component system, followed by Clipper's window and page adapters.
+   Every desktop entry point loads this once, after its own workspace styles. */
+@import './one-components.css';
+@import './redesign-028.css';
+@import './recent-shelf.css';
+@import './redesign-029.css';
+@import './one-motion.css';
+@import './one-search.css';
+@import './one-dialog.css';

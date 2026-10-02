@@ -1,0 +1,1 @@
+require('./renderer-fixture.cjs').setup(process.env.CLIPPER_VERIFY_LANGUAGE||'zh-CN');require('./language-text-fixture.cjs').setupText();require('./language-data-fixture.cjs').setupData();window.fixture.state.categories=[{id:'work',name:'工作',color:'#7893b4'}];

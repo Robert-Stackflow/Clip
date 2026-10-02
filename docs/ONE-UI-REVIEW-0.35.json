@@ -1,0 +1,30 @@
+{
+  "referenceVersion": "0.16.6",
+  "files": [
+    {
+      "file": "src/renderer/code-view.ts",
+      "sha256": "e2de9cf94f9737f82ac8301513d813cc5bfe529f6a831d2348b131139ca09a48"
+    },
+    {
+      "file": "src/renderer/code-worker.ts",
+      "sha256": "0fc3c5c0c5bb83a1a56716fa50d8e2625160a4df19bf47d5e2ab63aa31a28768"
+    },
+    {
+      "file": "src/renderer/preview-redesign.css",
+      "sha256": "4651cde652bc86d4a8d1b3acb5b8b9389fb5124f242715134eaf17c8b9c9b0af"
+    },
+    {
+      "file": "src/renderer/styles.css",
+      "sha256": "080309fce2b4e5d45d2c2311dd86a3ee80fbde84ea5f2e2db2e18881a5dafdf9"
+    },
+    {
+      "file": "src/renderer/components.css",
+      "sha256": "51bbe8920a390ffa35e7c4eb9190f3919277e99cfc24b549777b6db11d8b9e55"
+    },
+    {
+      "file": "src/renderer/segments.ts",
+      "sha256": "a640b881670e490606e91a7a036723c0900e5307e1570d43ae2fc6e50645f002"
+    }
+  ],
+  "adaptation": "Readonly full-text reader, worker line splitting, syntax classes and search row copied from actual code-view implementation. Clipboard kind detection, bilingual labels, appearance scale/prose font, lazy split loading, lifetime and wrap toolbar are Clipper adapters."
+}

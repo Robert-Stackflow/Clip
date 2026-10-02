@@ -1,0 +1,12 @@
+dialog{border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--fg);padding:24px;max-width:min(700px,90vw);max-height:80vh;box-shadow:0 12px 48px #00000014,0 2px 8px #00000008;animation:popup-in .15s var(--ease)}dialog::backdrop{background:#0002}dialog pre{font-size:12px;max-height:55vh;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--muted)}
+.tabs{position:relative;isolation:isolate}.tabs.segment-ready::before{content:"";position:absolute;left:0;top:0;width:var(--segment-width);height:var(--segment-height);transform:translate(var(--segment-x),var(--segment-y));background:var(--surface);border-radius:999px;box-shadow:0 1px 3px #0000000d;transition:transform .22s cubic-bezier(.2,.8,.2,1),width .22s cubic-bezier(.2,.8,.2,1),height .22s cubic-bezier(.2,.8,.2,1);pointer-events:none;z-index:0}.tabs.segment-ready>button.selected,.tabs.segment-ready>button[aria-selected=true]{background:transparent;box-shadow:none}.tabs>button{position:relative;z-index:1}
+
+@media(prefers-reduced-motion:reduce){.tabs.segment-ready::before{transition:none}.one-dialog.closing,.one-dialog.closing::backdrop{animation:none}}
+
+body .tabs.segment-ready>button:is(.active,.selected,[aria-selected=true]){background:transparent!important;box-shadow:none!important}
+
+
+.confirm-error:not(:empty){margin:16px 24px;padding:0}.confirm-dialog.one-dialog{border-radius:var(--panel-radius)}
+
+.one-form-dialog{animation:popup-in .15s var(--ease)}.one-form-dialog::backdrop{background:#0003;backdrop-filter:blur(2px)}.one-form-dialog.closing{animation:dialog-out .12s ease forwards}.one-form-dialog.closing::backdrop{animation:dialog-backdrop-out .12s ease forwards}@media(prefers-reduced-motion:reduce){.one-form-dialog,.one-form-dialog.closing,.one-form-dialog.closing::backdrop{animation:none}}
+

@@ -1,0 +1,6 @@
+const fs=require('node:fs'),path=require('node:path'),{execFileSync}=require('node:child_process');
+(async()=>{fs.mkdirSync('work/performance-030',{recursive:true});const target=path.resolve('work/performance-030/before.cjs');if(!fs.existsSync(target))await require('esbuild').build({entryPoints:['../delivery-0.29.0/src/main/store.ts'],outfile:target,bundle:true,platform:'node',external:['better-sqlite3-multiple-ciphers']});const executable=require('electron'),env={...process.env,ELECTRON_RUN_AS_NODE:'1'};
+ if(!fs.existsSync('work/performance-030/history.sqlite'))execFileSync(executable,['--expose-gc','tests/performance-030-host.cjs',target,'0.29.0','--prepare'],{stdio:'inherit',env,windowsHide:true,timeout:180000});
+ const after=path.resolve('work/performance-030/after.cjs');await require('esbuild').build({entryPoints:['tests/performance-030-exports.ts'],outfile:after,bundle:true,platform:'node',external:['better-sqlite3-multiple-ciphers']});
+ const output=execFileSync(executable,['--expose-gc','tests/performance-030-host.cjs',after,'0.30.0'],{encoding:'utf8',env,windowsHide:true,timeout:60000});const result=JSON.parse(output.trim());fs.writeFileSync('work/performance-030/after.json',JSON.stringify(result,null,2));console.log(JSON.stringify(result));
+})().catch(error=>{console.error(error);process.exitCode=1;});

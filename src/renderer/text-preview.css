@@ -1,0 +1,16 @@
+/* One 0.16.4 preview-redesign.css, code-reader/search and syntax primitives. */
+.code-reader{height:100%;display:flex;flex-direction:column;overflow:hidden}
+.code-mount{flex:1;min-height:0;min-width:0;overflow:hidden}
+.code-search{display:flex;align-items:center;gap:5px;flex-shrink:0;padding:8px 14px;border-bottom:1px solid var(--line)}
+.code-search input{min-height:30px;height:30px;flex:1;min-width:0;font-size:12px}
+.code-search .icon-button{height:28px;width:28px;min-height:28px;min-width:28px;max-width:28px;flex-basis:28px}
+.syntax-keyword{color:#9550a0}.syntax-string{color:#52805a}.syntax-number{color:#986326}.syntax-comment{color:#929292}.syntax-property{color:#3b779e}.syntax-type{color:#267e82}.syntax-function{color:#927329}
+[data-theme=dark] .syntax-keyword{color:#c992d5}[data-theme=dark] .syntax-string{color:#a1bc8c}[data-theme=dark] .syntax-number{color:#d6ad7b}[data-theme=dark] .syntax-property{color:#8eb9d5}[data-theme=dark] .syntax-type{color:#80c9c0}[data-theme=dark] .syntax-function{color:#d5c28a}
+.preview-body:has(.text-reader){overflow:hidden!important;padding:0!important}
+.text-reader{min-height:0;min-width:0;height:100%;display:flex;flex-direction:column}
+.text-reader .code-search[hidden]{display:none}
+.text-reader .code-search .preview-search-state{max-width:35%;color:var(--muted);font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.text-reader .code-search input{font-size:calc(12px * var(--text-scale,1))}
+.text-reader .code-loading{padding:18px 20px;color:var(--muted);font-size:calc(12px * var(--text-scale,1))}
+.text-reader .cm-editor{background:transparent!important}
+.text-reader .cm-gutters{background:transparent!important}
