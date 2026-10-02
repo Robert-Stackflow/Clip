@@ -92,11 +92,14 @@ body[data-view=shelf] #drop-hint{inset:44px 8px 8px}
 .record-card-heading>#refresh:hover{background:var(--hover)}
 .record-source-card>.record-source-toolbar{margin-bottom:16px;gap:10px}
 .record-source-card #sources{max-height:min(470px,calc(100vh - 268px));min-height:180px;padding:2px;scrollbar-gutter:stable;gap:12px}
-.record-source-card #sources button{padding:10px;border:1px solid transparent;border-radius:12px;gap:10px;transition:background .16s,border-color .16s}
+.record-source-card #sources button{position:relative;padding:10px;border:1px solid transparent;border-radius:12px;gap:10px;outline:0;box-shadow:none;transition:background .16s,border-color .16s}
 .record-source-card #sources button:hover{background:var(--hover)}
-.record-source-card #sources button[aria-pressed=true]{outline:0;border-color:color-mix(in srgb,var(--fg) 32%,var(--line));background:var(--soft);box-shadow:none}
+.record-source-card #sources button[aria-pressed=true]{border-color:color-mix(in srgb,var(--fg) 22%,var(--line));background:var(--soft)}
+.record-source-card #sources button:focus-visible{outline:1px solid var(--focus);outline-offset:2px}
+.record-source-card #sources button::after{content:'';position:absolute;right:12px;bottom:15px;width:12px;height:12px;opacity:0;background:var(--fg);clip-path:polygon(14% 44%,36% 66%,85% 17%,100% 32%,36% 96%,0 59%);transition:opacity .16s}
+.record-source-card #sources button[aria-pressed=true]::after{opacity:.65}
 .record-source-card #sources img{height:150px;border-radius:8px;background:var(--stage)}
-.record-source-card #sources span{font-size:11px;padding:0 2px}
+.record-source-card #sources span{font-size:11px;padding:0 22px 0 2px}
 .record-workbench .recording-options>.settings-card{padding:18px;border:1px solid var(--line);border-radius:18px;display:block}
 .recording-options .record-card-heading{margin-bottom:14px}
 .record-workbench .recording-options .sounds{gap:12px;flex-direction:column}
