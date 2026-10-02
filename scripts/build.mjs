@@ -1,5 +1,6 @@
 import './build-document-info.mjs';
 import './build-fonts.mjs';
+import './build-images.mjs';
 import './build-selection.mjs';
 import './build-attachments.mjs';
 import './build-updater.mjs';

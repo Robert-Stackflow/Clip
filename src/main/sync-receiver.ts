@@ -13,7 +13,7 @@ export class SyncReceiver {
  constructor(private workerFile=join(__dirname,'sync-receive-worker.cjs'),private timeout=30000){}
  stats(){return {workers:this.jobs.size};}
  async stop(){const jobs=[...this.jobs];for(const job of jobs)job.cancel();await Promise.all(jobs.map(job=>job.stopped));}
- run(source:SyncHistorySource,bytes:Uint8Array,version:number,valid:()=>boolean,enqueue:<T>(fn:()=>T|Promise<T>)=>Promise<T>,thumbnail:(payload:Payload)=>string|undefined,expected?:SyncRecord,deleted?:(record:SyncRecord)=>boolean):Promise<ReceivedSyncItem>{
+ run(source:SyncHistorySource,bytes:Uint8Array,version:number,valid:()=>boolean,enqueue:<T>(fn:()=>T|Promise<T>)=>Promise<T>,thumbnail:(payload:Payload,valid:()=>boolean)=>string|undefined|Promise<string|undefined>,expected?:SyncRecord,deleted?:(record:SyncRecord)=>boolean):Promise<ReceivedSyncItem>{
   const live=()=>{try{return valid();}catch{return false;}};
   if(!live()||this.jobs.size>=2){source.key?.fill(0);bytes.fill(0);return Promise.reject(new SyncError(!live()?'SYNC_STOPPED':'SYNC_ITEM_BUSY'));}
   return new Promise((resolve,reject)=>{
@@ -29,12 +29,12 @@ export class SyncReceiver {
    worker.on('message',message=>{
     if(done)return;
     if(message?.prepared){if(prepared){cancel(new SyncError('SYNC_RECORD_INVALID'));return;}prepared=true;
-     void enqueue(async()=>{if(done||Atomics.load(flag,0)!==0||!live())throw new SyncError('SYNC_STOPPED');
+     void (async()=>{const thumb=message.png?await thumbnail({png:message.png},()=>!done&&Atomics.load(flag,0)===0&&live()):undefined;message.png=undefined;
+      return enqueue(async()=>{if(done||Atomics.load(flag,0)!==0||!live())throw new SyncError('SYNC_STOPPED');
       // Keep deletion snapshots on the owning connection, preserving queue/shelf and Undo.
       if(message.record.deleted){if(!deleted)throw new SyncError('SYNC_RECORD_INVALID');return {changed:deleted(message.record),mutations:[]};}
-      const thumb=message.png?thumbnail({png:message.png}):undefined;if(done||Atomics.load(flag,0)!==0||!live())throw new SyncError('SYNC_STOPPED');
       return new Promise<ReceivedSyncItem>((r,j)=>{commitResolve=r;commitReject=j;worker.postMessage({commit:true,thumbnail:thumb});});
-     }).then(result=>finish(undefined,result),error=>{commitReject=undefined;cancel(error);});return;
+     });})().then(result=>finish(undefined,result),error=>{commitReject=undefined;cancel(error);});return;
     }
     const error=message?.code?new SyncError(message.code):new Error(message?.error||t('记录未完成，请重试'));
     if(message?.ok){commitResolve?.({changed:message.changed,mutations:message.mutations});}else{commitReject?.(error);finish(error);}

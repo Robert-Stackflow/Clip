@@ -22,7 +22,7 @@ export function customControls(root: HTMLElement) {
     const sync=()=>{
       const next=[...select.options].map(option=>({label:option.text,value:option.value,disabled:option.disabled,source:option.dataset.sourceApp}));
       if(menu&&(!button.isConnected||select.disabled||select.hidden||JSON.stringify(next)!==JSON.stringify(options)))close();
-      options=next;value=select.value;label.textContent=select.selectedOptions[0]?.text||tr('没有可选项');button.disabled=select.disabled;wrapper.hidden=select.hidden;
+      options=next;value=select.value;label.textContent=select.dataset.displayLabel?tr(select.dataset.displayLabel):select.selectedOptions[0]?.text||tr('没有可选项');button.disabled=select.disabled;wrapper.hidden=select.hidden;
       if(menu){const node=menu.children[select.selectedIndex] as HTMLElement|undefined;if(selected!==node){selected?.setAttribute('aria-selected','false');node?.setAttribute('aria-selected','true');selected=node||null;}}
     };
     const wrapper=document.createElement('span');wrapper.className='custom-select-wrap';select.before(wrapper);wrapper.append(select,button);select.classList.add('select-backing');select.tabIndex=-1;select.setAttribute('aria-hidden','true');

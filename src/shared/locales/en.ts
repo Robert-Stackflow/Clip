@@ -1967,5 +1967,16 @@ export const english:Readonly<Record<string,string>>={
   "控制条即将隐藏，缓慢滚动；按 Esc 完成预览": "The controls will hide shortly. Scroll slowly, then press Esc to finish and preview.",
   "正在准备其他同步内容，请稍后重试": "Preparing other sync items. Try again shortly.",
   "读取同步内容超时，请重试": "Reading the sync item timed out. Try again.",
-  "无法读取同步内容": "Could not read the sync item."
+  "无法读取同步内容": "Could not read the sync item.",
+  "指针": "Pointer",
+  "形状": "Shape",
+  "选择形状": "Choose shape",
+  "圆角矩形": "Rounded rectangle",
+  "椭圆": "Ellipse",
+  "三角形": "Triangle",
+  "菱形": "Diamond",
+  "编辑文字": "Edit text",
+  "删除标注": "Delete annotation",
+  "实色填充": "Solid fill",
+  "点击标注选中，拖动移动；拖动端点调整大小。Delete 删除，双击文字编辑。": "Click an annotation to select it. Drag to move, or drag handles to resize. Delete removes it; double-click text to edit."
 };

@@ -4,7 +4,7 @@ import { execFile, type ChildProcess } from 'node:child_process';
 import { join } from 'node:path';
 import { mkdir, mkdtemp, writeFile, unlink, rmdir, readdir } from 'node:fs/promises';
 import type { OcrResult, OcrStatus, Payload } from '../shared/types';
-import { thumbnail } from './clipboard';
+import { prepareThumbnail } from './clipboard';
 import {ocrErrorSource} from '../shared/ocr-errors';
 let running:ChildProcess|undefined,cancelled=false,statusCache:OcrStatus|undefined;
 function execute(args:string[],recognition=false):Promise<any>{return new Promise((accept,reject)=>{
@@ -21,7 +21,7 @@ export const cancelOcr=()=>{cancelled=true;running?.kill();};
 export async function recognize(payload:Payload,language:string):Promise<OcrResult>{
   if(busy)throw new Error(tr('已有识别任务，请等待或取消'));if(!payload.png)throw new Error(tr('请选择图片进行文字识别'));if(typeof language!=='string'||language.length>40||! /^[a-zA-Z0-9-]*$/.test(language))throw new Error(tr('OCR 语言无效'));
   busy=true;cancelled=false;let directory='';try{
-    thumbnail(payload);const info=await ocrStatus();if(cancelled)throw new Error(tr('识别已取消'));if(info.error)throw new Error(info.error);if(!info.languages.length)throw new Error(tr('没有可用 OCR 语言，请在 Windows 设置中安装语言识别组件'));if(language&&!info.languages.some(l=>l.tag===language))throw new Error(tr('未安装所选 OCR 语言'));
+    await prepareThumbnail(payload,()=>!cancelled);const info=await ocrStatus();if(cancelled)throw new Error(tr('识别已取消'));if(info.error)throw new Error(info.error);if(!info.languages.length)throw new Error(tr('没有可用 OCR 语言，请在 Windows 设置中安装语言识别组件'));if(language&&!info.languages.some(l=>l.tag===language))throw new Error(tr('未安装所选 OCR 语言'));
     let image=nativeImage.createFromBuffer(Buffer.from(payload.png,'base64'));const size=image.getSize(),scale=Math.min(1,info.maxDimension/size.width,info.maxDimension/size.height);if(scale<1)image=image.resize({width:Math.max(1,Math.floor(size.width*scale)),height:Math.max(1,Math.floor(size.height*scale)),quality:'best'});
     const root=join(app.getPath('userData'),'work');await mkdir(root,{recursive:true});directory=await mkdtemp(join(root,'ocr-'));const file=join(directory,'input.png');await writeFile(file,image.toPNG());if(cancelled)throw new Error(tr('识别已取消'));
     const result=await execute(['-Mode','Recognize','-ImagePath',file,'-Language',language||info.languages[0].tag],true);if(typeof result.text!=='string'||result.text.length>1024*1024)throw new Error(tr('识别文字无效或过长'));return {text:result.text,language:result.language,scaled:scale<1};

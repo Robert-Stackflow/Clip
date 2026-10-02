@@ -1,6 +1,6 @@
 {
   "name": "clipper-desktop",
-  "version": "0.46.7",
+  "version": "0.46.8",
   "private": true,
   "description": "Windows 本地剪贴板工作台",
   "author": "Clipper",
@@ -26,7 +26,7 @@
     "test:recording": "npm run build && node tests/recording-ui.cjs && node tests/recording-audio.cjs && node tests/recording-boundaries.cjs",
     "test:region": "npm run build && node tests/recording-region.cjs",
     "test:scroll": "npm run build && node tests/scroll-ui.cjs && node tests/scroll-boundaries.cjs",
-    "test:image": "npm run build && node tests/window-capture.cjs && node tests/image-editor-ui.cjs && node tests/image-editor-boundaries.cjs",
+    "test:image": "npm run build && node tests/window-capture.cjs && node tests/image-pointer-electron.cjs && node tests/image-pointer-ui.cjs && node tests/image-editor-boundaries.cjs",
     "test:formats": "npm run build && node tests/formats-ui.cjs && node tests/formats-boundaries.cjs",
     "test:attachments": "npm run build && node tests/attachments-ui.cjs && node tests/attachments-boundaries.cjs",
     "test:metadata": "npm run build && node scripts/test.mjs && node tests/metadata-ui.cjs && node tests/metadata-boundaries.cjs",
@@ -91,7 +91,7 @@
     "productName": "Clipper",
     "electronDist": "node_modules/electron/dist",
     "directories": {
-      "output": "release/0.46.7"
+      "output": "release/0.46.8"
     },
     "files": [
       "dist/**/*",
@@ -120,7 +120,8 @@
       "dist/native/UpdateHost.exe",
       "dist/native/RollbackHost.exe",
       "dist/native/DocumentInfo.exe",
-      "dist/native/FontHost.exe"
+      "dist/native/FontHost.exe",
+      "dist/native/ImageHost.exe"
     ],
     "extraFiles": [
       "README.md",

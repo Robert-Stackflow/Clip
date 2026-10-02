@@ -20,6 +20,7 @@ export * from '../src/main/backup-jobs';
 export * from '../src/main/sync-ledger';
 export * from '../src/main/sync-service';
 export * from '../src/main/sync-receiver';
+export * from '../src/main/share-publisher';
 export * from '../src/main/sync-transport';
 export * from '../src/main/sync-identity';
 export * from '../src/shared/sync';
@@ -96,3 +97,4 @@ export * from '../src/main/scroll-sampler';
 export * from '../src/shared/scroll-placement';
 
 export * from '../src/main/sync-item-reader';
+export * from '../src/shared/image-marks';

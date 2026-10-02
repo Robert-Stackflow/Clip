@@ -27,7 +27,7 @@ try{
   const compact=(item:SyncMutation|undefined)=>item?{id:item.id,...(item.localOnly!==undefined?{localOnly:item.localOnly}:{})}:undefined;
   store.onChange=(previous,next)=>{ledger.observe(previous,next);mutations.push({previous:compact(previous),next:compact(next)});};
   let png:string|undefined;
-  // Native PNG decoding remains on the main thread. Only a validated, matching PNG crosses back.
+  // Only a validated, matching PNG crosses to the bounded native thumbnail coordinator.
   // Existing publications still ignore malformed replay bodies as before; commit rechecks the ledger.
   if(value.payload?.png){try{const valid=validatePayload(value.payload);if(payloadDigest(valid)!==record.hash)throw new SyncError('SYNC_CONTENT_MISMATCH');png=valid.png;}catch(error){if(!ledger.entries().some(e=>e.id===record.id))throw error;}}
   parentPort!.postMessage({prepared:true,record,png});

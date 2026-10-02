@@ -18,6 +18,19 @@
 .editor-commandbar button{height:32px;min-height:32px;line-height:1;padding:5px 9px}
 .editor-commandbar button.quiet:hover{background:var(--hover)}
 .editor-commandbar button.active{background:var(--selected)}
+.editor-commandbar .image-shape-tool{display:inline-flex;flex-shrink:0;align-items:center}
+.editor-commandbar .image-shape-tool .custom-select-wrap{width:auto}
+.editor-commandbar #shape-kind-trigger{display:flex;height:32px;min-height:32px;padding:5px 9px;border:0;background:transparent;gap:7px;box-shadow:none}
+.editor-commandbar #shape-kind-trigger.active{background:var(--selected)}
+.editor-commandbar #shape-kind-trigger:hover{background:var(--hover)}
+.shape-symbol{display:flex}
+.shape-symbol svg{width:17px;height:17px}
+.editor-commandbar #shape-kind-trigger>svg{width:12px;height:12px}
+.image-workbench .selected-mark{padding:0 0 12px;border-bottom:1px solid var(--line);font-size:12px}
+.selected-mark>div{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+.image-workbench .selected-mark button{min-height:30px;padding:5px 8px;font-size:11px}
+.image-workbench .selected-mark button:hover{background:var(--hover)}
+.image-workbench .options #fill-field{min-height:32px}
 .image-workbench #viewport{scrollbar-width:none;padding:24px;box-sizing:border-box}
 .image-workbench #viewport::-webkit-scrollbar{display:none}
 .editor-footer button.quiet:hover{background:var(--hover)}
@@ -105,10 +118,11 @@ body[data-view=shelf] #drop-hint{inset:44px 8px 8px}
 .record-workbench .recording-options .sounds{gap:12px;flex-direction:column}
 .record-workbench .recording-options .sounds label{min-height:28px;font-size:12px}
 .record-workbench .recording-options .sounds>.custom-select-wrap{width:100%}
-.record-workbench .recording-options .fields{margin-top:18px;padding-top:18px;gap:14px}
+.record-workbench .recording-options .fields{margin-top:18px;padding:18px 0;gap:14px}
 .record-workbench .recording-options .fields label{flex-wrap:nowrap;font-size:12px}
 .record-workbench .recording-options .fields .custom-select-wrap{max-width:142px;min-width:0}
-.record-workbench .recording-options .field{padding-top:16px;font-size:12px}
+.record-workbench .recording-options .field{padding-top:18px;font-size:12px}
+.record-workbench .recording-options #video-quality[hidden]+.field{margin-top:18px}
 .record-audio-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:320px;text-align:center}
 #audio-brand{display:grid;place-items:center;width:64px;height:64px;border-radius:20px;background:var(--soft);color:var(--muted)}
 #audio-brand svg{width:28px;height:28px}
