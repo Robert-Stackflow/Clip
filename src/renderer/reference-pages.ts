@@ -109,8 +109,9 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
    const buckets=new Map<string,Entry[]>();for(const entry of entries){if(!buckets.has(entry.group))buckets.set(entry.group,[]);buckets.get(entry.group)!.push(entry);}
    entries=[...buckets.values()].flat();setCount(entries.length);
    const scale=parseFloat(getComputedStyle(root).getPropertyValue('--text-scale'))||1;
-   const cell=active==='mime'?Math.max(220,240*scale):active==='kaomoji'?160*scale:active==='colors'?52*scale:56*scale;
-   columns=Math.max(1,Math.floor((scroll.clientWidth-20)/(cell+6)));const height=(active==='mime'?48:active==='kaomoji'?54:60)*Math.max(1,scale),headerHeight=48*Math.max(1,scale);
+   const cell=active==='mime'?Math.max(220,240*scale):active==='kaomoji'?160*scale:active==='colors'?52*scale:active==='emoji'&&scroll.clientWidth<240?52*scale:56*scale;
+   const scrollStyle=getComputedStyle(scroll),available=scroll.clientWidth-parseFloat(scrollStyle.paddingLeft)-parseFloat(scrollStyle.paddingRight);
+   columns=Math.max(1,Math.floor((available+6)/(cell+6)));const height=(active==='mime'?48:active==='kaomoji'?54:60)*Math.max(1,scale),headerHeight=48*Math.max(1,scale);
    results.className='reference-results reference-virtual reference-kind-'+active;results.style.setProperty('--reference-columns',String(columns));
    let top=0,index=0;for(const [group,items]of buckets){sections.push({group,top,count:items.length});rows.push({top,height:headerHeight,group,title:groupLabel(group)});top+=headerHeight;
     for(let at=0;at<items.length;at+=columns){const batch=items.slice(at,at+columns).map(entry=>({entry,index:index++}));rows.push({top,height,group,items:batch});top+=height;}top+=20;
@@ -176,11 +177,14 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  });
  let composing=false;input.addEventListener('compositionstart',()=>{composing=true;clearTimeout(queryTimer);});input.addEventListener('compositionend',()=>{composing=false;changed();});
  const changed=()=>{clearTimeout(queryTimer);if(!composing)queryTimer=setTimeout(()=>{scroll.scrollTo({top:0,behavior:'instant'});focusIndex=0;rebuild();},100);};input.oninput=changed;
- let width=Math.round(scroll.clientWidth),resizeTimer:ReturnType<typeof setTimeout>|undefined;
- const resize=new ResizeObserver(()=>{if(disposed)return;const next=Math.round(scroll.clientWidth);if(kind==='symbols'&&width!==next){width=next;clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{const selected=currentCategory,section=sections.find(section=>section.group===selected),relative=section?scroll.scrollTop-section.top:0;rebuild();const anchor=sections.find(section=>section.group===selected);if(anchor){scroll.scrollTo({top:anchor.top+relative,behavior:'instant'});schedule();}},100);}else schedule();});resize.observe(scroll);
+ const readScale=()=>parseFloat(getComputedStyle(root).getPropertyValue('--text-scale'))||1;
+ let width=Math.round(scroll.clientWidth),textScale=readScale(),resizeTimer:ReturnType<typeof setTimeout>|undefined;
+ const relayout=()=>{if(disposed)return;const nextWidth=Math.round(scroll.clientWidth),nextScale=readScale();if(kind==='symbols'&&(width!==nextWidth||textScale!==nextScale)){const ratio=nextScale/textScale;width=nextWidth;textScale=nextScale;clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{const selected=currentCategory,section=sections.find(section=>section.group===selected),relative=section?(scroll.scrollTop-section.top)*ratio:0;rebuild();const anchor=sections.find(section=>section.group===selected);if(anchor){scroll.scrollTo({top:anchor.top+relative,behavior:'instant'});schedule();}},100);}else schedule();};
+ const resize=new ResizeObserver(relayout);resize.observe(scroll);
+ const appearance=new MutationObserver(relayout);appearance.observe(document.documentElement,{attributes:true,attributeFilter:['style']});
 
  const disposeEmojiFont=kind==='symbols'?mountEmojiFont(root,tip):()=>{};
  const disposeSegments=referenceSegments(root.querySelector<HTMLElement>('.reference-tabs')!);
  rebuild();
- return ()=>{disposed=true;disposeEmojiFont();disposeSegments();cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);scroll.removeEventListener('scrollend',finishSymbolNavigation);scroll.removeEventListener('keydown',navigationKey);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();tipResize.disconnect();cheatDocument?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();window.clipperAppearance?.releaseFontResources?.();};
+ return ()=>{disposed=true;disposeEmojiFont();disposeSegments();cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);scroll.removeEventListener('scrollend',finishSymbolNavigation);scroll.removeEventListener('keydown',navigationKey);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();appearance.disconnect();tipResize.disconnect();cheatDocument?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();window.clipperAppearance?.releaseFontResources?.();};
 }
