@@ -32,3 +32,4 @@
 .collection .clip-entry{display:block;position:relative}.collection .clip-entry>input{position:absolute;left:16px;top:19px;margin:0;z-index:2;width:16px;height:16px;animation:collection-select-in .18s var(--ease)}.collection .clip-entry>.clip-row{width:100%;padding-left:44px}.collection .clip-row{transition:background .15s var(--ease),padding .18s var(--ease)}
 @keyframes collection-select-in{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.collection .clip-entry>input,.collection .shelf-drop.dragging{animation:none}.collection .clip-row{transition:none}}
+@media(max-width:900px){.filterbar{flex-wrap:wrap;gap:6px}.filterbar #filters{flex:0 0 auto;max-width:100%}.filterbar>.source-filterbar{flex:1 1 200px;width:auto;min-width:200px}}

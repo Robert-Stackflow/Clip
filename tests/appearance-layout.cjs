@@ -5,11 +5,11 @@ const {setup,measure}=require('./renderer-fixture.cjs');
 (async()=>{await fs.mkdir(out,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true});const failures=[],results=[],errors=[];let context;try{
  context=await browser.newContext();await context.addInitScript(setup);await context.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);if(!/^[\w.-]+$/.test(name))return route.abort();try{await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'application/javascript'});}catch{return route.abort();}});
  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
- for(const [file,sizes,selectors] of [['index.html',[[1180,780],[860,600]],['#paste','#copy','.preview-body','[data-page="settings"]']],['tray.html',[[740,560],[460,460]],['#copy-selected','#paste-selected','#preview','#search']],['shelf.html',[[420,440],[280,220]],['#main','#choose','#items']]]){
+ for(const [file,sizes,selectors] of [['index.html',[[1180,780],[860,600]],['#paste','#copy','.preview-body','[data-page="settings"]','#filters','#filters [data-kind="code"]']],['tray.html',[[740,560],[460,460]],['#copy-selected','#paste-selected','#preview','#search']],['shelf.html',[[420,440],[280,220]],['#main','#choose','#items']]]){
   await page.goto('https://clipper.test/'+file);await page.waitForSelector(file.startsWith('index')?'.clip-row':file.startsWith('tray')?'.tray-row':'.shelf-row');
   for(const [width,height] of sizes){await page.setViewportSize({width,height});for(const font of ['system','sans','mono'])for(const scale of [100,110,125,150])for(const density of ['comfortable','compact']){
    await page.evaluate(v=>fixture.appearance(v),{font,scale,density});await page.evaluate(()=>new Promise(requestAnimationFrame));const metrics=await measure(page,selectors),label=`${file} ${width}x${height} ${font} ${scale} ${density}`;results.push({label,metrics});
-   for(const [key,value] of Object.entries(metrics)){if(value===false||typeof value==='object'&&(value.missing||!value.visible||!value.reachable||key==='.preview-body'&&value.h<80))failures.push({label,key,value});}
+   for(const [key,value] of Object.entries(metrics)){if(value===false||typeof value==='object'&&(value.missing||!value.visible||!value.reachable||key==='.preview-body'&&value.h<80||key==='#filters'&&value.overflow))failures.push({label,key,value});}
   }
   await page.screenshot({path:path.join(out,file.split('.')[0]+(file.includes('?')?'-quick':'')+`-${width}x${height}.png`)});
   }
