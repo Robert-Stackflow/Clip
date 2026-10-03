@@ -1,4 +1,3 @@
-import type {SelectionOptions,SelectionState,SelectionInput} from './selection';
 import type {DesktopOptions,DesktopState} from './desktop';
 import type {VaultState} from './vault';
 import type {WebState,WebOptions} from './web-share';
@@ -35,7 +34,6 @@ export interface API {
   rememberSearch(query:string):Promise<void>;removeSearch(query:string|null):Promise<void>;
   replyIntent():Promise<import('./efficiency').ReplyIntent|null>;resolveReply(token:string,values:Record<string,string>|null):Promise<void>;
   openRecorder():Promise<void>;
-  selectionState():Promise<SelectionState>;configureSelection(value:SelectionOptions):Promise<void>;readSelection():Promise<void>;selectionInput():Promise<SelectionInput|null>;
   showTray():Promise<void>;desktopState():Promise<DesktopState>;configureDesktop(value:DesktopOptions):Promise<void>;showQuick():Promise<void>;showShelf():Promise<void>;
   vaultState():Promise<VaultState>; prepareEncryption(password:string):Promise<{token:string;recoveryKey:string}>; cancelEncryption():Promise<void>; encryptHistory(token:string,proof:string):Promise<void>; cleanupPlaintext():Promise<void>; changeHistoryPassword(password:string):Promise<void>; configureVault(hello:boolean,idleMinutes:number):Promise<void>; lockHistory():Promise<void>;
   webState():Promise<WebState>;webStart(value:WebOptions):Promise<void>;webStop():Promise<void>;webInvite():Promise<string>;webCopyInvite():Promise<void>;webApprove(id:string,accept:boolean,allowSend:boolean):Promise<void>;webRevoke(id:string):Promise<void>;webPublish(id:string):Promise<void>;webRemove(id:string):Promise<void>;webFollow(value:boolean):Promise<void>;

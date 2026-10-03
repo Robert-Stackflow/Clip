@@ -51,7 +51,6 @@ export async function pasteTo(hwnd:number,valid:()=>boolean=()=>true){
 
 export function mouseButtons(){return {left:!!(api?.key(1)&0x8000),right:!!(api?.key(2)&0x8000),middle:!!(api?.key(4)&0x8000)};}
 export function foregroundBounds(){const hwnd=api?.foreground();if(!hwnd)return undefined;const name=Buffer.alloc(512),length=api.className(hwnd,name,256);if(['Progman','WorkerW','Shell_TrayWnd','Shell_SecondaryTrayWnd'].includes(name.toString('utf16le',0,length*2)))return undefined;const b=Buffer.alloc(16);if(!api.rect(hwnd,b))return undefined;return {x:b.readInt32LE(0),y:b.readInt32LE(4),width:b.readInt32LE(8)-b.readInt32LE(0),height:b.readInt32LE(12)-b.readInt32LE(4)};}
-export function selectionKeyDown(escapeOnly=false){if(!api)return false;if(escapeOnly)return !!(api.key(27)&0x8000);for(const [from,to] of [[8,9],[13,13],[32,90],[96,145],[186,222]])for(let key=from;key<=to;key++)if(api.key(key)&0x8000)return true;return false;}
 
 export function captureWindowInfo(hwnd:number){if(!api||!Number.isSafeInteger(hwnd)||!hwnd||!api.isWindow(hwnd)||!api.visible(hwnd)||api.isIconic(hwnd))return null;const info=windowInfo(hwnd),b=Buffer.alloc(16);if(!info||!api.rect(hwnd,b))return null;const width=b.readInt32LE(8)-b.readInt32LE(0),height=b.readInt32LE(12)-b.readInt32LE(4);if(width<2||height<2)return null;return {...info,width,height};}
 

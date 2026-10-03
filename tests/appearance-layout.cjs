@@ -5,7 +5,7 @@ const {setup,measure}=require('./renderer-fixture.cjs');
 (async()=>{await fs.mkdir(out,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true});const failures=[],results=[],errors=[];let context;try{
  context=await browser.newContext();await context.addInitScript(setup);await context.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);if(!/^[\w.-]+$/.test(name))return route.abort();try{await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'application/javascript'});}catch{return route.abort();}});
  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
- for(const [file,sizes,selectors] of [['index.html',[[1180,780],[860,600]],['#paste','#copy','.preview-body','[data-page="settings"]']],['index.html?quick=1',[[450,760],[1000,380]],['#search','#results']],['tray.html',[[740,560],[460,460]],['#copy-selected','#paste-selected','#preview','#search']],['shelf.html',[[420,440],[280,220]],['#main','#choose','#items']]]){
+ for(const [file,sizes,selectors] of [['index.html',[[1180,780],[860,600]],['#paste','#copy','.preview-body','[data-page="settings"]']],['tray.html',[[740,560],[460,460]],['#copy-selected','#paste-selected','#preview','#search']],['shelf.html',[[420,440],[280,220]],['#main','#choose','#items']]]){
   await page.goto('https://clipper.test/'+file);await page.waitForSelector(file.startsWith('index')?'.clip-row':file.startsWith('tray')?'.tray-row':'.shelf-row');
   for(const [width,height] of sizes){await page.setViewportSize({width,height});for(const font of ['system','sans','mono'])for(const scale of [100,110,125,150])for(const density of ['comfortable','compact']){
    await page.evaluate(v=>fixture.appearance(v),{font,scale,density});await page.evaluate(()=>new Promise(requestAnimationFrame));const metrics=await measure(page,selectors),label=`${file} ${width}x${height} ${font} ${scale} ${density}`;results.push({label,metrics});
@@ -14,13 +14,12 @@ const {setup,measure}=require('./renderer-fixture.cjs');
   await page.screenshot({path:path.join(out,file.split('.')[0]+(file.includes('?')?'-quick':'')+`-${width}x${height}.png`)});
   }
  }
- for(const [file,size,selectors,scrollable] of [['selection',[430,96],['#actions button:first-child','#actions button:last-child','#source'],false],['unlock',[480,570],['#unlock-submit','#use-recovery','#recover','#quit'],true],['recovery',[700,600],['#retry','#choose-database','#choose-backup','#quit'],true],['recorder',[680,520],['#start','#refresh','#resolution','#microphone'],true],['scroll',[680,540],['#start','#display'],true],['image-editor',[760,620],['#viewport','#copy','#save','#zoom'],false],['capture',[860,600],['#capture-hint'],false]]){
+ for(const [file,size,selectors,scrollable] of [['unlock',[480,570],['#unlock-submit','#use-recovery','#recover','#quit'],true],['recovery',[700,600],['#retry','#choose-database','#choose-backup','#quit'],true],['recorder',[680,520],['#start','#refresh','#resolution','#microphone'],true],['scroll',[680,540],['#start','#display'],true],['image-editor',[760,620],['#viewport','#copy','#save','#zoom'],false],['capture',[860,600],['#capture-hint'],false]]){
   await page.setViewportSize({width:size[0],height:size[1]});await page.goto('https://clipper.test/'+file+'.html');await page.waitForSelector(selectors[0]);
   for(const font of ['system','sans','mono'])for(const scale of [100,110,125,150])for(const density of ['comfortable','compact']){
    await page.evaluate(v=>fixture.appearance(v),{font,scale,density});await page.evaluate(()=>new Promise(requestAnimationFrame));const label=`${file} ${size.join('x')} ${font} ${scale} ${density}`;let metrics={};
    for(const selector of selectors){if(scrollable)await page.locator(selector).scrollIntoViewIfNeeded();const m=await measure(page,[selector]);metrics={...metrics,...m};}
    results.push({label,metrics});for(const [key,value] of Object.entries(metrics)){if(value===false||typeof value==='object'&&(value.missing||!value.visible||key!=='#capture-hint'&&!value.reachable))failures.push({label,key,value});}
-   if(file==='selection')assert.ok(await page.locator('#source').evaluate(el=>el.scrollHeight<=el.clientHeight+1),'selection source line must not be clipped');
    if(file==='image-editor')assert.deepEqual(await page.locator('#image').evaluate(c=>[c.width,c.height]),[640,360],'font scaling must not resample image canvas');
   }
   await page.screenshot({path:path.join(out,file+'-minimum.png')});

@@ -31,7 +31,7 @@ const {setup}=require('./renderer-fixture.cjs'),{setupData,openDataView}=require
 
   await start('data');assert.equal(await page.locator('#storage-directory').textContent(),'D:\\历史资料\\保存 设置');
   assert.ok((await page.locator('#backup-status').textContent()).includes('外部错误：保存 设置'));
-  await page.locator('.section-nav button').nth(1).click();await page.locator('#backup-choose-folder').click();await called('backup-folder');
+  await page.locator('.settings-nav [data-section="7"]').click();await page.locator('#backup-choose-folder').click();await called('backup-folder');
   await page.locator('#backup-interval').fill('12');await page.locator('#backup-keep').fill('7');
   await page.locator('#backup-password').fill('Fixture-only-2026!');await page.locator('#backup-password-repeat').fill('mismatch');
   await page.locator('#save-backup-settings').click();
@@ -41,7 +41,7 @@ const {setup}=require('./renderer-fixture.cjs'),{setupData,openDataView}=require
   await page.waitForFunction(()=>document.getElementById('backup-password').value==='');
   assert.deepEqual((await calls('backup-save'))[0][1],{enabled:true,directory:'D:\\备份\\新 保存',intervalHours:12,keep:7,encrypted:true,password:'Fixture-only-2026!'});
   assert.equal(await page.locator('#backup-password-repeat').inputValue(),'');await page.locator('#backup-now').click();await called('backup-now');
-  await page.locator('.section-nav button').first().click();await page.locator('#vault-idle').selectOption('30');await page.locator('#vault-hello').uncheck();await page.locator('#vault-save').click();await called('vault-save');
+  await page.locator('.settings-nav [data-section="6"]').click();await page.locator('#vault-idle').selectOption('30');await page.locator('#vault-hello').uncheck();await page.locator('#vault-save').click();await called('vault-save');
   assert.deepEqual((await calls('vault-save'))[0],['vault-save',false,30]);await page.locator('#vault-lock').click();await called('vault-lock');
 
   await start('migration');await cancel();assert.deepEqual(await calls('storage-migrate'),[]);
@@ -61,7 +61,7 @@ const {setup}=require('./renderer-fixture.cjs'),{setupData,openDataView}=require
   await page.keyboard.press('Escape');await closed();await called('restore-cancel');assert.deepEqual((await calls('restore-cancel'))[0],['restore-cancel','restore-preview-token']);
   await openDataView(page,'export');await page.evaluate(()=>fixture.release());await page.waitForFunction(()=>fixture.restoreFinished);await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   assert.equal(await page.locator('dialog').evaluate(node=>node.open),true);assert.equal(await page.locator('#export-password').isVisible(),true);assert.equal(await page.locator('#modal-error').isVisible(),false);await cancel();
-  await start('data');await page.locator('.section-nav button').nth(2).click();await page.locator('[data-restore-name="保存.json"]').click();await page.waitForSelector('.restore-summary');
+  await start('data');await page.locator('.settings-nav [data-section="8"]').click();await page.locator('[data-restore-name="保存.json"]').click();await page.waitForSelector('.restore-summary');
   assert.deepEqual((await calls('restore-file'))[0],['restore-file','保存.json']);assert.deepEqual((await calls('restore-preview'))[0],['restore-preview','restore-file-token',undefined]);await cancel();
 
   await start('vault-enable');await fillPassword();password=await remember('#vault-new-password');await cancel();await cleared(password);assert.deepEqual(await calls('encryption-prepare'),[]);

@@ -16,7 +16,7 @@ for(const file of expected){const built=fs.readFileSync(path.join(buildRoot,'dis
  assert.equal(hash(asar.extractFile(archive,('dist/'+file).replaceAll('/','\\'))),hash(built),file);
 }
 assert.equal(JSON.parse(asar.extractFile(archive,'package.json')).version,version);
-for(const file of ['SelectionHost.exe','AttachmentHost.exe','UpdateHost.exe','RollbackHost.exe'])assert.equal(hash(fs.readFileSync(path.join(root,'resources/app.asar.unpacked/dist/native',file))),hash(fs.readFileSync(path.join(buildRoot,'dist/native',file))),file);
+for(const file of ['AttachmentHost.exe','UpdateHost.exe','RollbackHost.exe'])assert.equal(hash(fs.readFileSync(path.join(root,'resources/app.asar.unpacked/dist/native',file))),hash(fs.readFileSync(path.join(buildRoot,'dist/native',file))),file);
 const evidence=path.resolve('work/checkpoints/package');fs.mkdirSync(evidence,{recursive:true});
 const helper=path.join(evidence,'runtime.cjs');
 fs.writeFileSync(helper,`const fs=require('node:fs'),fsp=require('node:fs/promises'),path=require('node:path'),assert=require('node:assert/strict'),Module=require('node:module');

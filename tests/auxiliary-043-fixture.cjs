@@ -25,7 +25,6 @@ function prepare({initialHidden=false,theme='light'}={}){
  const main=window.clipper;window.clipper=new Proxy({hide:async()=>probe.hides++,copy:async(id,paste)=>probe.copies.push({id,paste})},{get:(object,key)=>key in object?object[key]:main[key]});
  window.clipperImage={...window.clipperImage,save:async()=>{probe.copies.push({image:true});return null;}};
  window.capture={...window.capture,complete:async()=>probe.hides++};
- window.clipperSelection={...window.clipperSelection,hide:async()=>probe.hides++};
  if(initialHidden)fixture.windowVisible(false);
 }
 module.exports={prepare};

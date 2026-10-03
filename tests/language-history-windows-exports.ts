@@ -1,6 +1,5 @@
 export * from '../src/main/tray-panel';
 export * from '../src/main/desktop';
-export * from '../src/main/selection';
 export * from '../src/main/appearance-service';
 export * from '../src/main/clipboard';
 export * from '../src/main/transfer';

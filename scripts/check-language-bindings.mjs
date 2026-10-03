@@ -6,7 +6,7 @@ import {retainedMessages,labelSources} from './language-label-sources.mjs';
 import {translationAliases,directTranslationBinding} from './language-binding-utils.mjs';
 
 const coverage=JSON.parse(fs.readFileSync('work/language-coverage.json','utf8'));
-const tables=[...labelSources,...['web','ocr','sync','attachment'].map(name=>({file:'src/shared/'+name+'-errors.ts',name:name+'Errors'})),{file:'src/main/selection.ts',name:'messages'},{file:'src/main/document-info.ts',name:'documentErrors'}];
+const tables=[...labelSources,...['web','ocr','sync','attachment'].map(name=>({file:'src/shared/'+name+'-errors.ts',name:name+'Errors'})),{file:'src/main/document-info.ts',name:'documentErrors'}];
 const unbound=[],deferredBindings=[],files=[];
 const compact=node=>node.getText().replace(/\s+/g,'');
 for(const file of coverage.checkedScopes.filter(file=>file.endsWith('.ts'))){

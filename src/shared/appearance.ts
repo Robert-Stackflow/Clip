@@ -16,4 +16,4 @@ export const appearanceFonts:Record<'system'|'sans'|'mono',string>={
  mono:"Consolas,'Cascadia Mono','Microsoft YaHei UI',monospace"
 };
 export {fontStack};
-export function trustedAppearancePage(value:string){try{const url=new URL(value);return url.protocol==='clipper:'&&url.host==='app'&&/^\/(?:index|tray|shelf|selection|capture|recorder|scroll|image-editor|unlock|recovery)\.html$/.test(url.pathname);}catch{return false;}}
+export function trustedAppearancePage(value:string){try{const url=new URL(value);return url.protocol==='clipper:'&&url.host==='app'&&/^\/(?:index|tray|shelf|capture|recorder|scroll|image-editor|unlock|recovery)\.html$/.test(url.pathname);}catch{return false;}}

@@ -12,22 +12,22 @@ import {foregroundBelongsTo} from './native';
 interface Target{hwnd:number;pid:number}
 interface Context{source():string;key():Uint8Array|undefined;image?(window:BrowserWindow,item:ClipPreview):string;releaseImage?(owner:number):void;store():Store;blocked():boolean;dark():boolean;target():Target|undefined;validTarget(target:Target):boolean;main():void;copy(item:Detail,paste:boolean,target:Target|undefined,valid:()=>boolean):Promise<void>;drag(window:BrowserWindow,item:Detail,valid:()=>boolean):Promise<void>}
 export class TrayPanel{
- window?:BrowserWindow;private history:TrayHistory;private target?:Target;private busy=false;private serial=0;private opened=false;private loaded=false;private focusTimer?:NodeJS.Timeout;private idleTimer?:NodeJS.Timeout;private search=new TraySearch();
+ window?:BrowserWindow;private history:TrayHistory;private target?:Target;private busy=false;private serial=0;private opened=false;private loaded=false;private focusTimer?:NodeJS.Timeout;private idleTimer?:NodeJS.Timeout;private search=new TraySearch();private activate=true;private sticky=false;
  constructor(private ctx:Context){this.history=new TrayHistory(ctx.store,Date.now,item=>this.window?ctx.image?.(this.window,item):undefined);screen.on('display-added',this.close);screen.on('display-removed',this.close);screen.on('display-metrics-changed',this.close);}
  toggle(anchor?:Rectangle){if(this.window?.isVisible()){this.close();return;}this.open(anchor);}
- open(anchor?:Rectangle){
-  if(this.ctx.blocked()){this.close();return;}this.close();clearTimeout(this.idleTimer);this.target=this.ctx.target();this.history.open();this.opened=true;
-  const point=screen.getCursorScreenPoint(),bounds=anchor&&anchor.width>0&&anchor.height>0?anchor:{...point,width:1,height:1},area=screen.getDisplayNearestPoint({x:bounds.x+bounds.width/2,y:bounds.y+bounds.height/2}).workArea;
-  if(this.window&&!this.window.isDestroyed()){this.window.setBounds(trayPanelBounds(bounds,area));if(this.loaded)this.show();return;}
-  const window=new BrowserWindow({...trayPanelBounds(bounds,area),show:false,frame:true,titleBarStyle:'hidden',titleBarOverlay:false,thickFrame:true,hasShadow:true,resizable:false,maximizable:false,minimizable:false,skipTaskbar:true,alwaysOnTop:true,title:tr('Clipper · 最近记录'),backgroundColor:this.ctx.dark()?'#181818':'#fff',webPreferences:{additionalArguments:interfaceLanguageArguments(),preload:join(__dirname,'../preload/tray.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true}});this.window=window;const owner=window.webContents.id;
+ open(anchor?:Rectangle,options:{bounds?:Rectangle;activate?:boolean;sticky?:boolean}={}){
+  if(this.ctx.blocked()){this.close();return;}this.close();clearTimeout(this.idleTimer);this.target=this.ctx.target();this.history.open();this.opened=true;this.activate=options.activate!==false;this.sticky=!!options.sticky;
+  const point=screen.getCursorScreenPoint(),bounds=anchor&&anchor.width>0&&anchor.height>0?anchor:{...point,width:1,height:1},area=screen.getDisplayNearestPoint({x:bounds.x+bounds.width/2,y:bounds.y+bounds.height/2}).workArea,panelBounds=options.bounds||trayPanelBounds(bounds,area);
+  if(this.window&&!this.window.isDestroyed()){this.window.setBounds(panelBounds);if(this.loaded)this.show();return;}
+  const window=new BrowserWindow({...panelBounds,show:false,frame:true,titleBarStyle:'hidden',titleBarOverlay:false,thickFrame:true,hasShadow:true,resizable:false,maximizable:false,minimizable:false,skipTaskbar:true,alwaysOnTop:true,title:tr('Clipper · 最近记录'),backgroundColor:this.ctx.dark()?'#181818':'#fff',webPreferences:{additionalArguments:interfaceLanguageArguments(),preload:join(__dirname,'../preload/tray.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true}});this.window=window;const owner=window.webContents.id;
   window.webContents.setWindowOpenHandler(()=>({action:'deny'}));window.webContents.on('will-navigate',e=>e.preventDefault());window.webContents.on('will-attach-webview',e=>e.preventDefault());
-  window.on('blur',()=>{if(!this.busy)this.close();});window.on('hide',()=>{if(this.opened&&!this.busy)this.close();});
+  window.on('blur',()=>{if(!this.busy&&!this.sticky)this.close();});window.on('hide',()=>{if(this.opened&&!this.busy)this.close();});
   window.on('closed',()=>{this.ctx.releaseImage?.(owner);if(this.window===window){void this.search.cancel();clearInterval(this.focusTimer);this.focusTimer=undefined;this.window=undefined;this.loaded=false;this.opened=false;this.history.close();this.target=undefined;this.serial++;}});
   window.once('ready-to-show',()=>{if(this.window!==window||window.isDestroyed())return;this.loaded=true;if(this.opened&&!this.ctx.blocked())this.show();});void window.loadURL('clipper://app/tray.html');
  }
  private show(){
   const window=this.window!;if(this.ctx.blocked()||!this.opened||window.isDestroyed())return;const serial=this.serial;
-  window.show();window.focus();window.webContents.send('clipper:tray-session',true);
+  if(this.activate){window.show();window.focus();}else window.showInactive();window.webContents.send('clipper:tray-session',true);if(this.sticky||!this.activate)return;
   const hwnd=Number(window.getNativeWindowHandle().readBigUInt64LE());let misses=0;clearInterval(this.focusTimer);
   this.focusTimer=setInterval(()=>{if(serial!==this.serial)return;if(this.busy){misses=0;return;}if(foregroundBelongsTo(hwnd))misses=0;else if(++misses>=3)this.close();},150);this.focusTimer.unref();
  }

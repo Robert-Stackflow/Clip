@@ -34,8 +34,6 @@ export * from '../src/main/history-vault';
 export * from '../src/main/database';
 
 export * from '../src/shared/desktop';
-export * from '../src/shared/selection';
-export * from '../src/main/selection-reader';
 export * from '../src/shared/recording';
 export * from '../src/main/recording-file';
 

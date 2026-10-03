@@ -14,11 +14,11 @@ async function openDataView(page,name){
  const sync=name.startsWith('sync'),web=name.startsWith('web');
  if(name==='vault-enable'||name==='vault-recovery')await page.evaluate(()=>fixture.vault.encrypted=false);
  if(name==='web-off')await page.evaluate(()=>fixture.web.running=false);
- await page.locator(`[data-page="${sync?'sync':web?'web':'data'}"]`).click();await page.waitForSelector(sync?'#sync-save':web?'#web-status':'#vault-enable,#vault-lock',{state:'attached'});if(!sync&&!web)await page.locator('.section-nav button').first().click();
- if(['export','restore','restore-preview'].includes(name))await page.locator('.section-nav button').nth(2).click();if(name==='backups')await page.locator('.section-nav button').nth(1).click();
- const click={migration:'#migrate-storage',export:'#protected-export',restore:'#restore-file','restore-preview':'#restore-file','vault-enable':'#vault-enable','vault-recovery':'#vault-enable','vault-password':'#vault-password','vault-cleanup':'#vault-cleanup','sync-revoke':'[data-revoke="peer-known"]','sync-local':'[data-local="text"]','web-approve':'[data-web-approve="browser-pending"]'}[name];if(click)await page.locator(click).click();
+ await page.locator(`[data-page="${sync?'sync':web?'web':'settings'}"]`).click();await page.waitForSelector(sync?'#sync-save':web?'#web-status':'#vault-enable,#vault-lock',{state:'attached'});if(!sync&&!web){await page.waitForSelector('.settings-nav');await page.locator('.settings-nav [data-section="6"]').click();}
+ if(['export','restore','restore-preview'].includes(name))await page.locator('.settings-nav [data-section="8"]').click();if(name==='backups')await page.locator('.settings-nav [data-section="7"]').click();
+ const click={migration:'#migrate-storage',export:'#protected-export',restore:'#restore-file','restore-preview':'#restore-file','vault-enable':'#vault-enable','vault-recovery':'#vault-enable','vault-password':'#vault-password','vault-cleanup':'#vault-cleanup','sync-revoke':'[data-revoke="peer-known"]','sync-local':'[data-local="text"]','web-approve':'[data-web-approve="browser-pending"]'}[name];if(click){await page.locator(click).evaluate(el=>{const panel=el.closest('.section-panel');if(panel?.hidden)document.querySelector('[aria-controls="'+panel.id+'"]').click();});await page.locator(click).click();}
  if(name==='vault-recovery'){await page.locator('#vault-new-password').fill('Fixture-only-2026!');await page.locator('#vault-repeat-password').fill('Fixture-only-2026!');await page.locator('dialog [type=submit]').click();await page.waitForSelector('#vault-recovery-proof');}
  if(name==='restore-preview'){await page.locator('#restore-password').fill('Fixture-only-2026!');await page.locator('dialog [type=submit]').click();await page.waitForSelector('.restore-summary');}
- if(name==='web-on')await page.locator('details summary').click();
+ if(name==='web-on')await page.locator('#web-fingerprint').evaluate(el=>el.closest('details').open=true);
 }
 module.exports={setupData,openDataView};

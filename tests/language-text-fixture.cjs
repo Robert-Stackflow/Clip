@@ -17,8 +17,8 @@ async function openTextView(page,name){
  if(name==='ai-local')await page.evaluate(()=>fixture.ai.defaultId='local');
  if(name.startsWith('external-')){await page.evaluate(action=>{fixture.integration.pending={id:'external-token',intent:{action,text:'保存 <img id="injected-external"> {{姓名}}'}};fixture.refresh();},name.slice(9));await page.waitForSelector('dialog[open]');return;}
  if(['ai-remote','ai-local','ai-custom','ai-setup','script-run'].includes(name)){await page.locator('.detail-more').evaluate(el=>el.open=true);await page.locator(name==='script-run'?'#run-script':'#translate').click();await page.waitForSelector('dialog[open]');if(name==='ai-custom')await page.locator('#run-ai-action').selectOption('custom');return;}
- await page.locator('[data-page="tools"]').click();await page.waitForSelector('#new-ai-profile',{state:'attached'});await page.locator('.section-nav button').first().click();
- if(name.startsWith('script'))await page.locator('.section-nav button').nth(1).click();
+ const target=name.startsWith('script')?'scripts':name==='uri'?'uri':'ai';
+ await page.locator('[data-page="'+target+'"]').click();await page.waitForSelector(target==='scripts'?'#new-script':target==='uri'?'#toggle-integration':'#new-ai-profile');
  const selector={profile:'#new-ai-profile','profile-edit':'[data-ai-edit="remote"]',models:'[data-ai-models="remote"]','profile-delete':'[data-ai-remove="remote"]',script:'#new-script','script-edit':'[data-script-edit="script"]','script-delete':'[data-script-remove="script"]'}[name];if(selector){await page.locator(selector).click();await page.waitForSelector('dialog[open]');if(name==='models')await page.waitForFunction(()=>!document.getElementById('models-select').disabled);}
 }
 module.exports={setupText,openTextView};
