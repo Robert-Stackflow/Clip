@@ -20,7 +20,7 @@ output.push(await readFile('src/renderer/reference-data/MIME-DB-LICENSE.txt','ut
 output.push('Apache Tika MIME descriptions — https://github.com/apache/tika/tree/ccec84eb030fbfddcceffe063621e74ca81b13a3/tika-core/src/main/resources/org/apache/tika/mime');
 output.push(await readFile('src/renderer/reference-data/TIKA-LICENSE.txt','utf8'));
 output.push(await readFile('src/renderer/reference-data/TIKA-NOTICE.txt','utf8'));
-output.push('Wikidata MIME type descriptions (human-reviewed and paraphrased) — CC0 1.0 — https://www.wikidata.org/wiki/Property:P1163 and https://www.wikidata.org/wiki/Wikidata:Licensing');
+output.push('Wikidata MIME type descriptions and extension mappings (human-reviewed and paraphrased) — CC0 1.0 — https://www.wikidata.org/wiki/Property:P1163 and https://www.wikidata.org/wiki/Property:P1195 and https://www.wikidata.org/wiki/Wikidata:Licensing');
 output.push('Quick Reference — complete Git, LaTeX, Bash, Linux and Regex documents — https://github.com/jaywcjlove/reference');
 output.push(await readFile('src/renderer/reference-data/QUICKREF-LICENSE.txt','utf8'));
 output.push(rustNotices);

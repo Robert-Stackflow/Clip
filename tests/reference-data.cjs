@@ -26,15 +26,25 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=r
   assert.ok(emoji.some(([glyph])=>glyph==='👍🏿')&&emoji.some(([glyph])=>glyph==='🧑🏻'));
   const mime=JSON.parse(await fs.readFile('src/renderer/reference-data/mime-details.json','utf8'));
   const supplement=JSON.parse(await fs.readFile('src/renderer/reference-data/mime-wikidata.json','utf8'));
+  const extensionSupplements=JSON.parse(await fs.readFile('src/renderer/reference-data/mime-extension-supplements.json','utf8'));
   const mimeTypes=new Set(mime.map(([type])=>type));
-  assert.equal(Object.keys(supplement).length,50);
+  assert.equal(Object.keys(supplement).length,112);
   for(const [type,[zh,en,id]] of Object.entries(supplement)){
    assert.ok(mimeTypes.has(type),type+' must exist in the offline MIME catalog');
    assert.ok(zh&&en&&/^Q\d+$/.test(id),type+' must have bilingual text and a source item');
   }
+  assert.equal(Object.keys(extensionSupplements).length,20);
+  for(const [type,extensions] of Object.entries(extensionSupplements)){
+   assert.ok(mimeTypes.has(type),type+' must exist in the offline MIME catalog');
+   assert.ok(supplement[type],type+' must retain the reviewed Wikidata source item');
+   assert.ok(extensions.length&&extensions.every(extension=>/^[a-z0-9]+$/.test(extension)),type+' must have valid extensions');
+  }
   const entry=type=>referenceCatalog().mime.items.find(item=>item.title===type);
   assert.match(entry('model/stl').detail,/CAD.*3D/);
   assert.match(entry('application/geo+json').detail,/地理空间/);
+  assert.match(entry('application/vnd.apache.parquet').detail,/列式存储/);
+  assert.deepEqual(entry('application/vnd.apache.parquet').extensions,['parquet']);
+  assert.deepEqual(entry('application/vnd.comicbook+zip').extensions,['cbz']);
   setInterfaceLanguage('en');
   assert.match(entry('model/stl').detail,/CAD software and 3D printers/);
   setInterfaceLanguage('zh-CN');

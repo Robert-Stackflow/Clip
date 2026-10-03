@@ -1,0 +1,22 @@
+{
+  "audio/vnd.wave": ["wav", "wave"],
+  "application/vnd.shp": ["shp"],
+  "application/vnd.shx": ["shx"],
+  "application/vnd.debian.binary-package": ["deb", "udeb"],
+  "application/x-deb": ["deb", "udeb"],
+  "application/vnd.geo+json": ["geojson"],
+  "application/sgml": ["sgml"],
+  "application/vnd.coffeescript": ["coffee"],
+  "application/vnd.ms-asf": ["asf"],
+  "application/vnd.microsoft.portable-executable": ["exe", "dll"],
+  "application/vnd.comicbook-rar": ["cbr"],
+  "application/vnd.comicbook+zip": ["cbz"],
+  "audio/vnd.rn-realaudio": ["ra"],
+  "video/dv": ["dv"],
+  "application/vnd.las": ["las"],
+  "text/prs.fallenstein.rst": ["rst"],
+  "video/matroska": ["mkv"],
+  "application/vnd.hdfgroup.hdf5": ["h5", "hdf5"],
+  "application/vnd.sqlite3": ["sqlite", "sqlite3"],
+  "application/vnd.apache.parquet": ["parquet"]
+}

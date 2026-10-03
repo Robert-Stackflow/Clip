@@ -6,6 +6,7 @@ import entities from './reference-data/entities.json';
 import mime from './reference-data/mime-details.json';
 import mimeSourceDescriptions from './reference-data/mime-descriptions.json';
 import mimeWikidata from './reference-data/mime-wikidata.json';
+import mimeExtensionSupplements from './reference-data/mime-extension-supplements.json';
 import mimeRFC from './reference-data/mime-rfc.json';
 import colors from './reference-data/colors.json';
 import {interfaceLanguage} from '../shared/i18n';
@@ -50,6 +51,6 @@ export function referenceCatalog():Record<string,{label:string;source:string;ite
  symbols:{label:tx('符号','Symbols'),source:'https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt',items:(symbols as string[][]).map(([glyph,title,group,code])=>({glyph,title,detail:'U+'+code,group,copy:glyph}))},
  entities:{label:tx('HTML 实体','HTML entities'),source:'https://html.spec.whatwg.org/entities.json',items:(entities as string[][]).map(([title,glyph])=>({glyph,title,detail:Array.from(glyph,c=>'U+'+c.codePointAt(0)!.toString(16).toUpperCase()).join(' '),group:entityGroup(glyph),copy:title,secondary:glyph}))},
  colors:{label:tx('命名颜色','Named Colors'),source:'https://www.w3.org/TR/css-color-4/#named-colors',items:(colors as string[][]).map(([title,color])=>({glyph:'',title,detail:color.toUpperCase(),group:colorGroup(color),copy:color,secondary:title,color}))},
- mime:{label:'MIME',source:'https://www.iana.org/assignments/media-types/',items:(mime as [string,string[],string][]).map(([type,extensions,charset])=>({glyph:type,title:type,detail:mimeDescription(type)+(charset?` · ${charset}`:''),group:type.split('/')[0],copy:type,extensions,specifications:(mimeRFC as Record<string,string[][]>)[type]}))},
+ mime:{label:'MIME',source:'https://www.iana.org/assignments/media-types/',items:(mime as [string,string[],string][]).map(([type,extensions,charset])=>({glyph:type,title:type,detail:mimeDescription(type)+(charset?` · ${charset}`:''),group:type.split('/')[0],copy:type,extensions:[...new Set([...extensions,...((mimeExtensionSupplements as Record<string,string[]>)[type]||[])])],specifications:(mimeRFC as Record<string,string[][]>)[type]}))},
  ascii:{label:'ASCII',source:'https://www.rfc-editor.org/rfc/rfc20',items:Array.from({length:128},(_,code)=>({glyph:code<32?asciiNames[code]:code===32?'␣':code===127?'DEL':String.fromCharCode(code),title:code<32?asciiNames[code]:code===32?'SPACE':code===127?'DEL':String.fromCharCode(code),detail:`${code} · 0x${code.toString(16).toUpperCase().padStart(2,'0')} · ${code.toString(2).padStart(8,'0')}`,group:code<32||code===127?'Control':code<48?'Punctuation':code<58?'Digits':code<65?'Punctuation':code<91?'Uppercase':code<97?'Punctuation':code<123?'Lowercase':'Punctuation',copy:code<32||code===127?'\\x'+code.toString(16).toUpperCase().padStart(2,'0'):String.fromCharCode(code)}))}
 };}
