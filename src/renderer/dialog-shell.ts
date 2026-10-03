@@ -26,6 +26,6 @@ export function openOneDialog(dialog:HTMLDialogElement,dismiss:()=>void){
   dialog.addEventListener('click',event=>{const shouldDismiss=state!.outsideDown&&outside(event);state!.outsideDown=false;if(shouldDismiss)dismiss();});
   dialog.addEventListener('close',()=>{state!.outsideDown=false;const focus=state!.focus;state!.focus=undefined;if(focus?.isConnected&&!document.querySelector('dialog[open]'))focus.focus({preventScroll:true});});
  }
- dialog.setAttribute('aria-modal','true');resetDialogMotion(dialog);state.outsideDown=false;
+ dialog.setAttribute('aria-modal','true');const heading=dialog.querySelector<HTMLElement>('.one-dialog-heading h2[id]');if(heading)dialog.setAttribute('aria-labelledby',heading.id);resetDialogMotion(dialog);state.outsideDown=false;
  if(!dialog.open){state.focus=document.activeElement instanceof HTMLElement?document.activeElement:undefined;dialog.showModal();}
 }
