@@ -5,6 +5,7 @@ import {formatNumber,setInterfaceLanguage} from '../shared/i18n';
 import {icon,registerIcons} from './ui';
 import {Copy,Search} from 'lucide';
 import {referenceSegments} from './reference-segments';
+import {mountEmojiFont} from './emoji-font';
 registerIcons({copy:Copy,search:Search});
 const esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const emojiGlyph=(glyph:string)=>`<span class="reference-emoji-glyph" data-emoji="${esc(glyph)}" aria-hidden="true">${esc(glyph)}</span>`;
@@ -158,7 +159,8 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  let width=Math.round(scroll.clientWidth),resizeTimer:ReturnType<typeof setTimeout>|undefined;
  const resize=new ResizeObserver(()=>{if(disposed)return;const next=Math.round(scroll.clientWidth);if(kind==='symbols'&&width!==next){width=next;clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{const selected=currentCategory,section=sections.find(section=>section.group===selected),relative=section?scroll.scrollTop-section.top:0;rebuild();const anchor=sections.find(section=>section.group===selected);if(anchor){scroll.scrollTo({top:anchor.top+relative,behavior:'instant'});schedule();}},100);}else schedule();});resize.observe(scroll);
 
+ const disposeEmojiFont=kind==='symbols'?mountEmojiFont(root,tip):()=>{};
  const disposeSegments=referenceSegments(root.querySelector<HTMLElement>('.reference-tabs')!);
  rebuild();
- return ()=>{disposed=true;disposeSegments();cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);scroll.removeEventListener('keydown',navigationKey);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();tipResize.disconnect();cheatDocument?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();};
+ return ()=>{disposed=true;disposeEmojiFont();disposeSegments();cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);scroll.removeEventListener('keydown',navigationKey);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();tipResize.disconnect();cheatDocument?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();};
 }

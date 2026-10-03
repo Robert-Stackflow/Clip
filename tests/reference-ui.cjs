@@ -34,6 +34,7 @@ const {setup}=require('./renderer-fixture.cjs');
   const referenceLayout=()=>page.locator('.reference-page').evaluate(root=>{const tabs=root.querySelector('.reference-tabs').getBoundingClientRect(),search=root.querySelector('.reference-search').getBoundingClientRect(),workspace=root.querySelector('.reference-workspace'),nav=root.querySelector('.reference-nav').getBoundingClientRect();return {sameRow:Math.abs(tabs.top+tabs.height/2-search.top-search.height/2)<1,searchRight:Math.abs(search.right-root.getBoundingClientRect().right-(-parseFloat(getComputedStyle(root).paddingRight)))<1,navWidth:nav.width,border:getComputedStyle(workspace).borderTopWidth};});
   const symbolsLayout=await referenceLayout();assert.ok(symbolsLayout.sameRow&&symbolsLayout.searchRight,JSON.stringify(symbolsLayout));assert.equal(symbolsLayout.border,'0px');
   assert.equal(await page.locator('.reference-heading p').count(),0);
+  assert.ok(await page.locator('.reference-tones').evaluate(node=>node.getBoundingClientRect().top-document.querySelector('.reference-primary-controls').getBoundingClientRect().bottom<=16),'Tone selector should sit close to the controls');
   assert.equal(await page.locator('.reference-scroll').evaluate(node=>getComputedStyle(node).paddingRight),'14px');
   assert.ok(await page.locator('#reference-results').evaluate(node=>{const scroll=node.parentElement;return scroll.getBoundingClientRect().right-node.getBoundingClientRect().right>=14;}));
   assert.ok(await page.locator('.reference-item').count()<220,'Only nearby rows should be mounted');

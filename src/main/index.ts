@@ -72,7 +72,7 @@ const testing=process.env.CLIPPER_TEST_MODE==='1';
 const thumbnails=new Thumbnails(app.isPackaged?join(process.resourcesPath,'app.asar.unpacked/dist/native/ImageHost.exe'):join(__dirname,'../native/ImageHost.exe'));
 useThumbnails(thumbnails);
 
-protocol.registerSchemesAsPrivileged([{scheme:'clipper-font',privileges:{standard:true,secure:true,supportFetchAPI:true}},{scheme:'clipper',privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true}}]);
+protocol.registerSchemesAsPrivileged([{scheme:'clipper-font',privileges:{standard:true,secure:true,supportFetchAPI:true,corsEnabled:true}},{scheme:'clipper',privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true}}]);
 let appearanceService:AppearanceService;
 let updateService:UpdateService;
 let programRollback:ProgramRollbackManager|undefined;
