@@ -17,11 +17,11 @@ export const bundles=[
  {name:'text-preview-worker',restart:false,options:{...browser,entryPoints:['src/renderer/text-preview-worker.ts'],outfile:'dist/renderer/text-preview-worker.js'}},
  {name:'reference-pages',restart:false,options:{...browser,entryPoints:['src/renderer/reference-pages.ts'],outfile:'dist/renderer/reference-pages.js',format:'esm'}},
  {name:'web',restart:false,options:{...common,entryPoints:['src/web/app.ts'],outdir:'dist/web',platform:'browser',target:'es2022'}},
- {name:'styles',restart:false,options:{...common,entryPoints:['src/renderer/one-ui.css'],outfile:'dist/renderer/one-ui.css',target:'chrome138',loader:{'.woff2':'file','.woff':'file','.ttf':'file'},assetNames:'katex-fonts/[name]'}}
+ {name:'styles',restart:false,options:{...common,entryPoints:['src/renderer/one-ui.css'],outfile:'dist/renderer/one-ui.css',target:'chrome138',loader:{'.woff2':'file','.woff':'file','.ttf':'file'},assetNames:'katex-fonts/[name]',external:['./reference-flags.ttf']}}
 ];
 export const staticFiles=[
  ...['index','capture','recovery','unlock','shelf','recorder','scroll','image-editor','tray'].map(name=>['src/renderer/'+name+'.html','dist/renderer/'+name+'.html']),
  ['src/web/index.html','dist/web/index.html'],['src/main/ocr.ps1','dist/main/ocr.ps1',true],
- ['assets/clipper.png','dist/clipper.png'],['src/renderer/wav-worklet.js','dist/renderer/wav-worklet.js'],
+ ['assets/clipper.png','dist/clipper.png'],['src/renderer/wav-worklet.js','dist/renderer/wav-worklet.js'],['src/renderer/reference-flags.ttf','dist/renderer/reference-flags.ttf'],
  ...['one-components','redesign-028','recent-shelf','redesign-029','one-dialog'].map(name=>['src/renderer/'+name+'.css','dist/renderer/'+name+'.css'])
 ];

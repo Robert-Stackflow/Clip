@@ -8,7 +8,7 @@ import {referenceSegments} from './reference-segments';
 import {mountEmojiFont} from './emoji-font';
 registerIcons({copy:Copy,search:Search});
 const esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
-const emojiGlyph=(glyph:string)=>`<span class="reference-emoji-glyph" data-emoji="${esc(glyph)}" aria-hidden="true">${esc(glyph)}</span>`;
+const emojiGlyph=(glyph:string)=>`<span class="reference-emoji-glyph${/^(?:[\u{1F1E6}-\u{1F1FF}]{2}|\u{1F3F4}[\u{E0061}-\u{E007A}]+\u{E007F})$/u.test(glyph)?' reference-emoji-flag':''}" data-emoji="${esc(glyph)}" aria-hidden="true">${esc(glyph)}</span>`;
 const copy=async(value:string)=>{try{await navigator.clipboard.writeText(value);}catch{const field=document.createElement('textarea');field.value=value;field.style.position='fixed';field.style.opacity='0';document.body.append(field);try{field.select();if(!document.execCommand('copy'))throw new Error('Clipboard unavailable');}finally{field.remove();}}};
 
 type Row={top:number;height:number;group:string;title?:string;items?:{entry:Entry;index:number}[]};

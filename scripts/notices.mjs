@@ -13,6 +13,8 @@ for(const name of new Set(['electron','image-size','koffi','lucide','color-name'
 output.push(await readFile('licenses/SQLite3MultipleCiphers.txt','utf8'));
 output.push('Unicode emoji and Unicode character names — https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt and https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt');
 output.push(await readFile('src/renderer/reference-data/UNICODE-LICENSE.txt','utf8'));
+output.push('Noto Color Emoji COLRv1 (flag glyph subset) — SIL Open Font License 1.1 — https://github.com/googlefonts/noto-emoji');
+output.push(await readFile('licenses/NotoColorEmoji-OFL.txt','utf8'));
 output.push('mime-db 1.54.0 — offline MIME extension data — https://github.com/jshttp/mime-db');
 output.push(await readFile('src/renderer/reference-data/MIME-DB-LICENSE.txt','utf8'));
 output.push('Quick Reference — complete Git, LaTeX, Bash, Linux and Regex documents — https://github.com/jaywcjlove/reference');
