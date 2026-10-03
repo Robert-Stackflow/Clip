@@ -212,8 +212,8 @@ const {setup}=require('./renderer-fixture.cjs');
     assert.ok(selection.visible&&Math.abs(selection.top-start)<=1,JSON.stringify(selection));
    }
   }
-  // Scrolling the document manually releases the explicit selection and follows its actual heading.
-  await page.locator('.reference-scroll').evaluate(scroll=>{scroll.dispatchEvent(new WheelEvent('wheel',{deltaY:-500,bubbles:true}));scroll.scrollTop=0;});
+  // After navigation settles, the selected category follows later programmatic scrolling too.
+  await page.locator('.reference-scroll').evaluate(scroll=>{scroll.scrollTop=0;});
   await page.waitForFunction(id=>document.querySelector('#reference-categories [aria-current]')?.dataset.category===id,git.sections[0].id);
   for(const topic of snapshot.topics){
    await chooseReferenceTab(page,topic.id);

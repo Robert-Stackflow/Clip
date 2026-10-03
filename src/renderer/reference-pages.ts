@@ -91,6 +91,7 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
    for(const [index,node]of mounted)if(!wanted.has(index)&&!node.contains(document.activeElement)){node.remove();mounted.delete(index);}
    const section=[...sections].reverse().find(section=>section.top<=scroll.scrollTop+48)||sections[0];if(section)updateCategory(section.group);
   }else{
+   if(navigationGroup&&!navigationFrame){const target=results.querySelector<HTMLElement>(`[data-section="${navigationGroup}"]`);if(target){const box=target.getBoundingClientRect(),view=scroll.getBoundingClientRect();if(box.bottom<view.top||box.top>view.bottom)navigationGroup=undefined;}}
    const headers=Array.from(results.querySelectorAll<HTMLElement>('[data-section]'));const header=[...headers].reverse().find(node=>node.offsetTop-results.offsetTop<=scroll.scrollTop+72)||headers[0];if(header)updateCategory(header.dataset.section!);
   }
  };
@@ -130,7 +131,10 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  };
  nav.onclick=event=>{const button=(event.target as HTMLElement).closest<HTMLElement>('[data-category]');if(!button)return;awaitPointer=true;pointer=undefined;clearTimeout(scrollTipTimer);const group=button.dataset.category!;cheatDocument?.ensure(group);const top=kind==='symbols'?sections.find(section=>section.group===group)!.top:Array.from(results.querySelectorAll<HTMLElement>('[data-section]')).find(node=>node.dataset.section===group)!.offsetTop-results.offsetTop;
   hideTip();cancelNavigation();navigationGroup=group;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(kind==='symbols')scroll.scrollTo({top,behavior:reduced?'instant':'smooth'});
+  if(kind==='symbols'){
+   scroll.scrollTo({top,behavior:reduced?'instant':'smooth'});
+   if(reduced||Math.abs(scroll.scrollTop-top)<1){navigationGroup=undefined;schedule();}
+  }
   else{
    // Lazy sections change height while scrolling. Follow the actual heading throughout the motion.
    const start=scroll.scrollTop,began=performance.now(),duration=reduced?0:360;
@@ -138,12 +142,14 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
     const destination=Math.max(0,Math.min(scroll.scrollHeight-scroll.clientHeight,target.offsetTop-results.offsetTop));
     const progress=duration?Math.min(1,(now-began)/duration):1,ease=1-(1-progress)**3;
     scroll.scrollTop=start+(destination-start)*ease;updateCategory(group);
-    if(now-began<duration+200)navigationFrame=requestAnimationFrame(move);else navigationFrame=0;
+    if(now-began<duration+200)navigationFrame=requestAnimationFrame(move);else{navigationFrame=0;schedule();}
    };navigationFrame=requestAnimationFrame(move);
   }
   updateCategory(group);
  };
  scroll.addEventListener('wheel',cancelNavigation,{passive:true});scroll.addEventListener('touchstart',cancelNavigation,{passive:true});scroll.addEventListener('pointerdown',cancelNavigation);
+ const finishSymbolNavigation=()=>{if(kind==='symbols'&&navigationGroup){navigationGroup=undefined;schedule();}};
+ scroll.addEventListener('scrollend',finishSymbolNavigation);
  const navigationKey=(event:KeyboardEvent)=>{if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))cancelNavigation();};
  scroll.addEventListener('keydown',navigationKey);
  root.onclick=event=>{const link=(event.target as HTMLElement).closest<HTMLAnchorElement>('a[href]');if(!link)return;event.preventDefault();if(link.getAttribute('href')?.startsWith('#')){const anchor=decodeURIComponent(link.hash.slice(1)).toLocaleLowerCase();const topic=cheatTopics.find(topic=>topic.id===active);const section=topic?.sections.find(section=>section.name.toLocaleLowerCase().replace(/ /g,'-')===anchor);if(section)nav.querySelector<HTMLButtonElement>(`[data-category="${section.id}"]`)?.click();return;}void window.clipper.openReference(link.href).catch(error=>notify(String(error)));};
@@ -176,5 +182,5 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  const disposeEmojiFont=kind==='symbols'?mountEmojiFont(root,tip):()=>{};
  const disposeSegments=referenceSegments(root.querySelector<HTMLElement>('.reference-tabs')!);
  rebuild();
- return ()=>{disposed=true;disposeEmojiFont();disposeSegments();cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);scroll.removeEventListener('keydown',navigationKey);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();tipResize.disconnect();cheatDocument?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();window.clipperAppearance?.releaseFontResources?.();};
+ return ()=>{disposed=true;disposeEmojiFont();disposeSegments();cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);scroll.removeEventListener('scrollend',finishSymbolNavigation);scroll.removeEventListener('keydown',navigationKey);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();tipResize.disconnect();cheatDocument?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();window.clipperAppearance?.releaseFontResources?.();};
 }
