@@ -18,6 +18,13 @@ export function lockOneDialogDismiss(dialog:HTMLDialogElement){
  return ()=>{const count=dismissLocks.get(form)||0;if(count<=1)dismissLocks.delete(form);else dismissLocks.set(form,count-1);};
 }
 export function oneDialogDismissLocked(dialog:HTMLDialogElement){const form=dialog.querySelector('form');return !!form&&!!dismissLocks.get(form);}
+function focusField(dialog:HTMLDialogElement){
+ const available=(element:HTMLElement)=>!element.matches(':disabled')&&!element.closest('[hidden],[inert]')&&element.getClientRects().length>0&&getComputedStyle(element).visibility==='visible';
+ if(Array.from(dialog.querySelectorAll<HTMLElement>('[autofocus]')).some(available))return;
+ const active=document.activeElement;if(active!==dialog&&!(active instanceof Element&&active.closest('.one-dialog-heading button')))return;
+ const field=Array.from(dialog.querySelectorAll<HTMLElement>('.one-dialog-body input:not([readonly]),.one-dialog-body textarea:not([readonly]),.one-dialog-body [contenteditable="true"]')).find(element=>(!(element instanceof HTMLInputElement)||!['hidden','checkbox','radio','range','color','file','button','submit','reset'].includes(element.type))&&available(element));
+ field?.focus({preventScroll:true});
+}
 /** One requires both pointer-down and pointer-up outside, so dragging out of an input keeps the dialog open. */
 export function openOneDialog(dialog:HTMLDialogElement,dismiss:()=>void){
  let state=states.get(dialog);if(!state){state={outsideDown:false};states.set(dialog,state);
@@ -27,5 +34,5 @@ export function openOneDialog(dialog:HTMLDialogElement,dismiss:()=>void){
   dialog.addEventListener('close',()=>{state!.outsideDown=false;const focus=state!.focus;state!.focus=undefined;if(focus?.isConnected&&!document.querySelector('dialog[open]'))focus.focus({preventScroll:true});});
  }
  dialog.setAttribute('aria-modal','true');const heading=dialog.querySelector<HTMLElement>('.one-dialog-heading h2[id]');if(heading)dialog.setAttribute('aria-labelledby',heading.id);resetDialogMotion(dialog);state.outsideDown=false;
- if(!dialog.open){state.focus=document.activeElement instanceof HTMLElement?document.activeElement:undefined;dialog.showModal();}
+ if(!dialog.open){state.focus=document.activeElement instanceof HTMLElement?document.activeElement:undefined;dialog.showModal();focusField(dialog);}
 }
