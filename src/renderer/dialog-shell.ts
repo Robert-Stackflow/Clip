@@ -9,6 +9,15 @@ export function dialogParts(title:string,body:string,actions:string,form=false){
  return `<header class="one-dialog-heading${form?' modal-heading':''}"><h2 id="${prefix}-title">${esc(title)}</h2><button type="button" id="${prefix}-close" class="icon-button quiet" aria-label="${esc(t('关闭'))}">${icon('close')}</button></header><div class="one-dialog-body${form?' modal-body':''}">${body}</div>${form?'<div id="modal-error" role="alert"></div>':''}<footer class="one-dialog-actions${form?' modal-footer':' confirm-actions'}">${actions}</footer>`;
 }
 const states=new WeakMap<HTMLDialogElement,{focus?:HTMLElement;outsideDown:boolean}>();
+const dismissLocks=new WeakMap<HTMLFormElement,number>();
+/** Keep a running form in place until its operation settles. Locks belong to the form, not the reused dialog. */
+export function lockOneDialogDismiss(dialog:HTMLDialogElement){
+ const form=dialog.querySelector('form');if(!form)return ()=>{};
+ resetDialogMotion(dialog);
+ dismissLocks.set(form,(dismissLocks.get(form)||0)+1);
+ return ()=>{const count=dismissLocks.get(form)||0;if(count<=1)dismissLocks.delete(form);else dismissLocks.set(form,count-1);};
+}
+export function oneDialogDismissLocked(dialog:HTMLDialogElement){const form=dialog.querySelector('form');return !!form&&!!dismissLocks.get(form);}
 /** One requires both pointer-down and pointer-up outside, so dragging out of an input keeps the dialog open. */
 export function openOneDialog(dialog:HTMLDialogElement,dismiss:()=>void){
  let state=states.get(dialog);if(!state){state={outsideDown:false};states.set(dialog,state);

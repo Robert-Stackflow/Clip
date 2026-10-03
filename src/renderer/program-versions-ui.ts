@@ -1,6 +1,7 @@
 import {t as tr,formatDate,formatBytes,formatNumber} from '../shared/i18n';
 import {createElement,Archive} from 'lucide';
 import {utilityEmpty} from './utility-empty';
+import {lockOneDialogDismiss} from './dialog-shell';
 import {newerVersion} from '../shared/updates';
 import type {ProgramVersionEntry,ProgramRollbackChoice,ProgramRollbackPreview} from '../shared/program-versions';
 interface Context {modal(title:string,body:string,save:()=>Promise<void>,label?:string):void;toast(value:unknown):void}
@@ -15,7 +16,7 @@ export function mountProgramVersions(root:HTMLElement,ctx:Context){
   if(entries.length>limit){const more=document.createElement('button');more.className='load-more';more.textContent=tr('载入更多');more.onclick=()=>{limit+=50;draw();};list.append(more);}
  }
  async function refresh(){const value=await api.programVersions();if(disposed)return;entries=value;draw();}
- async function locked(action:()=>Promise<void>){const dialog=q<HTMLDialogElement>('dialog'),prevent=(e:Event)=>e.preventDefault(),controls=Array.from(dialog.querySelectorAll<HTMLButtonElement|HTMLInputElement>('button,input')),disabled=controls.map(c=>c.disabled);dialog.addEventListener('cancel',prevent);controls.forEach(c=>c.disabled=true);try{await action();}finally{dialog.removeEventListener('cancel',prevent);controls.forEach((c,i)=>c.disabled=disabled[i]);}}
+ async function locked(action:()=>Promise<void>){const dialog=q<HTMLDialogElement>('dialog'),unlock=lockOneDialogDismiss(dialog),controls=Array.from(dialog.querySelectorAll<HTMLButtonElement|HTMLInputElement>('button,input')),disabled=controls.map(c=>c.disabled);controls.forEach(c=>c.disabled=true);try{await action();}finally{unlock();controls.forEach((c,i)=>c.disabled=disabled[i]);}}
  function wipeOnClose(){const dialog=q<HTMLDialogElement>('dialog'),fields=Array.from(dialog.querySelectorAll<HTMLInputElement>('input')),key=dialog.querySelector<HTMLElement>('#program-recovery-key'),wipe=()=>{fields.forEach(f=>f.value='');if(key)key.textContent='';};modalCleanup=()=>{wipe();if(dialog.open)dialog.close();};dialog.addEventListener('close',wipe,{once:true});return wipe;}
  async function select(id:string){if(loading||externalBusy||disposed)return;loading=true;draw();status.textContent=tr('正在校验旧程序与恢复点…');
   try{const choice=await api.chooseProgramVersion(id);if(disposed){await api.cancelProgramRollback();return;}if(!choice.encrypted&&!choice.requiresProtection){const preview=await api.previewProgramVersion(choice.token);if(disposed){await api.cancelProgramRollback();return;}showPreview(preview);}else credentials(choice);

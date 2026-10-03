@@ -25,7 +25,7 @@ const {setup}=require('./renderer-fixture.cjs'),{setupData,openDataView}=require
   const busy=async name=>{
    await page.evaluate(name=>fixture.block=name,name);await page.locator('dialog [type=submit]').click();await called(name);
    assert.equal(await page.locator('#modal-close').isDisabled(),true);assert.equal(await page.locator('#modal-cancel').isDisabled(),true);
-   await page.keyboard.press('Escape');assert.equal(await page.locator('dialog').evaluate(node=>node.open),true);
+   await page.keyboard.press('Escape');if(name==='storage-migrate'||name==='backup-export'){await page.waitForTimeout(200);assert.equal(await page.locator('dialog').evaluate(node=>node.open),true);await page.mouse.click(5,5);await page.waitForTimeout(200);}assert.equal(await page.locator('dialog').evaluate(node=>node.open),true);
    await page.evaluate(()=>fixture.release());await closed();
   };
 

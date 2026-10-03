@@ -6,6 +6,7 @@ import {utilityEmpty} from './utility-empty';
 import {t as tr,formatBytes,formatDate,formatNumber} from '../shared/i18n';
 import {renderVault} from './vault-ui';
 import {renderCheckpoints} from './checkpoint-ui';
+import {lockOneDialogDismiss} from './dialog-shell';
 import type {DataState,RestorePreview} from '../shared/data';
 const api=window.clipper,q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
@@ -16,7 +17,7 @@ export function dataUI(ctx:Context){
  let generation=0,restoreGeneration=0,embedded=false;
  const actions=new ActionScope(),on=(id:string,fn:()=>unknown)=>actions.bind(q<HTMLButtonElement>(id),fn,ctx.toast,id==='restore-file'?'restore-source':id);
  function protectInputs(){const nodes=Array.from(q('dialog').querySelectorAll<HTMLInputElement>('input[type=password]'));q('dialog').addEventListener('close',()=>nodes.forEach(n=>n.value=''),{once:true});}
- async function locked(work:()=>Promise<void>){const dialog=q<HTMLDialogElement>('dialog'),cancel=(e:Event)=>{e.preventDefault();e.stopImmediatePropagation();};dialog.addEventListener('cancel',cancel,true);const buttons=[q<HTMLButtonElement>('modal-close'),q<HTMLButtonElement>('modal-cancel')];buttons.forEach(b=>b.disabled=true);try{await work();}finally{dialog.removeEventListener('cancel',cancel,true);buttons.forEach(b=>b.disabled=false);}}
+ async function locked(work:()=>Promise<void>){const dialog=q<HTMLDialogElement>('dialog'),unlock=lockOneDialogDismiss(dialog),buttons=[q<HTMLButtonElement>('modal-close'),q<HTMLButtonElement>('modal-cancel')];buttons.forEach(b=>b.disabled=true);try{await work();}finally{unlock();buttons.forEach(b=>b.disabled=false);}}
  function status(state:DataState){
   const b=state.backup,node=q('backup-status');if(!node)return;
   node.innerHTML=tr`<div><span>最近成功</span><strong>${date(b.lastSuccess)}</strong></div><div><span>下次备份</span><strong>${b.enabled?date(b.nextAt):tr('未启用')}</strong></div>${b.lastError?`<p class="data-error" role="status">${esc(b.lastError)}</p>`:''}`;
