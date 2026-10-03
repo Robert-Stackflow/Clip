@@ -5,6 +5,7 @@ import {formatNumber,setInterfaceLanguage} from '../shared/i18n';
 import {icon,registerIcons} from './ui';
 import {Copy,Search} from 'lucide';
 import {EmojiRasterizer} from './reference-emoji';
+import {referenceSegments} from './reference-segments';
 registerIcons({copy:Copy,search:Search});
 const esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const emojiImage=(glyph:string)=>`<canvas class="reference-emoji-image" width="96" height="96" data-emoji="${esc(glyph)}" aria-hidden="true"></canvas>`;
@@ -25,9 +26,11 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  const mounted=new Map<number,HTMLElement>();
  const painter=kind==='symbols'?new EmojiRasterizer():undefined;
  const tip=document.createElement('div');tip.className='reference-popover';tip.hidden=true;tip.id='reference-hover-details';tip.setAttribute('role','dialog');tip.setAttribute('aria-label',tx('符号详情','Symbol details'));document.body.append(tip);
- const tabs=kind==='symbols'?Object.entries(catalog).map(([id,value])=>[id,value.label]):cheatTopics.map(topic=>[topic.id,topic.label]);
- root.innerHTML=`<section class="reference-page ${kind==='cheats'?'reference-sheet':''}"><header class="reference-heading"><h1>${kind==='symbols'?tx('表情符号','Symbols & Emoji'):'CheetSheet'}</h1><div class="reference-tab-viewport"><div class="tabs reference-tabs" aria-label="${tx('资料分类','Reference categories')}">${tabs.map(([id,label])=>`<button type="button" data-tab="${id}" class="${id===active?'active':''}">${esc(label)}</button>`).join('')}</div></div></header><div class="reference-toolbar"><label class="reference-search">${icon('lucide:search')}<input type="search" id="reference-search" autocomplete="off" placeholder="${kind==='symbols'?tx('搜索字符、名称或代码','Search characters, names or codes'):tx('搜索命令、语法或用途','Search commands, syntax or purpose')}" aria-label="${tx('搜索资料','Search references')}"></label>${kind==='symbols'?`<div class="reference-tones" aria-label="${tx('肤色','Skin tone')}">${['✋','✋🏻','✋🏼','✋🏽','✋🏾','✋🏿'].map((glyph,index)=>`<button type="button" data-tone="${index}" aria-label="${esc([tx('默认肤色','Default tone'),tx('浅肤色','Light tone'),tx('较浅肤色','Medium-light tone'),tx('中等肤色','Medium tone'),tx('较深肤色','Medium-dark tone'),tx('深肤色','Dark tone')][index])}" aria-pressed="${index===tone}">${emojiImage(glyph)}</button>`).join('')}</div>`:''}<span id="reference-count" class="reference-count"></span></div><div class="reference-workspace"><aside class="reference-nav" aria-label="${tx('分类导航','Category navigation')}">${kind==='cheats'?`<div class="reference-nav-caption">${tx('本页目录','On this page')}</div>`:''}<nav id="reference-categories"></nav><p class="reference-attribution" id="reference-attribution"></p></aside><div class="reference-scroll" tabindex="-1"><div id="reference-results" class="reference-results"></div></div></div></section>`;
- const input=root.querySelector<HTMLInputElement>('#reference-search')!,results=root.querySelector<HTMLElement>('#reference-results')!,scroll=root.querySelector<HTMLElement>('.reference-scroll')!,nav=root.querySelector<HTMLElement>('#reference-categories')!,count=root.querySelector<HTMLElement>('#reference-count')!,attribution=root.querySelector<HTMLElement>('#reference-attribution')!,tones=root.querySelector<HTMLElement>('.reference-tones');
+ const tabs=kind==='symbols'?Object.entries(catalog).map(([id,value])=>({id,label:value.label,count:value.items.length})):cheatTopics.map(topic=>({id:topic.id,label:topic.label,count:topic.sections.reduce((sum,section)=>sum+section.items,0)}));
+ const tonePicker=kind==='symbols'?`<div class="reference-tone-control"><div class="reference-tones" role="group" aria-label="${tx('人物与手势肤色','People & gesture skin tone')}">${['✋','✋🏻','✋🏼','✋🏽','✋🏾','✋🏿'].map((glyph,index)=>`<button type="button" data-tone="${index}" aria-label="${esc([tx('默认肤色','Default tone'),tx('浅肤色','Light tone'),tx('较浅肤色','Medium-light tone'),tx('中等肤色','Medium tone'),tx('较深肤色','Medium-dark tone'),tx('深肤色','Dark tone')][index])}" aria-pressed="${index===tone}">${emojiImage(glyph)}</button>`).join('')}</div></div>`:'';
+ root.innerHTML=`<section class="reference-page ${kind==='cheats'?'reference-sheet':''}"><header class="reference-heading"><h1>${kind==='symbols'?tx('表情符号','Symbols & Emoji'):'CheetSheet'}</h1></header><div class="reference-primary-controls"><div class="reference-tab-viewport"><div class="tabs reference-tabs" aria-label="${tx('资料分类','Reference categories')}">${tabs.map(({id,label,count})=>`<button type="button" data-tab="${id}" class="${id===active?'active':''}" aria-label="${esc(label)}"><span>${esc(label)}</span><small data-tab-count="${id}">${formatNumber(count)}</small></button>`).join('')}</div></div><label class="reference-search">${icon('lucide:search')}<input type="search" id="reference-search" autocomplete="off" placeholder="${kind==='symbols'?tx('搜索字符、名称或代码','Search characters, names or codes'):tx('搜索命令、语法或用途','Search commands, syntax or purpose')}" aria-label="${tx('搜索资料','Search references')}"></label></div><div class="reference-workspace"><aside class="reference-nav" aria-label="${tx('分类导航','Category navigation')}">${tonePicker}<nav id="reference-categories"></nav><p class="reference-attribution" id="reference-attribution"></p></aside><div class="reference-scroll" tabindex="-1"><div id="reference-results" class="reference-results"></div></div></div></section>`;
+ const input=root.querySelector<HTMLInputElement>('#reference-search')!,results=root.querySelector<HTMLElement>('#reference-results')!,scroll=root.querySelector<HTMLElement>('.reference-scroll')!,nav=root.querySelector<HTMLElement>('#reference-categories')!,attribution=root.querySelector<HTMLElement>('#reference-attribution')!,tones=root.querySelector<HTMLElement>('.reference-tones');
+ const setCount=(value:number)=>{root.querySelector<HTMLElement>(`[data-tab-count="${active}"]`)!.textContent=formatNumber(value);};
  const performCopy=(value:string)=>void copy(value).then(()=>{if(!disposed)notify(tx('已复制','Copied'));}).catch(error=>{if(!disposed)notify(String(error));});
  const hideTip=()=>{painter?.detach(tip);clearTimeout(tooltipTimer);tooltipAnchor?.removeAttribute('aria-describedby');tooltipAnchor=undefined;if(!tip.hidden)tip.hidden=true;};
  const showTip=(button:HTMLElement)=>{
@@ -80,12 +83,13 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
   cancelNavigation();
   hideTip();awaitPointer=true;pointer=undefined;clearTimeout(scrollTipTimer);cheatDocument?.dispose();cheatDocument=undefined;currentCategory='';painter?.clear();if(tones)painter?.attach(tones);mounted.clear();results.replaceChildren();rows=[];sections=[];
   const term=input.value.trim().toLocaleLowerCase();
+  for(const tab of tabs)if(tab.id!==active){const badge=root.querySelector<HTMLElement>(`[data-tab-count="${tab.id}"]`)!,value=formatNumber(tab.count);if(badge.textContent!==value)badge.textContent=value;}
   if(kind==='symbols'){
-   tones!.hidden=active!=='emoji';
+   tones!.parentElement!.hidden=active!=='emoji';
    entries=catalog[active].items.filter(entry=>!term||`${entry.glyph} ${(entry.variants||[]).join(' ')} ${entry.title} ${entry.detail} ${entry.group} ${groupLabel(entry.group)} ${entry.secondary||''} ${(entry.extensions||[]).join(' ')}`.toLocaleLowerCase().includes(term));
    focusIndex=Math.min(focusIndex,Math.max(0,entries.length-1));
    const buckets=new Map<string,Entry[]>();for(const entry of entries){if(!buckets.has(entry.group))buckets.set(entry.group,[]);buckets.get(entry.group)!.push(entry);}
-   entries=[...buckets.values()].flat();count.textContent=tx(`${formatNumber(entries.length)} 项`,`${formatNumber(entries.length)} items`);
+   entries=[...buckets.values()].flat();setCount(entries.length);
    const scale=parseFloat(getComputedStyle(root).getPropertyValue('--text-scale'))||1;
    const cell=active==='mime'?Math.max(220,240*scale):active==='kaomoji'?160*scale:active==='colors'?52*scale:56*scale;
    columns=Math.max(1,Math.floor((scroll.clientWidth-20)/(cell+6)));const height=(active==='mime'?48:active==='kaomoji'?54:60)*Math.max(1,scale),headerHeight=48*Math.max(1,scale);
@@ -98,7 +102,7 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
   }else{
    const topic=cheatTopics.find(topic=>topic.id===active)!;
    const filtered=filterCheatSections(topic,term);
-   const total=filtered.reduce((sum,section)=>sum+section.items,0);count.textContent=tx(`${formatNumber(total)} 条 · ${filtered.length} 节`,`${formatNumber(total)} entries · ${filtered.length} sections`);
+   const total=filtered.reduce((sum,section)=>sum+section.items,0);setCount(total);
    cheatDocument=mountCheatDocument(results,scroll,topic,filtered);
    nav.innerHTML=filtered.map(section=>`<button type="button" data-category="${section.id}"><span>${esc(section.name)}</span><small>${section.items||''}</small></button>`).join('');
    entries=filtered.map(section=>({glyph:'',title:section.name,detail:'',group:section.id,copy:''}));attribution.innerHTML=`<a href="${topic.source}">Quick Reference · MIT ↗</a>`;
@@ -135,12 +139,24 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
   results.querySelector<HTMLElement>(`[data-entry="${focusIndex}"]`)?.focus({preventScroll:true});
  };
  root.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(button=>button.onclick=()=>{active=button.dataset.tab!;input.value='';clearTimeout(queryTimer);scroll.scrollTo({top:0,behavior:'instant'});focusIndex=0;root.querySelectorAll<HTMLElement>('[data-tab]').forEach(node=>{node.classList.toggle('active',node.dataset.tab===active);node.setAttribute('aria-pressed',String(node.dataset.tab===active));});rebuild();});
- root.querySelectorAll<HTMLButtonElement>('[data-tone]').forEach(button=>button.onclick=()=>{tone=Number(button.dataset.tone);root.querySelectorAll<HTMLElement>('[data-tone]').forEach(node=>node.setAttribute('aria-pressed',String(Number(node.dataset.tone)===tone)));hideTip();painter?.clear();painter?.attach(tones!);for(const [index,node]of mounted)if(rows[index].items){rows[index].items!.forEach(({entry,index})=>{const canvas=node.querySelector<HTMLCanvasElement>(`[data-entry="${index}"] canvas`);if(canvas){canvas.dataset.emoji=toneGlyph(entry,tone);canvas.classList.remove('ready');canvas.getContext('2d')!.clearRect(0,0,96,96);}else node.querySelector<HTMLElement>(`[data-entry="${index}"] .reference-glyph`)!.textContent=toneGlyph(entry,tone);});painter!.attach(node);}});
+ root.querySelectorAll<HTMLButtonElement>('[data-tone]').forEach(button=>button.onclick=()=>{
+  const next=Number(button.dataset.tone);if(tone===next)return;tone=next;
+  root.querySelectorAll<HTMLElement>('[data-tone]').forEach(node=>node.setAttribute('aria-pressed',String(Number(node.dataset.tone)===tone)));hideTip();
+  for(const [rowIndex,node]of mounted)if(rows[rowIndex].items){
+   // Retain already painted faces and symbols; only real tone variants need new graphics.
+   for(const {entry,index}of rows[rowIndex].items!){
+    const button=node.querySelector<HTMLElement>(`[data-entry="${index}"]`)!,canvas=button.querySelector<HTMLCanvasElement>('canvas'),glyph=toneGlyph(entry,tone);
+    if(canvas&&canvas.dataset.emoji!==glyph){painter!.detach(button);canvas.dataset.emoji=glyph;canvas.classList.remove('ready');canvas.getContext('2d')!.clearRect(0,0,96,96);painter!.attach(button);}
+    else if(!canvas)button.querySelector<HTMLElement>('.reference-glyph')!.textContent=glyph;
+   }
+  }
+ });
  let composing=false;input.addEventListener('compositionstart',()=>{composing=true;clearTimeout(queryTimer);});input.addEventListener('compositionend',()=>{composing=false;changed();});
  const changed=()=>{clearTimeout(queryTimer);if(!composing)queryTimer=setTimeout(()=>{scroll.scrollTo({top:0,behavior:'instant'});focusIndex=0;rebuild();},100);};input.oninput=changed;
  let width=Math.round(scroll.clientWidth),resizeTimer:ReturnType<typeof setTimeout>|undefined;
  const resize=new ResizeObserver(()=>{if(disposed)return;const next=Math.round(scroll.clientWidth);if(kind==='symbols'&&width!==next){width=next;clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{const selected=currentCategory,section=sections.find(section=>section.group===selected),relative=section?scroll.scrollTop-section.top:0;rebuild();const anchor=sections.find(section=>section.group===selected);if(anchor){scroll.scrollTo({top:anchor.top+relative,behavior:'instant'});schedule();}},100);}else schedule();});resize.observe(scroll);
 
+ const disposeSegments=referenceSegments(root.querySelector<HTMLElement>('.reference-tabs')!);
  rebuild();
- return ()=>{disposed=true;cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();tipResize.disconnect();cheatDocument?.dispose();painter?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();};
+ return ()=>{disposed=true;disposeSegments();cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();tipResize.disconnect();cheatDocument?.dispose();painter?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();};
 }

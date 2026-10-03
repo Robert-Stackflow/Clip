@@ -1,3 +1,4 @@
+const {chooseReferenceTab}=require('./reference-helpers.cjs');
 const {_electron:electron}=require('@playwright/test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
 const {StorageManager}=require('../work/test-exports.cjs');
 (async()=>{const {beginCase}=await import('../scripts/workspace.mjs'),work=await beginCase('reference-performance');let app;try{
@@ -7,12 +8,12 @@ const {StorageManager}=require('../work/test-exports.cjs');
  const page=await app.firstWindow();await page.waitForSelector('[data-page=symbols]');const report={packaged:!!process.env.CLIPPER_PACKAGED_EXE,samples:[]};
  await page.locator('[data-page=symbols]').click();await page.waitForSelector('.reference-item');
  for(const tab of ['mime','emoji','symbols','entities']){
-  await page.locator(`[data-tab=${tab}]`).click();await page.waitForTimeout(150);
+  await chooseReferenceTab(page,tab);await page.waitForTimeout(150);
   const sample=await page.evaluate(async()=>{
    const scroll=document.querySelector('.reference-scroll'),times=[],tasks=[];let last=0,maxNodes=0,n=0;
    const observer=new PerformanceObserver(list=>tasks.push(...list.getEntries().map(entry=>entry.duration)));observer.observe({type:'longtask'});
    const start=performance.now();await new Promise(resolve=>{function tick(now){if(last)times.push(now-last);last=now;scroll.scrollTop=Math.min(scroll.scrollHeight-scroll.clientHeight,n*180);maxNodes=Math.max(maxNodes,document.querySelectorAll('.reference-item').length);if(++n<140)requestAnimationFrame(tick);else resolve();}requestAnimationFrame(tick);});observer.disconnect();times.sort((a,b)=>a-b);
-   return {elapsed:performance.now()-start,p95:times[Math.floor(times.length*.95)],max:Math.max(...times),longTasks:tasks,maxNodes,total:Number(document.querySelector('#reference-count').textContent.replace(/\D/g,'')),height:scroll.scrollHeight};
+   return {elapsed:performance.now()-start,p95:times[Math.floor(times.length*.95)],max:Math.max(...times),longTasks:tasks,maxNodes,total:Number(document.querySelector('.reference-tabs>.active [data-tab-count]').textContent.replace(/\D/g,'')),height:scroll.scrollHeight};
   });
   report.samples.push({tab,...sample});assert(sample.maxNodes<250,'DOM size must stay bounded');
  }
