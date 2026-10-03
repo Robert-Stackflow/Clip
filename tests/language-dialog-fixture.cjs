@@ -21,7 +21,6 @@ async function openDialog(page,name){
  else if(name==='reply-image'){await page.locator('[data-id="image"]').click();await page.locator('.detail-more').evaluate(el=>el.open=true);await page.locator('#save-reply').click();}
  else if(name==='ocr'){await page.locator('[data-id="image"]').click();await page.locator('.detail-more').evaluate(el=>el.open=true);await page.locator('#ocr').click();await page.waitForFunction(()=>!document.getElementById('ocr-run').disabled);}
  else if(name==='capture')await page.locator('#take-screenshot').click();
- else if(['desktop','selection','efficiency'].includes(name)){await page.locator('[data-page="settings"]').click();await page.locator('.section-nav button').nth(2).click();await page.locator('#'+name+'-settings').click();}
  else if(name==='search')await page.locator('#search-history').click();
  else if(name==='stack-rules'||name==='stack-batch'){await page.locator('[data-page="stack"]').click();await page.locator('#'+name).click();if(name==='stack-batch'){await page.locator('#stack-preview').click();await page.waitForFunction(()=>!document.querySelector('dialog [type=submit]').disabled);}}
  else if(name==='formats'||name==='metadata'){await page.locator('.detail-more').evaluate(el=>el.open=true);await page.locator('#content-info').click();await page.waitForSelector('#metadata-tab');if(name==='metadata'){await page.locator('#metadata-tab').click();await page.locator('#metadata-read').click();await page.waitForSelector('#metadata-values dd');}}
