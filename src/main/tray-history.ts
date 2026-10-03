@@ -3,7 +3,8 @@ import {randomUUID} from 'node:crypto';
 import type {Store} from './store';
 import type {Clip,Detail} from '../shared/types';
 import type {ClipPreview} from '../shared/preview';
-import {TRAY_LIMIT,TRAY_TEXT_LIMIT,TRAY_CATEGORY_MISSING,validateTrayQuery,type TrayState,type TrayPreview} from '../shared/tray';
+import {TRAY_TEXT_LIMIT,validateTrayQuery,type TrayQuery,type TrayState,type TrayPreview} from '../shared/tray';
+import {readTrayRows,type TrayRows} from './tray-query';
 interface Ticket{id:string;hash:string;expires:number}
 /** Transient capabilities for only the rows displayed by the current tray query. */
 export class TrayHistory{
@@ -12,28 +13,22 @@ export class TrayHistory{
  open(){this.close();this.active=true;}
  close(){this.active=false;this.generation++;this.tickets.clear();this.previews.clear();}
  query(value:unknown):Pick<TrayState,'items'|'total'|'categories'>{
-  this.ensure();const query=validateTrayQuery(value),store=this.store(),category=query.category&&query.category!=='favorites'?store.categories.find(c=>c.id===query.category):undefined;
-  if(query.category&&query.category!=='favorites'&&!category)throw new Error(TRAY_CATEGORY_MISSING+': '+tr('分类已不存在'));
-  this.generation++;this.tickets.clear();const terms=query.text.toLocaleLowerCase().split(/\s+/).filter(Boolean),needsText=!!(terms.length||category?.contains);
-  // Use the existing rebuildable projections. Opening Recent must never parse
-  // every full PNG or attachment just to remove it again inside SQLite.
-  const indexed=!!store.db.prepare("SELECT 1 FROM sqlite_master WHERE name='clip_list_cache'").get();
-  const summary=indexed?"json_remove(i.data,'$.thumbnail')":"json_remove(c.data,'$.payload','$.thumbnail')";
-  const payload=indexed?'p.payload':"json_extract(c.data,'$.payload')";
-  const projection=needsText?`,json_extract(${payload},'$.text') AS body,(SELECT group_concat(value,char(10)) FROM json_each(${payload},'$.files')) AS paths,(SELECT group_concat(json_extract(value,'$.name'),char(10)) FROM json_each(${payload},'$.attachments')) AS attachments`:'';
-  const unfiltered=query.kind==='all'&&!query.category&&!terms.length;
-  const rows=store.db.prepare(`SELECT ${summary} AS summary${projection} FROM clips c ${indexed?'JOIN clip_list_cache i ON i.id=c.id':''} ${indexed&&needsText?'JOIN clip_preview_cache p ON p.id=c.id':''} ORDER BY c.updated DESC,c.id ASC ${unfiltered?'LIMIT '+TRAY_LIMIT:''}`).iterate() as Iterable<{summary:string;body?:string;paths?:string;attachments?:string}>;
-  const items:TrayState['items']=[],previews=new Map<string,{hash:string;key:string}>();let total=0;
-  for(const row of rows){const item=JSON.parse(row.summary) as Clip,content=[item.title,row.body,row.paths,row.attachments].join('\n').toLocaleLowerCase();
-   if(query.kind!=='all'&&item.kind!==query.kind||query.category==='favorites'&&!item.favorite)continue;
-   if(category&&(category.kind!=='all'&&category.kind!==item.kind||category.source&&!item.source.toLocaleLowerCase().includes(category.source.toLocaleLowerCase())||category.tag&&!item.tags.some(t=>t.toLocaleLowerCase()===category.tag.toLocaleLowerCase())||category.contains&&!content.includes(category.contains.toLocaleLowerCase())))continue;
-   const searchable=[content,item.source,...item.tags].join('\n').toLocaleLowerCase();if(!terms.every(t=>searchable.includes(t)))continue;
-   total++;if(items.length===TRAY_LIMIT)continue;const token=randomUUID();this.tickets.set(token,{id:item.id,hash:item.hash,expires:this.now()+10*60*1000});
+  this.ensure();const store=this.store(),rows=readTrayRows(store.db,store.categories,value);this.generation++;this.tickets.clear();
+  return this.accept(rows);
+ }
+ async queryAsync(value:unknown,read:(query:TrayQuery)=>Promise<TrayRows>):Promise<Pick<TrayState,'items'|'total'|'categories'>>{
+  this.ensure();const query=validateTrayQuery(value),store=this.store();
+  const generation=++this.generation;this.tickets.clear();
+  const rows=await read(query);this.ensure();if(generation!==this.generation||store!==this.store())throw new Error(tr('最近记录查询已取消'));
+  return this.accept(rows);
+ }
+ private accept(rows:TrayRows):Pick<TrayState,'items'|'total'|'categories'>{
+  const items:TrayState['items']=[],previews=new Map<string,{hash:string;key:string}>();
+  for(const item of rows.items){const token=randomUUID();this.tickets.set(token,{id:item.id,hash:item.hash,expires:this.now()+10*60*1000});
    const previous=this.previews.get(item.id),preview=previous?.hash===item.hash?previous:{hash:item.hash,key:randomUUID()};previews.set(item.id,preview);
    items.push({token,previewKey:preview.key,id:item.id,kind:item.kind,title:item.title,preview:item.preview,source:item.source,updatedAt:item.updatedAt,favorite:item.favorite,pinned:item.pinned,bytes:item.bytes,draggable:item.kind==='image'||item.kind==='files'});
   }
-  if(unfiltered)total=Number((store.db.prepare('SELECT count(*) AS n FROM clips').get() as {n:number}).n);
-  this.previews=previews;return {items,total,categories:store.categories.map(c=>({id:c.id,name:c.name}))};
+  this.previews=previews;return {items,total:rows.total,categories:rows.categories};
  }
  private ensure(){if(!this.active)throw new Error(tr('托盘面板已关闭，请重新打开'));}
  resolve(value:unknown){this.ensure();if(typeof value!=='string'||!this.tickets.has(value))throw new Error(tr('此记录已失效，请重新选择'));const ticket=this.tickets.get(value)!;if(ticket.expires<this.now())throw new Error(tr('托盘预览已过期，请重新打开'));const item=this.store().find(ticket.id);if(!item||item.hash!==ticket.hash)throw new Error(tr('记录已改变或删除，请重新选择'));return item;}

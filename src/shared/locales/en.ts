@@ -19,6 +19,7 @@ export const english:Readonly<Record<string,string>>={
   "关闭查找": "Close search",
   "自动换行": "Wrap lines",
   "搜索超时，请缩小范围后重试": "Search timed out. Narrow the search and try again.",
+  "最近记录查询已取消": "Recent history query was canceled",
   "搜索未完成，请重试": "Search did not complete. Try again.",
   "界面语言": "Interface language",
   "简体中文": "Simplified Chinese",

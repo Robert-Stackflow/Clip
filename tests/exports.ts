@@ -102,3 +102,6 @@ export * from '../src/main/sync-item-reader';
 export * from '../src/shared/image-marks';
 
 export * from '../src/main/recording-sources-protocol';
+
+export * from '../src/main/tray-query';
+export * from '../src/main/tray-search';
