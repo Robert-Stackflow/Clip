@@ -2,7 +2,7 @@
 
 Windows 剪贴板工作台，使用 Electron、TypeScript、SQLite 和 Windows 原生组件。功能参考 OneClip，界面组件、页面骨架和开发工作流参考本地 `D:\Repositories\One`。
 
-当前源码版本为 **0.47.0**。侧边栏按 One 的尺寸、分组、边框与折叠动效整理；新增离线表情符号和 CheetSheet，支持搜索、筛选与复制。数据来源、更新方法与许可见 [资料目录说明](src/renderer/reference-data/README.md)，验证范围见 [0.47.0 验收记录](docs/history/验收-0.47.0.md)。
+当前源码版本为 **0.47.1**。大型备份的校验预览移到短期后台线程，读取与解密按块处理；校验中可取消，也可继续操作其他页面。最终合并恢复仍在主进程，总内存峰值尚未改善，验证范围见 [0.47.1 验收记录](docs/history/验收-0.47.1.md)。侧边栏按 One 的尺寸、分组、边框与折叠动效整理；离线表情符号和 CheetSheet 支持搜索、筛选与复制，数据来源、更新方法与许可见 [资料目录说明](src/renderer/reference-data/README.md)。
 
 ## 开发与运行
 

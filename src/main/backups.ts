@@ -1,23 +1,34 @@
 import {t as tr} from '../shared/i18n';
-import {mkdir,readdir,lstat,unlink} from 'node:fs/promises';
+import {mkdir,readdir,lstat,unlink,open} from 'node:fs/promises';
 import {join,basename} from 'node:path';
 import {randomUUID,createHash} from 'node:crypto';
 import {Store} from './store';
 import {validateBackup} from '../shared/core';
 import {validateBackupOptions,type BackupStatus,type BackupEntry,type RestoreFile,type RestorePreview} from '../shared/data';
-import {localDirectory,writeAtomic,boundedFile} from './data-files';
+import {localDirectory,writeAtomic,boundedFile,MAX_BACKUP_FILE} from './data-files';
 import {decodeBackup,encodeBackup,isEncryptedBackup,validateBackupPassword} from './backup-crypto';
+import {previewBackupJob,type BackupPreviewOptions} from './backup-preview-job';
 import type {Payload} from '../shared/types';
 interface SavedBackup extends BackupStatus {secret?:string}
 interface Vault {available():Promise<boolean>;encrypt(value:string):Promise<string>;decrypt(value:string):Promise<string>}
+/** Small asynchronous reads keep the initial file selection out of the large-buffer path. */
+async function fingerprint(file:string,valid:()=>boolean){
+ const handle=await open(file,'r'),block=Buffer.alloc(256*1024),prefix=Buffer.alloc(16),digest=createHash('sha256');
+ try{const info=await handle.stat();if(!info.isFile()||info.size>MAX_BACKUP_FILE)throw new Error(tr('备份文件无效或超过 384 MiB'));let at=0;
+  for(;;){if(!valid())throw new Error(tr('恢复预览已过期，请重新选择备份'));const {bytesRead}=await handle.read(block,0,Math.min(block.length,MAX_BACKUP_FILE-at+1),at);if(!bytesRead)break;if(at===0)block.copy(prefix,0,0,Math.min(prefix.length,bytesRead));at+=bytesRead;if(at>MAX_BACKUP_FILE)throw new Error(tr('备份文件过大'));digest.update(block.subarray(0,bytesRead));}
+  if(at!==info.size)throw new Error(tr('备份文件在读取时改变'));return {encrypted:isEncryptedBackup(prefix),hash:digest.digest('hex')};
+ }finally{block.fill(0);prefix.fill(0);await handle.close();}
+}
 export class BackupManager {
- private restoring:{token:string;file:string;name:string;expires:number;encrypted:boolean;hash:string;value?:unknown}|undefined;
+ private restoring:{token:string;file:string;name:string;expires:number;encrypted:boolean;hash:string;snapshot?:Uint8Array}|undefined;
+ private previewJob?:ReturnType<typeof previewBackupJob>;
+ private selection=0;private disposed=false;
  private busy=false;
  private expiryTimer:NodeJS.Timeout|undefined;
- constructor(private store:()=>Store,private profileId:string,private defaultFolder:string,private vault:Vault,private changed:()=>void,private thumbnail:(p:Payload)=>string|undefined=()=>undefined,private exporter?:(file:string,password?:string)=>Promise<void>){}
+ constructor(private store:()=>Store,private profileId:string,private defaultFolder:string,private vault:Vault,private changed:()=>void,private thumbnail:(p:Payload)=>string|undefined=()=>undefined,private exporter?:(file:string,password?:string)=>Promise<void>,private previewOptions:BackupPreviewOptions={}){}
  private saved():SavedBackup{return {enabled:false,directory:this.defaultFolder,intervalHours:24,keep:7,encrypted:true,hasPassword:false,lastSuccess:0,lastAttempt:0,nextAt:0,lastError:'',...this.store().meta('automatic-backup',{})};}
  async exclusive<T>(operation:()=>Promise<T>){if(this.busy)throw new Error(tr('正在备份或切换资料，请完成后重试'));this.busy=true;try{return await operation();}finally{this.busy=false;}}
- status():BackupStatus{if(this.restoring&&this.restoring.expires<Date.now())this.restoring=undefined;const {secret,...state}=this.saved();return {...state,hasPassword:!!secret};}
+ status():BackupStatus{if(this.restoring&&this.restoring.expires<Date.now())this.cancelRestore(this.restoring.token);const {secret,...state}=this.saved();return {...state,hasPassword:!!secret};}
  configure(value:unknown){return this.exclusive(()=>this.configureIdle(value));}
  private async configureIdle(value:unknown){
   const v=validateBackupOptions(value),old=this.saved();let secret=old.secret;
@@ -53,14 +64,17 @@ export class BackupManager {
  private rehearse(value:unknown){validateBackup(value);const temporary=new Store(':memory:');try{temporary.import(value,this.thumbnail);}finally{temporary.close();}}
  private async write(file:string,password?:string){if(this.exporter)return this.exporter(file,password);const value=this.store().backup();this.rehearse(value);await writeAtomic(file,await encodeBackup(value,password));this.rehearse(await decodeBackup(await boundedFile(file),password));}
  export(file:string,password?:string){return this.exclusive(async()=>{if(/^Clipper-auto-/i.test(basename(file)))throw new Error(tr('此文件名保留给自动备份，请选择其他名称'));if(password!==undefined)validateBackupPassword(password);await this.write(file,password);return basename(file);});}
- async chooseRestore(file:string):Promise<RestoreFile>{const bytes=await boundedFile(file);const encrypted=isEncryptedBackup(bytes),token=randomUUID();this.restoring={token,file,name:basename(file),expires:Date.now()+600000,encrypted,hash:createHash('sha256').update(bytes).digest('hex')};clearTimeout(this.expiryTimer);this.expiryTimer=setTimeout(()=>this.cancelRestore(token),600000);this.expiryTimer.unref();return {token,name:basename(file),encrypted};}
+ async chooseRestore(file:string):Promise<RestoreFile>{this.cancelPendingRestore();const selection=this.selection,valid=()=>!this.disposed&&selection===this.selection;const {encrypted,hash}=await fingerprint(file,valid);if(!valid())throw new Error(tr('恢复预览已过期，请重新选择备份'));const token=randomUUID();this.restoring={token,file,name:basename(file),expires:Date.now()+600000,encrypted,hash};this.expiryTimer=setTimeout(()=>this.cancelRestore(token),600000);this.expiryTimer.unref();return {token,name:basename(file),encrypted};}
  async chooseOwn(name:string){if(typeof name!=='string'||!this.pattern().test(name)||(await this.entries()).every(e=>e.name!==name))throw new Error(tr('此备份不在当前列表中'));return this.chooseRestore(join(this.saved().directory,name));}
  private request(token:unknown){const request=this.restoring;if(!request||token!==request.token||request.expires<Date.now())throw new Error(tr('恢复预览已过期，请重新选择备份'));return request;}
  async preview(token:string,password?:string):Promise<RestorePreview>{
-  const request=this.request(token);request.value=undefined;const bytes=await boundedFile(request.file);if(createHash('sha256').update(bytes).digest('hex')!==request.hash)throw new Error(tr('备份文件已改变，请重新选择'));const value=await decodeBackup(bytes,password);this.rehearse(value);request.value=value;const summary=validateBackup(value);
-  return {token,name:request.name,clips:summary.clips.length,snippets:summary.snippets.length,categories:summary.categories.length,scripts:summary.scripts.length,exportedAt:typeof value.exportedAt==='string'?value.exportedAt.slice(0,100):'',encrypted:request.encrypted};
+  const request=this.request(token);request.snapshot?.fill(0);request.snapshot=undefined;this.previewJob?.cancel();
+  const job=previewBackupJob(request.file,request.hash,password,this.previewOptions,this.previewJob?.promise);this.previewJob=job;
+  try{const {result,snapshot}=await job.promise;try{if(this.previewJob!==job||this.request(token)!==request)throw new Error(tr('恢复预览已过期，请重新选择备份'));request.snapshot=snapshot;return {token,name:request.name,...result,encrypted:request.encrypted};}catch(error){snapshot.fill(0);throw error;}}
+  finally{if(this.previewJob===job)this.previewJob=undefined;}
  }
- restore(token:string){const request=this.request(token);if(!request.value)throw new Error(tr('请先校验并预览备份'));const count=this.store().import(request.value,this.thumbnail);this.cancelRestore(token);this.changed();return count;}
- cancelRestore(token:string){if(this.restoring?.token===token){this.restoring=undefined;clearTimeout(this.expiryTimer);}}
- dispose(){this.restoring=undefined;clearTimeout(this.expiryTimer);}
+ restore(token:string){const request=this.request(token);if(!request.snapshot)throw new Error(tr('请先校验并预览备份'));const value=JSON.parse(Buffer.from(request.snapshot.buffer,request.snapshot.byteOffset,request.snapshot.byteLength).toString('utf8'));const count=this.store().import(value,this.thumbnail);this.cancelRestore(token);this.changed();return count;}
+ cancelRestore(token:string){if(this.restoring?.token===token)this.cancelPendingRestore();}
+ cancelPendingRestore(){this.selection++;this.previewJob?.cancel();this.restoring?.snapshot?.fill(0);this.restoring=undefined;clearTimeout(this.expiryTimer);}
+ dispose(){this.disposed=true;this.cancelPendingRestore();}
 }

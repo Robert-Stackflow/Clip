@@ -17,6 +17,7 @@ export * from '../src/main/rollback-data';
 export * from '../src/shared/checkpoints';
 export * from '../src/main/database-check';
 export * from '../src/main/backup-jobs';
+export * from '../src/main/backup-preview-job';
 export * from '../src/main/sync-ledger';
 export * from '../src/main/sync-service';
 export * from '../src/main/sync-receiver';

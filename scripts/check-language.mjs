@@ -27,6 +27,7 @@ scopes.push('src/shared/base64.ts','src/main/base64-file.ts','src/main/collectio
 scopes.push('src/renderer/application-segments.ts');
 scopes.push('src/renderer/dialog-shell.ts','src/main/capture-writer.ts','src/main/capture-writer-worker.ts');
 scopes.push('src/renderer/color-picker.ts','src/renderer/utility-empty.ts');
+scopes.push('src/main/backup-preview-job.ts','src/main/backup-preview-worker.ts');
 const required=inventory.entries.filter(entry=>(scopes.includes(entry.file)||checkedLabelSources.some(table=>table.file===entry.file&&table.values.includes(entry.value)))&&!entry.property&&!retained(entry)),missing=required.filter(entry=>!catalog.has(entry.value));
 const pending=[...new Set(inventory.entries.filter(entry=>!catalog.has(entry.value)&&!retained(entry)).map(entry=>entry.value))];
 const report={status:missing.length?'failed':'partial-scope-passed',fullApplicationComplete:false,catalogEntries:catalog.size,checkedScopes:scopes,checkedLabelSources,checkedNativeSources,retainedMessages,checkedSourceMessages:required.length,missing,pendingCandidateCount:pending.length,note:'Static candidate coverage and native compatibility-code mappings do not prove runtime bindings, full layout coverage or actual Windows acceptance. Full-application completion remains unverified.'};
