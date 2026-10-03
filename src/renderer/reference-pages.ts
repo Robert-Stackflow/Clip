@@ -4,11 +4,10 @@ import {filterCheatSections,mountCheatDocument} from './cheatsheet-renderer';
 import {formatNumber,setInterfaceLanguage} from '../shared/i18n';
 import {icon,registerIcons} from './ui';
 import {Copy,Search} from 'lucide';
-import {EmojiRasterizer} from './reference-emoji';
 import {referenceSegments} from './reference-segments';
 registerIcons({copy:Copy,search:Search});
 const esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
-const emojiImage=(glyph:string)=>`<canvas class="reference-emoji-image" width="96" height="96" data-emoji="${esc(glyph)}" aria-hidden="true"></canvas>`;
+const emojiGlyph=(glyph:string)=>`<span class="reference-emoji-glyph" data-emoji="${esc(glyph)}" aria-hidden="true">${esc(glyph)}</span>`;
 const copy=async(value:string)=>{try{await navigator.clipboard.writeText(value);}catch{const field=document.createElement('textarea');field.value=value;field.style.position='fixed';field.style.opacity='0';document.body.append(field);try{field.select();if(!document.execCommand('copy'))throw new Error('Clipboard unavailable');}finally{field.remove();}}};
 
 type Row={top:number;height:number;group:string;title?:string;items?:{entry:Entry;index:number}[]};
@@ -21,30 +20,29 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  let rows:Row[]=[],sections:Section[]=[],entries:Entry[]=[],columns=1,frame=0,queryTimer:ReturnType<typeof setTimeout>|undefined;
  let tooltipTimer:ReturnType<typeof setTimeout>|undefined,scrollTipTimer:ReturnType<typeof setTimeout>|undefined,tooltipAnchor:HTMLElement|undefined,currentCategory='',focusIndex=0,pointer:{x:number;y:number}|undefined,tipGlyph='',awaitPointer=false;
  let cheatDocument:ReturnType<typeof mountCheatDocument>|undefined;
- let navigationFrame=0;
- const cancelNavigation=()=>{cancelAnimationFrame(navigationFrame);navigationFrame=0;};
+ let navigationFrame=0,navigationGroup:string|undefined;
+ const cancelNavigation=()=>{cancelAnimationFrame(navigationFrame);navigationFrame=0;navigationGroup=undefined;};
  const mounted=new Map<number,HTMLElement>();
- const painter=kind==='symbols'?new EmojiRasterizer():undefined;
  const tip=document.createElement('div');tip.className='reference-popover';tip.hidden=true;tip.id='reference-hover-details';tip.setAttribute('role','dialog');tip.setAttribute('aria-label',tx('符号详情','Symbol details'));document.body.append(tip);
  const tabs=kind==='symbols'?Object.entries(catalog).map(([id,value])=>({id,label:value.label,count:value.items.length})):cheatTopics.map(topic=>({id:topic.id,label:topic.label,count:topic.sections.reduce((sum,section)=>sum+section.items,0)}));
- const tonePicker=kind==='symbols'?`<div class="reference-tone-control"><div class="reference-tones" role="group" aria-label="${tx('人物与手势肤色','People & gesture skin tone')}">${['✋','✋🏻','✋🏼','✋🏽','✋🏾','✋🏿'].map((glyph,index)=>`<button type="button" data-tone="${index}" aria-label="${esc([tx('默认肤色','Default tone'),tx('浅肤色','Light tone'),tx('较浅肤色','Medium-light tone'),tx('中等肤色','Medium tone'),tx('较深肤色','Medium-dark tone'),tx('深肤色','Dark tone')][index])}" aria-pressed="${index===tone}">${emojiImage(glyph)}</button>`).join('')}</div></div>`:'';
+ const tonePicker=kind==='symbols'?`<div class="reference-tone-control"><div class="reference-tones" role="group" aria-label="${tx('人物与手势肤色','People & gesture skin tone')}">${['✋','✋🏻','✋🏼','✋🏽','✋🏾','✋🏿'].map((glyph,index)=>`<button type="button" data-tone="${index}" aria-label="${esc([tx('默认肤色','Default tone'),tx('浅肤色','Light tone'),tx('较浅肤色','Medium-light tone'),tx('中等肤色','Medium tone'),tx('较深肤色','Medium-dark tone'),tx('深肤色','Dark tone')][index])}" aria-pressed="${index===tone}">${emojiGlyph(glyph)}</button>`).join('')}</div></div>`:'';
  root.innerHTML=`<section class="reference-page ${kind==='cheats'?'reference-sheet':''}"><header class="reference-heading"><h1>${kind==='symbols'?tx('表情符号','Symbols & Emoji'):'CheetSheet'}</h1></header><div class="reference-primary-controls"><div class="reference-tab-viewport"><div class="tabs reference-tabs" aria-label="${tx('资料分类','Reference categories')}">${tabs.map(({id,label,count})=>`<button type="button" data-tab="${id}" class="${id===active?'active':''}" aria-label="${esc(label)}"><span>${esc(label)}</span><small data-tab-count="${id}">${formatNumber(count)}</small></button>`).join('')}</div></div><label class="reference-search">${icon('lucide:search')}<input type="search" id="reference-search" autocomplete="off" placeholder="${kind==='symbols'?tx('搜索字符、名称或代码','Search characters, names or codes'):tx('搜索命令、语法或用途','Search commands, syntax or purpose')}" aria-label="${tx('搜索资料','Search references')}"></label></div><div class="reference-workspace"><aside class="reference-nav" aria-label="${tx('分类导航','Category navigation')}">${tonePicker}<nav id="reference-categories"></nav><p class="reference-attribution" id="reference-attribution"></p></aside><div class="reference-scroll" tabindex="-1"><div id="reference-results" class="reference-results"></div></div></div></section>`;
  const input=root.querySelector<HTMLInputElement>('#reference-search')!,results=root.querySelector<HTMLElement>('#reference-results')!,scroll=root.querySelector<HTMLElement>('.reference-scroll')!,nav=root.querySelector<HTMLElement>('#reference-categories')!,attribution=root.querySelector<HTMLElement>('#reference-attribution')!,tones=root.querySelector<HTMLElement>('.reference-tones');
  const setCount=(value:number)=>{root.querySelector<HTMLElement>(`[data-tab-count="${active}"]`)!.textContent=formatNumber(value);};
  const performCopy=(value:string)=>void copy(value).then(()=>{if(!disposed)notify(tx('已复制','Copied'));}).catch(error=>{if(!disposed)notify(String(error));});
- const hideTip=()=>{painter?.detach(tip);clearTimeout(tooltipTimer);tooltipAnchor?.removeAttribute('aria-describedby');tooltipAnchor=undefined;if(!tip.hidden)tip.hidden=true;};
+ const hideTip=()=>{clearTimeout(tooltipTimer);tooltipAnchor?.removeAttribute('aria-describedby');tooltipAnchor=undefined;if(!tip.hidden)tip.hidden=true;};
  const showTip=(button:HTMLElement)=>{
   if(disposed||!button.isConnected)return;const entry=entries[Number(button.dataset.entry)];if(!entry)return;
   hideTip();tooltipAnchor=button;tip.dataset.kind=active;button.setAttribute('aria-describedby',tip.id);
   const glyph=active==='emoji'?toneGlyph(entry,tone):entry.glyph;tipGlyph=glyph;
   const toneOptions=entry.tones&&entry.tones.size>1?[...entry.tones].sort(([a],[b])=>a-b):[];
   const code=active==='emoji'?Array.from(glyph,c=>'U+'+c.codePointAt(0)!.toString(16).toUpperCase()).join(' '):entry.detail;
-  tip.innerHTML=`<header class="reference-popover-heading">${active!=='mime'?`<div class="reference-popover-preview">${entry.color?`<i style="background:${entry.color}"></i>`:active==='emoji'?emojiImage(glyph):`<span class="reference-text-preview">${esc(glyph||'␣')}</span>`}</div>`:''}<div><strong>${esc(entry.title)}</strong><small>${esc(groupLabel(entry.group))}</small></div></header><div class="reference-popover-body">${active==='mime'?`<p class="reference-mime-description">${esc(entry.detail)}</p><div class="reference-detail-label">${tx('扩展名','Extensions')}</div><div class="reference-extensions">${entry.extensions!.length?entry.extensions!.map(ext=>`<code>.${esc(ext)}</code>`).join(''):tx('无已知扩展名映射','No known extension mapping')}</div>`:code?`<code class="reference-code">${esc(code)}</code>`:''}${toneOptions.length?`<div class="reference-detail-label">${tx('肤色变体','Skin tones')}</div><div class="reference-detail-tones">${toneOptions.map(([index,value])=>`<button type="button" data-detail-tone="${index}" aria-label="${esc(value)}" aria-pressed="${value===glyph}">${emojiImage(value)}</button>`).join('')}</div>`:''}${(entry.variants?.length||0)>6?`<details class="reference-mixed-tones"><summary>${tx('更多肤色组合','More tone combinations')}</summary><div class="reference-variants">${entry.variants!.map((variant,index)=>`<button type="button" data-variant="${index}" aria-label="${esc(variant)}">${emojiImage(variant)}</button>`).join('')}</div></details>`:''}</div><footer class="reference-popover-actions"><button type="button" class="primary" data-tip-copy="main">${icon('lucide:copy')}${active==='entities'?tx('复制实体','Copy entity'):tx('复制','Copy')}</button>${entry.secondary?`<button type="button" data-tip-copy="secondary">${active==='entities'?tx('复制字符','Copy character'):tx('复制名称','Copy name')}</button>`:''}</footer>`;
-  tip.hidden=false;painter?.attach(tip);positionTip();
+  tip.innerHTML=`<header class="reference-popover-heading">${active!=='mime'?`<div class="reference-popover-preview">${entry.color?`<i style="background:${entry.color}"></i>`:active==='emoji'?emojiGlyph(glyph):`<span class="reference-text-preview">${esc(glyph||'␣')}</span>`}</div>`:''}<div><strong>${esc(entry.title)}</strong><small>${esc(groupLabel(entry.group))}</small></div></header><div class="reference-popover-body">${active==='mime'?`<p class="reference-mime-description">${esc(entry.detail)}</p><div class="reference-detail-label">${tx('扩展名','Extensions')}</div><div class="reference-extensions">${entry.extensions!.length?entry.extensions!.map(ext=>`<code>.${esc(ext)}</code>`).join(''):tx('无已知扩展名映射','No known extension mapping')}</div>`:code?`<code class="reference-code">${esc(code)}</code>`:''}${toneOptions.length?`<div class="reference-detail-label">${tx('肤色变体','Skin tones')}</div><div class="reference-detail-tones">${toneOptions.map(([index,value])=>`<button type="button" data-detail-tone="${index}" aria-label="${esc(value)}" aria-pressed="${value===glyph}">${emojiGlyph(value)}</button>`).join('')}</div>`:''}${(entry.variants?.length||0)>6?`<details class="reference-mixed-tones"><summary>${tx('更多肤色组合','More tone combinations')}</summary><div class="reference-variants">${entry.variants!.map((variant,index)=>`<button type="button" data-variant="${index}" aria-label="${esc(variant)}">${emojiGlyph(variant)}</button>`).join('')}</div></details>`:''}</div><footer class="reference-popover-actions"><button type="button" class="primary" data-tip-copy="main">${icon('lucide:copy')}${active==='entities'?tx('复制实体','Copy entity'):tx('复制','Copy')}</button>${entry.secondary?`<button type="button" data-tip-copy="secondary">${active==='entities'?tx('复制字符','Copy character'):tx('复制名称','Copy name')}</button>`:''}</footer>`;
+  tip.hidden=false;positionTip();
  };
  const positionTip=()=>{if(!tooltipAnchor||tip.hidden)return;const left=Math.max(8,scroll.getBoundingClientRect().left);tip.style.maxWidth=Math.max(120,innerWidth-left-8)+'px';const rect=tooltipAnchor.getBoundingClientRect(),size=tip.getBoundingClientRect();tip.style.left=Math.max(left,Math.min(innerWidth-size.width-8,rect.left+rect.width/2-size.width/2))+'px';tip.style.top=Math.max(8,Math.min(innerHeight-size.height-8,rect.bottom+8+size.height>innerHeight?rect.top-size.height-8:rect.bottom+8))+'px';};
  const tipResize=new ResizeObserver(positionTip);tipResize.observe(tip);
- const previewTone=(button:HTMLElement)=>{if(!tooltipAnchor||button.dataset.detailTone===undefined)return;const entry=entries[Number(tooltipAnchor.dataset.entry)];tipGlyph=entry.tones!.get(Number(button.dataset.detailTone))!;painter?.detach(tip);tip.querySelector<HTMLElement>('.reference-popover-preview')!.innerHTML=emojiImage(tipGlyph);painter?.attach(tip);tip.querySelector<HTMLElement>('.reference-code')!.textContent=Array.from(tipGlyph,c=>'U+'+c.codePointAt(0)!.toString(16).toUpperCase()).join(' ');for(const node of tip.querySelectorAll<HTMLElement>('[data-detail-tone]'))node.setAttribute('aria-pressed',String(node===button));};
+ const previewTone=(button:HTMLElement)=>{if(!tooltipAnchor||button.dataset.detailTone===undefined)return;const entry=entries[Number(tooltipAnchor.dataset.entry)];tipGlyph=entry.tones!.get(Number(button.dataset.detailTone))!;tip.querySelector<HTMLElement>('.reference-popover-preview')!.innerHTML=emojiGlyph(tipGlyph);tip.querySelector<HTMLElement>('.reference-code')!.textContent=Array.from(tipGlyph,c=>'U+'+c.codePointAt(0)!.toString(16).toUpperCase()).join(' ');for(const node of tip.querySelectorAll<HTMLElement>('[data-detail-tone]'))node.setAttribute('aria-pressed',String(node===button));};
  tip.onpointerover=event=>{const button=(event.target as HTMLElement).closest<HTMLElement>('[data-detail-tone]');if(button)previewTone(button);};
  tip.addEventListener('focusin',event=>{const button=(event.target as HTMLElement).closest<HTMLElement>('[data-detail-tone]');if(button)previewTone(button);});
  tip.onclick=event=>{const button=(event.target as HTMLElement).closest<HTMLElement>('button');if(!button||!tooltipAnchor)return;const entry=entries[Number(tooltipAnchor.dataset.entry)];if(button.dataset.variant!==undefined)performCopy(entry.variants![Number(button.dataset.variant)]);else if(button.dataset.detailTone!==undefined){previewTone(button);performCopy(tipGlyph);}else performCopy(button.dataset.tipCopy==='secondary'?entry.secondary!:active==='emoji'?tipGlyph:entry.copy);};
@@ -56,7 +54,12 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  results.addEventListener('focusin',event=>{const button=(event.target as HTMLElement).closest<HTMLElement>('[data-entry]');if(button){focusIndex=Number(button.dataset.entry);if(button.matches(':focus-visible'))showTip(button);}});
  const dismiss=(event:Event)=>{if(event instanceof KeyboardEvent&&event.key!=='Escape')return;if(event instanceof PointerEvent&&(tip.contains(event.target as Node)||tooltipAnchor?.contains(event.target as Node)))return;hideTip();};
  document.addEventListener('pointerdown',dismiss);document.addEventListener('keydown',dismiss);
- const updateCategory=(group:string)=>{if(group===currentCategory)return;currentCategory=group;for(const button of nav.querySelectorAll<HTMLElement>('[data-category]')){const selected=button.dataset.category===group;button.classList.toggle('active',selected);if(selected)button.setAttribute('aria-current','location');else button.removeAttribute('aria-current');}const chosen=nav.querySelector<HTMLElement>('[aria-current]');if(chosen){const relative=chosen.offsetTop-nav.offsetTop;if(relative<nav.scrollTop)nav.scrollTop=relative;else if(relative+chosen.offsetHeight>nav.scrollTop+nav.clientHeight)nav.scrollTop=relative+chosen.offsetHeight-nav.clientHeight;}};
+ const updateCategory=(group:string)=>{
+  // Keep an explicit selection stable while the document passes intermediate lazy sections.
+  group=navigationGroup||group;if(group===currentCategory)return;currentCategory=group;
+  for(const button of nav.querySelectorAll<HTMLElement>('[data-category]')){const selected=button.dataset.category===group;button.classList.toggle('active',selected);if(selected)button.setAttribute('aria-current','location');else button.removeAttribute('aria-current');}
+  const chosen=nav.querySelector<HTMLElement>('[aria-current]');if(chosen){const rect=chosen.getBoundingClientRect(),viewport=nav.getBoundingClientRect();if(rect.top<viewport.top)nav.scrollTop+=rect.top-viewport.top;else if(rect.bottom>viewport.bottom)nav.scrollTop+=rect.bottom-viewport.bottom;}
+ };
  const renderWindow=()=>{
   frame=0;if(disposed)return;
   if(kind==='symbols'){
@@ -66,12 +69,11 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
    const batch=document.createDocumentFragment();
    for(let index=left;index<rows.length&&rows[index].top<max;index++){
     wanted.add(index);if(mounted.has(index))continue;const row=rows[index],node=document.createElement('div');node.className=row.title?'reference-section-heading':'reference-virtual-row';node.style.top=row.top+'px';node.style.height=row.height+'px';
-    node.innerHTML=row.title?`<h2>${esc(row.title)}</h2><small>${formatNumber(sections.find(section=>section.group===row.group)!.count)}</small>`:row.items!.map(({entry,index})=>`<button type="button" class="reference-item reference-main" data-entry="${index}" tabindex="${index===focusIndex?0:-1}" aria-label="${esc(entry.title)}">${entry.color?`<i class="reference-swatch" style="background:${entry.color}"></i>`:active==='emoji'?`<canvas class="reference-emoji-image" width="96" height="96" data-emoji="${esc(toneGlyph(entry,tone))}" aria-hidden="true"></canvas>`:`<span class="reference-glyph">${esc(entry.glyph||'␣')}</span>`}</button>`).join('');
+    node.innerHTML=row.title?`<h2>${esc(row.title)}</h2><small>${formatNumber(sections.find(section=>section.group===row.group)!.count)}</small>`:row.items!.map(({entry,index})=>`<button type="button" class="reference-item reference-main" data-entry="${index}" tabindex="${index===focusIndex?0:-1}" aria-label="${esc(entry.title)}">${entry.color?`<i class="reference-swatch" style="background:${entry.color}"></i>`:active==='emoji'?emojiGlyph(toneGlyph(entry,tone)):`<span class="reference-glyph">${esc(entry.glyph||'␣')}</span>`}</button>`).join('');
     batch.append(node);mounted.set(index,node);
    }
    if(batch.childNodes.length)results.append(batch);
-   if(active==='emoji')for(const [index,node]of mounted)if(wanted.has(index))painter!.attach(node);
-   for(const [index,node]of mounted)if(!wanted.has(index)&&!node.contains(document.activeElement)){painter?.detach(node);node.remove();mounted.delete(index);}
+   for(const [index,node]of mounted)if(!wanted.has(index)&&!node.contains(document.activeElement)){node.remove();mounted.delete(index);}
    const section=[...sections].reverse().find(section=>section.top<=scroll.scrollTop+48)||sections[0];if(section)updateCategory(section.group);
   }else{
    const headers=Array.from(results.querySelectorAll<HTMLElement>('[data-section]'));const header=[...headers].reverse().find(node=>node.offsetTop-results.offsetTop<=scroll.scrollTop+72)||headers[0];if(header)updateCategory(header.dataset.section!);
@@ -81,7 +83,7 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  scroll.onscroll=()=>{hideTip();schedule();clearTimeout(scrollTipTimer);scrollTipTimer=setTimeout(()=>{if(!pointer)return;const target=document.elementFromPoint(pointer.x,pointer.y)?.closest<HTMLElement>('[data-entry]');if(target&&results.contains(target))scheduleTip(target);},140);};
  const rebuild=()=>{
   cancelNavigation();
-  hideTip();awaitPointer=true;pointer=undefined;clearTimeout(scrollTipTimer);cheatDocument?.dispose();cheatDocument=undefined;currentCategory='';painter?.clear();if(tones)painter?.attach(tones);mounted.clear();results.replaceChildren();rows=[];sections=[];
+  hideTip();awaitPointer=true;pointer=undefined;clearTimeout(scrollTipTimer);cheatDocument?.dispose();cheatDocument=undefined;currentCategory='';mounted.clear();results.replaceChildren();rows=[];sections=[];
   const term=input.value.trim().toLocaleLowerCase();
   for(const tab of tabs)if(tab.id!==active){const badge=root.querySelector<HTMLElement>(`[data-tab-count="${tab.id}"]`)!,value=formatNumber(tab.count);if(badge.textContent!==value)badge.textContent=value;}
   if(kind==='symbols'){
@@ -112,7 +114,7 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
   renderWindow();
  };
  nav.onclick=event=>{const button=(event.target as HTMLElement).closest<HTMLElement>('[data-category]');if(!button)return;awaitPointer=true;pointer=undefined;clearTimeout(scrollTipTimer);const group=button.dataset.category!;cheatDocument?.ensure(group);const top=kind==='symbols'?sections.find(section=>section.group===group)!.top:Array.from(results.querySelectorAll<HTMLElement>('[data-section]')).find(node=>node.dataset.section===group)!.offsetTop-results.offsetTop;
-  hideTip();cancelNavigation();const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  hideTip();cancelNavigation();navigationGroup=group;const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(kind==='symbols')scroll.scrollTo({top,behavior:reduced?'instant':'smooth'});
   else{
    // Lazy sections change height while scrolling. Follow the actual heading throughout the motion.
@@ -127,6 +129,8 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
   updateCategory(group);
  };
  scroll.addEventListener('wheel',cancelNavigation,{passive:true});scroll.addEventListener('touchstart',cancelNavigation,{passive:true});scroll.addEventListener('pointerdown',cancelNavigation);
+ const navigationKey=(event:KeyboardEvent)=>{if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))cancelNavigation();};
+ scroll.addEventListener('keydown',navigationKey);
  root.onclick=event=>{const link=(event.target as HTMLElement).closest<HTMLAnchorElement>('a[href]');if(!link)return;event.preventDefault();if(link.getAttribute('href')?.startsWith('#')){const anchor=decodeURIComponent(link.hash.slice(1)).toLocaleLowerCase();const topic=cheatTopics.find(topic=>topic.id===active);const section=topic?.sections.find(section=>section.name.toLocaleLowerCase().replace(/ /g,'-')===anchor);if(section)nav.querySelector<HTMLButtonElement>(`[data-category="${section.id}"]`)?.click();return;}void window.clipper.openReference(link.href).catch(error=>notify(String(error)));};
  results.onclick=event=>{const code=(event.target as HTMLElement).closest<HTMLElement>('[data-code]');if(code){performCopy(code.dataset.code!);return;}const button=(event.target as HTMLElement).closest<HTMLElement>('[data-entry],[data-copy]');if(!button)return;const entry=entries[Number(button.dataset.entry??button.dataset.copy)];performCopy(active==='emoji'&&kind==='symbols'?toneGlyph(entry,tone):entry.copy);};
  results.onkeydown=event=>{
@@ -143,11 +147,9 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
   const next=Number(button.dataset.tone);if(tone===next)return;tone=next;
   root.querySelectorAll<HTMLElement>('[data-tone]').forEach(node=>node.setAttribute('aria-pressed',String(Number(node.dataset.tone)===tone)));hideTip();
   for(const [rowIndex,node]of mounted)if(rows[rowIndex].items){
-   // Retain already painted faces and symbols; only real tone variants need new graphics.
    for(const {entry,index}of rows[rowIndex].items!){
-    const button=node.querySelector<HTMLElement>(`[data-entry="${index}"]`)!,canvas=button.querySelector<HTMLCanvasElement>('canvas'),glyph=toneGlyph(entry,tone);
-    if(canvas&&canvas.dataset.emoji!==glyph){painter!.detach(button);canvas.dataset.emoji=glyph;canvas.classList.remove('ready');canvas.getContext('2d')!.clearRect(0,0,96,96);painter!.attach(button);}
-    else if(!canvas)button.querySelector<HTMLElement>('.reference-glyph')!.textContent=glyph;
+    const span=node.querySelector<HTMLElement>(`[data-entry="${index}"] .reference-emoji-glyph`),glyph=toneGlyph(entry,tone);
+    if(span&&span.dataset.emoji!==glyph){span.dataset.emoji=glyph;span.textContent=glyph;}
    }
   }
  });
@@ -158,5 +160,5 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
 
  const disposeSegments=referenceSegments(root.querySelector<HTMLElement>('.reference-tabs')!);
  rebuild();
- return ()=>{disposed=true;disposeSegments();cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();tipResize.disconnect();cheatDocument?.dispose();painter?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();};
+ return ()=>{disposed=true;disposeSegments();cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);scroll.removeEventListener('keydown',navigationKey);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();tipResize.disconnect();cheatDocument?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();};
 }

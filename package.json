@@ -1,6 +1,6 @@
 {
   "name": "clipper-desktop",
-  "version": "0.48.0",
+  "version": "0.48.1",
   "private": true,
   "description": "Windows 本地剪贴板工作台",
   "author": "Clipper",
@@ -61,8 +61,10 @@
   },
   "dependencies": {
     "@codemirror/commands": "6.11.1",
+    "@codemirror/lang-php": "6.0.2",
     "@codemirror/language": "6.12.4",
     "@codemirror/language-data": "6.5.2",
+    "@codemirror/legacy-modes": "6.5.4",
     "@codemirror/search": "6.7.2",
     "@codemirror/state": "6.7.6",
     "@codemirror/view": "6.43.13",
@@ -97,7 +99,7 @@
     "productName": "Clipper",
     "electronDist": "node_modules/electron/dist",
     "directories": {
-      "output": "release/0.48.0"
+      "output": "release/0.48.1"
     },
     "files": [
       "dist/**/*",

@@ -1,9 +1,8 @@
 # 离线资料源与渲染
 
-资料文字、分组元数据与图形映射保存在 JSON，进入页面时才加载。reference-catalog.ts 整理条目，reference-pages.ts 管理搜索、分类和虚拟列表；cheatsheet-renderer.ts 用本应用组件渲染结构化块。程序运行和正常构建均不访问资料网站。
+资料文字与分组元数据保存在 JSON，进入页面时才加载。reference-catalog.ts 整理条目，reference-pages.ts 管理搜索、分类和虚拟列表；cheatsheet-renderer.ts 用本应用组件渲染结构化块。程序运行和正常构建均不访问资料网站。
 
-- emoji.json：Unicode **17.0** 的 3,944 个 fully-qualified 变体，合并为 1,926 个表情家族。来源：[emoji-test.txt](https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt)。固定版本与完整离线图形保持一致；Unicode 18 的新增条目尚未收录。
-- emoji-art.json / assets/emoji-atlas：Twemoji **17.0.3**，固定提交 b6b55fef1e8636b540a6d016a4729ca8cdf2e60b。原始 72×72 图形等比例装入 21 张离线 PNG；后台解码最多缓存三张图集，页面最多缓存 384 张小图，离开页面释放。所有目录变体均有图形。
+- emoji.json：Unicode **17.0** 的 3,944 个 fully-qualified 变体，合并为 1,926 个表情家族。来源：[emoji-test.txt](https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt)。直接显示 Unicode 字符，由系统 Emoji 字体绘制；肤色只使用规范定义的变体，笑脸没有肤色修饰符。系统字体未覆盖的较新字符可能显示缺字；Unicode 18 的新增条目尚未收录。
 - symbols.json：Unicode [字符名称与选定符号区段](https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt)，2,339 项。
 - entities.json：WHATWG [HTML 命名实体](https://html.spec.whatwg.org/entities.json)，2,125 项。
 - colors.json：color-name 与 CSS Color 4 的 149 个名称。
@@ -18,9 +17,10 @@
 node scripts/update-reference-data.mjs
 node scripts/update-mime-details.mjs
 node scripts/update-cheatsheets.mjs 6f382a13d72f3c4ce67f3d6f3f38f6f930d01a6c
-python scripts/pack-emoji-art.py
 ```
 
-图集更新先把上述 Twemoji 固定提交的 GitHub tarball 放到 work/emoji-source/twemoji.tar.gz，打包需要 Pillow；刷新时校验完整覆盖和原始图形许可。普通构建无需 Python，也不下载图形。检查入口：node tests/reference-data.cjs。
+普通构建不下载图片或字体，不创建 Emoji 解码工作线程。虚拟列表仅挂载可见区域附近的字符条目。检查入口：node tests/reference-data.cjs。
 
-Unicode、颜色、mime-db、QuickRef 的许可分别保存在本目录。Twemoji 图形由 Twitter, Inc. 和贡献者提供，使用 **CC BY 4.0**，完整许可见 TWEMOJI-LICENSE.txt；打包仅合并图集。QuickRef 为 MIT。所有许可同时加入程序的 THIRD_PARTY_NOTICES.txt。
+Unicode、颜色、mime-db、QuickRef 的许可分别保存在本目录。QuickRef 为 MIT。所有许可同时加入程序的 THIRD_PARTY_NOTICES.txt。
+
+速查代码的语法解析、转义与高亮在 `cheatsheet-highlight.ts`，结构块渲染在 `cheatsheet-renderer.ts`；数据 JSON 无展示样式。代码块语言优先，行内片段继承主题，复制始终取未插入高亮标签的原始数据。

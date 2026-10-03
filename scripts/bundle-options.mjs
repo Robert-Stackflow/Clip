@@ -1,4 +1,3 @@
-import {readdirSync} from 'node:fs';
 // Shared by normal builds and Electron development, following One's workflow.
 const common={bundle:true,preserveSymlinks:true};
 const node={...common,platform:'node',target:'node22'};
@@ -17,12 +16,10 @@ export const bundles=[
  {name:'text-preview',restart:false,options:{...browser,entryPoints:['src/renderer/text-preview.ts'],outdir:'dist/renderer/text-preview',format:'esm',splitting:true}},
  {name:'text-preview-worker',restart:false,options:{...browser,entryPoints:['src/renderer/text-preview-worker.ts'],outfile:'dist/renderer/text-preview-worker.js'}},
  {name:'reference-pages',restart:false,options:{...browser,entryPoints:['src/renderer/reference-pages.ts'],outfile:'dist/renderer/reference-pages.js',format:'esm'}},
- {name:'reference-emoji-worker',restart:false,options:{...browser,entryPoints:['src/renderer/reference-emoji-worker.ts'],outfile:'dist/renderer/reference-emoji-worker.js'}},
  {name:'web',restart:false,options:{...common,entryPoints:['src/web/app.ts'],outdir:'dist/web',platform:'browser',target:'es2022'}},
  {name:'styles',restart:false,options:{...common,entryPoints:['src/renderer/one-ui.css'],outfile:'dist/renderer/one-ui.css',target:'chrome138',loader:{'.woff2':'file','.woff':'file','.ttf':'file'},assetNames:'katex-fonts/[name]'}}
 ];
 export const staticFiles=[
- ...readdirSync('assets/emoji-atlas').filter(name=>/^sheet-\d{2}\.png$/.test(name)).map(name=>['assets/emoji-atlas/'+name,'dist/renderer/emoji-atlas/'+name]),
  ...['index','capture','recovery','unlock','shelf','selection','recorder','scroll','image-editor','tray'].map(name=>['src/renderer/'+name+'.html','dist/renderer/'+name+'.html']),
  ['src/web/index.html','dist/web/index.html'],['src/main/ocr.ps1','dist/main/ocr.ps1',true],
  ['assets/clipper.png','dist/clipper.png'],['src/renderer/wav-worklet.js','dist/renderer/wav-worklet.js'],

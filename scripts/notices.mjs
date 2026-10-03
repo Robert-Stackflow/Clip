@@ -17,6 +17,5 @@ output.push('mime-db 1.54.0 — offline MIME extension data — https://github.c
 output.push(await readFile('src/renderer/reference-data/MIME-DB-LICENSE.txt','utf8'));
 output.push('Quick Reference — complete Git, LaTeX, Bash, Linux and Regex documents — https://github.com/jaywcjlove/reference');
 output.push(await readFile('src/renderer/reference-data/QUICKREF-LICENSE.txt','utf8'));
-output.push(await readFile('src/renderer/reference-data/TWEMOJI-LICENSE.txt','utf8'));
 output.push(rustNotices);
 await writeFile('THIRD_PARTY_NOTICES.txt',output.join('\n').replaceAll('\r\n','\n'));

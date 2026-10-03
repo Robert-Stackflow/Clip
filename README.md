@@ -2,7 +2,7 @@
 
 Windows 剪贴板工作台，使用 Electron、TypeScript、SQLite 和 Windows 原生组件。功能参考 OneClip，界面组件、页面骨架和开发工作流参考本地 `D:\Repositories\One`。
 
-当前源码版本为 **0.48.0**。表情符号改为左右分类与连续虚拟列表，肤色选择和详情复制独立处理；颜文字详情保持单行并限制在预览内。Emoji 使用完整的 Unicode 17 离线图形，避免系统缺字与绘制压缩。CheetSheet 完整导入 QuickRef 的 Git、LaTeX、Bash、Linux、Regex 五份资料，解析成 JSON 后由本应用组件渲染，含 371 节、1,277 个代码块或表格条目。数据来源与更新方法见 [资料目录说明](src/renderer/reference-data/README.md)，验证范围见 [0.48.0 验收记录](docs/history/验收-0.48.0.md)。大型备份预览的已完成改进与仍未解决的恢复/内存问题见 [0.47.1 验收记录](docs/history/验收-0.47.1.md)。
+当前源码版本为 **0.48.1**。表情符号使用原生 Unicode Emoji，人物与手势可独立选择肤色，详情预览与复制使用相同字符；不再加载离线图片。资料页使用连续虚拟列表，搜索与可自动收缩的 SegmentTab 同行，肤色选择置于左侧分类栏。CheetSheet 完整导入 QuickRef 的 Git、LaTeX、Bash、Linux、Regex 五份资料，解析成 JSON 后由本应用组件渲染，含 371 节、1,277 个代码块或表格条目；五个主题统一使用更清晰的等宽字体、较大字号和语言高亮，保留公式预览与原文复制。数据来源与更新方法见 [资料目录说明](src/renderer/reference-data/README.md)，本轮验证见 [0.48.1 验收记录](docs/history/验收-0.48.1.md)，完整资料导入验证见 [0.48.0 验收记录](docs/history/验收-0.48.0.md)。大型备份预览的已完成改进与仍未解决的恢复/内存问题见 [0.47.1 验收记录](docs/history/验收-0.47.1.md)。
 
 ## 开发与运行
 
