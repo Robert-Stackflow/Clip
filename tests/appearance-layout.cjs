@@ -10,6 +10,7 @@ const {setup,measure}=require('./renderer-fixture.cjs');
   for(const [width,height] of sizes){await page.setViewportSize({width,height});for(const font of ['system','sans','mono'])for(const scale of [100,110,125,150])for(const density of ['comfortable','compact']){
    await page.evaluate(v=>fixture.appearance(v),{font,scale,density});await page.evaluate(()=>new Promise(requestAnimationFrame));const metrics=await measure(page,selectors),label=`${file} ${width}x${height} ${font} ${scale} ${density}`;results.push({label,metrics});
    for(const [key,value] of Object.entries(metrics)){if(value===false||typeof value==='object'&&(value.missing||!value.visible||!value.reachable||key==='.preview-body'&&value.h<80||key==='#filters'&&value.overflow))failures.push({label,key,value});}
+   if(file==='index.html'){const clipped=await page.evaluate(()=>['[data-page="cheats"] span','#pause-nav>span'].filter(selector=>{const node=document.querySelector(selector);return node&&node.scrollWidth>node.clientWidth+1;}));if(clipped.length)failures.push({label,sidebarLabels:clipped});}
   }
   await page.screenshot({path:path.join(out,file.split('.')[0]+(file.includes('?')?'-quick':'')+`-${width}x${height}.png`)});
   }

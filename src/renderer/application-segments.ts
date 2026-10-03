@@ -20,7 +20,7 @@ export function applicationSegments(root:HTMLElement,entries:SourceEntry[],selec
   const draw=()=>{
    frame=0;if(!root.isConnected||!current.length)return;
    const font=fontKey();if(font!==measuredFont)measureWidths(font);
-   const parent=root.parentElement!,siblings=Array.from(parent.children).filter(node=>node!==root&&node.getClientRects().length),gap=parseFloat(getComputedStyle(parent).columnGap)||0;
+   const parent=root.parentElement!,rootRect=root.getBoundingClientRect(),siblings=Array.from(parent.children).filter(node=>{if(node===root||!node.getClientRects().length)return false;const rect=node.getBoundingClientRect();return rect.top<rootRect.bottom-2&&rect.bottom>rootRect.top+2;}),gap=parseFloat(getComputedStyle(parent).columnGap)||0;
    const available=parent.clientWidth-siblings.reduce((sum,node)=>sum+Math.max(node.getBoundingClientRect().width,node.id==='filters'?node.scrollWidth:0),0)-siblings.length*gap;
    if(!parent.clientWidth)return;
    const size=(entry:SourceEntry)=>widths.get(entry.key)||100,total=current.reduce((sum,entry)=>sum+size(entry),0)+Math.max(0,current.length-1)*3+6,width=Math.max(140,Math.min(available,total));
