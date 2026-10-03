@@ -28,6 +28,24 @@ test('selection result codes retain their identity while owned feedback translat
  }finally{service.dispose();s.close();}}
 });
 
+test('recent window reuses rapid invocations, resets idle retirement and revokes previous capabilities',async t=>{
+ t.mock.timers.enable({apis:['setTimeout','setInterval']});const api=fixture('zh-CN'),store=new core.Store(':memory:');let panel;
+ try{const item=store.add({text:'retained original'},'Fixture');panel=new api.TrayPanel({store:()=>store,blocked:()=>false,dark:()=>false,target:()=>({hwnd:88,pid:44}),validTarget:()=>true,main:()=>{},copy:async()=>{},drag:async()=>{}});
+  panel.open();const first=panel.window;first.emit('ready-to-show');const token=(await panel.state(core.trayQuery)).items[0].token;panel.close();assert.equal(first.isVisible(),false);assert.throws(()=>panel.preview(token));t.mock.timers.tick(7999);assert.equal(first.isDestroyed(),false);
+  panel.open();assert.equal(panel.window,first);assert.equal(first.isVisible(),true);assert.throws(()=>panel.preview(token));assert.equal(panel.preview((await panel.state(core.trayQuery)).items[0].token).text,'retained original');t.mock.timers.tick(9000);assert.equal(first.isDestroyed(),false,'An active window must survive its old retirement deadline');
+  panel.close();t.mock.timers.tick(4000);panel.open();panel.close();t.mock.timers.tick(4001);assert.equal(first.isDestroyed(),false,'Closing again resets the full idle interval');t.mock.timers.tick(3999);assert.equal(first.isDestroyed(),true);assert.equal(panel.window,undefined);
+  panel.open();const fresh=panel.window;assert.notEqual(fresh,first);fresh.emit('ready-to-show');assert.equal(fresh.isVisible(),true);assert.equal((await panel.state(core.trayQuery)).items[0].id,item.id);
+ }finally{panel?.dispose();await panel?.stopSearch();store.close();}
+});
+
+test('abandoned loading callbacks cannot activate a replacement recent window, and lock bypasses retention',async t=>{
+ t.mock.timers.enable({apis:['setTimeout','setInterval']});const api=fixture('zh-CN'),store=new core.Store(':memory:');let blocked=false,panel;
+ try{panel=new api.TrayPanel({store:()=>store,blocked:()=>blocked,dark:()=>false,target:()=>undefined,validTarget:()=>false,main:()=>{},copy:async()=>{},drag:async()=>{}});panel.open();const abandoned=panel.window;panel.close();t.mock.timers.tick(8000);assert.equal(abandoned.isDestroyed(),true);
+  panel.open();const replacement=panel.window;abandoned.emit('ready-to-show');panel.open();assert.equal(panel.window,replacement);assert.equal(replacement.isVisible(),false,'Replacement still awaits its own load');replacement.emit('ready-to-show');assert.equal(replacement.isVisible(),true);
+  blocked=true;panel.close();assert.equal(replacement.isDestroyed(),true);assert.equal(panel.window,undefined);blocked=false;panel.open();const next=panel.window;next.emit('ready-to-show');panel.dispose();t.mock.timers.tick(9000);assert.equal(next.isDestroyed(),true);assert.equal(panel.window,undefined);assert.equal(api.electron.screen.listenerCount('display-added'),0);
+ }finally{panel?.dispose();await panel?.stopSearch();store.close();}
+});
+
 test('clipboard and transfer adapters translate errors/dialog labels without rewriting text, format bytes or paths',async()=>{
  for(const language of ['zh-CN','en']){const en=language==='en',api=fixture(language);await api.writePayload({text:raw},42,true);assert.deepEqual(api.state.calls.pop(),['writeText',raw]);await assert.rejects(()=>api.writePayload({text:raw},42,false,()=>false),{message:en?'Copying was canceled or history is locked':'复制已取消或历史已锁定'});assert.equal(api.state.calls.length,0);
   const data=Buffer.from('{\\rtf1 保存 设置}');await api.writePayload({text:raw,formats:[{name:'Rich Text Format',data:data.toString('base64')}]},42);const blocks=api.state.calls.pop();assert.equal(blocks[0],'blocks');assert.equal(blocks[2],42);assert.equal(blocks[1][0].format,13);assert.deepEqual(blocks[1][0].data,Buffer.from(raw+'\0','utf16le'));assert.equal(blocks[1][1].format,'Rich Text Format');assert.deepEqual(blocks[1][1].data,data);

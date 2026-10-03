@@ -23,7 +23,7 @@ export class TrayPanel{
   window.webContents.setWindowOpenHandler(()=>({action:'deny'}));window.webContents.on('will-navigate',e=>e.preventDefault());window.webContents.on('will-attach-webview',e=>e.preventDefault());
   window.on('blur',()=>{if(!this.busy)this.close();});window.on('hide',()=>{if(this.opened&&!this.busy)this.close();});
   window.on('closed',()=>{this.ctx.releaseImage?.(owner);if(this.window===window){void this.search.cancel();clearInterval(this.focusTimer);this.focusTimer=undefined;this.window=undefined;this.loaded=false;this.opened=false;this.history.close();this.target=undefined;this.serial++;}});
-  window.once('ready-to-show',()=>{this.loaded=true;if(this.window===window&&this.opened&&!this.ctx.blocked()&&!window.isDestroyed())this.show();});void window.loadURL('clipper://app/tray.html');
+  window.once('ready-to-show',()=>{if(this.window!==window||window.isDestroyed())return;this.loaded=true;if(this.opened&&!this.ctx.blocked())this.show();});void window.loadURL('clipper://app/tray.html');
  }
  private show(){
   const window=this.window!;if(this.ctx.blocked()||!this.opened||window.isDestroyed())return;const serial=this.serial;
@@ -50,7 +50,9 @@ export class TrayPanel{
   if(window&&!window.isDestroyed()){
    this.ctx.releaseImage?.(window.webContents.id);window.webContents.send('clipper:tray-session',false);
    if(this.ctx.blocked()){this.window=undefined;this.loaded=false;window.destroy();}
-   else{if(window.isVisible())window.hide();this.idleTimer=setTimeout(()=>{if(this.window===window&&!this.opened){this.window=undefined;this.loaded=false;window.destroy();}},60_000);this.idleTimer.unref();}
+   // Reuse the warm renderer for rapid consecutive invocations, then release
+   // the hidden process rather than retaining its memory for a full minute.
+   else{if(window.isVisible())window.hide();this.idleTimer=setTimeout(()=>{if(this.window===window&&!this.opened){this.window=undefined;this.loaded=false;window.destroy();}},8_000);this.idleTimer.unref();}
   }
  };
  stopSearch(){return this.search.cancel();}
