@@ -29,6 +29,8 @@ export class Store {
     }catch(e){try{this.db.close();}catch{}throw e;}
   }
   meta(key:string,fallback:any){const row=this.db.prepare('SELECT value FROM meta WHERE key=?').get(key) as any;return row?JSON.parse(row.value):fallback;}
+  /** A coherent WAL read can finish while another connection merges a backup. */
+  readSnapshot<T>(read:()=>T):T{this.db.exec('SAVEPOINT history_read');try{const result=read();this.db.exec('RELEASE history_read');return result;}catch(error){this.db.exec('ROLLBACK TO history_read; RELEASE history_read');throw error;}}
   setMeta(key:string,value:unknown){this.db.prepare('INSERT OR REPLACE INTO meta VALUES(?,?)').run(key,JSON.stringify(value));}
   all():Detail[]{return (this.db.prepare('SELECT data FROM clips ORDER BY updated DESC').all() as any[]).map(r=>JSON.parse(r.data));}
   list():Clip[]{return (this.db.prepare(this.indexed?"SELECT i.data FROM clips c JOIN clip_list_cache i ON i.id=c.id ORDER BY c.updated DESC":"SELECT json_remove(data,'$.payload') AS data FROM clips ORDER BY updated DESC").all() as any[]).map(r=>JSON.parse(r.data)).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||b.updatedAt-a.updatedAt);}
@@ -116,17 +118,18 @@ export class Store {
     }catch(e){this.db.exec('ROLLBACK TO batch_change; RELEASE batch_change');this.queue=queue;this.shelf=shelf;throw e;}
   }
   backup(){return {format:'clipper-backup',version:7,exportedAt:new Date().toISOString(),clips:this.all(),snippets:this.snippets(),categories:this.categories,scripts:this.meta('text-scripts',[])};}
-  import(value:unknown,thumbnail:(p:Payload)=>string|undefined=()=>undefined){
+  import(value:unknown,thumbnail:(p:Payload)=>string|undefined=()=>undefined,control?:{check():void;beforeCommit():void}){
+    control?.check();
     const data=validateBackup(value),previousCategories=[...this.categories];this.importTotal=this.bytes();
     try{
       this.db.exec('BEGIN');
       try{
-        for(const c of data.clips)this.add(c.payload,c.source,thumbnail(c.payload),c,false);
+        for(const c of data.clips){control?.check();this.add(c.payload,c.source,thumbnail(c.payload),c,false);}
         const seenSnippets=new Set(this.snippets().map(s=>JSON.stringify([s.title,s.payload])));
-        for(const s of data.snippets){const identity=JSON.stringify([s.title,s.payload]);if(seenSnippets.has(identity))continue;this.saveSnippet({title:s.title,payload:s.payload},thumbnail(s.payload));seenSnippets.add(identity);}
+        for(const s of data.snippets){control?.check();const identity=JSON.stringify([s.title,s.payload]);if(seenSnippets.has(identity))continue;this.saveSnippet({title:s.title,payload:s.payload},thumbnail(s.payload));seenSnippets.add(identity);}
         for(const c of data.categories)if(!this.categories.some(x=>x.name===c.name&&x.kind===c.kind&&x.contains===c.contains&&x.source===c.source&&x.tag===c.tag))this.saveCategory({...c,id:undefined});
         if(data.scripts.length){const scripts=this.meta('text-scripts',[]);for(const script of data.scripts)if(!scripts.some((s:any)=>s.name===script.name&&s.code===script.code))scripts.push({...script,id:randomUUID(),updatedAt:Date.now()});if(scripts.length>100||Buffer.byteLength(JSON.stringify(scripts))>4*1024*1024)throw new Error(tr('合并后脚本超过容量限制'));this.setMeta('text-scripts',scripts);}
-        this.db.exec('COMMIT');return data.clips.length;
+        control?.check();control?.beforeCommit();this.db.exec('COMMIT');return data.clips.length;
       }catch(e){this.db.exec('ROLLBACK');this.categories=previousCategories;throw e;}
     }finally{this.importTotal=undefined;}
   }

@@ -6,7 +6,7 @@ export const bundles=[
  {name:'main',restart:true,options:{...node,entryPoints:['src/main/index.ts'],outfile:'dist/main/index.cjs',external:['electron','koffi','better-sqlite3-multiple-ciphers'],sourcemap:true}},
  ...[
   ['script-worker',['quickjs-emscripten','better-sqlite3-multiple-ciphers']],
-  ['backup-worker',['better-sqlite3-multiple-ciphers']],['backup-preview-worker',['better-sqlite3-multiple-ciphers','koffi']],['recovery-worker',['better-sqlite3-multiple-ciphers']],
+  ['backup-worker',['better-sqlite3-multiple-ciphers']],['backup-preview-worker',['better-sqlite3-multiple-ciphers','koffi']],['backup-restore-worker',['better-sqlite3-multiple-ciphers','koffi']],['recovery-worker',['better-sqlite3-multiple-ciphers']],
   ['scroll-worker',[]],['metadata-worker',['koffi']],['sync-files-worker',['koffi']],['share-publisher-worker',['koffi','better-sqlite3-multiple-ciphers']],
   ['sync-item-worker',['better-sqlite3-multiple-ciphers']],['sync-receive-worker',['better-sqlite3-multiple-ciphers']],['search-worker',['better-sqlite3-multiple-ciphers']],['preview-image-worker',['better-sqlite3-multiple-ciphers']],
   ['capture-writer-worker',['better-sqlite3-multiple-ciphers']]

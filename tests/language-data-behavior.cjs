@@ -54,9 +54,15 @@ const {setup}=require('./renderer-fixture.cjs'),{setupData,openDataView}=require
   await start('restore');await page.locator('#restore-password').fill('Fixture-only-2026!');password=await remember('#restore-password');await cancel();await cleared(password);await called('restore-cancel');assert.deepEqual((await calls('restore-cancel'))[0],['restore-cancel','restore-file-token']);
   await start('restore-preview');assert.equal(await page.locator('.restore-summary strong').first().textContent(),'12,345');
   assert.deepEqual((await calls('restore-preview'))[0],['restore-preview','restore-file-token','Fixture-only-2026!']);await cancel();await called('restore-cancel');assert.deepEqual((await calls('restore-cancel'))[0],['restore-cancel','restore-preview-token']);
-  await start('restore-preview');await busy('restore-commit');assert.deepEqual((await calls('restore-commit'))[0],['restore-commit','restore-preview-token']);assert.deepEqual(await calls('restore-cancel'),[]);
+  await start('restore-preview');await page.evaluate(()=>fixture.block='restore-commit');await page.locator('dialog [type=submit]').click();await called('restore-commit');
+  assert.equal(await page.locator('#restore-merge-progress').isVisible(),true);assert.equal(await page.locator('#modal-close').isDisabled(),false);assert.equal(await page.locator('#modal-cancel').isDisabled(),false);
+  await page.evaluate(()=>fixture.release());await closed();assert.deepEqual((await calls('restore-commit'))[0],['restore-commit','restore-preview-token']);assert.deepEqual(await calls('restore-cancel'),[]);
+  await start('restore-preview');await page.evaluate(()=>{fixture.block='restore-commit';fixture.rejectRestore=true;fixture.restoreFinished=false;});await page.locator('dialog [type=submit]').click();await called('restore-commit');
+  await page.keyboard.press('Escape');await closed();await called('restore-cancel');assert.deepEqual((await calls('restore-cancel'))[0],['restore-cancel','restore-preview-token']);
+  await openDataView(page,'export');await page.evaluate(()=>fixture.release());await page.waitForFunction(()=>fixture.restoreFinished);await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  assert.equal(await page.locator('dialog').evaluate(node=>node.open),true);assert.equal(await page.locator('#export-password').isVisible(),true);assert.equal(await page.locator('#modal-error').isVisible(),false);await cancel();
   await start('data');await page.locator('.section-nav button').nth(2).click();await page.locator('[data-restore-name="保存.json"]').click();await page.waitForSelector('.restore-summary');
-  assert.deepEqual((await calls('restore-file'))[0],['restore-file','保存.json']);assert.deepEqual((await calls('restore-preview'))[0],['restore-preview','restore-file-token']);await cancel();
+  assert.deepEqual((await calls('restore-file'))[0],['restore-file','保存.json']);assert.deepEqual((await calls('restore-preview'))[0],['restore-preview','restore-file-token',undefined]);await cancel();
 
   await start('vault-enable');await fillPassword();password=await remember('#vault-new-password');await cancel();await cleared(password);assert.deepEqual(await calls('encryption-prepare'),[]);
   await start('vault-enable');await fillPassword();password=await remember('#vault-new-password');await page.locator('dialog [type=submit]').click();await page.waitForSelector('#vault-recovery-proof');await cleared(password);

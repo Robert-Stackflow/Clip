@@ -8,6 +8,7 @@ import {validateBackupOptions,type BackupStatus,type BackupEntry,type RestoreFil
 import {localDirectory,writeAtomic,boundedFile,MAX_BACKUP_FILE} from './data-files';
 import {decodeBackup,encodeBackup,isEncryptedBackup,validateBackupPassword} from './backup-crypto';
 import {previewBackupJob,type BackupPreviewOptions} from './backup-preview-job';
+import type {restoreBackupJob} from './backup-restore-job';
 import type {Payload} from '../shared/types';
 interface SavedBackup extends BackupStatus {secret?:string}
 interface Vault {available():Promise<boolean>;encrypt(value:string):Promise<string>;decrypt(value:string):Promise<string>}
@@ -22,10 +23,12 @@ async function fingerprint(file:string,valid:()=>boolean){
 export class BackupManager {
  private restoring:{token:string;file:string;name:string;expires:number;encrypted:boolean;hash:string;snapshot?:Uint8Array}|undefined;
  private previewJob?:ReturnType<typeof previewBackupJob>;
+ private restoreJob?:ReturnType<typeof restoreBackupJob>;
  private selection=0;private disposed=false;
  private busy=false;
  private expiryTimer:NodeJS.Timeout|undefined;
- constructor(private store:()=>Store,private profileId:string,private defaultFolder:string,private vault:Vault,private changed:()=>void,private thumbnail:(p:Payload)=>string|undefined=()=>undefined,private exporter?:(file:string,password?:string)=>Promise<void>,private previewOptions:BackupPreviewOptions={}){}
+ get restoringBackup(){return !!this.restoreJob;}
+ constructor(private store:()=>Store,private profileId:string,private defaultFolder:string,private vault:Vault,private changed:()=>void,private thumbnail:(p:Payload)=>string|undefined=()=>undefined,private exporter?:(file:string,password?:string)=>Promise<void>,private previewOptions:BackupPreviewOptions={},private restorer?:(snapshot:Uint8Array,valid:()=>boolean,previous?:Promise<unknown>)=>ReturnType<typeof restoreBackupJob>){}
  private saved():SavedBackup{return {enabled:false,directory:this.defaultFolder,intervalHours:24,keep:7,encrypted:true,hasPassword:false,lastSuccess:0,lastAttempt:0,nextAt:0,lastError:'',...this.store().meta('automatic-backup',{})};}
  async exclusive<T>(operation:()=>Promise<T>){if(this.busy)throw new Error(tr('正在备份或切换资料，请完成后重试'));this.busy=true;try{return await operation();}finally{this.busy=false;}}
  status():BackupStatus{if(this.restoring&&this.restoring.expires<Date.now())this.cancelRestore(this.restoring.token);const {secret,...state}=this.saved();return {...state,hasPassword:!!secret};}
@@ -68,13 +71,23 @@ export class BackupManager {
  async chooseOwn(name:string){if(typeof name!=='string'||!this.pattern().test(name)||(await this.entries()).every(e=>e.name!==name))throw new Error(tr('此备份不在当前列表中'));return this.chooseRestore(join(this.saved().directory,name));}
  private request(token:unknown){const request=this.restoring;if(!request||token!==request.token||request.expires<Date.now())throw new Error(tr('恢复预览已过期，请重新选择备份'));return request;}
  async preview(token:string,password?:string):Promise<RestorePreview>{
+  if(this.restoreJob)throw new Error(tr('正在备份或切换资料，请完成后重试'));
   const request=this.request(token);request.snapshot?.fill(0);request.snapshot=undefined;this.previewJob?.cancel();
   const job=previewBackupJob(request.file,request.hash,password,this.previewOptions,this.previewJob?.promise);this.previewJob=job;
   try{const {result,snapshot}=await job.promise;try{if(this.previewJob!==job||this.request(token)!==request)throw new Error(tr('恢复预览已过期，请重新选择备份'));request.snapshot=snapshot;return {token,name:request.name,...result,encrypted:request.encrypted};}catch(error){snapshot.fill(0);throw error;}}
   finally{if(this.previewJob===job)this.previewJob=undefined;}
  }
- restore(token:string){const request=this.request(token);if(!request.snapshot)throw new Error(tr('请先校验并预览备份'));const value=JSON.parse(Buffer.from(request.snapshot.buffer,request.snapshot.byteOffset,request.snapshot.byteLength).toString('utf8'));const count=this.store().import(value,this.thumbnail);this.cancelRestore(token);this.changed();return count;}
+ restore(token:string){const request=this.request(token);if(!request.snapshot)throw new Error(tr('请先校验并预览备份'));
+  if(this.restorer)return this.exclusive(async()=>{
+   const original=this.store(),snapshot=request.snapshot!;request.snapshot=undefined;
+   const valid=()=>{try{return !this.disposed&&this.request(token)===request&&this.store()===original;}catch{return false;}};
+   const job=this.restorer!(snapshot,valid,this.restoreJob?.promise);this.restoreJob=job;
+   try{const result=await job.promise;this.cancelRestore(token);this.changed();return result.count;}
+   finally{if(this.restoreJob===job)this.restoreJob=undefined;}
+  });
+  const value=JSON.parse(Buffer.from(request.snapshot.buffer,request.snapshot.byteOffset,request.snapshot.byteLength).toString('utf8'));const count=this.store().import(value,this.thumbnail);this.cancelRestore(token);this.changed();return count;
+ }
  cancelRestore(token:string){if(this.restoring?.token===token)this.cancelPendingRestore();}
- cancelPendingRestore(){this.selection++;this.previewJob?.cancel();this.restoring?.snapshot?.fill(0);this.restoring=undefined;clearTimeout(this.expiryTimer);}
+ cancelPendingRestore(){this.selection++;this.previewJob?.cancel();this.restoreJob?.cancel();this.restoring?.snapshot?.fill(0);this.restoring=undefined;clearTimeout(this.expiryTimer);}
  dispose(){this.disposed=true;this.cancelPendingRestore();}
 }
