@@ -183,7 +183,7 @@ async function renderSettings(){const revision=++settingsRevision;disposeUpdates
 document.addEventListener('clipper:feedback',e=>toast((e as CustomEvent).detail));
 document.addEventListener('keydown',e=>{
   if(e.isComposing||e.defaultPrevented)return;if(document.querySelector('dialog[open]'))return;const target=e.target as HTMLElement,editing=target.matches('input,textarea,select');
-  if(e.key==='Escape'){e.preventDefault();void api.hide();return;}
+  if(e.key==='Escape'){if(document.querySelector('.reference-popover:not([hidden])'))return;e.preventDefault();void api.hide();return;}
   if(target.closest('.text-reader'))return;
   if(e.ctrlKey&&e.key.toLowerCase()==='f'){e.preventDefault();(document.getElementById('reference-search')||document.getElementById('search'))?.focus();return;}
   if(target.closest('#toast')||(!editing&&target.closest('button,summary,[role=combobox]')&&!target.closest('.clip-row')))return;

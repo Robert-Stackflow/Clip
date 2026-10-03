@@ -109,7 +109,10 @@ const {setup}=require('./renderer-fixture.cjs');
   assert.equal(await page.locator('[data-detail-tone="5"]').getAttribute('aria-pressed'),'true');
   assert.equal(await page.locator('.reference-item[aria-label="thumbs up"] .reference-emoji-glyph').textContent(),'👍🏿');
   await page.screenshot({path:'work/reference-ui/skin-details.png'});
+  await page.evaluate(()=>{fixture.hideCalls=0;window.clipper.hide=async()=>{fixture.hideCalls++;};});
   await page.keyboard.press('Escape');await page.waitForSelector('.reference-popover[hidden]',{state:'attached'});
+  assert.equal(await page.evaluate(()=>fixture.hideCalls),0,'The first Escape closes only the detail popup');
+  await page.keyboard.press('Escape');assert.equal(await page.evaluate(()=>fixture.hideCalls),1,'The next Escape may close the main window');
   await page.locator('#reference-search').fill('person');await page.waitForSelector('.reference-item[aria-label="person"]');
   assert.equal(await page.locator('.reference-item[aria-label="person"] .reference-emoji-glyph').textContent(),'🧑🏽','Other emoji retain the global tone');
   await page.locator('#reference-search').fill('thumbs up');await page.waitForSelector('.reference-item[aria-label="thumbs up"]');
@@ -224,6 +227,14 @@ const {setup}=require('./renderer-fixture.cjs');
   // After navigation settles, the selected category follows later programmatic scrolling too.
   await page.locator('.reference-scroll').evaluate(scroll=>{scroll.scrollTop=0;});
   await page.waitForFunction(id=>document.querySelector('#reference-categories [aria-current]')?.dataset.category===id,git.sections[0].id);
+  await page.setViewportSize({width:860,height:620});
+  await page.evaluate(()=>fixture.appearance({...fixture.value(),scale:150}));
+  const enlargedSection=git.sections[95];await page.locator(`[data-category="${enlargedSection.id}"]`).click();
+  await page.waitForTimeout(650);
+  assert.ok(await page.locator(`[data-category="${enlargedSection.id}"]`).evaluate(node=>{const rect=node.getBoundingClientRect(),view=node.parentElement.getBoundingClientRect();return node.getAttribute('aria-current')==='location'&&rect.top>=view.top-1&&rect.bottom<=view.bottom+1;}),'Large text must keep the selected Git category visible');
+  assert.ok(await page.locator(`[data-section="${enlargedSection.id}"]`).evaluate(node=>{const rect=node.getBoundingClientRect(),view=document.querySelector('.reference-scroll').getBoundingClientRect();return rect.top<view.bottom&&rect.bottom>view.top;}),'Large text must keep the selected Git section visible');
+  await page.setViewportSize({width:1280,height:820});
+  await page.evaluate(()=>fixture.appearance({...fixture.value(),scale:100}));
   for(const topic of snapshot.topics){
    await chooseReferenceTab(page,topic.id);
    assert.equal(await page.locator('[data-section]').count(),topic.sections.length,topic.id);
