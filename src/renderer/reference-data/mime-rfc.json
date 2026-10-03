@@ -1,0 +1,4042 @@
+{
+  "application/1d-interleaved-parityfec": [
+    [
+      "RFC6015",
+      "RTP Payload Format for 1-D Interleaved Parity Forward Error Correction (FEC)"
+    ]
+  ],
+  "application/ace-groupcomm+cbor": [
+    [
+      "RFC9594",
+      "Key Provisioning for Group Communication Using Authentication and Authorization for Constrained Environments (ACE)"
+    ]
+  ],
+  "application/ace-trl+cbor": [
+    [
+      "RFC9770",
+      "Notification of Revoked Access Tokens in the Authentication and Authorization for Constrained Environments (ACE) Framework"
+    ]
+  ],
+  "application/ace+cbor": [
+    [
+      "RFC9200",
+      "Authentication and Authorization for Constrained Environments Using the OAuth 2.0 Framework (ACE-OAuth)"
+    ]
+  ],
+  "application/ace+json": [
+    [
+      "RFC9431",
+      "Message Queuing Telemetry Transport (MQTT) and Transport Layer Security (TLS) Profile of Authentication and Authorization for Constrained Environments (ACE) Framework"
+    ]
+  ],
+  "application/aif+cbor": [
+    [
+      "RFC9237",
+      "An Authorization Information Format (AIF) for Authentication and Authorization for Constrained Environments (ACE)"
+    ]
+  ],
+  "application/aif+json": [
+    [
+      "RFC9237",
+      "An Authorization Information Format (AIF) for Authentication and Authorization for Constrained Environments (ACE)"
+    ]
+  ],
+  "application/alto-cdni+json": [
+    [
+      "RFC9241",
+      "Content Delivery Network Interconnection (CDNI) Footprint and Capabilities Advertisement Using Application-Layer Traffic Optimization (ALTO)"
+    ]
+  ],
+  "application/alto-cdnifilter+json": [
+    [
+      "RFC9241",
+      "Content Delivery Network Interconnection (CDNI) Footprint and Capabilities Advertisement Using Application-Layer Traffic Optimization (ALTO)"
+    ]
+  ],
+  "application/alto-costmap+json": [
+    [
+      "RFC7285",
+      "Application-Layer Traffic Optimization (ALTO) Protocol"
+    ]
+  ],
+  "application/alto-costmapfilter+json": [
+    [
+      "RFC7285",
+      "Application-Layer Traffic Optimization (ALTO) Protocol"
+    ]
+  ],
+  "application/alto-directory+json": [
+    [
+      "RFC7285",
+      "Application-Layer Traffic Optimization (ALTO) Protocol"
+    ]
+  ],
+  "application/alto-endpointcost+json": [
+    [
+      "RFC7285",
+      "Application-Layer Traffic Optimization (ALTO) Protocol"
+    ]
+  ],
+  "application/alto-endpointcostparams+json": [
+    [
+      "RFC7285",
+      "Application-Layer Traffic Optimization (ALTO) Protocol"
+    ]
+  ],
+  "application/alto-endpointprop+json": [
+    [
+      "RFC7285",
+      "Application-Layer Traffic Optimization (ALTO) Protocol"
+    ]
+  ],
+  "application/alto-endpointpropparams+json": [
+    [
+      "RFC7285",
+      "Application-Layer Traffic Optimization (ALTO) Protocol"
+    ]
+  ],
+  "application/alto-error+json": [
+    [
+      "RFC7285",
+      "Application-Layer Traffic Optimization (ALTO) Protocol"
+    ]
+  ],
+  "application/alto-networkmap+json": [
+    [
+      "RFC7285",
+      "Application-Layer Traffic Optimization (ALTO) Protocol"
+    ]
+  ],
+  "application/alto-networkmapfilter+json": [
+    [
+      "RFC7285",
+      "Application-Layer Traffic Optimization (ALTO) Protocol"
+    ]
+  ],
+  "application/alto-propmap+json": [
+    [
+      "RFC9240",
+      "An Extension for Application-Layer Traffic Optimization (ALTO): Entity Property Maps"
+    ]
+  ],
+  "application/alto-propmapparams+json": [
+    [
+      "RFC9240",
+      "An Extension for Application-Layer Traffic Optimization (ALTO): Entity Property Maps"
+    ]
+  ],
+  "application/alto-tips+json": [
+    [
+      "RFC9569",
+      "The Application-Layer Traffic Optimization (ALTO) Transport Information Publication Service (TIPS)"
+    ]
+  ],
+  "application/alto-tipsparams+json": [
+    [
+      "RFC9569",
+      "The Application-Layer Traffic Optimization (ALTO) Transport Information Publication Service (TIPS)"
+    ]
+  ],
+  "application/alto-updatestreamcontrol+json": [
+    [
+      "RFC8895",
+      "Application-Layer Traffic Optimization (ALTO) Incremental Updates Using Server-Sent Events (SSE)"
+    ]
+  ],
+  "application/alto-updatestreamparams+json": [
+    [
+      "RFC8895",
+      "Application-Layer Traffic Optimization (ALTO) Incremental Updates Using Server-Sent Events (SSE)"
+    ]
+  ],
+  "application/at+jwt": [
+    [
+      "RFC9068",
+      "JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens"
+    ]
+  ],
+  "application/atom+xml": [
+    [
+      "RFC4287",
+      "The Atom Syndication Format"
+    ],
+    [
+      "RFC5023",
+      "The Atom Publishing Protocol"
+    ]
+  ],
+  "application/atomcat+xml": [
+    [
+      "RFC5023",
+      "The Atom Publishing Protocol"
+    ]
+  ],
+  "application/atomdeleted+xml": [
+    [
+      "RFC6721",
+      "The Atom \"deleted-entry\" Element"
+    ]
+  ],
+  "application/atomsvc+xml": [
+    [
+      "RFC5023",
+      "The Atom Publishing Protocol"
+    ]
+  ],
+  "application/auth-policy+xml": [
+    [
+      "RFC4745",
+      "Common Policy: A Document Format for Expressing Privacy Preferences"
+    ]
+  ],
+  "application/batch-smtp": [
+    [
+      "RFC2442",
+      "The Batch SMTP Media Type"
+    ]
+  ],
+  "application/beep+xml": [
+    [
+      "RFC3080",
+      "The Blocks Extensible Exchange Protocol Core"
+    ]
+  ],
+  "application/calendar+json": [
+    [
+      "RFC7265",
+      "jCal: The JSON Format for iCalendar"
+    ]
+  ],
+  "application/calendar+xml": [
+    [
+      "RFC6321",
+      "xCal: The XML Format for iCalendar"
+    ]
+  ],
+  "application/call-completion": [
+    [
+      "RFC6910",
+      "Completion of Calls for the Session Initiation Protocol (SIP)"
+    ]
+  ],
+  "application/cals-1840": [
+    [
+      "RFC1895",
+      "The Application/CALS-1840 Content-type"
+    ]
+  ],
+  "application/captive+json": [
+    [
+      "RFC8908",
+      "Captive Portal API"
+    ]
+  ],
+  "application/cbor": [
+    [
+      "RFC8949",
+      "Concise Binary Object Representation (CBOR)"
+    ]
+  ],
+  "application/cbor-seq": [
+    [
+      "RFC8742",
+      "Concise Binary Object Representation (CBOR) Sequences"
+    ]
+  ],
+  "application/ccmp+xml": [
+    [
+      "RFC6503",
+      "Centralized Conferencing Manipulation Protocol"
+    ]
+  ],
+  "application/ccxml+xml": [
+    [
+      "RFC4267",
+      "The W3C Speech Interface Framework Media Types: application/voicexml+xml, application/ssml+xml, application/srgs, application/srgs+xml, application/ccxml+xml, and application/pls+xml"
+    ]
+  ],
+  "application/cdmi-capability": [
+    [
+      "RFC6208",
+      "Cloud Data Management Interface (CDMI) Media Types"
+    ]
+  ],
+  "application/cdmi-container": [
+    [
+      "RFC6208",
+      "Cloud Data Management Interface (CDMI) Media Types"
+    ]
+  ],
+  "application/cdmi-domain": [
+    [
+      "RFC6208",
+      "Cloud Data Management Interface (CDMI) Media Types"
+    ]
+  ],
+  "application/cdmi-object": [
+    [
+      "RFC6208",
+      "Cloud Data Management Interface (CDMI) Media Types"
+    ]
+  ],
+  "application/cdmi-queue": [
+    [
+      "RFC6208",
+      "Cloud Data Management Interface (CDMI) Media Types"
+    ]
+  ],
+  "application/cdni": [
+    [
+      "RFC7736",
+      "Content Delivery Network Interconnection (CDNI) Media Type Registration"
+    ]
+  ],
+  "application/cellml+xml": [
+    [
+      "RFC4708",
+      "CellML Media Type"
+    ]
+  ],
+  "application/cfw": [
+    [
+      "RFC6230",
+      "Media Control Channel Framework"
+    ]
+  ],
+  "application/cid-edhoc+cbor-seq": [
+    [
+      "RFC9528",
+      "Ephemeral Diffie-Hellman Over COSE (EDHOC)"
+    ]
+  ],
+  "application/clue_info+xml": [
+    [
+      "RFC8846",
+      "An XML Schema for the Controlling Multiple Streams for Telepresence (CLUE) Data Model"
+    ]
+  ],
+  "application/clue+xml": [
+    [
+      "RFC8847",
+      "Protocol for Controlling Multiple Streams for Telepresence (CLUE)"
+    ]
+  ],
+  "application/cms": [
+    [
+      "RFC7193",
+      "The application/cms Media Type"
+    ]
+  ],
+  "application/cmw+cbor": [
+    [
+      "RFC9999",
+      "Remote ATtestation procedureS (RATS) Conceptual Message Wrapper (CMW)"
+    ]
+  ],
+  "application/cmw+cose": [
+    [
+      "RFC9999",
+      "Remote ATtestation procedureS (RATS) Conceptual Message Wrapper (CMW)"
+    ]
+  ],
+  "application/cmw+json": [
+    [
+      "RFC9999",
+      "Remote ATtestation procedureS (RATS) Conceptual Message Wrapper (CMW)"
+    ]
+  ],
+  "application/cmw+jws": [
+    [
+      "RFC9999",
+      "Remote ATtestation procedureS (RATS) Conceptual Message Wrapper (CMW)"
+    ]
+  ],
+  "application/cnrp+xml": [
+    [
+      "RFC3367",
+      "Common Name Resolution Protocol (CNRP)"
+    ]
+  ],
+  "application/coap-eap": [
+    [
+      "RFC9820",
+      "Authentication Service Based on the Extensible Authentication Protocol (EAP) for Use with the Constrained Application Protocol (CoAP)"
+    ]
+  ],
+  "application/coap-group+json": [
+    [
+      "RFC7390",
+      "Group Communication for the Constrained Application Protocol (CoAP)"
+    ]
+  ],
+  "application/coap-payload": [
+    [
+      "RFC8075",
+      "Guidelines for Mapping Implementations: HTTP to the Constrained Application Protocol (CoAP)"
+    ]
+  ],
+  "application/concise-problem-details+cbor": [
+    [
+      "RFC9290",
+      "Concise Problem Details for Constrained Application Protocol (CoAP) APIs"
+    ]
+  ],
+  "application/conference-info+xml": [
+    [
+      "RFC4575",
+      "A Session Initiation Protocol (SIP) Event Package for Conference State"
+    ]
+  ],
+  "application/cose": [
+    [
+      "RFC9052",
+      "CBOR Object Signing and Encryption (COSE): Structures and Process"
+    ]
+  ],
+  "application/cose-key": [
+    [
+      "RFC9052",
+      "CBOR Object Signing and Encryption (COSE): Structures and Process"
+    ]
+  ],
+  "application/cose-key-set": [
+    [
+      "RFC9052",
+      "CBOR Object Signing and Encryption (COSE): Structures and Process"
+    ]
+  ],
+  "application/cose-x509": [
+    [
+      "RFC9360",
+      "CBOR Object Signing and Encryption (COSE): Header Parameters for Carrying and Referencing X.509 Certificates"
+    ]
+  ],
+  "application/cpl+xml": [
+    [
+      "RFC3880",
+      "Call Processing Language (CPL): A Language for User Control of Internet Telephony Services"
+    ]
+  ],
+  "application/csrattrs": [
+    [
+      "RFC7030",
+      "Enrollment over Secure Transport"
+    ]
+  ],
+  "application/cwt": [
+    [
+      "RFC8392",
+      "CBOR Web Token (CWT)"
+    ]
+  ],
+  "application/davmount+xml": [
+    [
+      "RFC4709",
+      "Mounting Web Distributed Authoring and Versioning (WebDAV) Servers"
+    ]
+  ],
+  "application/dialog-info+xml": [
+    [
+      "RFC4235",
+      "An INVITE-Initiated Dialog Event Package for the Session Initiation Protocol (SIP)"
+    ]
+  ],
+  "application/dicom": [
+    [
+      "RFC3240",
+      "Digital Imaging and Communications in Medicine (DICOM) - Application/dicom MIME Sub-type Registration"
+    ]
+  ],
+  "application/dns": [
+    [
+      "RFC4027",
+      "Domain Name System Media Types"
+    ]
+  ],
+  "application/dns-message": [
+    [
+      "RFC8484",
+      "DNS Queries over HTTPS (DoH)"
+    ]
+  ],
+  "application/dns+json": [
+    [
+      "RFC8427",
+      "Representing DNS Messages in JSON"
+    ]
+  ],
+  "application/dots+cbor": [
+    [
+      "RFC9132",
+      "Distributed Denial-of-Service Open Threat Signaling (DOTS) Signal Channel Specification"
+    ]
+  ],
+  "application/dpop+jwt": [
+    [
+      "RFC9449",
+      "OAuth 2.0 Demonstrating Proof of Possession (DPoP)"
+    ]
+  ],
+  "application/dskpp+xml": [
+    [
+      "RFC6063",
+      "Dynamic Symmetric Key Provisioning Protocol (DSKPP)"
+    ]
+  ],
+  "application/dssc+der": [
+    [
+      "RFC5698",
+      "Data Structure for the Security Suitability of Cryptographic Algorithms (DSSC)"
+    ]
+  ],
+  "application/dssc+xml": [
+    [
+      "RFC5698",
+      "Data Structure for the Security Suitability of Cryptographic Algorithms (DSSC)"
+    ]
+  ],
+  "application/dvcs": [
+    [
+      "RFC3029",
+      "Internet X.509 Public Key Infrastructure Data Validation and Certification Server Protocols"
+    ]
+  ],
+  "application/eat-bun+cbor": [
+    [
+      "RFC9782",
+      "Entity Attestation Token (EAT) Media Types"
+    ]
+  ],
+  "application/eat-bun+json": [
+    [
+      "RFC9782",
+      "Entity Attestation Token (EAT) Media Types"
+    ]
+  ],
+  "application/eat-ucs+cbor": [
+    [
+      "RFC9782",
+      "Entity Attestation Token (EAT) Media Types"
+    ]
+  ],
+  "application/eat-ucs+json": [
+    [
+      "RFC9782",
+      "Entity Attestation Token (EAT) Media Types"
+    ]
+  ],
+  "application/eat+cwt": [
+    [
+      "RFC9782",
+      "Entity Attestation Token (EAT) Media Types"
+    ]
+  ],
+  "application/eat+jwt": [
+    [
+      "RFC9782",
+      "Entity Attestation Token (EAT) Media Types"
+    ]
+  ],
+  "application/ecmascript": [
+    [
+      "RFC4329",
+      "Scripting Media Types"
+    ],
+    [
+      "RFC9239",
+      "Updates to ECMAScript Media Types"
+    ]
+  ],
+  "application/edhoc+cbor-seq": [
+    [
+      "RFC9528",
+      "Ephemeral Diffie-Hellman Over COSE (EDHOC)"
+    ]
+  ],
+  "application/edi-consent": [
+    [
+      "RFC1767",
+      "MIME Encapsulation of EDI Objects"
+    ]
+  ],
+  "application/edi-x12": [
+    [
+      "RFC1767",
+      "MIME Encapsulation of EDI Objects"
+    ]
+  ],
+  "application/edifact": [
+    [
+      "RFC1767",
+      "MIME Encapsulation of EDI Objects"
+    ]
+  ],
+  "application/emergencycalldata.cap+xml": [
+    [
+      "RFC8876",
+      "Non-interactive Emergency Calls"
+    ]
+  ],
+  "application/emergencycalldata.comment+xml": [
+    [
+      "RFC7852",
+      "Additional Data Related to an Emergency Call"
+    ]
+  ],
+  "application/emergencycalldata.control+xml": [
+    [
+      "RFC8147",
+      "Next-Generation Pan-European eCall"
+    ]
+  ],
+  "application/emergencycalldata.deviceinfo+xml": [
+    [
+      "RFC7852",
+      "Additional Data Related to an Emergency Call"
+    ]
+  ],
+  "application/emergencycalldata.ecall.msd": [
+    [
+      "RFC8147",
+      "Next-Generation Pan-European eCall"
+    ]
+  ],
+  "application/emergencycalldata.providerinfo+xml": [
+    [
+      "RFC7852",
+      "Additional Data Related to an Emergency Call"
+    ]
+  ],
+  "application/emergencycalldata.serviceinfo+xml": [
+    [
+      "RFC7852",
+      "Additional Data Related to an Emergency Call"
+    ]
+  ],
+  "application/emergencycalldata.subscriberinfo+xml": [
+    [
+      "RFC7852",
+      "Additional Data Related to an Emergency Call"
+    ]
+  ],
+  "application/emergencycalldata.veds+xml": [
+    [
+      "RFC8148",
+      "Next-Generation Vehicle-Initiated Emergency Calls"
+    ]
+  ],
+  "application/encaprtp": [
+    [
+      "RFC6849",
+      "An Extension to the Session Description Protocol (SDP) and Real-time Transport Protocol (RTP) for Media Loopback"
+    ]
+  ],
+  "application/epp+xml": [
+    [
+      "RFC5730",
+      "Extensible Provisioning Protocol (EPP)"
+    ]
+  ],
+  "application/example": [
+    [
+      "RFC4735",
+      "Example Media Types for Use in Documentation"
+    ]
+  ],
+  "application/expect-ct-report+json": [
+    [
+      "RFC9163",
+      "Expect-CT Extension for HTTP"
+    ]
+  ],
+  "application/fdt+xml": [
+    [
+      "RFC6726",
+      "FLUTE - File Delivery over Unidirectional Transport"
+    ]
+  ],
+  "application/fits": [
+    [
+      "RFC4047",
+      "MIME Sub-type Registrations for Flexible Image Transport System (FITS)"
+    ]
+  ],
+  "application/flexfec": [
+    [
+      "RFC8627",
+      "RTP Payload Format for Flexible Forward Error Correction (FEC)"
+    ]
+  ],
+  "application/font-sfnt": [
+    [
+      "RFC8081",
+      "The \"font\" Top-Level Media Type"
+    ]
+  ],
+  "application/font-tdpfr": [
+    [
+      "RFC3073",
+      "Portable Font Resource (PFR) - application/font-tdpfr MIME Sub-type Registration"
+    ]
+  ],
+  "application/font-woff": [
+    [
+      "RFC8081",
+      "The \"font\" Top-Level Media Type"
+    ]
+  ],
+  "application/framework-attributes+xml": [
+    [
+      "RFC6230",
+      "Media Control Channel Framework"
+    ]
+  ],
+  "application/geo+json": [
+    [
+      "RFC7946",
+      "The GeoJSON Format"
+    ]
+  ],
+  "application/geo+json-seq": [
+    [
+      "RFC8142",
+      "GeoJSON Text Sequences"
+    ]
+  ],
+  "application/geofeed+csv": [
+    [
+      "RFC9877",
+      "Registration Data Access Protocol (RDAP) Extension for Geofeed Data"
+    ]
+  ],
+  "application/gnap-binding-jws": [
+    [
+      "RFC9635",
+      "Grant Negotiation and Authorization Protocol (GNAP)"
+    ]
+  ],
+  "application/gnap-binding-jwsd": [
+    [
+      "RFC9635",
+      "Grant Negotiation and Authorization Protocol (GNAP)"
+    ]
+  ],
+  "application/gnap-binding-rotation-jws": [
+    [
+      "RFC9635",
+      "Grant Negotiation and Authorization Protocol (GNAP)"
+    ]
+  ],
+  "application/gnap-binding-rotation-jwsd": [
+    [
+      "RFC9635",
+      "Grant Negotiation and Authorization Protocol (GNAP)"
+    ]
+  ],
+  "application/gzip": [
+    [
+      "RFC6713",
+      "The 'application/zlib' and 'application/gzip' Media Types"
+    ]
+  ],
+  "application/h224": [
+    [
+      "RFC4573",
+      "MIME Type Registration for RTP Payload Format for H.224"
+    ]
+  ],
+  "application/held+xml": [
+    [
+      "RFC5985",
+      "HTTP-Enabled Location Delivery (HELD)"
+    ]
+  ],
+  "application/http": [
+    [
+      "RFC9112",
+      "HTTP/1.1"
+    ]
+  ],
+  "application/ibe-key-request+xml": [
+    [
+      "RFC5408",
+      "Identity-Based Encryption Architecture and Supporting Data Structures"
+    ]
+  ],
+  "application/ibe-pkg-reply+xml": [
+    [
+      "RFC5408",
+      "Identity-Based Encryption Architecture and Supporting Data Structures"
+    ]
+  ],
+  "application/ibe-pp-data": [
+    [
+      "RFC5408",
+      "Identity-Based Encryption Architecture and Supporting Data Structures"
+    ]
+  ],
+  "application/im-iscomposing+xml": [
+    [
+      "RFC3994",
+      "Indication of Message Composition for Instant Messaging"
+    ]
+  ],
+  "application/index": [
+    [
+      "RFC2652",
+      "MIME Object Definitions for the Common Indexing Protocol (CIP)"
+    ]
+  ],
+  "application/index.cmd": [
+    [
+      "RFC2652",
+      "MIME Object Definitions for the Common Indexing Protocol (CIP)"
+    ]
+  ],
+  "application/index.obj": [
+    [
+      "RFC2652",
+      "MIME Object Definitions for the Common Indexing Protocol (CIP)"
+    ]
+  ],
+  "application/index.response": [
+    [
+      "RFC2652",
+      "MIME Object Definitions for the Common Indexing Protocol (CIP)"
+    ]
+  ],
+  "application/index.vnd": [
+    [
+      "RFC2652",
+      "MIME Object Definitions for the Common Indexing Protocol (CIP)"
+    ]
+  ],
+  "application/iotp": [
+    [
+      "RFC2935",
+      "Internet Open Trading Protocol (IOTP) HTTP Supplement"
+    ]
+  ],
+  "application/ipfix": [
+    [
+      "RFC5655",
+      "Specification of the IP Flow Information Export (IPFIX) File Format"
+    ]
+  ],
+  "application/ipp": [
+    [
+      "RFC8010",
+      "Internet Printing Protocol/1.1: Encoding and Transport"
+    ]
+  ],
+  "application/isup": [
+    [
+      "RFC3204",
+      "MIME media types for ISUP and QSIG Objects"
+    ]
+  ],
+  "application/javascript": [
+    [
+      "RFC4329",
+      "Scripting Media Types"
+    ],
+    [
+      "RFC9239",
+      "Updates to ECMAScript Media Types"
+    ]
+  ],
+  "application/jose": [
+    [
+      "RFC7515",
+      "JSON Web Signature (JWS)"
+    ]
+  ],
+  "application/jose+json": [
+    [
+      "RFC7515",
+      "JSON Web Signature (JWS)"
+    ]
+  ],
+  "application/jrd+json": [
+    [
+      "RFC7033",
+      "WebFinger"
+    ]
+  ],
+  "application/jscalendar+json": [
+    [
+      "RFC8984",
+      "JSCalendar: A JSON Representation of Calendar Data"
+    ]
+  ],
+  "application/jscontact+json": [
+    [
+      "RFC9553",
+      "JSContact: A JSON Representation of Contact Data"
+    ]
+  ],
+  "application/json": [
+    [
+      "RFC8259",
+      "The JavaScript Object Notation (JSON) Data Interchange Format"
+    ]
+  ],
+  "application/json-patch+json": [
+    [
+      "RFC6902",
+      "JavaScript Object Notation (JSON) Patch"
+    ]
+  ],
+  "application/json-seq": [
+    [
+      "RFC7464",
+      "JavaScript Object Notation (JSON) Text Sequences"
+    ]
+  ],
+  "application/jsonpath": [
+    [
+      "RFC9535",
+      "JSONPath: Query Expressions for JSON"
+    ]
+  ],
+  "application/jwk-set+json": [
+    [
+      "RFC7517",
+      "JSON Web Key (JWK)"
+    ]
+  ],
+  "application/jwk+json": [
+    [
+      "RFC7517",
+      "JSON Web Key (JWK)"
+    ]
+  ],
+  "application/jwt": [
+    [
+      "RFC7519",
+      "JSON Web Token (JWT)"
+    ]
+  ],
+  "application/kb+jwt": [
+    [
+      "RFC9901",
+      "Selective Disclosure for JSON Web Tokens"
+    ]
+  ],
+  "application/kpml-request+xml": [
+    [
+      "RFC4730",
+      "A Session Initiation Protocol (SIP) Event Package for Key Press Stimulus (KPML)"
+    ]
+  ],
+  "application/kpml-response+xml": [
+    [
+      "RFC4730",
+      "A Session Initiation Protocol (SIP) Event Package for Key Press Stimulus (KPML)"
+    ]
+  ],
+  "application/lgr+xml": [
+    [
+      "RFC7940",
+      "Representing Label Generation Rulesets Using XML"
+    ]
+  ],
+  "application/link-format": [
+    [
+      "RFC6690",
+      "Constrained RESTful Environments (CoRE) Link Format"
+    ]
+  ],
+  "application/linkset": [
+    [
+      "RFC9264",
+      "Linkset: Media Types and a Link Relation Type for Link Sets"
+    ]
+  ],
+  "application/linkset+json": [
+    [
+      "RFC9264",
+      "Linkset: Media Types and a Link Relation Type for Link Sets"
+    ]
+  ],
+  "application/load-control+xml": [
+    [
+      "RFC7200",
+      "A Session Initiation Protocol (SIP) Load-Control Event Package"
+    ]
+  ],
+  "application/lost+xml": [
+    [
+      "RFC5222",
+      "LoST: A Location-to-Service Translation Protocol"
+    ]
+  ],
+  "application/lostsync+xml": [
+    [
+      "RFC6739",
+      "Synchronizing Service Boundaries and <mapping> Elements Based on the Location-to-Service Translation (LoST) Protocol"
+    ]
+  ],
+  "application/mads+xml": [
+    [
+      "RFC6207",
+      "The Media Types application/mods+xml, application/mads+xml, application/mets+xml, application/marcxml+xml, and application/sru+xml"
+    ]
+  ],
+  "application/marc": [
+    [
+      "RFC2220",
+      "The Application/MARC Content-type"
+    ]
+  ],
+  "application/marcxml+xml": [
+    [
+      "RFC6207",
+      "The Media Types application/mods+xml, application/mads+xml, application/mets+xml, application/marcxml+xml, and application/sru+xml"
+    ]
+  ],
+  "application/mbox": [
+    [
+      "RFC4155",
+      "The application/mbox Media Type"
+    ]
+  ],
+  "application/measured-component+cbor": [
+    [
+      "RFC10013",
+      "Entity Attestation Token (EAT) Measured Component"
+    ]
+  ],
+  "application/measured-component+json": [
+    [
+      "RFC10013",
+      "Entity Attestation Token (EAT) Measured Component"
+    ]
+  ],
+  "application/media_control+xml": [
+    [
+      "RFC5168",
+      "XML Schema for Media Control"
+    ]
+  ],
+  "application/media-policy-dataset+xml": [
+    [
+      "RFC6796",
+      "A User Agent Profile Data Set for Media Policy"
+    ]
+  ],
+  "application/mediaservercontrol+xml": [
+    [
+      "RFC5022",
+      "Media Server Control Markup Language (MSCML) and Protocol"
+    ]
+  ],
+  "application/merge-patch+json": [
+    [
+      "RFC7396",
+      "JSON Merge Patch"
+    ]
+  ],
+  "application/metalink4+xml": [
+    [
+      "RFC5854",
+      "The Metalink Download Description Format"
+    ]
+  ],
+  "application/mets+xml": [
+    [
+      "RFC6207",
+      "The Media Types application/mods+xml, application/mads+xml, application/mets+xml, application/marcxml+xml, and application/sru+xml"
+    ]
+  ],
+  "application/mikey": [
+    [
+      "RFC3830",
+      "MIKEY: Multimedia Internet KEYing"
+    ]
+  ],
+  "application/missing-blocks+cbor-seq": [
+    [
+      "RFC9177",
+      "Constrained Application Protocol (CoAP) Block-Wise Transfer Options Supporting Robust Transmission"
+    ]
+  ],
+  "application/mods+xml": [
+    [
+      "RFC6207",
+      "The Media Types application/mods+xml, application/mads+xml, application/mets+xml, application/marcxml+xml, and application/sru+xml"
+    ]
+  ],
+  "application/moss-keys": [
+    [
+      "RFC1848",
+      "MIME Object Security Services"
+    ]
+  ],
+  "application/moss-signature": [
+    [
+      "RFC1848",
+      "MIME Object Security Services"
+    ]
+  ],
+  "application/mosskey-data": [
+    [
+      "RFC1848",
+      "MIME Object Security Services"
+    ]
+  ],
+  "application/mosskey-request": [
+    [
+      "RFC1848",
+      "MIME Object Security Services"
+    ]
+  ],
+  "application/mp21": [
+    [
+      "RFC6381",
+      "The 'Codecs' and 'Profiles' Parameters for \"Bucket\" Media Types"
+    ]
+  ],
+  "application/mp4": [
+    [
+      "RFC4337",
+      "MIME Type Registration for MPEG-4"
+    ],
+    [
+      "RFC6381",
+      "The 'Codecs' and 'Profiles' Parameters for \"Bucket\" Media Types"
+    ]
+  ],
+  "application/mpeg4-generic": [
+    [
+      "RFC3640",
+      "RTP Payload Format for Transport of MPEG-4 Elementary Streams"
+    ]
+  ],
+  "application/mpeg4-iod": [
+    [
+      "RFC4337",
+      "MIME Type Registration for MPEG-4"
+    ]
+  ],
+  "application/mpeg4-iod-xmt": [
+    [
+      "RFC4337",
+      "MIME Type Registration for MPEG-4"
+    ]
+  ],
+  "application/mrb-consumer+xml": [
+    [
+      "RFC6917",
+      "Media Resource Brokering"
+    ]
+  ],
+  "application/mrb-publish+xml": [
+    [
+      "RFC6917",
+      "Media Resource Brokering"
+    ]
+  ],
+  "application/msc-ivr+xml": [
+    [
+      "RFC6231",
+      "An Interactive Voice Response (IVR) Control Package for the Media Control Channel Framework"
+    ]
+  ],
+  "application/msc-mixer+xml": [
+    [
+      "RFC6505",
+      "A Mixer Control Package for the Media Control Channel Framework"
+    ]
+  ],
+  "application/mud+json": [
+    [
+      "RFC8520",
+      "Manufacturer Usage Description Specification"
+    ]
+  ],
+  "application/multipart-core": [
+    [
+      "RFC8710",
+      "Multipart Content-Format for the Constrained Application Protocol (CoAP)"
+    ]
+  ],
+  "application/mxf": [
+    [
+      "RFC4539",
+      "Media Type Registration for the Society of Motion Picture and Television Engineers (SMPTE) Material Exchange Format (MXF)"
+    ]
+  ],
+  "application/nasdata": [
+    [
+      "RFC4707",
+      "Netnews Administration System (NAS)"
+    ]
+  ],
+  "application/news-checkgroups": [
+    [
+      "RFC5537",
+      "Netnews Architecture and Protocols"
+    ]
+  ],
+  "application/news-groupinfo": [
+    [
+      "RFC5537",
+      "Netnews Architecture and Protocols"
+    ]
+  ],
+  "application/news-transmission": [
+    [
+      "RFC5537",
+      "Netnews Architecture and Protocols"
+    ]
+  ],
+  "application/nlsml+xml": [
+    [
+      "RFC6787",
+      "Media Resource Control Protocol Version 2 (MRCPv2)"
+    ]
+  ],
+  "application/oauth-authz-req+jwt": [
+    [
+      "RFC9101",
+      "The OAuth 2.0 Authorization Framework: JWT-Secured Authorization Request (JAR)"
+    ]
+  ],
+  "application/oblivious-dns-message": [
+    [
+      "RFC9230",
+      "Oblivious DNS over HTTPS"
+    ]
+  ],
+  "application/ocsp-request": [
+    [
+      "RFC6960",
+      "X.509 Internet Public Key Infrastructure Online Certificate Status Protocol - OCSP"
+    ]
+  ],
+  "application/ocsp-response": [
+    [
+      "RFC6960",
+      "X.509 Internet Public Key Infrastructure Online Certificate Status Protocol - OCSP"
+    ]
+  ],
+  "application/octet-stream": [
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ],
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ]
+  ],
+  "application/oda": [
+    [
+      "RFC1494",
+      "Equivalences between 1988 X.400 and RFC-822 Message Bodies"
+    ]
+  ],
+  "application/ogg": [
+    [
+      "RFC5334",
+      "Ogg Media Types"
+    ],
+    [
+      "RFC7845",
+      "Ogg Encapsulation for the Opus Audio Codec"
+    ]
+  ],
+  "application/ohttp-keys": [
+    [
+      "RFC9458",
+      "Oblivious HTTP"
+    ]
+  ],
+  "application/oscore": [
+    [
+      "RFC8613",
+      "Object Security for Constrained RESTful Environments (OSCORE)"
+    ]
+  ],
+  "application/p2p-overlay+xml": [
+    [
+      "RFC6940",
+      "REsource LOcation And Discovery (RELOAD) Base Protocol"
+    ]
+  ],
+  "application/parityfec": [
+    [
+      "RFC3009",
+      "Registration of parityfec MIME types"
+    ]
+  ],
+  "application/passport": [
+    [
+      "RFC8225",
+      "PASSporT: Personal Assertion Token"
+    ]
+  ],
+  "application/patch-ops-error+xml": [
+    [
+      "RFC5261",
+      "An Extensible Markup Language (XML) Patch Operations Framework Utilizing XML Path Language (XPath) Selectors"
+    ]
+  ],
+  "application/pdf": [
+    [
+      "RFC8118",
+      "The application/pdf Media Type"
+    ]
+  ],
+  "application/pem-certificate-chain": [
+    [
+      "RFC8555",
+      "Automatic Certificate Management Environment (ACME)"
+    ]
+  ],
+  "application/pgp-encrypted": [
+    [
+      "RFC3156",
+      "MIME Security with OpenPGP"
+    ]
+  ],
+  "application/pgp-keys": [
+    [
+      "RFC3156",
+      "MIME Security with OpenPGP"
+    ]
+  ],
+  "application/pgp-signature": [
+    [
+      "RFC3156",
+      "MIME Security with OpenPGP"
+    ]
+  ],
+  "application/pidf-diff+xml": [
+    [
+      "RFC5262",
+      "Presence Information Data Format (PIDF) Extension for Partial Presence"
+    ]
+  ],
+  "application/pidf+xml": [
+    [
+      "RFC3863",
+      "Presence Information Data Format (PIDF)"
+    ]
+  ],
+  "application/pkcs10": [
+    [
+      "RFC5967",
+      "The application/pkcs10 Media Type"
+    ]
+  ],
+  "application/pkcs7-mime": [
+    [
+      "RFC8551",
+      "Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 4.0 Message Specification"
+    ],
+    [
+      "RFC7114",
+      "Creation of a Registry for smime-type Parameter Values"
+    ]
+  ],
+  "application/pkcs7-signature": [
+    [
+      "RFC8551",
+      "Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 4.0 Message Specification"
+    ]
+  ],
+  "application/pkcs8": [
+    [
+      "RFC5958",
+      "Asymmetric Key Packages"
+    ]
+  ],
+  "application/pkcs8-encrypted": [
+    [
+      "RFC8351",
+      "The PKCS #8 EncryptedPrivateKeyInfo Media Type"
+    ]
+  ],
+  "application/pkix-attr-cert": [
+    [
+      "RFC5877",
+      "The application/pkix-attr-cert Media Type for Attribute Certificates"
+    ]
+  ],
+  "application/pkix-cert": [
+    [
+      "RFC2585",
+      "Internet X.509 Public Key Infrastructure Operational Protocols: FTP and HTTP"
+    ]
+  ],
+  "application/pkix-crl": [
+    [
+      "RFC2585",
+      "Internet X.509 Public Key Infrastructure Operational Protocols: FTP and HTTP"
+    ]
+  ],
+  "application/pkix-pkipath": [
+    [
+      "RFC6066",
+      "Transport Layer Security (TLS) Extensions: Extension Definitions"
+    ]
+  ],
+  "application/pkixcmp": [
+    [
+      "RFC9811",
+      "Internet X.509 Public Key Infrastructure -- HTTP Transfer for the Certificate Management Protocol (CMP)"
+    ]
+  ],
+  "application/pls+xml": [
+    [
+      "RFC4267",
+      "The W3C Speech Interface Framework Media Types: application/voicexml+xml, application/ssml+xml, application/srgs, application/srgs+xml, application/ccxml+xml, and application/pls+xml"
+    ]
+  ],
+  "application/poc-settings+xml": [
+    [
+      "RFC4354",
+      "A Session Initiation Protocol (SIP) Event Package and Data Format for Various Settings in Support for the Push-to-Talk over Cellular (PoC) Service"
+    ]
+  ],
+  "application/postscript": [
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ],
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ]
+  ],
+  "application/ppsp-tracker+json": [
+    [
+      "RFC7846",
+      "Peer-to-Peer Streaming Tracker Protocol (PPSTP)"
+    ]
+  ],
+  "application/private-token-issuer-directory": [
+    [
+      "RFC9578",
+      "Privacy Pass Issuance Protocols"
+    ]
+  ],
+  "application/private-token-request": [
+    [
+      "RFC9578",
+      "Privacy Pass Issuance Protocols"
+    ]
+  ],
+  "application/private-token-response": [
+    [
+      "RFC9578",
+      "Privacy Pass Issuance Protocols"
+    ]
+  ],
+  "application/problem+json": [
+    [
+      "RFC9457",
+      "Problem Details for HTTP APIs"
+    ]
+  ],
+  "application/problem+xml": [
+    [
+      "RFC9457",
+      "Problem Details for HTTP APIs"
+    ]
+  ],
+  "application/protobuf": [
+    [
+      "RFC9996",
+      "Media Types for Protocol Buffers"
+    ]
+  ],
+  "application/protobuf+json": [
+    [
+      "RFC9996",
+      "Media Types for Protocol Buffers"
+    ]
+  ],
+  "application/pskc+xml": [
+    [
+      "RFC6030",
+      "Portable Symmetric Key Container (PSKC)"
+    ]
+  ],
+  "application/pvd+json": [
+    [
+      "RFC8801",
+      "Discovering Provisioning Domain Names and Data"
+    ]
+  ],
+  "application/qsig": [
+    [
+      "RFC3204",
+      "MIME media types for ISUP and QSIG Objects"
+    ]
+  ],
+  "application/raptorfec": [
+    [
+      "RFC6682",
+      "RTP Payload Format for Raptor Forward Error Correction (FEC)"
+    ]
+  ],
+  "application/rdap+json": [
+    [
+      "RFC9083",
+      "JSON Responses for the Registration Data Access Protocol (RDAP)"
+    ]
+  ],
+  "application/rdf+xml": [
+    [
+      "RFC3870",
+      "application/rdf+xml Media Type Registration"
+    ]
+  ],
+  "application/reginfo+xml": [
+    [
+      "RFC3680",
+      "A Session Initiation Protocol (SIP) Event Package for Registrations"
+    ]
+  ],
+  "application/remote-printing": [
+    [
+      "RFC1486",
+      "An Experiment in Remote Printing"
+    ]
+  ],
+  "application/reputon+json": [
+    [
+      "RFC7071",
+      "A Media Type for Reputation Interchange"
+    ]
+  ],
+  "application/resource-lists-diff+xml": [
+    [
+      "RFC5362",
+      "The Session Initiation Protocol (SIP) Pending Additions Event Package"
+    ]
+  ],
+  "application/resource-lists+xml": [
+    [
+      "RFC4826",
+      "Extensible Markup Language (XML) Formats for Representing Resource Lists"
+    ]
+  ],
+  "application/rfc+xml": [
+    [
+      "RFC7991",
+      "The \"xml2rfc\" Version 3 Vocabulary"
+    ]
+  ],
+  "application/rlmi+xml": [
+    [
+      "RFC4662",
+      "A Session Initiation Protocol (SIP) Event Notification Extension for Resource Lists"
+    ]
+  ],
+  "application/rls-services+xml": [
+    [
+      "RFC4826",
+      "Extensible Markup Language (XML) Formats for Representing Resource Lists"
+    ]
+  ],
+  "application/rpki-checklist": [
+    [
+      "RFC9323",
+      "A Profile for RPKI Signed Checklists (RSCs)"
+    ]
+  ],
+  "application/rpki-ghostbusters": [
+    [
+      "RFC6493",
+      "The Resource Public Key Infrastructure (RPKI) Ghostbusters Record"
+    ]
+  ],
+  "application/rpki-manifest": [
+    [
+      "RFC6481",
+      "A Profile for Resource Certificate Repository Structure"
+    ]
+  ],
+  "application/rpki-publication": [
+    [
+      "RFC8181",
+      "A Publication Protocol for the Resource Public Key Infrastructure (RPKI)"
+    ]
+  ],
+  "application/rpki-roa": [
+    [
+      "RFC9582",
+      "A Profile for Route Origin Authorizations (ROAs)"
+    ]
+  ],
+  "application/rpki-signed-tal": [
+    [
+      "RFC9691",
+      "A Profile for Resource Public Key Infrastructure (RPKI) Trust Anchor Keys (TAKs)"
+    ]
+  ],
+  "application/rpki-updown": [
+    [
+      "RFC6492",
+      "A Protocol for Provisioning Resource Certificates"
+    ]
+  ],
+  "application/rs-metadata+xml": [
+    [
+      "RFC7865",
+      "Session Initiation Protocol (SIP) Recording Metadata"
+    ],
+    [
+      "RFC9806",
+      "Updates to SIP-Based Media Recording (SIPREC) to Correct Metadata Media Type"
+    ]
+  ],
+  "application/rtploopback": [
+    [
+      "RFC6849",
+      "An Extension to the Session Description Protocol (SDP) and Real-time Transport Protocol (RTP) for Media Loopback"
+    ]
+  ],
+  "application/rtx": [
+    [
+      "RFC4588",
+      "RTP Retransmission Payload Format"
+    ]
+  ],
+  "application/sbml+xml": [
+    [
+      "RFC3823",
+      "MIME Media Type for the Systems Biology Markup Language (SBML)"
+    ]
+  ],
+  "application/scim+json": [
+    [
+      "RFC7644",
+      "System for Cross-domain Identity Management: Protocol"
+    ]
+  ],
+  "application/scitt-receipt+cose": [
+    [
+      "RFC9943",
+      "An Architecture for Trustworthy and Transparent Digital Supply Chains"
+    ]
+  ],
+  "application/scitt-statement+cose": [
+    [
+      "RFC9943",
+      "An Architecture for Trustworthy and Transparent Digital Supply Chains"
+    ]
+  ],
+  "application/scvp-cv-request": [
+    [
+      "RFC5055",
+      "Server-Based Certificate Validation Protocol (SCVP)"
+    ]
+  ],
+  "application/scvp-cv-response": [
+    [
+      "RFC5055",
+      "Server-Based Certificate Validation Protocol (SCVP)"
+    ]
+  ],
+  "application/scvp-vp-request": [
+    [
+      "RFC5055",
+      "Server-Based Certificate Validation Protocol (SCVP)"
+    ]
+  ],
+  "application/scvp-vp-response": [
+    [
+      "RFC5055",
+      "Server-Based Certificate Validation Protocol (SCVP)"
+    ]
+  ],
+  "application/sd-jwt": [
+    [
+      "RFC9901",
+      "Selective Disclosure for JSON Web Tokens"
+    ]
+  ],
+  "application/sd-jwt+json": [
+    [
+      "RFC9901",
+      "Selective Disclosure for JSON Web Tokens"
+    ]
+  ],
+  "application/sdf+json": [
+    [
+      "RFC9880",
+      "Semantic Definition Format (SDF) for Data and Interactions of Things"
+    ]
+  ],
+  "application/sdp": [
+    [
+      "RFC8866",
+      "SDP: Session Description Protocol"
+    ]
+  ],
+  "application/secevent+jwt": [
+    [
+      "RFC8417",
+      "Security Event Token (SET)"
+    ]
+  ],
+  "application/senml-etch+cbor": [
+    [
+      "RFC8790",
+      "FETCH and PATCH with Sensor Measurement Lists (SenML)"
+    ]
+  ],
+  "application/senml-etch+json": [
+    [
+      "RFC8790",
+      "FETCH and PATCH with Sensor Measurement Lists (SenML)"
+    ]
+  ],
+  "application/senml-exi": [
+    [
+      "RFC8428",
+      "Sensor Measurement Lists (SenML)"
+    ]
+  ],
+  "application/senml+cbor": [
+    [
+      "RFC8428",
+      "Sensor Measurement Lists (SenML)"
+    ]
+  ],
+  "application/senml+json": [
+    [
+      "RFC8428",
+      "Sensor Measurement Lists (SenML)"
+    ]
+  ],
+  "application/senml+xml": [
+    [
+      "RFC8428",
+      "Sensor Measurement Lists (SenML)"
+    ]
+  ],
+  "application/sensml-exi": [
+    [
+      "RFC8428",
+      "Sensor Measurement Lists (SenML)"
+    ]
+  ],
+  "application/sensml+cbor": [
+    [
+      "RFC8428",
+      "Sensor Measurement Lists (SenML)"
+    ]
+  ],
+  "application/sensml+json": [
+    [
+      "RFC8428",
+      "Sensor Measurement Lists (SenML)"
+    ]
+  ],
+  "application/sensml+xml": [
+    [
+      "RFC8428",
+      "Sensor Measurement Lists (SenML)"
+    ]
+  ],
+  "application/sgml": [
+    [
+      "RFC1874",
+      "SGML Media Types"
+    ]
+  ],
+  "application/shf+xml": [
+    [
+      "RFC4194",
+      "The S Hexdump Format"
+    ]
+  ],
+  "application/sieve": [
+    [
+      "RFC5228",
+      "Sieve: An Email Filtering Language"
+    ]
+  ],
+  "application/simple-filter+xml": [
+    [
+      "RFC4661",
+      "An Extensible Markup Language (XML)-Based Format for Event Notification Filtering"
+    ]
+  ],
+  "application/simple-message-summary": [
+    [
+      "RFC3842",
+      "A Message Summary and Message Waiting Indication Event Package for the Session Initiation Protocol (SIP)"
+    ]
+  ],
+  "application/smil": [
+    [
+      "RFC4536",
+      "The application/smil and application/smil+xml Media Types"
+    ]
+  ],
+  "application/smil+xml": [
+    [
+      "RFC4536",
+      "The application/smil and application/smil+xml Media Types"
+    ]
+  ],
+  "application/smpte336m": [
+    [
+      "RFC6597",
+      "RTP Payload Format for Society of Motion Picture and Television Engineers (SMPTE) ST 336 Encoded Data"
+    ]
+  ],
+  "application/soap+xml": [
+    [
+      "RFC3902",
+      "The \"application/soap+xml\" media type"
+    ]
+  ],
+  "application/spirits-event+xml": [
+    [
+      "RFC3910",
+      "The SPIRITS (Services in PSTN requesting Internet Services) Protocol"
+    ]
+  ],
+  "application/sql": [
+    [
+      "RFC6922",
+      "The application/sql Media Type"
+    ]
+  ],
+  "application/srgs": [
+    [
+      "RFC4267",
+      "The W3C Speech Interface Framework Media Types: application/voicexml+xml, application/ssml+xml, application/srgs, application/srgs+xml, application/ccxml+xml, and application/pls+xml"
+    ]
+  ],
+  "application/srgs+xml": [
+    [
+      "RFC4267",
+      "The W3C Speech Interface Framework Media Types: application/voicexml+xml, application/ssml+xml, application/srgs, application/srgs+xml, application/ccxml+xml, and application/pls+xml"
+    ]
+  ],
+  "application/sru+xml": [
+    [
+      "RFC6207",
+      "The Media Types application/mods+xml, application/mads+xml, application/mets+xml, application/marcxml+xml, and application/sru+xml"
+    ]
+  ],
+  "application/sslkeylogfile": [
+    [
+      "RFC9850",
+      "The SSLKEYLOGFILE Format for TLS"
+    ]
+  ],
+  "application/ssml+xml": [
+    [
+      "RFC4267",
+      "The W3C Speech Interface Framework Media Types: application/voicexml+xml, application/ssml+xml, application/srgs, application/srgs+xml, application/ccxml+xml, and application/pls+xml"
+    ]
+  ],
+  "application/swid+cbor": [
+    [
+      "RFC9393",
+      "Concise Software Identification Tags"
+    ]
+  ],
+  "application/tamp-apex-update": [
+    [
+      "RFC5934",
+      "Trust Anchor Management Protocol (TAMP)"
+    ]
+  ],
+  "application/tamp-apex-update-confirm": [
+    [
+      "RFC5934",
+      "Trust Anchor Management Protocol (TAMP)"
+    ]
+  ],
+  "application/tamp-community-update": [
+    [
+      "RFC5934",
+      "Trust Anchor Management Protocol (TAMP)"
+    ]
+  ],
+  "application/tamp-community-update-confirm": [
+    [
+      "RFC5934",
+      "Trust Anchor Management Protocol (TAMP)"
+    ]
+  ],
+  "application/tamp-error": [
+    [
+      "RFC5934",
+      "Trust Anchor Management Protocol (TAMP)"
+    ]
+  ],
+  "application/tamp-sequence-adjust": [
+    [
+      "RFC5934",
+      "Trust Anchor Management Protocol (TAMP)"
+    ]
+  ],
+  "application/tamp-sequence-adjust-confirm": [
+    [
+      "RFC5934",
+      "Trust Anchor Management Protocol (TAMP)"
+    ]
+  ],
+  "application/tamp-status-query": [
+    [
+      "RFC5934",
+      "Trust Anchor Management Protocol (TAMP)"
+    ]
+  ],
+  "application/tamp-status-response": [
+    [
+      "RFC5934",
+      "Trust Anchor Management Protocol (TAMP)"
+    ]
+  ],
+  "application/tamp-update": [
+    [
+      "RFC5934",
+      "Trust Anchor Management Protocol (TAMP)"
+    ]
+  ],
+  "application/tamp-update-confirm": [
+    [
+      "RFC5934",
+      "Trust Anchor Management Protocol (TAMP)"
+    ]
+  ],
+  "application/tei+xml": [
+    [
+      "RFC6129",
+      "The 'application/tei+xml' Media Type"
+    ]
+  ],
+  "application/thraud+xml": [
+    [
+      "RFC5941",
+      "Sharing Transaction Fraud Data"
+    ]
+  ],
+  "application/timestamp-query": [
+    [
+      "RFC3161",
+      "Internet X.509 Public Key Infrastructure Time-Stamp Protocol (TSP)"
+    ]
+  ],
+  "application/timestamp-reply": [
+    [
+      "RFC3161",
+      "Internet X.509 Public Key Infrastructure Time-Stamp Protocol (TSP)"
+    ]
+  ],
+  "application/timestamped-data": [
+    [
+      "RFC5955",
+      "The application/timestamped-data Media Type"
+    ]
+  ],
+  "application/tlsrpt+gzip": [
+    [
+      "RFC8460",
+      "SMTP TLS Reporting"
+    ]
+  ],
+  "application/tlsrpt+json": [
+    [
+      "RFC8460",
+      "SMTP TLS Reporting"
+    ]
+  ],
+  "application/tnauthlist": [
+    [
+      "RFC8226",
+      "Secure Telephone Identity Credentials: Certificates"
+    ]
+  ],
+  "application/token-introspection+jwt": [
+    [
+      "RFC9701",
+      "JSON Web Token (JWT) Response for OAuth Token Introspection"
+    ]
+  ],
+  "application/trickle-ice-sdpfrag": [
+    [
+      "RFC8840",
+      "A Session Initiation Protocol (SIP) Usage for Incremental Provisioning of Candidates for the Interactive Connectivity Establishment (Trickle ICE)"
+    ]
+  ],
+  "application/tzif": [
+    [
+      "RFC9636",
+      "The Time Zone Information Format (TZif)"
+    ]
+  ],
+  "application/tzif-leap": [
+    [
+      "RFC9636",
+      "The Time Zone Information Format (TZif)"
+    ]
+  ],
+  "application/uccs+cbor": [
+    [
+      "RFC9781",
+      "A Concise Binary Object Representation (CBOR) Tag for Unprotected CBOR Web Token Claims Sets (UCCS)"
+    ]
+  ],
+  "application/ujcs+json": [
+    [
+      "RFC9781",
+      "A Concise Binary Object Representation (CBOR) Tag for Unprotected CBOR Web Token Claims Sets (UCCS)"
+    ]
+  ],
+  "application/ulpfec": [
+    [
+      "RFC5109",
+      "RTP Payload Format for Generic Forward Error Correction"
+    ]
+  ],
+  "application/v3c": [
+    [
+      "RFC10034",
+      "RTP Payload Format for Visual Volumetric Video-Based Coding (V3C)"
+    ]
+  ],
+  "application/vcard+json": [
+    [
+      "RFC7095",
+      "jCard: The JSON Format for vCard"
+    ]
+  ],
+  "application/vcard+xml": [
+    [
+      "RFC6351",
+      "xCard: vCard XML Representation"
+    ]
+  ],
+  "application/vemmi": [
+    [
+      "RFC2122",
+      "VEMMI URL Specification"
+    ]
+  ],
+  "application/vnd.pwg-multiplexed": [
+    [
+      "RFC3391",
+      "The MIME Application/Vnd.pwg-multiplexed Content-Type"
+    ]
+  ],
+  "application/vnd.radisys.moml+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml-audit-conf+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml-audit-conn+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml-audit-dialog+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml-audit-stream+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml-audit+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml-conf+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml-dialog-base+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml-dialog-fax-detect+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml-dialog-fax-sendrecv+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml-dialog-group+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml-dialog-speech+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml-dialog-transform+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml-dialog+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/vnd.radisys.msml+xml": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "application/voicexml+xml": [
+    [
+      "RFC4267",
+      "The W3C Speech Interface Framework Media Types: application/voicexml+xml, application/ssml+xml, application/srgs, application/srgs+xml, application/ccxml+xml, and application/pls+xml"
+    ]
+  ],
+  "application/voucher-cms+json": [
+    [
+      "RFC8366",
+      "A Voucher Artifact for Bootstrapping Protocols"
+    ]
+  ],
+  "application/vq-rtcpxr": [
+    [
+      "RFC6035",
+      "Session Initiation Protocol Event Package for Voice Quality Reporting"
+    ]
+  ],
+  "application/watcherinfo+xml": [
+    [
+      "RFC3858",
+      "An Extensible Markup Language (XML) Based Format for Watcher Information"
+    ]
+  ],
+  "application/webpush-options+json": [
+    [
+      "RFC8292",
+      "Voluntary Application Server Identification (VAPID) for Web Push"
+    ]
+  ],
+  "application/whoispp-query": [
+    [
+      "RFC2957",
+      "The application/whoispp-query Content-Type"
+    ]
+  ],
+  "application/whoispp-response": [
+    [
+      "RFC2958",
+      "The application/whoispp-response Content-type"
+    ]
+  ],
+  "application/x-pki-message": [
+    [
+      "RFC8894",
+      "Simple Certificate Enrolment Protocol"
+    ]
+  ],
+  "application/x-x509-ca-cert": [
+    [
+      "RFC8894",
+      "Simple Certificate Enrolment Protocol"
+    ]
+  ],
+  "application/x-x509-ca-ra-cert": [
+    [
+      "RFC8894",
+      "Simple Certificate Enrolment Protocol"
+    ]
+  ],
+  "application/x-x509-next-ca-cert": [
+    [
+      "RFC8894",
+      "Simple Certificate Enrolment Protocol"
+    ]
+  ],
+  "application/x400-bp": [
+    [
+      "RFC1494",
+      "Equivalences between 1988 X.400 and RFC-822 Message Bodies"
+    ]
+  ],
+  "application/xacml+xml": [
+    [
+      "RFC7061",
+      "eXtensible Access Control Markup Language (XACML) XML Media Type"
+    ]
+  ],
+  "application/xcap-att+xml": [
+    [
+      "RFC4825",
+      "The Extensible Markup Language (XML) Configuration Access Protocol (XCAP)"
+    ]
+  ],
+  "application/xcap-caps+xml": [
+    [
+      "RFC4825",
+      "The Extensible Markup Language (XML) Configuration Access Protocol (XCAP)"
+    ]
+  ],
+  "application/xcap-diff+xml": [
+    [
+      "RFC5874",
+      "An Extensible Markup Language (XML) Document Format for Indicating a Change in XML Configuration Access Protocol (XCAP) Resources"
+    ]
+  ],
+  "application/xcap-el+xml": [
+    [
+      "RFC4825",
+      "The Extensible Markup Language (XML) Configuration Access Protocol (XCAP)"
+    ]
+  ],
+  "application/xcap-error+xml": [
+    [
+      "RFC4825",
+      "The Extensible Markup Language (XML) Configuration Access Protocol (XCAP)"
+    ]
+  ],
+  "application/xcap-ns+xml": [
+    [
+      "RFC4825",
+      "The Extensible Markup Language (XML) Configuration Access Protocol (XCAP)"
+    ]
+  ],
+  "application/xcon-conference-info-diff+xml": [
+    [
+      "RFC6502",
+      "Conference Event Package Data Format Extension for Centralized Conferencing (XCON)"
+    ]
+  ],
+  "application/xcon-conference-info+xml": [
+    [
+      "RFC6502",
+      "Conference Event Package Data Format Extension for Centralized Conferencing (XCON)"
+    ]
+  ],
+  "application/xml": [
+    [
+      "RFC7303",
+      "XML Media Types"
+    ]
+  ],
+  "application/xml-dtd": [
+    [
+      "RFC7303",
+      "XML Media Types"
+    ]
+  ],
+  "application/xml-external-parsed-entity": [
+    [
+      "RFC7303",
+      "XML Media Types"
+    ]
+  ],
+  "application/xml-patch+xml": [
+    [
+      "RFC7351",
+      "A Media Type for XML Patch Operations"
+    ]
+  ],
+  "application/xmpp+xml": [
+    [
+      "RFC3923",
+      "End-to-End Signing and Object Encryption for the Extensible Messaging and Presence Protocol (XMPP)"
+    ]
+  ],
+  "application/xv+xml": [
+    [
+      "RFC4374",
+      "The application/xv+xml Media Type"
+    ]
+  ],
+  "application/yaml": [
+    [
+      "RFC9512",
+      "YAML Media Type"
+    ]
+  ],
+  "application/yang": [
+    [
+      "RFC6020",
+      "YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)"
+    ]
+  ],
+  "application/yang-data+cbor": [
+    [
+      "RFC9254",
+      "Encoding of Data Modeled with YANG in the Concise Binary Object Representation (CBOR)"
+    ]
+  ],
+  "application/yang-data+json": [
+    [
+      "RFC8040",
+      "RESTCONF Protocol"
+    ]
+  ],
+  "application/yang-data+xml": [
+    [
+      "RFC8040",
+      "RESTCONF Protocol"
+    ]
+  ],
+  "application/yang-patch+json": [
+    [
+      "RFC8072",
+      "YANG Patch Media Type"
+    ]
+  ],
+  "application/yang-patch+xml": [
+    [
+      "RFC8072",
+      "YANG Patch Media Type"
+    ]
+  ],
+  "application/yang-sid+json": [
+    [
+      "RFC9595",
+      "YANG Schema Item iDentifier (YANG SID)"
+    ]
+  ],
+  "application/yin+xml": [
+    [
+      "RFC6020",
+      "YANG - A Data Modeling Language for the Network Configuration Protocol (NETCONF)"
+    ]
+  ],
+  "application/zlib": [
+    [
+      "RFC6713",
+      "The 'application/zlib' and 'application/gzip' Media Types"
+    ]
+  ],
+  "application/zstd": [
+    [
+      "RFC8878",
+      "Zstandard Compression and the 'application/zstd' Media Type"
+    ]
+  ],
+  "audio/1d-interleaved-parityfec": [
+    [
+      "RFC6015",
+      "RTP Payload Format for 1-D Interleaved Parity Forward Error Correction (FEC)"
+    ]
+  ],
+  "audio/32kadpcm": [
+    [
+      "RFC3802",
+      "Toll Quality Voice - 32 kbit/s Adaptive Differential Pulse Code Modulation (ADPCM) MIME Sub-type Registration"
+    ],
+    [
+      "RFC2421",
+      "Voice Profile for Internet Mail - version 2"
+    ]
+  ],
+  "audio/3gpp": [
+    [
+      "RFC3839",
+      "MIME Type Registrations for 3rd Generation Partnership Project (3GPP) Multimedia files"
+    ],
+    [
+      "RFC6381",
+      "The 'Codecs' and 'Profiles' Parameters for \"Bucket\" Media Types"
+    ]
+  ],
+  "audio/3gpp2": [
+    [
+      "RFC4393",
+      "MIME Type Registrations for 3GPP2 Multimedia Files"
+    ],
+    [
+      "RFC6381",
+      "The 'Codecs' and 'Profiles' Parameters for \"Bucket\" Media Types"
+    ]
+  ],
+  "audio/ac3": [
+    [
+      "RFC4184",
+      "RTP Payload Format for AC-3 Audio"
+    ]
+  ],
+  "audio/amr": [
+    [
+      "RFC4867",
+      "RTP Payload Format and File Storage Format for the Adaptive Multi-Rate (AMR) and Adaptive Multi-Rate Wideband (AMR-WB) Audio Codecs"
+    ]
+  ],
+  "audio/amr-wb": [
+    [
+      "RFC4867",
+      "RTP Payload Format and File Storage Format for the Adaptive Multi-Rate (AMR) and Adaptive Multi-Rate Wideband (AMR-WB) Audio Codecs"
+    ]
+  ],
+  "audio/amr-wb+": [
+    [
+      "RFC4352",
+      "RTP Payload Format for the Extended Adaptive Multi-Rate Wideband (AMR-WB+) Audio Codec"
+    ]
+  ],
+  "audio/aptx": [
+    [
+      "RFC7310",
+      "RTP Payload Format for Standard apt-X and Enhanced apt-X Codecs"
+    ]
+  ],
+  "audio/asc": [
+    [
+      "RFC6295",
+      "RTP Payload Format for MIDI"
+    ]
+  ],
+  "audio/atrac-advanced-lossless": [
+    [
+      "RFC5584",
+      "RTP Payload Format for the Adaptive TRansform Acoustic Coding (ATRAC) Family"
+    ]
+  ],
+  "audio/atrac-x": [
+    [
+      "RFC5584",
+      "RTP Payload Format for the Adaptive TRansform Acoustic Coding (ATRAC) Family"
+    ]
+  ],
+  "audio/atrac3": [
+    [
+      "RFC5584",
+      "RTP Payload Format for the Adaptive TRansform Acoustic Coding (ATRAC) Family"
+    ]
+  ],
+  "audio/basic": [
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ],
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ]
+  ],
+  "audio/bv16": [
+    [
+      "RFC4298",
+      "RTP Payload Format for BroadVoice Speech Codecs"
+    ]
+  ],
+  "audio/bv32": [
+    [
+      "RFC4298",
+      "RTP Payload Format for BroadVoice Speech Codecs"
+    ]
+  ],
+  "audio/clearmode": [
+    [
+      "RFC4040",
+      "RTP Payload Format for a 64 kbit/s Transparent Call"
+    ]
+  ],
+  "audio/cn": [
+    [
+      "RFC3389",
+      "Real-time Transport Protocol (RTP) Payload for Comfort Noise (CN)"
+    ]
+  ],
+  "audio/dat12": [
+    [
+      "RFC3190",
+      "RTP Payload Format for 12-bit DAT Audio and 20- and 24-bit Linear Sampled Audio"
+    ]
+  ],
+  "audio/dls": [
+    [
+      "RFC4613",
+      "Media Type Registrations for Downloadable Sounds for Musical Instrument Digital Interface (MIDI)"
+    ]
+  ],
+  "audio/dsr-es201108": [
+    [
+      "RFC3557",
+      "RTP Payload Format for European Telecommunications Standards Institute (ETSI) European Standard ES 201 108 Distributed Speech Recognition Encoding"
+    ]
+  ],
+  "audio/dsr-es202050": [
+    [
+      "RFC4060",
+      "RTP Payload Formats for European Telecommunications Standards Institute (ETSI) European Standard ES 202 050, ES 202 211, and ES 202 212 Distributed Speech Recognition Encoding"
+    ]
+  ],
+  "audio/dsr-es202211": [
+    [
+      "RFC4060",
+      "RTP Payload Formats for European Telecommunications Standards Institute (ETSI) European Standard ES 202 050, ES 202 211, and ES 202 212 Distributed Speech Recognition Encoding"
+    ]
+  ],
+  "audio/dsr-es202212": [
+    [
+      "RFC4060",
+      "RTP Payload Formats for European Telecommunications Standards Institute (ETSI) European Standard ES 202 050, ES 202 211, and ES 202 212 Distributed Speech Recognition Encoding"
+    ]
+  ],
+  "audio/dv": [
+    [
+      "RFC6469",
+      "RTP Payload Format for DV (IEC 61834) Video"
+    ]
+  ],
+  "audio/dvi4": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/eac3": [
+    [
+      "RFC4598",
+      "Real-time Transport Protocol (RTP) Payload Format for Enhanced AC-3 (E-AC-3) Audio"
+    ]
+  ],
+  "audio/encaprtp": [
+    [
+      "RFC6849",
+      "An Extension to the Session Description Protocol (SDP) and Real-time Transport Protocol (RTP) for Media Loopback"
+    ]
+  ],
+  "audio/evrc": [
+    [
+      "RFC4788",
+      "Enhancements to RTP Payload Formats for EVRC Family Codecs"
+    ]
+  ],
+  "audio/evrc-qcp": [
+    [
+      "RFC3625",
+      "The QCP File Format and Media Types for Speech Data"
+    ]
+  ],
+  "audio/evrc0": [
+    [
+      "RFC4788",
+      "Enhancements to RTP Payload Formats for EVRC Family Codecs"
+    ]
+  ],
+  "audio/evrc1": [
+    [
+      "RFC4788",
+      "Enhancements to RTP Payload Formats for EVRC Family Codecs"
+    ]
+  ],
+  "audio/evrcb": [
+    [
+      "RFC5188",
+      "RTP Payload Format for the Enhanced Variable Rate Wideband Codec (EVRC-WB) and the Media Subtype Updates for EVRC-B Codec"
+    ]
+  ],
+  "audio/evrcb0": [
+    [
+      "RFC5188",
+      "RTP Payload Format for the Enhanced Variable Rate Wideband Codec (EVRC-WB) and the Media Subtype Updates for EVRC-B Codec"
+    ]
+  ],
+  "audio/evrcb1": [
+    [
+      "RFC4788",
+      "Enhancements to RTP Payload Formats for EVRC Family Codecs"
+    ]
+  ],
+  "audio/evrcnw": [
+    [
+      "RFC6884",
+      "RTP Payload Format for the Enhanced Variable Rate Narrowband-Wideband Codec (EVRC-NW)"
+    ]
+  ],
+  "audio/evrcnw0": [
+    [
+      "RFC6884",
+      "RTP Payload Format for the Enhanced Variable Rate Narrowband-Wideband Codec (EVRC-NW)"
+    ]
+  ],
+  "audio/evrcnw1": [
+    [
+      "RFC6884",
+      "RTP Payload Format for the Enhanced Variable Rate Narrowband-Wideband Codec (EVRC-NW)"
+    ]
+  ],
+  "audio/evrcwb": [
+    [
+      "RFC5188",
+      "RTP Payload Format for the Enhanced Variable Rate Wideband Codec (EVRC-WB) and the Media Subtype Updates for EVRC-B Codec"
+    ]
+  ],
+  "audio/evrcwb0": [
+    [
+      "RFC5188",
+      "RTP Payload Format for the Enhanced Variable Rate Wideband Codec (EVRC-WB) and the Media Subtype Updates for EVRC-B Codec"
+    ]
+  ],
+  "audio/evrcwb1": [
+    [
+      "RFC5188",
+      "RTP Payload Format for the Enhanced Variable Rate Wideband Codec (EVRC-WB) and the Media Subtype Updates for EVRC-B Codec"
+    ]
+  ],
+  "audio/example": [
+    [
+      "RFC4735",
+      "Example Media Types for Use in Documentation"
+    ]
+  ],
+  "audio/flac": [
+    [
+      "RFC9639",
+      "Free Lossless Audio Codec (FLAC)"
+    ]
+  ],
+  "audio/flexfec": [
+    [
+      "RFC8627",
+      "RTP Payload Format for Flexible Forward Error Correction (FEC)"
+    ]
+  ],
+  "audio/fwdred": [
+    [
+      "RFC6354",
+      "Forward-Shifted RTP Redundancy Payload Support"
+    ]
+  ],
+  "audio/g711-0": [
+    [
+      "RFC7655",
+      "RTP Payload Format for G.711.0"
+    ]
+  ],
+  "audio/g719": [
+    [
+      "RFC5404",
+      "RTP Payload Format for G.719"
+    ]
+  ],
+  "audio/g722": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/g7221": [
+    [
+      "RFC5577",
+      "RTP Payload Format for ITU-T Recommendation G.722.1"
+    ]
+  ],
+  "audio/g723": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/g726-16": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/g726-24": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/g726-32": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/g726-40": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/g728": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/g729": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/g7291": [
+    [
+      "RFC4749",
+      "RTP Payload Format for the G.729.1 Audio Codec"
+    ],
+    [
+      "RFC5459",
+      "G.729.1 RTP Payload Format Update: Discontinuous Transmission (DTX) Support"
+    ]
+  ],
+  "audio/g729d": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/g729e": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/gsm": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/gsm-efr": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/gsm-hr-08": [
+    [
+      "RFC5993",
+      "RTP Payload Format for Global System for Mobile Communications Half Rate (GSM-HR)"
+    ]
+  ],
+  "audio/ilbc": [
+    [
+      "RFC3952",
+      "Real-time Transport Protocol (RTP) Payload Format for internet Low Bit Rate Codec (iLBC) Speech"
+    ]
+  ],
+  "audio/ip-mr_v2.5": [
+    [
+      "RFC6262",
+      "RTP Payload Format for IP-MR Speech Codec"
+    ]
+  ],
+  "audio/l16": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/l20": [
+    [
+      "RFC3190",
+      "RTP Payload Format for 12-bit DAT Audio and 20- and 24-bit Linear Sampled Audio"
+    ]
+  ],
+  "audio/l24": [
+    [
+      "RFC3190",
+      "RTP Payload Format for 12-bit DAT Audio and 20- and 24-bit Linear Sampled Audio"
+    ]
+  ],
+  "audio/l8": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/lpc": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/matroska": [
+    [
+      "RFC9559",
+      "Matroska Media Container Format Specification"
+    ]
+  ],
+  "audio/melp": [
+    [
+      "RFC8130",
+      "RTP Payload Format for the Mixed Excitation Linear Prediction Enhanced (MELPe) Codec"
+    ]
+  ],
+  "audio/melp1200": [
+    [
+      "RFC8130",
+      "RTP Payload Format for the Mixed Excitation Linear Prediction Enhanced (MELPe) Codec"
+    ]
+  ],
+  "audio/melp2400": [
+    [
+      "RFC8130",
+      "RTP Payload Format for the Mixed Excitation Linear Prediction Enhanced (MELPe) Codec"
+    ]
+  ],
+  "audio/melp600": [
+    [
+      "RFC8130",
+      "RTP Payload Format for the Mixed Excitation Linear Prediction Enhanced (MELPe) Codec"
+    ]
+  ],
+  "audio/mobile-xmf": [
+    [
+      "RFC4723",
+      "Registration of Media Type audio/mobile-xmf"
+    ]
+  ],
+  "audio/mp4": [
+    [
+      "RFC4337",
+      "MIME Type Registration for MPEG-4"
+    ],
+    [
+      "RFC6381",
+      "The 'Codecs' and 'Profiles' Parameters for \"Bucket\" Media Types"
+    ]
+  ],
+  "audio/mp4a-latm": [
+    [
+      "RFC6416",
+      "RTP Payload Format for MPEG-4 Audio/Visual Streams"
+    ]
+  ],
+  "audio/mpa": [
+    [
+      "RFC3555",
+      "MIME Type Registration of RTP Payload Formats"
+    ]
+  ],
+  "audio/mpa-robust": [
+    [
+      "RFC5219",
+      "A More Loss-Tolerant RTP Payload Format for MP3 Audio"
+    ]
+  ],
+  "audio/mpeg": [
+    [
+      "RFC3003",
+      "The audio/mpeg Media Type"
+    ]
+  ],
+  "audio/mpeg4-generic": [
+    [
+      "RFC3640",
+      "RTP Payload Format for Transport of MPEG-4 Elementary Streams"
+    ],
+    [
+      "RFC5691",
+      "RTP Payload Format for Elementary Streams with MPEG Surround Multi-Channel Audio"
+    ],
+    [
+      "RFC6295",
+      "RTP Payload Format for MIDI"
+    ]
+  ],
+  "audio/ogg": [
+    [
+      "RFC5334",
+      "Ogg Media Types"
+    ],
+    [
+      "RFC7845",
+      "Ogg Encapsulation for the Opus Audio Codec"
+    ]
+  ],
+  "audio/opus": [
+    [
+      "RFC7587",
+      "RTP Payload Format for the Opus Speech and Audio Codec"
+    ]
+  ],
+  "audio/parityfec": [
+    [
+      "RFC3009",
+      "Registration of parityfec MIME types"
+    ]
+  ],
+  "audio/pcma": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/pcma-wb": [
+    [
+      "RFC5391",
+      "RTP Payload Format for ITU-T Recommendation G.711.1"
+    ]
+  ],
+  "audio/pcmu": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/pcmu-wb": [
+    [
+      "RFC5391",
+      "RTP Payload Format for ITU-T Recommendation G.711.1"
+    ]
+  ],
+  "audio/qcelp": [
+    [
+      "RFC3555",
+      "MIME Type Registration of RTP Payload Formats"
+    ],
+    [
+      "RFC3625",
+      "The QCP File Format and Media Types for Speech Data"
+    ]
+  ],
+  "audio/raptorfec": [
+    [
+      "RFC6682",
+      "RTP Payload Format for Raptor Forward Error Correction (FEC)"
+    ]
+  ],
+  "audio/red": [
+    [
+      "RFC3555",
+      "MIME Type Registration of RTP Payload Formats"
+    ]
+  ],
+  "audio/rtp-midi": [
+    [
+      "RFC6295",
+      "RTP Payload Format for MIDI"
+    ]
+  ],
+  "audio/rtploopback": [
+    [
+      "RFC6849",
+      "An Extension to the Session Description Protocol (SDP) and Real-time Transport Protocol (RTP) for Media Loopback"
+    ]
+  ],
+  "audio/rtx": [
+    [
+      "RFC4588",
+      "RTP Retransmission Payload Format"
+    ]
+  ],
+  "audio/scip": [
+    [
+      "RFC9607",
+      "RTP Payload Format for the Secure Communication Interoperability Protocol (SCIP) Codec"
+    ]
+  ],
+  "audio/smv": [
+    [
+      "RFC3558",
+      "RTP Payload Format for Enhanced Variable Rate Codecs (EVRC) and Selectable Mode Vocoders (SMV)"
+    ]
+  ],
+  "audio/smv-qcp": [
+    [
+      "RFC3625",
+      "The QCP File Format and Media Types for Speech Data"
+    ]
+  ],
+  "audio/smv0": [
+    [
+      "RFC3558",
+      "RTP Payload Format for Enhanced Variable Rate Codecs (EVRC) and Selectable Mode Vocoders (SMV)"
+    ]
+  ],
+  "audio/speex": [
+    [
+      "RFC5574",
+      "RTP Payload Format for the Speex Codec"
+    ]
+  ],
+  "audio/t140c": [
+    [
+      "RFC4351",
+      "Real-Time Transport Protocol (RTP) Payload for Text Conversation Interleaved in an Audio Stream"
+    ]
+  ],
+  "audio/t38": [
+    [
+      "RFC4612",
+      "Real-Time Facsimile (T.38) - audio/t38 MIME Sub-type Registration"
+    ]
+  ],
+  "audio/telephone-event": [
+    [
+      "RFC4733",
+      "RTP Payload for DTMF Digits, Telephony Tones, and Telephony Signals"
+    ]
+  ],
+  "audio/tone": [
+    [
+      "RFC4733",
+      "RTP Payload for DTMF Digits, Telephony Tones, and Telephony Signals"
+    ]
+  ],
+  "audio/tsvcis": [
+    [
+      "RFC8817",
+      "RTP Payload Format for Tactical Secure Voice Cryptographic Interoperability Specification (TSVCIS) Codec"
+    ]
+  ],
+  "audio/uemclip": [
+    [
+      "RFC5686",
+      "RTP Payload Format for mU-law EMbedded Codec for Low-delay IP Communication (UEMCLIP) Speech Codec"
+    ]
+  ],
+  "audio/ulpfec": [
+    [
+      "RFC5109",
+      "RTP Payload Format for Generic Forward Error Correction"
+    ]
+  ],
+  "audio/vdvi": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "audio/vmr-wb": [
+    [
+      "RFC4348",
+      "Real-Time Transport Protocol (RTP) Payload Format for the Variable-Rate Multimode Wideband (VMR-WB) Audio Codec"
+    ],
+    [
+      "RFC4424",
+      "Real-Time Transport Protocol (RTP) Payload Format for the Variable-Rate Multimode Wideband (VMR-WB) Extension Audio Codec"
+    ]
+  ],
+  "audio/vnd.qcelp": [
+    [
+      "RFC3625",
+      "The QCP File Format and Media Types for Speech Data"
+    ]
+  ],
+  "audio/vorbis": [
+    [
+      "RFC5215",
+      "RTP Payload Format for Vorbis Encoded Audio"
+    ]
+  ],
+  "audio/vorbis-config": [
+    [
+      "RFC5215",
+      "RTP Payload Format for Vorbis Encoded Audio"
+    ]
+  ],
+  "font/collection": [
+    [
+      "RFC8081",
+      "The \"font\" Top-Level Media Type"
+    ]
+  ],
+  "font/otf": [
+    [
+      "RFC8081",
+      "The \"font\" Top-Level Media Type"
+    ]
+  ],
+  "font/sfnt": [
+    [
+      "RFC8081",
+      "The \"font\" Top-Level Media Type"
+    ]
+  ],
+  "font/ttf": [
+    [
+      "RFC8081",
+      "The \"font\" Top-Level Media Type"
+    ]
+  ],
+  "font/woff": [
+    [
+      "RFC8081",
+      "The \"font\" Top-Level Media Type"
+    ]
+  ],
+  "font/woff2": [
+    [
+      "RFC8081",
+      "The \"font\" Top-Level Media Type"
+    ]
+  ],
+  "haptics/hjif": [
+    [
+      "RFC9695",
+      "The 'haptics' Top-Level Media Type"
+    ]
+  ],
+  "haptics/hmpg": [
+    [
+      "RFC9695",
+      "The 'haptics' Top-Level Media Type"
+    ],
+    [
+      "RFC9993",
+      "RTP Payload Format for Haptics"
+    ]
+  ],
+  "haptics/ivs": [
+    [
+      "RFC9695",
+      "The 'haptics' Top-Level Media Type"
+    ]
+  ],
+  "image/bmp": [
+    [
+      "RFC7903",
+      "Windows Image Media Types"
+    ]
+  ],
+  "image/emf": [
+    [
+      "RFC7903",
+      "Windows Image Media Types"
+    ]
+  ],
+  "image/example": [
+    [
+      "RFC4735",
+      "Example Media Types for Use in Documentation"
+    ]
+  ],
+  "image/fits": [
+    [
+      "RFC4047",
+      "MIME Sub-type Registrations for Flexible Image Transport System (FITS)"
+    ]
+  ],
+  "image/g3fax": [
+    [
+      "RFC1494",
+      "Equivalences between 1988 X.400 and RFC-822 Message Bodies"
+    ]
+  ],
+  "image/gif": [
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ],
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ]
+  ],
+  "image/ief": [
+    [
+      "RFC1314",
+      "A File Format for the Exchange of Images in the Internet"
+    ]
+  ],
+  "image/jp2": [
+    [
+      "RFC3745",
+      "MIME Type Registrations for JPEG 2000 (ISO/IEC 15444)"
+    ]
+  ],
+  "image/jpeg": [
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ],
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ]
+  ],
+  "image/jpm": [
+    [
+      "RFC3745",
+      "MIME Type Registrations for JPEG 2000 (ISO/IEC 15444)"
+    ]
+  ],
+  "image/jpx": [
+    [
+      "RFC3745",
+      "MIME Type Registrations for JPEG 2000 (ISO/IEC 15444)"
+    ]
+  ],
+  "image/t38": [
+    [
+      "RFC3362",
+      "Real-time Facsimile (T.38) - image/t38 MIME Sub-type Registration"
+    ]
+  ],
+  "image/tiff": [
+    [
+      "RFC3302",
+      "Tag Image File Format (TIFF) - image/tiff MIME Sub-type Registration"
+    ]
+  ],
+  "image/tiff-fx": [
+    [
+      "RFC3950",
+      "Tag Image File Format Fax eXtended (TIFF-FX) - image/tiff-fx MIME Sub-type Registration"
+    ]
+  ],
+  "image/webp": [
+    [
+      "RFC9649",
+      "WebP Image Format"
+    ]
+  ],
+  "image/wmf": [
+    [
+      "RFC7903",
+      "Windows Image Media Types"
+    ]
+  ],
+  "message/bhttp": [
+    [
+      "RFC9292",
+      "Binary Representation of HTTP Messages"
+    ]
+  ],
+  "message/cpim": [
+    [
+      "RFC3862",
+      "Common Presence and Instant Messaging (CPIM): Message Format"
+    ]
+  ],
+  "message/delivery-status": [
+    [
+      "RFC1894",
+      "An Extensible Message Format for Delivery Status Notifications"
+    ]
+  ],
+  "message/disposition-notification": [
+    [
+      "RFC8098",
+      "Message Disposition Notification"
+    ]
+  ],
+  "message/example": [
+    [
+      "RFC4735",
+      "Example Media Types for Use in Documentation"
+    ]
+  ],
+  "message/external-body": [
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ],
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ]
+  ],
+  "message/feedback-report": [
+    [
+      "RFC5965",
+      "An Extensible Format for Email Feedback Reports"
+    ]
+  ],
+  "message/global": [
+    [
+      "RFC6532",
+      "Internationalized Email Headers"
+    ]
+  ],
+  "message/global-delivery-status": [
+    [
+      "RFC6533",
+      "Internationalized Delivery Status and Disposition Notifications"
+    ]
+  ],
+  "message/global-disposition-notification": [
+    [
+      "RFC6533",
+      "Internationalized Delivery Status and Disposition Notifications"
+    ]
+  ],
+  "message/global-headers": [
+    [
+      "RFC6533",
+      "Internationalized Delivery Status and Disposition Notifications"
+    ]
+  ],
+  "message/http": [
+    [
+      "RFC9112",
+      "HTTP/1.1"
+    ]
+  ],
+  "message/imdn+xml": [
+    [
+      "RFC5438",
+      "Instant Message Disposition Notification (IMDN)"
+    ]
+  ],
+  "message/mls": [
+    [
+      "RFC9420",
+      "The Messaging Layer Security (MLS) Protocol"
+    ]
+  ],
+  "message/news": [
+    [
+      "RFC5537",
+      "Netnews Architecture and Protocols"
+    ]
+  ],
+  "message/ohttp-req": [
+    [
+      "RFC9458",
+      "Oblivious HTTP"
+    ]
+  ],
+  "message/ohttp-res": [
+    [
+      "RFC9458",
+      "Oblivious HTTP"
+    ]
+  ],
+  "message/partial": [
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ],
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ]
+  ],
+  "message/rfc822": [
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ],
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ]
+  ],
+  "message/s-http": [
+    [
+      "RFC2660",
+      "The Secure HyperText Transfer Protocol"
+    ]
+  ],
+  "message/sip": [
+    [
+      "RFC3261",
+      "SIP: Session Initiation Protocol"
+    ]
+  ],
+  "message/sipfrag": [
+    [
+      "RFC3420",
+      "Internet Media Type message/sipfrag"
+    ]
+  ],
+  "message/tracking-status": [
+    [
+      "RFC3886",
+      "An Extensible Message Format for Message Tracking Responses"
+    ]
+  ],
+  "model/example": [
+    [
+      "RFC4735",
+      "Example Media Types for Use in Documentation"
+    ]
+  ],
+  "model/mesh": [
+    [
+      "RFC2077",
+      "The Model Primary Content Type for Multipurpose Internet Mail Extensions"
+    ]
+  ],
+  "model/vrml": [
+    [
+      "RFC2077",
+      "The Model Primary Content Type for Multipurpose Internet Mail Extensions"
+    ]
+  ],
+  "multipart/alternative": [
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ],
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ]
+  ],
+  "multipart/byteranges": [
+    [
+      "RFC9110",
+      "HTTP Semantics"
+    ]
+  ],
+  "multipart/digest": [
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ],
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ]
+  ],
+  "multipart/encrypted": [
+    [
+      "RFC1847",
+      "Security Multiparts for MIME: Multipart/Signed and Multipart/Encrypted"
+    ]
+  ],
+  "multipart/example": [
+    [
+      "RFC4735",
+      "Example Media Types for Use in Documentation"
+    ]
+  ],
+  "multipart/form-data": [
+    [
+      "RFC7578",
+      "Returning Values from Forms: multipart/form-data"
+    ]
+  ],
+  "multipart/mixed": [
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ],
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ]
+  ],
+  "multipart/multilingual": [
+    [
+      "RFC8255",
+      "Multiple Language Content Type"
+    ]
+  ],
+  "multipart/parallel": [
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ],
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ]
+  ],
+  "multipart/related": [
+    [
+      "RFC2387",
+      "The MIME Multipart/Related Content-type"
+    ]
+  ],
+  "multipart/report": [
+    [
+      "RFC6522",
+      "The Multipart/Report Media Type for the Reporting of Mail System Administrative Messages"
+    ]
+  ],
+  "multipart/signed": [
+    [
+      "RFC1847",
+      "Security Multiparts for MIME: Multipart/Signed and Multipart/Encrypted"
+    ]
+  ],
+  "multipart/voice-message": [
+    [
+      "RFC3801",
+      "Voice Profile for Internet Mail - version 2 (VPIMv2)"
+    ]
+  ],
+  "text/1d-interleaved-parityfec": [
+    [
+      "RFC6015",
+      "RTP Payload Format for 1-D Interleaved Parity Forward Error Correction (FEC)"
+    ]
+  ],
+  "text/calendar": [
+    [
+      "RFC5545",
+      "Internet Calendaring and Scheduling Core Object Specification (iCalendar)"
+    ]
+  ],
+  "text/csv": [
+    [
+      "RFC4180",
+      "Common Format and MIME Type for Comma-Separated Values (CSV) Files"
+    ],
+    [
+      "RFC7111",
+      "URI Fragment Identifiers for the text/csv Media Type"
+    ]
+  ],
+  "text/directory": [
+    [
+      "RFC2425",
+      "A MIME Content-Type for Directory Information"
+    ],
+    [
+      "RFC6350",
+      "vCard Format Specification"
+    ]
+  ],
+  "text/dns": [
+    [
+      "RFC4027",
+      "Domain Name System Media Types"
+    ]
+  ],
+  "text/ecmascript": [
+    [
+      "RFC9239",
+      "Updates to ECMAScript Media Types"
+    ]
+  ],
+  "text/encaprtp": [
+    [
+      "RFC6849",
+      "An Extension to the Session Description Protocol (SDP) and Real-time Transport Protocol (RTP) for Media Loopback"
+    ]
+  ],
+  "text/enriched": [
+    [
+      "RFC1896",
+      "The text/enriched MIME Content-type"
+    ]
+  ],
+  "text/example": [
+    [
+      "RFC4735",
+      "Example Media Types for Use in Documentation"
+    ]
+  ],
+  "text/flexfec": [
+    [
+      "RFC8627",
+      "RTP Payload Format for Flexible Forward Error Correction (FEC)"
+    ]
+  ],
+  "text/fwdred": [
+    [
+      "RFC6354",
+      "Forward-Shifted RTP Redundancy Payload Support"
+    ]
+  ],
+  "text/grammar-ref-list": [
+    [
+      "RFC6787",
+      "Media Resource Control Protocol Version 2 (MRCPv2)"
+    ]
+  ],
+  "text/javascript": [
+    [
+      "RFC9239",
+      "Updates to ECMAScript Media Types"
+    ]
+  ],
+  "text/markdown": [
+    [
+      "RFC7763",
+      "The text/markdown Media Type"
+    ]
+  ],
+  "text/parameters": [
+    [
+      "RFC7826",
+      "Real-Time Streaming Protocol Version 2.0"
+    ]
+  ],
+  "text/parityfec": [
+    [
+      "RFC3009",
+      "Registration of parityfec MIME types"
+    ]
+  ],
+  "text/plain": [
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ],
+    [
+      "RFC3676",
+      "The Text/Plain Format and DelSp Parameters"
+    ],
+    [
+      "RFC5147",
+      "URI Fragment Identifiers for the text/plain Media Type"
+    ]
+  ],
+  "text/raptorfec": [
+    [
+      "RFC6682",
+      "RTP Payload Format for Raptor Forward Error Correction (FEC)"
+    ]
+  ],
+  "text/red": [
+    [
+      "RFC4102",
+      "Registration of the text/red MIME Sub-Type"
+    ]
+  ],
+  "text/rfc822-headers": [
+    [
+      "RFC6522",
+      "The Multipart/Report Media Type for the Reporting of Mail System Administrative Messages"
+    ]
+  ],
+  "text/richtext": [
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ],
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ]
+  ],
+  "text/rtploopback": [
+    [
+      "RFC6849",
+      "An Extension to the Session Description Protocol (SDP) and Real-time Transport Protocol (RTP) for Media Loopback"
+    ]
+  ],
+  "text/rtx": [
+    [
+      "RFC4588",
+      "RTP Retransmission Payload Format"
+    ]
+  ],
+  "text/sgml": [
+    [
+      "RFC1874",
+      "SGML Media Types"
+    ]
+  ],
+  "text/t140": [
+    [
+      "RFC4103",
+      "RTP Payload for Text Conversation"
+    ]
+  ],
+  "text/troff": [
+    [
+      "RFC4263",
+      "Media Subtype Registration for Media Type text/troff"
+    ]
+  ],
+  "text/ulpfec": [
+    [
+      "RFC5109",
+      "RTP Payload Format for Generic Forward Error Correction"
+    ]
+  ],
+  "text/uri-list": [
+    [
+      "RFC2483",
+      "URI Resolution Services Necessary for URN Resolution"
+    ]
+  ],
+  "text/vcard": [
+    [
+      "RFC6350",
+      "vCard Format Specification"
+    ]
+  ],
+  "text/vnd.radisys.msml-basic-layout": [
+    [
+      "RFC5707",
+      "Media Server Markup Language (MSML)"
+    ]
+  ],
+  "text/xml": [
+    [
+      "RFC7303",
+      "XML Media Types"
+    ]
+  ],
+  "text/xml-external-parsed-entity": [
+    [
+      "RFC7303",
+      "XML Media Types"
+    ]
+  ],
+  "video/1d-interleaved-parityfec": [
+    [
+      "RFC6015",
+      "RTP Payload Format for 1-D Interleaved Parity Forward Error Correction (FEC)"
+    ]
+  ],
+  "video/3gpp": [
+    [
+      "RFC3839",
+      "MIME Type Registrations for 3rd Generation Partnership Project (3GPP) Multimedia files"
+    ],
+    [
+      "RFC6381",
+      "The 'Codecs' and 'Profiles' Parameters for \"Bucket\" Media Types"
+    ]
+  ],
+  "video/3gpp-tt": [
+    [
+      "RFC4396",
+      "RTP Payload Format for 3rd Generation Partnership Project (3GPP) Timed Text"
+    ]
+  ],
+  "video/3gpp2": [
+    [
+      "RFC4393",
+      "MIME Type Registrations for 3GPP2 Multimedia Files"
+    ],
+    [
+      "RFC6381",
+      "The 'Codecs' and 'Profiles' Parameters for \"Bucket\" Media Types"
+    ]
+  ],
+  "video/bmpeg": [
+    [
+      "RFC3555",
+      "MIME Type Registration of RTP Payload Formats"
+    ]
+  ],
+  "video/bt656": [
+    [
+      "RFC3555",
+      "MIME Type Registration of RTP Payload Formats"
+    ]
+  ],
+  "video/celb": [
+    [
+      "RFC3555",
+      "MIME Type Registration of RTP Payload Formats"
+    ]
+  ],
+  "video/dv": [
+    [
+      "RFC6469",
+      "RTP Payload Format for DV (IEC 61834) Video"
+    ]
+  ],
+  "video/encaprtp": [
+    [
+      "RFC6849",
+      "An Extension to the Session Description Protocol (SDP) and Real-time Transport Protocol (RTP) for Media Loopback"
+    ]
+  ],
+  "video/evc": [
+    [
+      "RFC9584",
+      "RTP Payload Format for Essential Video Coding (EVC)"
+    ]
+  ],
+  "video/example": [
+    [
+      "RFC4735",
+      "Example Media Types for Use in Documentation"
+    ]
+  ],
+  "video/ffv1": [
+    [
+      "RFC9043",
+      "FFV1 Video Coding Format Versions 0, 1, and 3"
+    ]
+  ],
+  "video/flexfec": [
+    [
+      "RFC8627",
+      "RTP Payload Format for Flexible Forward Error Correction (FEC)"
+    ]
+  ],
+  "video/h261": [
+    [
+      "RFC4587",
+      "RTP Payload Format for H.261 Video Streams"
+    ]
+  ],
+  "video/h263": [
+    [
+      "RFC3555",
+      "MIME Type Registration of RTP Payload Formats"
+    ]
+  ],
+  "video/h263-1998": [
+    [
+      "RFC4629",
+      "RTP Payload Format for ITU-T Rec. H.263 Video"
+    ]
+  ],
+  "video/h263-2000": [
+    [
+      "RFC4629",
+      "RTP Payload Format for ITU-T Rec. H.263 Video"
+    ]
+  ],
+  "video/h264": [
+    [
+      "RFC6184",
+      "RTP Payload Format for H.264 Video"
+    ]
+  ],
+  "video/h264-rcdo": [
+    [
+      "RFC6185",
+      "RTP Payload Format for H.264 Reduced-Complexity Decoding Operation (RCDO) Video"
+    ]
+  ],
+  "video/h264-svc": [
+    [
+      "RFC6190",
+      "RTP Payload Format for Scalable Video Coding"
+    ]
+  ],
+  "video/h265": [
+    [
+      "RFC7798",
+      "RTP Payload Format for High Efficiency Video Coding (HEVC)"
+    ]
+  ],
+  "video/h266": [
+    [
+      "RFC9328",
+      "RTP Payload Format for Versatile Video Coding (VVC)"
+    ]
+  ],
+  "video/jpeg": [
+    [
+      "RFC3555",
+      "MIME Type Registration of RTP Payload Formats"
+    ]
+  ],
+  "video/jpeg2000": [
+    [
+      "RFC5371",
+      "RTP Payload Format for JPEG 2000 Video Streams"
+    ],
+    [
+      "RFC5372",
+      "Payload Format for JPEG 2000 Video: Extensions for Scalability and Main Header Recovery"
+    ]
+  ],
+  "video/jpeg2000-scl": [
+    [
+      "RFC9828",
+      "RTP Payload Format for JPEG 2000 Streaming with Sub-Codestream Latency"
+    ]
+  ],
+  "video/matroska": [
+    [
+      "RFC9559",
+      "Matroska Media Container Format Specification"
+    ]
+  ],
+  "video/matroska-3d": [
+    [
+      "RFC9559",
+      "Matroska Media Container Format Specification"
+    ]
+  ],
+  "video/mj2": [
+    [
+      "RFC3745",
+      "MIME Type Registrations for JPEG 2000 (ISO/IEC 15444)"
+    ]
+  ],
+  "video/mp1s": [
+    [
+      "RFC3555",
+      "MIME Type Registration of RTP Payload Formats"
+    ]
+  ],
+  "video/mp2p": [
+    [
+      "RFC3555",
+      "MIME Type Registration of RTP Payload Formats"
+    ]
+  ],
+  "video/mp2t": [
+    [
+      "RFC3555",
+      "MIME Type Registration of RTP Payload Formats"
+    ]
+  ],
+  "video/mp4": [
+    [
+      "RFC4337",
+      "MIME Type Registration for MPEG-4"
+    ],
+    [
+      "RFC6381",
+      "The 'Codecs' and 'Profiles' Parameters for \"Bucket\" Media Types"
+    ]
+  ],
+  "video/mp4v-es": [
+    [
+      "RFC6416",
+      "RTP Payload Format for MPEG-4 Audio/Visual Streams"
+    ]
+  ],
+  "video/mpeg": [
+    [
+      "RFC2045",
+      "Multipurpose Internet Mail Extensions (MIME) Part One: Format of Internet Message Bodies"
+    ],
+    [
+      "RFC2046",
+      "Multipurpose Internet Mail Extensions (MIME) Part Two: Media Types"
+    ]
+  ],
+  "video/mpeg4-generic": [
+    [
+      "RFC3640",
+      "RTP Payload Format for Transport of MPEG-4 Elementary Streams"
+    ]
+  ],
+  "video/mpv": [
+    [
+      "RFC3555",
+      "MIME Type Registration of RTP Payload Formats"
+    ]
+  ],
+  "video/nv": [
+    [
+      "RFC4856",
+      "Media Type Registration of Payload Formats in the RTP Profile for Audio and Video Conferences"
+    ]
+  ],
+  "video/ogg": [
+    [
+      "RFC5334",
+      "Ogg Media Types"
+    ],
+    [
+      "RFC7845",
+      "Ogg Encapsulation for the Opus Audio Codec"
+    ]
+  ],
+  "video/parityfec": [
+    [
+      "RFC3009",
+      "Registration of parityfec MIME types"
+    ]
+  ],
+  "video/pointer": [
+    [
+      "RFC2862",
+      "RTP Payload Format for Real-Time Pointers"
+    ]
+  ],
+  "video/quicktime": [
+    [
+      "RFC6381",
+      "The 'Codecs' and 'Profiles' Parameters for \"Bucket\" Media Types"
+    ]
+  ],
+  "video/raptorfec": [
+    [
+      "RFC6682",
+      "RTP Payload Format for Raptor Forward Error Correction (FEC)"
+    ]
+  ],
+  "video/raw": [
+    [
+      "RFC4175",
+      "RTP Payload Format for Uncompressed Video"
+    ]
+  ],
+  "video/rtploopback": [
+    [
+      "RFC6849",
+      "An Extension to the Session Description Protocol (SDP) and Real-time Transport Protocol (RTP) for Media Loopback"
+    ]
+  ],
+  "video/rtx": [
+    [
+      "RFC4588",
+      "RTP Retransmission Payload Format"
+    ]
+  ],
+  "video/scip": [
+    [
+      "RFC9607",
+      "RTP Payload Format for the Secure Communication Interoperability Protocol (SCIP) Codec"
+    ]
+  ],
+  "video/smpte291": [
+    [
+      "RFC8331",
+      "RTP Payload for Society of Motion Picture and Television Engineers (SMPTE) ST 291-1 Ancillary Data"
+    ]
+  ],
+  "video/smpte292m": [
+    [
+      "RFC3497",
+      "RTP Payload Format for Society of Motion Picture and Television Engineers (SMPTE) 292M Video"
+    ]
+  ],
+  "video/ulpfec": [
+    [
+      "RFC5109",
+      "RTP Payload Format for Generic Forward Error Correction"
+    ]
+  ],
+  "video/vc1": [
+    [
+      "RFC4425",
+      "RTP Payload Format for Video Codec 1 (VC-1)"
+    ]
+  ],
+  "video/vc2": [
+    [
+      "RFC8450",
+      "RTP Payload Format for VC-2 High Quality (HQ) Profile"
+    ]
+  ],
+  "video/vp8": [
+    [
+      "RFC7741",
+      "RTP Payload Format for VP8 Video"
+    ]
+  ],
+  "video/vp9": [
+    [
+      "RFC9628",
+      "RTP Payload Format for VP9 Video"
+    ]
+  ]
+}
