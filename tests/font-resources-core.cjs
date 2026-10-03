@@ -1,0 +1,14 @@
+const {test}=require('node:test'),assert=require('node:assert/strict');
+const {fontResourceCleanup}=require('../work/test-font-resources.cjs');
+function fixture(){
+ let serial=0,listener,cleared=0,can=true,bytes=13*1024*1024,error=false;const timers=new Map(),idle=new Map();
+ const cleanup=fontResourceCleanup({later:(fn,delay)=>{assert.equal(delay,2000);const id=++serial;timers.set(id,fn);return id;},cancelLater:id=>timers.delete(id),idle:fn=>{const id=++serial;idle.set(id,fn);return id;},cancelIdle:id=>idle.delete(id),activity:fn=>{assert.equal(listener,undefined);listener=fn;return ()=>listener=undefined;},canRelease:()=>can,fontBytes:()=>{if(error)throw Error('closed frame');return bytes;},release:()=>{cleared++;if(error)throw Error('closed frame');}});
+ const run=map=>{const [id,fn]=map.entries().next().value;map.delete(id);fn();};
+ return {cleanup,timers,idle,activity:()=>listener?.(),timer:()=>run(timers),frame:()=>run(idle),get cleared(){return cleared;},get listening(){return !!listener;},set can(v){can=v;},set bytes(v){bytes=v;},set error(v){error=v;}};
+}
+test('heavy font cleanup waits for quiet time and an idle frame, then unregisters activity',()=>{const f=fixture();f.cleanup.release();assert.equal(f.cleared,0);f.timer();assert.equal(f.cleared,0);assert.equal(f.idle.size,1);f.frame();assert.equal(f.cleared,1);assert.equal(f.listening,false);assert.equal(f.timers.size+f.idle.size,0);});
+test('typing, scrolling or clicking restarts the quiet interval and cancels queued idle work',()=>{const f=fixture();f.cleanup.release();f.timer();assert.equal(f.idle.size,1);f.activity();assert.equal(f.idle.size,0);assert.equal(f.timers.size,1);f.timer();f.frame();assert.equal(f.cleared,1);});
+test('returning to a reference page cancels both stages without clearing resources',()=>{for(const stage of ['timer','idle']){const f=fixture();f.cleanup.release();if(stage==='idle')f.timer();f.cleanup.retain();assert.equal(f.cleared,0);assert.equal(f.listening,false);assert.equal(f.timers.size+f.idle.size,0);}});
+test('small caches and active reference pages are preserved',()=>{for(const blocked of ['size','page']){const f=fixture();if(blocked==='size')f.bytes=1024;else f.can=false;f.cleanup.release();f.timer();assert.equal(f.cleared,0);assert.equal(f.idle.size,0);assert.equal(f.listening,false);}});
+test('a page opened between the timer and idle callback is rechecked',()=>{const f=fixture();f.cleanup.release();f.timer();f.can=false;f.frame();assert.equal(f.cleared,0);assert.equal(f.listening,false);});
+test('repeated releases coalesce and a closing frame cannot leave callbacks attached',()=>{const f=fixture();f.cleanup.release();f.cleanup.release();assert.equal(f.timers.size,1);f.error=true;f.timer();assert.equal(f.cleared,0);assert.equal(f.listening,false);assert.equal(f.idle.size,0);});

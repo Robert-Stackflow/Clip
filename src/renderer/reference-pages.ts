@@ -16,6 +16,7 @@ type Section={group:string;top:number;count:number};
 
 /** A bounded row window over one continuous catalog, including off-screen category anchors. */
 export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(text:string)=>void){
+ window.clipperAppearance?.retainFontResources?.();
  setInterfaceLanguage(document.documentElement.lang==='en'?'en':'zh-CN');
  const catalog=referenceCatalog();let active=kind==='symbols'?'emoji':'git',tone=0,disposed=false;
  let rows:Row[]=[],sections:Section[]=[],entries:Entry[]=[],columns=1,frame=0,queryTimer:ReturnType<typeof setTimeout>|undefined;
@@ -162,5 +163,5 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  const disposeEmojiFont=kind==='symbols'?mountEmojiFont(root,tip):()=>{};
  const disposeSegments=referenceSegments(root.querySelector<HTMLElement>('.reference-tabs')!);
  rebuild();
- return ()=>{disposed=true;disposeEmojiFont();disposeSegments();cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);scroll.removeEventListener('keydown',navigationKey);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();tipResize.disconnect();cheatDocument?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();};
+ return ()=>{disposed=true;disposeEmojiFont();disposeSegments();cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);scroll.removeEventListener('keydown',navigationKey);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();tipResize.disconnect();cheatDocument?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();window.clipperAppearance?.releaseFontResources?.();};
 }

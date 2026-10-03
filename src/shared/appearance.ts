@@ -3,7 +3,7 @@ import {validFont,fontStack,type UIFont,type InstalledFont,type UIFontSource} fr
 export const appearanceScales=[100,110,125,150] as const;
 export interface UIAppearance {font:UIFont;scale:typeof appearanceScales[number];density:'comfortable'|'compact';accent:string;lightBackground:string;darkBackground:string;lightForeground:string;darkForeground:string;radius:number;toastPosition:'top-center'|'top-right'|'top-left'|'bottom-center'|'bottom-right'|'bottom-left'}
 export interface AppearanceState {value:UIAppearance;warning:string}
-export interface AppearanceAPI {state():Promise<AppearanceState>;installedFonts(refresh?:boolean):Promise<InstalledFont[]>;uiFontSource(family:string):Promise<UIFontSource|null>;onChange(callback:(state:AppearanceState)=>void):()=>void}
+export interface AppearanceAPI {retainFontResources?():void;releaseFontResources?():void;state():Promise<AppearanceState>;installedFonts(refresh?:boolean):Promise<InstalledFont[]>;uiFontSource(family:string):Promise<UIFontSource|null>;onChange(callback:(state:AppearanceState)=>void):()=>void}
 export const defaultAppearance=():UIAppearance=>({font:'system',scale:100,density:'comfortable',accent:'#303030',lightBackground:'#ffffff',darkBackground:'#181818',lightForeground:'#202020',darkForeground:'#eeeeee',radius:10,toastPosition:'bottom-center'});
 export function validateAppearance(value:unknown):UIAppearance {
  if(!value||typeof value!=='object'||Array.isArray(value)||!('font'in value)||!('scale'in value)||!('density'in value))throw new Error(tr('字体或密度设置无效'));const v={...defaultAppearance(),...value} as UIAppearance;

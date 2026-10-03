@@ -19,7 +19,7 @@ export function mountEmojiFont(...hosts:HTMLElement[]){
     descriptors.lineGapOverride='0%';
    }
    face=new FontFace(alias,'url('+JSON.stringify(value.url)+')',descriptors);await face.load();
-   if(disposed)return;document.fonts.add(face);
+   if(disposed){window.clipperAppearance?.releaseFontResources?.();return;}document.fonts.add(face);
    for(const host of hosts){host.style.setProperty('--reference-emoji-font',JSON.stringify(alias));host.dataset.emojiFont='loaded';}
   }catch{if(!disposed)for(const host of hosts)host.dataset.emojiFont='fallback';}
  })();
