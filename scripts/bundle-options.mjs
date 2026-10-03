@@ -15,6 +15,7 @@ export const bundles=[
  {name:'renderer',restart:false,options:{...browser,entryPoints:['tray','app','capture','recovery','unlock','shelf','selection','recorder','scroll','image-editor'].map(name=>'src/renderer/'+name+'.ts'),outdir:'dist/renderer'}},
  {name:'text-preview',restart:false,options:{...browser,entryPoints:['src/renderer/text-preview.ts'],outdir:'dist/renderer/text-preview',format:'esm',splitting:true}},
  {name:'text-preview-worker',restart:false,options:{...browser,entryPoints:['src/renderer/text-preview-worker.ts'],outfile:'dist/renderer/text-preview-worker.js'}},
+ {name:'reference-pages',restart:false,options:{...browser,entryPoints:['src/renderer/reference-pages.ts'],outfile:'dist/renderer/reference-pages.js',format:'esm'}},
  {name:'web',restart:false,options:{...common,entryPoints:['src/web/app.ts'],outdir:'dist/web',platform:'browser',target:'es2022'}},
  {name:'styles',restart:false,options:{...common,entryPoints:['src/renderer/one-ui.css'],outfile:'dist/renderer/one-ui.css',target:'chrome138'}}
 ];

@@ -25,7 +25,7 @@ const active=await activePrograms();
 for(const old of versions.filter(value=>!keep.includes(value)))if(active.some(file=>file.toLowerCase().startsWith((join(root,old)+'\\').toLowerCase())))
  throw Error('An old release is running. Exit it from its tray menu before packaging.');
 
-const candidate=await staging(root);
+const candidate=await staging(root,version);
 const env={...process.env,TEMP:work.temp,TMP:work.temp,ELECTRON_BUILDER_CACHE:join(work.root,'builder-cache')};
 delete env.CLIPPER_DEVELOPMENT;delete env.CLIPPER_DEV_DATA_DIR;
 let failure;

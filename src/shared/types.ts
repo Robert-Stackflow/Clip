@@ -21,6 +21,7 @@ export interface State { services?:{sync:'off'|'ready'|'busy'|'error';web:boolea
 export type BatchAction='delete'|'favorite'|'enqueue'|'shelf'|'unshelf'|'tag';
 export type ClipAction = 'favorite'|'pin'|'delete'|'enqueue'|'dequeue'|'up'|'down'|'split';
 export interface API {
+  openReference(url:string):Promise<void>;
   appIcons(names:string[]):Promise<Record<string,string|null>>;
   programVersions():Promise<import('./program-versions').ProgramVersionEntry[]>;deleteProgramVersion(id:string):Promise<void>;chooseProgramVersion(id:string):Promise<import('./program-versions').ProgramRollbackChoice>;previewProgramVersion(token:string,password?:string,newPassword?:string,mode?:'password'|'recovery'):Promise<import('./program-versions').ProgramRollbackPreview>;rollbackProgramVersion(token:string,proof?:string):Promise<void>;cancelProgramRollback():Promise<void>;
   updateState():Promise<import('./updates').UpdateState>; configureUpdates(automatic:boolean):Promise<import('./updates').UpdateState>;

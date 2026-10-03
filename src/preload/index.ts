@@ -4,6 +4,7 @@ import { contextBridge, ipcRenderer, webUtils } from 'electron';
 import type { API } from '../shared/types';
 const invoke=(name:string,...args:unknown[])=>ipcRenderer.invoke('clipper:'+name,...args);
 const api:API={
+ openReference:url=>invoke('reference-open',url),
  preview:id=>invoke('preview',id),snippetPreview:id=>invoke('snippet-preview',id),releasePreview:url=>invoke('preview-release',url),
   programVersions:()=>invoke('program-version-list'),deleteProgramVersion:id=>invoke('program-version-delete',id),chooseProgramVersion:id=>invoke('program-version-choose',id),previewProgramVersion:(token,password,newPassword,mode)=>invoke('program-version-preview',token,password,newPassword,mode),rollbackProgramVersion:(token,proof)=>invoke('program-version-commit',token,proof),cancelProgramRollback:()=>invoke('program-version-cancel'),
   checkpoints:()=>invoke('checkpoint-list'),createCheckpoint:()=>invoke('checkpoint-create'),deleteCheckpoint:id=>invoke('checkpoint-delete',id),chooseCheckpoint:id=>invoke('checkpoint-choose',id),previewCheckpoint:(token,password,newPassword,mode)=>invoke('checkpoint-preview',token,password,newPassword,mode),restoreCheckpoint:(token,proof)=>invoke('checkpoint-commit',token,proof),cancelCheckpoint:()=>invoke('checkpoint-cancel'),

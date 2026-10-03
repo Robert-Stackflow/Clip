@@ -1977,6 +1977,9 @@ export const english:Readonly<Record<string,string>>={
   "菱形": "Diamond",
   "编辑文字": "Edit text",
   "删除标注": "Delete annotation",
+  "表情符号": "Symbols & Emoji",
+  "连接与分享": "Connections & Sharing",
+  "管理": "Manage",
   "实色填充": "Solid fill",
   "点击标注选中，拖动移动；拖动端点调整大小。Delete 删除，双击文字编辑。": "Click an annotation to select it. Drag to move, or drag handles to resize. Delete removes it; double-click text to edit."
 };
