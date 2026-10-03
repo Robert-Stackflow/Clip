@@ -17,6 +17,9 @@ output.push('Noto Color Emoji COLRv1 (flag glyph subset) — SIL Open Font Licen
 output.push(await readFile('licenses/NotoColorEmoji-OFL.txt','utf8'));
 output.push('mime-db 1.54.0 — offline MIME extension data — https://github.com/jshttp/mime-db');
 output.push(await readFile('src/renderer/reference-data/MIME-DB-LICENSE.txt','utf8'));
+output.push('Apache Tika MIME descriptions — https://github.com/apache/tika/tree/ccec84eb030fbfddcceffe063621e74ca81b13a3/tika-core/src/main/resources/org/apache/tika/mime');
+output.push(await readFile('src/renderer/reference-data/TIKA-LICENSE.txt','utf8'));
+output.push(await readFile('src/renderer/reference-data/TIKA-NOTICE.txt','utf8'));
 output.push('Quick Reference — complete Git, LaTeX, Bash, Linux and Regex documents — https://github.com/jaywcjlove/reference');
 output.push(await readFile('src/renderer/reference-data/QUICKREF-LICENSE.txt','utf8'));
 output.push(rustNotices);
