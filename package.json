@@ -26,7 +26,7 @@
     "test:recording": "npm run build && node tests/recording-ui.cjs && node tests/recording-audio.cjs && node tests/recording-boundaries.cjs && node tests/recording-microphones-ui.cjs && node tests/recording-microphone-electron.cjs && node tests/select-loading-ui.cjs && node tests/recording-active-ui.cjs",
     "test:region": "npm run build && node tests/recording-region.cjs",
     "test:scroll": "npm run build && node tests/scroll-ui.cjs && node tests/scroll-boundaries.cjs",
-    "test:image": "npm run build && node tests/window-capture.cjs && node tests/image-pointer-electron.cjs && node tests/image-pointer-ui.cjs && node tests/image-editor-boundaries.cjs",
+    "test:image": "npm run build && node tests/window-capture.cjs && node tests/image-pointer-electron.cjs && node tests/image-pointer-ui.cjs && node tests/image-transform-clip.cjs && node tests/image-editor-boundaries.cjs",
     "test:formats": "npm run build && node tests/formats-ui.cjs && node tests/formats-boundaries.cjs",
     "test:attachments": "npm run build && node tests/attachments-ui.cjs && node tests/attachments-boundaries.cjs",
     "test:metadata": "npm run build && node scripts/test.mjs && node tests/metadata-ui.cjs && node tests/metadata-boundaries.cjs",
