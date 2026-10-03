@@ -16,7 +16,13 @@ export function sectionLayout(root:HTMLElement, labels:string[], starts:HTMLElem
     const button=document.createElement('button');button.type='button';button.className='quiet';const glyph=options.icons?.[i];if(glyph)button.append(createElement(glyph,{'class':'icon lucide','aria-hidden':'true','focusable':'false','stroke-width':1.75}));const caption=document.createElement('span');caption.className='section-nav-label';caption.textContent=label;button.append(caption);button.dataset.section=String(i);button.setAttribute('aria-controls',panel.id);
     button.onclick=()=>select(i);const group=options.groups?.[i];if(group&&(i===0||options.groups?.[i-1]!==group)){const heading=document.createElement('h2');heading.className='section-nav-group';heading.textContent=group;nav.append(heading);}nav.append(button);content.append(panel);return panel;
   });
-  function reveal(){const button=nav.querySelector<HTMLElement>('[aria-current=page]');if(nav.getClientRects().length)button?.scrollIntoView({block:'nearest',inline:'nearest'});}
+  function reveal(){const button=nav.querySelector<HTMLElement>('[aria-current=page]');if(!button||!nav.getClientRects().length)return;
+    const viewport=nav.getBoundingClientRect(),item=button.getBoundingClientRect(),margin=4;
+    if(item.top<viewport.top+margin)nav.scrollTop+=item.top-viewport.top-margin;
+    else if(item.bottom>viewport.bottom-margin)nav.scrollTop+=item.bottom-viewport.bottom+margin;
+    if(item.left<viewport.left+margin)nav.scrollLeft+=item.left-viewport.left-margin;
+    else if(item.right>viewport.right-margin)nav.scrollLeft+=item.right-viewport.right+margin;
+  }
   function select(index:number){(document.activeElement as HTMLElement)?.blur();closeControls();panels.forEach((panel,i)=>panel.hidden=i!==index);Array.from(nav.querySelectorAll<HTMLButtonElement>('[data-section]')).forEach((button,i)=>{button.classList.toggle('active',i===index);if(i===index)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});sessionStorage.setItem(storageKey,String(index));content.scrollTop=0;reveal();options.onSelect?.(index);}
   layout.append(nav,content);root.replaceChildren(layout);
   const saved=Number(sessionStorage.getItem(storageKey)||0);select(saved>=0&&saved<panels.length?saved:0);
