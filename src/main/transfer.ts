@@ -8,22 +8,24 @@ import { extname, join } from 'node:path';
 import { readFile, stat, access } from 'node:fs/promises';
 import type { Detail, Payload } from '../shared/types';
 import { MAX_ITEM, validatePayload } from '../shared/core';
-import { prepareThumbnail,pngDimensions } from './clipboard';
+import { prepareThumbnail,pngDimensions,convertJPEG } from './clipboard';
 import {formatDefinition,type FormatName} from '../shared/formats';
 import { imageSize } from 'image-size';
-export async function incomingFiles(paths:unknown):Promise<Payload>{
+export async function incomingFiles(paths:unknown,valid:()=>boolean=()=>true):Promise<Payload>{
+  const epoch=transferGeneration,live=()=>epoch===transferGeneration&&valid(),check=()=>{if(!live())throw new Error(tr('记录已取消'));};check();
   const payload=validatePayload({files:paths});for(const file of payload.files!)await stat(file).catch(()=>{throw new Error(tr`文件无法访问：${file}`);});
   if(payload.files!.length===1&&/\.(png|jpg|jpeg|webp|bmp|gif)$/i.test(extname(payload.files![0]))){
-    const file=payload.files![0];if((await stat(file)).size>MAX_ITEM)throw new Error(tr('图片文件过大'));const buffer=await readFile(file);let dimensions;try{dimensions=imageSize(buffer);}catch{throw new Error(tr('图片文件无效'));}
+    const file=payload.files![0];if((await stat(file)).size>MAX_ITEM)throw new Error(tr('图片文件过大'));const buffer=await readFile(file);try{check();if(buffer.length>MAX_ITEM)throw new Error(tr('图片文件过大'));let dimensions;try{dimensions=imageSize(buffer);}catch{throw new Error(tr('图片文件无效'));}
     if(!['png','jpg','gif','webp','bmp'].includes(dimensions.type||''))throw new Error(tr('图片格式不支持'));
     if(!dimensions.width||!dimensions.height||dimensions.width>16384||dimensions.height>16384||dimensions.width*dimensions.height>40_000_000)throw new Error(tr('图片像素过大'));
-    const image=dimensions.type==='png'?undefined:nativeImage.createFromBuffer(buffer);if(image?.isEmpty())throw new Error(tr('图片无法解码'));const original:Record<string,FormatName>={jpg:'JFIF',gif:'GIF',webp:'image/webp',bmp:'image/bmp'};const p=validatePayload({png:dimensions.type==='png'?buffer.toString('base64'):image!.toPNG().toString('base64'),...(original[dimensions.type!]?{formats:[{name:original[dimensions.type!],data:buffer.toString('base64')}]}:{})});await prepareThumbnail(p);buffer.fill(0);return p;
-  }return payload;
+    const image=['png','jpg'].includes(dimensions.type!)?undefined:nativeImage.createFromBuffer(buffer);if(image?.isEmpty())throw new Error(tr('图片无法解码'));const png=dimensions.type==='png'?buffer.toString('base64'):dimensions.type==='jpg'?await convertJPEG(buffer,live):image!.toPNG().toString('base64');check();const size=pngDimensions(png);if(size.width!==dimensions.width||size.height!==dimensions.height)throw new Error(tr('PNG 图片无效'));const original:Record<string,FormatName>={jpg:'JFIF',gif:'GIF',webp:'image/webp',bmp:'image/bmp'};const p=validatePayload({png,...(original[dimensions.type!]?{formats:[{name:original[dimensions.type!],data:buffer.toString('base64')}]}:{})});await prepareThumbnail(p,live);check();return p;}finally{buffer.fill(0);}
+  }check();return payload;
 }
-export async function chooseFiles(window:BrowserWindow){const result=await dialog.showOpenDialog(window,{title:tr('添加到拖拽容器'),properties:['openFile','multiSelections']});if(result.canceled)return null;return incomingFiles(result.filePaths);}
+export async function chooseFiles(window:BrowserWindow){const epoch=transferGeneration,result=await dialog.showOpenDialog(window,{title:tr('添加到拖拽容器'),properties:['openFile','multiSelections']});if(result.canceled)return null;return incomingFiles(result.filePaths,()=>epoch===transferGeneration&&!window.isDestroyed());}
 let imageFiles:ImageDragFiles|undefined,initializing:Promise<void>|undefined,transferGeneration=0;
 export async function initTransfer(){const epoch=transferGeneration;if(initializing)await initializing;if(epoch!==transferGeneration||imageFiles)return;const cache=new ImageDragFiles(join(app.getPath('userData'),'work','drag'));const task=(async()=>{await initAttachments();await cache.init();if(epoch===transferGeneration)imageFiles=cache;else{cache.dispose();disposeAttachments();}})();initializing=task;try{await task;}finally{if(initializing===task)initializing=undefined;}}
 export function disposeTransfer(){transferGeneration++;disposeAttachments();imageFiles?.dispose();imageFiles=undefined;}
+export function cancelTransfers(){transferGeneration++;}
 function smallThumbnail(item:Detail){const value=item.thumbnail;if(!value||value.length>512*1024||!value.startsWith('data:image/png;base64,'))return undefined;try{const size=pngDimensions(value.slice(22));if(size.width<=280&&size.height<=180)return value;}catch{}return undefined;}
 export async function prepareDrag(item:Detail,valid:()=>boolean=()=>true){
  const live=()=>{if(!valid())throw new Error(tr('记录已改变、删除或历史已锁定'));};live();

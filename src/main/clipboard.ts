@@ -11,10 +11,11 @@ import {pngDimensions} from './png-header';
 export {pngDimensions} from './png-header';
 import {readFiles,writeFiles,readClipboardFormats,writeClipboardBlocks} from './native';
 import type {ClipboardBlock} from './clipboard-blocks';
-import type {Thumbnails} from './thumbnails';
+import {Thumbnails} from './thumbnails';
 let backgroundThumbnails:Thumbnails|undefined;
 export function useThumbnails(service:Thumbnails){backgroundThumbnails=service;}
 export async function prepareThumbnail(payload:Payload,valid:()=>boolean=()=>true){return backgroundThumbnails?backgroundThumbnails.run(payload,valid):thumbnail(payload);}
+export async function convertJPEG(bytes:Buffer,valid:()=>boolean=()=>true){return (backgroundThumbnails??new Thumbnails()).convertJPEG(bytes,valid);}
 const previews=new WeakMap<Payload,{png:string;url:string}>();
 export function decodePng(encoded:string){const header=pngDimensions(encoded),data=Buffer.from(encoded,'base64');try{const image=nativeImage.createFromBuffer(data);if(image.isEmpty())throw new Error(tr('图片无法解码'));const size=image.getSize();if(size.width!==header.width||size.height!==header.height)throw new Error(tr('PNG 图片无效'));return {data,image,size};}catch(error){data.fill(0);throw error;}}
 export function thumbnail(p:Payload){if(!p.png){previews.delete(p);return undefined;}const existing=previews.get(p);if(existing?.png===p.png)return existing.url;const {data,image,size:s}=decodePng(p.png);try{const scale=Math.min(1,280/s.width,180/s.height),url=image.resize({width:Math.max(1,Math.round(s.width*scale)),height:Math.max(1,Math.round(s.height*scale)),quality:'good'}).toDataURL();previews.set(p,{png:p.png,url});return url;}finally{data.fill(0);}}
