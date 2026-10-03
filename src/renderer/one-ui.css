@@ -1,3 +1,4 @@
+@import "../../node_modules/katex/dist/katex.min.css";
 /* One's shared component system, followed by Clipper's window and page adapters.
    Every desktop entry point loads this once, after its own workspace styles. */
 @import './one-components.css';

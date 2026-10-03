@@ -1,0 +1,598 @@
+{
+  "kaomojiGroups": {
+    "开心": [
+      "(＾▽＾)",
+      "(≧▽≦)",
+      "(๑˃ᴗ˂)ﻭ",
+      "(｡♥‿♥｡)",
+      "(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧",
+      "ヽ(・∀・)ﾉ",
+      "(⌒▽⌒)☆",
+      "٩(◕‿◕｡)۶",
+      "(￣▽￣)ノ",
+      "(｡•̀ᴗ-)✧",
+      "(๑>◡<๑)",
+      "(*^▽^*)",
+      "(≧◡≦)",
+      "(ﾉ´ヮ`)ﾉ*: ･ﾟ",
+      "(✿◠‿◠)"
+    ],
+    "喜欢": [
+      "(づ｡◕‿‿◕｡)づ",
+      "(づ￣ ³￣)づ",
+      "(っ˘з(˘⌣˘ )",
+      "(♡°▽°♡)",
+      "( ˘ ³˘)♥",
+      "(♥ω♥*)",
+      "(｡･ω･｡)ﾉ♡",
+      "(◍•ᴗ•◍)❤",
+      "(≧◡≦) ♡",
+      "♡(˃͈ દ ˂͈ ༶ )",
+      "(っ´▽｀)っ",
+      "(๑♡⌓♡๑)"
+    ],
+    "惊讶": [
+      "(⊙_⊙)",
+      "(°ロ°) !",
+      "Σ(°△°|||)",
+      "(☉_☉)",
+      "(ﾟДﾟ;)",
+      "(　ﾟдﾟ)",
+      "(◎_◎;)",
+      "(ʘᗩʘ')",
+      "(O_O;)",
+      "(・o・)"
+    ],
+    "难过": [
+      "(╥_╥)",
+      "(ಥ_ಥ)",
+      "(T_T)",
+      "(；ω；)",
+      "(｡•́︿•̀｡)",
+      "(ノ_<。)",
+      "(つ﹏⊂)",
+      "(இ﹏இ)",
+      "(ಥ﹏ಥ)",
+      "(｡╯︵╰｡)"
+    ],
+    "生气": [
+      "(╬ಠ益ಠ)",
+      "(ノಠ益ಠ)ノ彡┻━┻",
+      "(＃`Д´)",
+      "(ง •̀_•́)ง",
+      "(╯°□°）╯︵ ┻━┻",
+      "(¬_¬)",
+      "(눈_눈)",
+      "(ಠ_ಠ)",
+      "( •̀ω•́ )"
+    ],
+    "动作": [
+      "(づ￣ ³￣)づ",
+      "ヽ(•‿•)ノ",
+      "┬─┬ノ( º _ ºノ)",
+      "(☞ﾟヮﾟ)☞",
+      "☜(ﾟヮﾟ☜)",
+      "(ง'̀-'́)ง",
+      "(っ•̀ω•́)っ",
+      "＼(￣▽￣)／",
+      "(ﾉﾟ0ﾟ)ﾉ~",
+      "(〜￣▽￣)〜",
+      "(￣ー￣)ゞ",
+      "( _ _ ).｡o○"
+    ],
+    "动物": [
+      "ʕ•ᴥ•ʔ",
+      "ฅ^•ﻌ•^ฅ",
+      "(=^･ω･^=)",
+      "U・ᴥ・U",
+      "(ᵔᴥᵔ)",
+      "(=｀ω´=)",
+      "(◕ᴥ◕)",
+      "(=^‥^=)",
+      "/ᐠ｡ꞈ｡ᐟ\\",
+      "ʕっ•ᴥ•ʔっ"
+    ]
+  },
+  "groups": {
+    "Smileys & Emotion": [
+      "笑脸与情感",
+      "Smileys & Emotion"
+    ],
+    "People & Body": [
+      "人物与身体",
+      "People & Body"
+    ],
+    "Animals & Nature": [
+      "动物与自然",
+      "Animals & Nature"
+    ],
+    "Food & Drink": [
+      "食物与饮品",
+      "Food & Drink"
+    ],
+    "Travel & Places": [
+      "旅行与地点",
+      "Travel & Places"
+    ],
+    "Activities": [
+      "活动",
+      "Activities"
+    ],
+    "Objects": [
+      "物品",
+      "Objects"
+    ],
+    "Symbols": [
+      "标志",
+      "Symbols"
+    ],
+    "Flags": [
+      "旗帜",
+      "Flags"
+    ],
+    "Currency": [
+      "货币",
+      "Currency"
+    ],
+    "Superscripts": [
+      "上下标",
+      "Superscripts"
+    ],
+    "Punctuation": [
+      "标点",
+      "Punctuation"
+    ],
+    "CJK punctuation": [
+      "中日韩标点",
+      "CJK punctuation"
+    ],
+    "Enclosed numbers": [
+      "带圈字符",
+      "Enclosed numbers"
+    ],
+    "Miscellaneous": [
+      "杂项",
+      "Miscellaneous"
+    ],
+    "Arrows": [
+      "箭头",
+      "Arrows"
+    ],
+    "Math": [
+      "数学",
+      "Math"
+    ],
+    "Extra arrows": [
+      "扩展箭头",
+      "Extra arrows"
+    ],
+    "Supplemental arrows": [
+      "补充箭头",
+      "Supplemental arrows"
+    ],
+    "Supplemental math": [
+      "补充数学",
+      "Supplemental math"
+    ],
+    "Technical": [
+      "技术符号",
+      "Technical"
+    ],
+    "Box drawing": [
+      "制表与方块",
+      "Box drawing"
+    ],
+    "Geometric": [
+      "几何形状",
+      "Geometric"
+    ],
+    "Dingbats": [
+      "装饰符号",
+      "Dingbats"
+    ],
+    "Braille": [
+      "盲文",
+      "Braille"
+    ],
+    "Greek": [
+      "希腊字母",
+      "Greek"
+    ],
+    "Roman numerals": [
+      "罗马数字",
+      "Roman numerals"
+    ],
+    "Control": [
+      "控制字符",
+      "Control"
+    ],
+    "Digits": [
+      "数字",
+      "Digits"
+    ],
+    "Uppercase": [
+      "大写字母",
+      "Uppercase"
+    ],
+    "Lowercase": [
+      "小写字母",
+      "Lowercase"
+    ],
+    "Letters": [
+      "字母",
+      "Letters"
+    ],
+    "Other": [
+      "其他",
+      "Other"
+    ],
+    "Red": [
+      "红色",
+      "Red"
+    ],
+    "Orange": [
+      "橙色",
+      "Orange"
+    ],
+    "Yellow": [
+      "黄色",
+      "Yellow"
+    ],
+    "Green": [
+      "绿色",
+      "Green"
+    ],
+    "Cyan": [
+      "青色",
+      "Cyan"
+    ],
+    "Blue": [
+      "蓝色",
+      "Blue"
+    ],
+    "Purple": [
+      "紫色",
+      "Purple"
+    ],
+    "Pink": [
+      "粉色",
+      "Pink"
+    ],
+    "Neutral": [
+      "黑白灰",
+      "Neutral"
+    ],
+    "开心": [
+      "开心",
+      "Happy"
+    ],
+    "喜欢": [
+      "喜欢",
+      "Love"
+    ],
+    "惊讶": [
+      "惊讶",
+      "Surprised"
+    ],
+    "难过": [
+      "难过",
+      "Sad"
+    ],
+    "生气": [
+      "生气",
+      "Angry"
+    ],
+    "动作": [
+      "动作",
+      "Actions"
+    ],
+    "动物": [
+      "动物",
+      "Animals"
+    ],
+    "application": [
+      "应用与文件",
+      "Application"
+    ],
+    "audio": [
+      "音频",
+      "Audio"
+    ],
+    "image": [
+      "图像",
+      "Image"
+    ],
+    "video": [
+      "视频",
+      "Video"
+    ],
+    "text": [
+      "文本",
+      "Text"
+    ],
+    "font": [
+      "字体",
+      "Fonts"
+    ],
+    "message": [
+      "消息",
+      "Message"
+    ],
+    "model": [
+      "模型",
+      "Models"
+    ],
+    "multipart": [
+      "多部分内容",
+      "Multipart"
+    ],
+    "chemical": [
+      "化学",
+      "Chemical"
+    ],
+    "example": [
+      "示例",
+      "Example"
+    ],
+    "haptics": [
+      "触觉",
+      "Haptics"
+    ]
+  },
+  "mimeDescriptions": {
+    "application/pdf": [
+      "PDF 文档，保留页面排版",
+      "PDF document with fixed page layout"
+    ],
+    "application/json": [
+      "JSON 结构化数据",
+      "JSON structured data"
+    ],
+    "application/ld+json": [
+      "带链接语义的 JSON 数据",
+      "Linked data in JSON"
+    ],
+    "application/xml": [
+      "XML 标记文档",
+      "XML markup document"
+    ],
+    "text/xml": [
+      "XML 文本文档",
+      "XML text document"
+    ],
+    "text/html": [
+      "HTML 网页文档",
+      "HTML web document"
+    ],
+    "text/css": [
+      "CSS 样式表",
+      "CSS stylesheet"
+    ],
+    "text/plain": [
+      "纯文本，不含排版标记",
+      "Plain text without formatting markup"
+    ],
+    "text/csv": [
+      "以逗号分隔的表格数据",
+      "Comma-separated tabular data"
+    ],
+    "text/markdown": [
+      "Markdown 标记文本",
+      "Markdown formatted text"
+    ],
+    "text/javascript": [
+      "JavaScript 源代码",
+      "JavaScript source code"
+    ],
+    "application/javascript": [
+      "JavaScript 源代码（旧的媒体类型）",
+      "JavaScript source code (legacy media type)"
+    ],
+    "application/octet-stream": [
+      "通用二进制数据，具体格式未指定",
+      "Generic binary data with unspecified format"
+    ],
+    "application/zip": [
+      "ZIP 压缩归档",
+      "ZIP archive"
+    ],
+    "application/gzip": [
+      "gzip 压缩数据",
+      "gzip compressed data"
+    ],
+    "application/x-7z-compressed": [
+      "7-Zip 压缩归档",
+      "7-Zip archive"
+    ],
+    "application/vnd.rar": [
+      "RAR 压缩归档",
+      "RAR archive"
+    ],
+    "application/x-tar": [
+      "tar 文件归档",
+      "tar archive"
+    ],
+    "application/wasm": [
+      "WebAssembly 二进制模块",
+      "WebAssembly binary module"
+    ],
+    "application/msword": [
+      "Word 文档（旧版 DOC）",
+      "Microsoft Word document (legacy DOC)"
+    ],
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+      "Word 文档（DOCX）",
+      "Microsoft Word document (DOCX)"
+    ],
+    "application/vnd.ms-excel": [
+      "Excel 工作簿（旧版 XLS）",
+      "Microsoft Excel workbook (legacy XLS)"
+    ],
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+      "Excel 工作簿（XLSX）",
+      "Microsoft Excel workbook (XLSX)"
+    ],
+    "application/vnd.ms-powerpoint": [
+      "PowerPoint 演示文稿（旧版 PPT）",
+      "PowerPoint presentation (legacy PPT)"
+    ],
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": [
+      "PowerPoint 演示文稿（PPTX）",
+      "PowerPoint presentation (PPTX)"
+    ],
+    "image/png": [
+      "PNG 无损位图，支持透明度",
+      "Lossless PNG bitmap with transparency"
+    ],
+    "image/jpeg": [
+      "JPEG 压缩照片与位图",
+      "JPEG compressed photo or bitmap"
+    ],
+    "image/gif": [
+      "GIF 位图，支持多帧动画",
+      "GIF bitmap with multi-frame animation"
+    ],
+    "image/svg+xml": [
+      "SVG 可缩放矢量图",
+      "SVG scalable vector image"
+    ],
+    "image/webp": [
+      "WebP 图像，可包含动画",
+      "WebP image, optionally animated"
+    ],
+    "image/avif": [
+      "AVIF 图像，基于 AV1 编码",
+      "AVIF image based on AV1 coding"
+    ],
+    "image/heic": [
+      "HEIC 高效率图像",
+      "HEIC high-efficiency image"
+    ],
+    "image/tiff": [
+      "TIFF 位图图像",
+      "TIFF bitmap image"
+    ],
+    "image/bmp": [
+      "BMP 位图图像",
+      "BMP bitmap image"
+    ],
+    "image/vnd.microsoft.icon": [
+      "Windows ICO 图标",
+      "Windows ICO icon"
+    ],
+    "audio/mpeg": [
+      "MPEG 音频，包括 MP3",
+      "MPEG audio, including MP3"
+    ],
+    "audio/ogg": [
+      "Ogg 容器中的音频",
+      "Audio in an Ogg container"
+    ],
+    "audio/flac": [
+      "FLAC 无损音频",
+      "FLAC lossless audio"
+    ],
+    "audio/wav": [
+      "WAVE 音频",
+      "WAVE audio"
+    ],
+    "audio/x-wav": [
+      "WAVE 音频",
+      "WAVE audio"
+    ],
+    "audio/mp4": [
+      "MP4 容器中的音频",
+      "Audio in an MP4 container"
+    ],
+    "audio/aac": [
+      "AAC 编码音频",
+      "AAC encoded audio"
+    ],
+    "video/mp4": [
+      "MP4 容器中的视频",
+      "Video in an MP4 container"
+    ],
+    "video/webm": [
+      "WebM 容器中的视频",
+      "Video in a WebM container"
+    ],
+    "video/quicktime": [
+      "QuickTime 视频容器",
+      "QuickTime video container"
+    ],
+    "video/x-matroska": [
+      "Matroska 视频容器",
+      "Matroska video container"
+    ],
+    "font/woff": [
+      "WOFF 网页字体",
+      "WOFF web font"
+    ],
+    "font/woff2": [
+      "WOFF 2 网页字体",
+      "WOFF 2 web font"
+    ],
+    "font/ttf": [
+      "TrueType 字体",
+      "TrueType font"
+    ],
+    "font/otf": [
+      "OpenType 字体",
+      "OpenType font"
+    ],
+    "application/x-www-form-urlencoded": [
+      "HTML 表单的 URL 编码数据",
+      "URL-encoded HTML form data"
+    ],
+    "multipart/form-data": [
+      "分段表单内容，可包含文件上传",
+      "Multipart form content including file uploads"
+    ],
+    "message/rfc822": [
+      "电子邮件消息",
+      "Internet email message"
+    ],
+    "model/gltf+json": [
+      "glTF 三维场景的 JSON 描述",
+      "JSON description of a glTF 3D scene"
+    ],
+    "model/gltf-binary": [
+      "glTF 二进制三维场景（GLB）",
+      "Binary glTF 3D scene (GLB)"
+    ]
+  },
+  "asciiNames": [
+    "NUL",
+    "SOH",
+    "STX",
+    "ETX",
+    "EOT",
+    "ENQ",
+    "ACK",
+    "BEL",
+    "BS",
+    "HT",
+    "LF",
+    "VT",
+    "FF",
+    "CR",
+    "SO",
+    "SI",
+    "DLE",
+    "DC1",
+    "DC2",
+    "DC3",
+    "DC4",
+    "NAK",
+    "SYN",
+    "ETB",
+    "CAN",
+    "EM",
+    "SUB",
+    "ESC",
+    "FS",
+    "GS",
+    "RS",
+    "US"
+  ]
+}

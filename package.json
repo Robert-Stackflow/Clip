@@ -1,6 +1,6 @@
 {
   "name": "clipper-desktop",
-  "version": "0.47.1",
+  "version": "0.48.0",
   "private": true,
   "description": "Windows 本地剪贴板工作台",
   "author": "Clipper",
@@ -36,7 +36,7 @@
     "test:folders": "npm run build && node tests/folders-ui.cjs && node tests/folders-boundaries.cjs",
     "test:tray": "npm run build && node tests/tray-ui.cjs && node tests/tray-boundaries.cjs && node tests/tray-drag.cjs && node tests/tray-native.cjs",
     "test:appearance": "npm run build && node tests/appearance-layout.cjs",
-    "test:reference": "npm run build && node tests/reference-ui.cjs && node tests/reference-native.cjs",
+    "test:reference": "npm run build && node tests/reference-data.cjs && node tests/reference-ui.cjs && node tests/reference-native.cjs",
     "check:language": "node scripts/check-language.mjs",
     "check:language:bindings": "npm run check:language && node scripts/check-language-bindings.mjs",
     "test:language": "npm run build && node tests/language-ui.cjs && node tests/language-panels.cjs && node tests/language-workspace.cjs && node tests/language-workspace-behavior.cjs && node tests/language-dialogs.cjs && node tests/language-dialog-behavior.cjs && node tests/language-data-layout.cjs && node tests/language-data-behavior.cjs && node tests/language-text-layout.cjs && node tests/language-text-behavior.cjs && node tests/language-web-behavior.cjs && node tests/language-web-layout.cjs && node tests/language-protection-layout.cjs && node tests/language-history-layout.cjs && node tests/language-media-layout.cjs && node tests/language-entry-layout.cjs && node tests/language-format-layout.cjs",
@@ -72,8 +72,10 @@
     "better-sqlite3-multiple-ciphers": "13.0.3",
     "exifr": "7.1.3",
     "image-size": "2.0.4",
+    "katex": "0.19.0",
     "koffi": "3.3.2",
     "lucide": "1.49.0",
+    "marked": "18.0.14",
     "music-metadata": "11.16.1",
     "pdf-lib": "1.17.1",
     "quickjs-emscripten": "0.32.0",
@@ -95,7 +97,7 @@
     "productName": "Clipper",
     "electronDist": "node_modules/electron/dist",
     "directories": {
-      "output": "release/0.47.1"
+      "output": "release/0.48.0"
     },
     "files": [
       "dist/**/*",

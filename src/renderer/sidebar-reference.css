@@ -5,6 +5,7 @@
 .caption-space{height:52px}
 .brand strong{display:block;white-space:nowrap;max-width:160px;opacity:1;transition:opacity .15s var(--ease),transform .24s var(--ease),max-width .24s var(--ease)}
 .title-tools,#main{border-left:1px solid var(--line)}
+.title-tools{align-self:stretch}
 .sidebar{overflow:hidden;transition:padding .24s var(--ease);gap:3px}
 .sidebar-scroll{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;padding-bottom:12px}
 .sidebar-group{display:flex;flex-direction:column;gap:3px;flex-shrink:0;margin-top:14px}
@@ -39,6 +40,5 @@
 @media(max-width:1100px){#app{grid-template-columns:184px minmax(0,1fr)}.brand{width:184px}.sidebar-collapsed #app{grid-template-columns:56px minmax(0,1fr)}.sidebar-collapsed .brand{width:56px}}
 @media(max-width:900px){#app{grid-template-columns:168px minmax(0,1fr)}.brand{width:168px}.sidebar .nav-item{font-size:calc(12px * var(--text-scale,1))}.sidebar-collapsed #app{grid-template-columns:56px minmax(0,1fr)}.sidebar-collapsed .brand{width:56px}}
 @media(prefers-reduced-motion:reduce){#app,.brand,.brand strong,.sidebar,.sidebar .nav-item span:not(.status-dot),.sidebar-group-caption,#categories .category-heading{transition:none}}
-.reference-cheats{grid-template-columns:repeat(auto-fit,minmax(460px,1fr))}
-.reference-cheat-row span{white-space:normal;overflow-wrap:anywhere}
-@media(max-width:700px){.reference-cheats{grid-template-columns:1fr}}
+.sidebar-collapsed .sidebar-bottom #pause-nav{width:40px;height:40px;min-height:40px;padding:0;gap:0;align-self:center}
+.sidebar-collapsed #pause-nav .recording-indicator{margin:0;flex:0 0 16px}

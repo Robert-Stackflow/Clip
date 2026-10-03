@@ -9,7 +9,8 @@ await mkdir(output,{recursive:true});
 const get=async url=>{const response=await fetch(url);if(!response.ok)throw new Error(`${url}: ${response.status}`);return response.text();};
 const save=(name,value)=>writeFile(resolve(output,name),JSON.stringify(value));
 
-const emojiText=await get('https://www.unicode.org/Public/emoji/latest/emoji-test.txt');
+// Keep the catalog aligned with the complete offline Twemoji 17 artwork snapshot.
+const emojiText=await get('https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt');
 let group='',subgroup='';
 const emoji=[];
 for(const line of emojiText.split(/\r?\n/)){
@@ -49,6 +50,7 @@ await save('entities.json',Object.entries(entities).filter(([name])=>name.endsWi
 const xml=await get('https://www.iana.org/assignments/media-types/media-types.xml');
 const mime=[...xml.matchAll(/<file type="template">([^<]+)<\/file>/g)].map(match=>match[1]).filter(value=>/^[a-z0-9.+-]+\/[a-z0-9.+-]+$/i.test(value));
 await save('mime.json',[...new Set(mime)].sort());
+await import('./update-mime-details.mjs');
 
 const colors=Object.entries(colorNames).map(([name,rgb])=>[name,'#'+rgb.map(n=>n.toString(16).padStart(2,'0')).join('')]);
 colors.push(['rebeccapurple','#663399']);
