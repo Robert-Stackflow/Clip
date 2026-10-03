@@ -9,10 +9,9 @@
 .record-workbench .region-row>button:hover,.record-heading>#refresh:hover{background:var(--hover)}
 .record-heading>#refresh{border:1px solid var(--line)}
 .record-source-toolbar .region-row>button:disabled{opacity:.4}
-/* Reserve one row for commands; the tool strip can scroll at smaller sizes. */
-.editor-commandbar{align-items:center;min-width:0;gap:12px;padding:6px 16px}
-.editor-commandbar>.toolbar{flex-wrap:nowrap;overflow:auto;min-width:0;scrollbar-width:none;align-items:center;margin:0}
-.editor-commandbar>.toolbar::-webkit-scrollbar{display:none}
+/* Keep every image command visible when the window or text scale changes. */
+.editor-commandbar{align-items:flex-start;min-width:0;gap:12px;padding:6px 16px}
+.editor-commandbar>.toolbar{flex-wrap:wrap;overflow:visible;min-width:0;align-items:center;margin:0}
 .editor-commandbar>.toolbar>button,.editor-commandbar>.toolbar>.divider{flex-shrink:0}
 .editor-commandbar>.actions{display:flex;flex-direction:row;align-items:center;flex-wrap:nowrap;flex-shrink:0;gap:2px;margin:0;padding:0}
 .editor-commandbar button{height:32px;min-height:32px;line-height:1;padding:5px 9px}
@@ -26,6 +25,7 @@
 .shape-symbol{display:flex}
 .shape-symbol svg{width:17px;height:17px}
 .editor-commandbar #shape-kind-trigger>svg{width:12px;height:12px}
+.editor-commandbar .image-transform-tools{display:inline-flex;align-items:center;gap:2px;flex-shrink:0}
 .image-workbench .selected-mark{padding:0 0 12px;border-bottom:1px solid var(--line);font-size:12px}
 .selected-mark>div{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
 .image-workbench .selected-mark button{min-height:30px;padding:5px 8px;font-size:11px}
