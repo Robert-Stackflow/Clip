@@ -31,7 +31,7 @@ for(const encrypted of [false,true])test('legacy ordering index upgrades without
   s.close();s=new Store(f.file,false,false,key);
   assert.deepEqual(s.db.prepare('SELECT id,data FROM clips ORDER BY id').all(),raw);assert.equal(s.db.prepare('PRAGMA user_version').get().user_version,7);
   assert.deepEqual(s.all().map(row=>row.id),records.map(row=>row.id));assert.deepEqual(s.list().map(row=>row.id),records.map(row=>row.id));
-  for(const q of queries){let querySql;const watched={prepare(sql){if(sql.startsWith('SELECT json_remove'))querySql=sql;return s.db.prepare(sql);}};
+  for(const q of queries){let querySql;const watched={prepare(sql){if(sql.includes(' AS summary'))querySql=sql;return s.db.prepare(sql);}};
    assert.deepEqual(readTrayRows(watched,[],q),expectedRows(records,[],q));const plan=s.db.prepare('EXPLAIN QUERY PLAN '+querySql).all().map(row=>row.detail);
    assert.ok(plan.some(row=>row.includes('COVERING INDEX clips_recent_order')));assert.ok(plan.every(row=>!row.includes('TEMP B-TREE')));
    assert.deepEqual(await f.search.run(f.file,q,key?Buffer.from(key):undefined,()=>true),expectedRows(records,[],q));
@@ -56,5 +56,33 @@ for(const encrypted of [false,true])for(const legacy of [false,true])test('recen
   let inspected=0;const watched={prepare(sql){const statement=s.db.prepare(sql);return {...statement,get:(...args)=>statement.get(...args),iterate(){const rows=statement.iterate();return (function*(){for(const row of rows){const raw=JSON.stringify(row);assert.ok(!raw.includes(binary));assert.ok(!raw.includes('RICH_BODY_MUST_NOT_REACH_READER'));assert.ok(!raw.includes('PRIVATE_RTF_CONTENT'));assert.ok(!raw.includes('PRIVATE_THUMBNAIL'));assert.ok(!raw.includes('iVBORw0KGgoAAAANSUhEUg'));inspected++;yield row;}})();}};}};
   for(const q of queries)assert.deepEqual(readTrayRows(watched,categories,q),expectedRows(records,categories,q),JSON.stringify(q));
   assert.ok(inspected>0);assert.equal(s.get(records[93].id).payload.attachments[0].data,binary);
+ }finally{await f.search.cancel();s.close();key?.fill(0);}
+});
+
+for(const encrypted of [false,true])test('metadata matches skip long preview reads while content categories and mixed terms retain exact results: '+(encrypted?'encrypted':'plain'),async()=>{
+ const f=await fixture();let s=f.store,key;
+ if(encrypted){s.close();await fs.unlink(f.file);key=Buffer.alloc(32,29);s=new Store(f.file,false,false,key);}
+ try{
+  const records=[];for(let i=0;i<93;i++)records.push(s.add({text:'CAFÉ body '+i+' '+('preserved long content '.repeat(4096))},'Editor.exe',undefined,{title:'Name '+i,tags:['标签'],favorite:i%3===0,updatedAt:1700000000000+i%7},false));
+  s.saveCategory({name:'Only content',contains:'editor',source:'editor',tag:'标签',kind:'text',color:'#7b8e9c'});
+  const categories=s.categories,raw=s.db.prepare('SELECT id,data FROM clips ORDER BY id').all();let bodyReads=0;
+  const watched={prepare(sql){const statement=s.db.prepare(sql);return {get(...args){if(sql==='SELECT payload FROM clip_preview_cache WHERE id=?')bodyReads++;return statement.get(...args);},all:(...args)=>statement.all(...args),iterate:(...args)=>statement.iterate(...args),run:(...args)=>statement.run(...args)};}};
+  for(const [query,expectedReads]of[
+   [{...trayQuery,text:'editor 标签'},0],
+   [{...trayQuery,text:'name'},0],
+   [{...trayQuery,text:'café 标签 name'},93],
+   [{...trayQuery,text:'editor 标签',category:categories[0].id},93],
+   [{...trayQuery,text:'editor 标签',kind:'image'},0],
+   [{...trayQuery,text:'editor 标签',category:'favorites'},0],
+  ]){
+   bodyReads=0;const expected=expectedRows(records,categories,query);
+   assert.deepEqual(readTrayRows(watched,categories,query),expected);assert.equal(bodyReads,expectedReads);
+   assert.deepEqual(await f.search.run(f.file,query,key?Buffer.from(key):undefined,()=>true),expected);
+  }
+  // Preserve the old inner join if a rebuildable preview projection is absent.
+  s.db.prepare('DELETE FROM clip_preview_cache WHERE id=?').run(records[0].id);
+  const query={...trayQuery,text:'editor 标签'};
+  assert.deepEqual(readTrayRows(s.db,categories,query),expectedRows(records.slice(1),categories,query));
+  assert.deepEqual(s.db.prepare('SELECT id,data FROM clips ORDER BY id').all(),raw);
  }finally{await f.search.cancel();s.close();key?.fill(0);}
 });

@@ -5,7 +5,7 @@ if(process.argv[2]==='--read'){
  const [file,encrypted]=process.argv.slice(3),key=encrypted==='true'?Buffer.alloc(32,17):undefined;
  const opened=performance.now(),store=new Store(file,false,true,key),openMs=performance.now()-opened;
  try{
-  let querySql;const db={prepare(sql){if(sql.startsWith('SELECT json_remove'))querySql=sql;return store.db.prepare(sql);}};
+  let querySql;const db={prepare(sql){if(sql.includes(' AS summary'))querySql=sql;return store.db.prepare(sql);}};
   const before=process.resourceUsage().maxRSS,start=performance.now(),rows=readTrayRows(db,[],{...trayQuery,text:'café 标签'}),milliseconds=performance.now()-start,peakKiB=process.resourceUsage().maxRSS;
   const expected=store.db.prepare('SELECT id FROM clips ORDER BY updated DESC,id ASC LIMIT 80').all().map(row=>row.id);
   assert.equal(rows.total,1500);assert.deepEqual(rows.items.map(row=>row.id),expected);assert.ok(rows.items.every(row=>!('payload'in row)&&!('thumbnail'in row)));
