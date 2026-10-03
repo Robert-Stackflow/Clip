@@ -1,5 +1,5 @@
 /* One components.css shared dialog skeleton. */
-.one-dialog{padding:0;width:440px;max-width:calc(100vw - 32px);overflow:hidden}.one-dialog-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 24px 0}.one-dialog-heading h2{font-size:calc(17px * var(--text-scale,1))}.one-dialog-body{padding:16px 24px 24px;color:var(--muted);font-size:calc(13px * var(--text-scale,1));line-height:1.8;max-height:60vh;overflow:auto}.one-dialog-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--line)}.one-dialog::backdrop{background:#0003;backdrop-filter:blur(2px)}.one-dialog.closing{animation:dialog-out .12s ease forwards}.one-dialog.closing::backdrop{animation:dialog-backdrop-out .12s ease forwards}@keyframes dialog-out{to{opacity:0;transform:translateY(5px) scale(.985)}}@keyframes dialog-backdrop-out{to{background:#0000;backdrop-filter:blur(0)}}
+.one-dialog{padding:0;width:440px;max-width:calc(100vw - 32px);overflow:hidden}.one-dialog-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 24px 0}.one-dialog-heading h2{font-size:calc(17px * var(--text-scale,1))}.one-dialog-body{padding:16px 24px 24px;color:var(--muted);font-size:calc(13px * var(--text-scale,1));line-height:1.8;max-height:60vh;overflow:auto}.one-dialog-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--line)}.one-dialog::backdrop{background:#0003;backdrop-filter:blur(2px)}.one-dialog.closing{animation:dialog-out .12s ease forwards}.one-dialog.closing::backdrop{animation:dialog-backdrop-out .12s ease forwards}@keyframes dialog-out{from{opacity:var(--dialog-exit-opacity,1);transform:var(--dialog-exit-transform,none)}to{opacity:0;transform:translateY(5px) scale(.985)}}@keyframes dialog-backdrop-out{from{background:var(--dialog-exit-backdrop,#0003);backdrop-filter:var(--dialog-exit-filter,blur(2px))}to{background:#0000;backdrop-filter:blur(0)}}
 @media(prefers-reduced-motion:reduce){.tabs.segment-ready::before{transition:none}.one-dialog.closing,.one-dialog.closing::backdrop{animation:none}}
 
 /* A single scrolling body keeps headings and confirmation actions visible. */
@@ -25,8 +25,8 @@
 .one-dialog .dialog-error{flex-shrink:0;margin:12px 0 0}
 .one-dialog[open]:not(.closing){animation:one-dialog-in .18s var(--ease)}
 .one-dialog[open]:not(.closing)::backdrop{animation:one-dialog-backdrop-in .18s ease}
-@keyframes one-dialog-in{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes one-dialog-backdrop-in{from{background:#0000;backdrop-filter:blur(0)}to{background:#0003;backdrop-filter:blur(2px)}}
+@keyframes one-dialog-in{from{opacity:var(--dialog-enter-opacity,0);transform:var(--dialog-enter-transform,translateY(8px) scale(.985))}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes one-dialog-backdrop-in{from{background:var(--dialog-enter-backdrop,#0000);backdrop-filter:var(--dialog-enter-filter,blur(0))}to{background:#0003;backdrop-filter:blur(2px)}}
 .one-form-dialog.one-dialog{width:560px}.one-form-dialog.one-dialog.text-processing{width:800px}.one-form-dialog.one-dialog>form{display:flex;flex-direction:column;min-height:0;max-height:inherit}.one-form-dialog.one-dialog .modal-body{flex:1;min-height:0}.one-form-dialog.one-dialog #modal-error:empty{display:none}.confirm-dialog.one-dialog .confirm-actions{margin:0}
 
 /* One segments, wrapping only when a form has limited width. */
