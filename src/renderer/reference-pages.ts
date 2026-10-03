@@ -19,6 +19,7 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  window.clipperAppearance?.retainFontResources?.();
  setInterfaceLanguage(document.documentElement.lang==='en'?'en':'zh-CN');
  const catalog=referenceCatalog();let active=kind==='symbols'?'emoji':'git',tone=0,disposed=false;
+ const toneOverrides=new WeakMap<Entry,number>(),selectedGlyph=(entry:Entry)=>toneGlyph(entry,toneOverrides.get(entry)??tone);
  let rows:Row[]=[],sections:Section[]=[],entries:Entry[]=[],columns=1,frame=0,queryTimer:ReturnType<typeof setTimeout>|undefined;
  let tooltipTimer:ReturnType<typeof setTimeout>|undefined,scrollTipTimer:ReturnType<typeof setTimeout>|undefined,tooltipAnchor:HTMLElement|undefined,currentCategory='',focusIndex=0,pointer:{x:number;y:number}|undefined,tipGlyph='',awaitPointer=false;
  let cheatDocument:ReturnType<typeof mountCheatDocument>|undefined;
@@ -36,7 +37,7 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  const showTip=(button:HTMLElement)=>{
   if(disposed||!button.isConnected)return;const entry=entries[Number(button.dataset.entry)];if(!entry)return;
   hideTip();tooltipAnchor=button;tip.dataset.kind=active;button.setAttribute('aria-describedby',tip.id);
-  const glyph=active==='emoji'?toneGlyph(entry,tone):entry.glyph;tipGlyph=glyph;
+  const glyph=active==='emoji'?selectedGlyph(entry):entry.glyph;tipGlyph=glyph;
   const toneOptions=entry.tones&&entry.tones.size>1?[...entry.tones].sort(([a],[b])=>a-b):[];
   const code=active==='emoji'?Array.from(glyph,c=>'U+'+c.codePointAt(0)!.toString(16).toUpperCase()).join(' '):entry.detail;
   tip.innerHTML=`<header class="reference-popover-heading">${active!=='mime'?`<div class="reference-popover-preview">${entry.color?`<i style="background:${entry.color}"></i>`:active==='emoji'?emojiGlyph(glyph):`<span class="reference-text-preview">${esc(glyph||'␣')}</span>`}</div>`:''}<div><strong>${esc(entry.title)}</strong><small>${esc(groupLabel(entry.group))}</small></div></header><div class="reference-popover-body">${active==='mime'?`<p class="reference-mime-description">${esc(entry.detail)}</p><div class="reference-detail-label">${tx('扩展名','Extensions')}</div><div class="reference-extensions">${entry.extensions!.length?entry.extensions!.map(ext=>`<code>.${esc(ext)}</code>`).join(''):tx('无已知扩展名映射','No known extension mapping')}</div>`:code?`<code class="reference-code">${esc(code)}</code>`:''}${toneOptions.length?`<div class="reference-detail-label">${tx('肤色变体','Skin tones')}</div><div class="reference-detail-tones">${toneOptions.map(([index,value])=>`<button type="button" data-detail-tone="${index}" aria-label="${esc(value)}" aria-pressed="${value===glyph}">${emojiGlyph(value)}</button>`).join('')}</div>`:''}${(entry.variants?.length||0)>6?`<details class="reference-mixed-tones"><summary>${tx('更多肤色组合','More tone combinations')}</summary><div class="reference-variants">${entry.variants!.map((variant,index)=>`<button type="button" data-variant="${index}" aria-label="${esc(variant)}">${emojiGlyph(variant)}</button>`).join('')}</div></details>`:''}</div><footer class="reference-popover-actions"><button type="button" class="primary" data-tip-copy="main">${icon('lucide:copy')}${active==='entities'?tx('复制实体','Copy entity'):tx('复制','Copy')}</button>${entry.secondary?`<button type="button" data-tip-copy="secondary">${active==='entities'?tx('复制字符','Copy character'):tx('复制名称','Copy name')}</button>`:''}</footer>`;
@@ -44,10 +45,14 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  };
  const positionTip=()=>{if(!tooltipAnchor||tip.hidden)return;const left=Math.max(8,scroll.getBoundingClientRect().left);tip.style.maxWidth=Math.max(120,innerWidth-left-8)+'px';const rect=tooltipAnchor.getBoundingClientRect(),size=tip.getBoundingClientRect();tip.style.left=Math.max(left,Math.min(innerWidth-size.width-8,rect.left+rect.width/2-size.width/2))+'px';tip.style.top=Math.max(8,Math.min(innerHeight-size.height-8,rect.bottom+8+size.height>innerHeight?rect.top-size.height-8:rect.bottom+8))+'px';};
  const tipResize=new ResizeObserver(positionTip);tipResize.observe(tip);
- const previewTone=(button:HTMLElement)=>{if(!tooltipAnchor||button.dataset.detailTone===undefined)return;const entry=entries[Number(tooltipAnchor.dataset.entry)];tipGlyph=entry.tones!.get(Number(button.dataset.detailTone))!;tip.querySelector<HTMLElement>('.reference-popover-preview')!.innerHTML=emojiGlyph(tipGlyph);tip.querySelector<HTMLElement>('.reference-code')!.textContent=Array.from(tipGlyph,c=>'U+'+c.codePointAt(0)!.toString(16).toUpperCase()).join(' ');for(const node of tip.querySelectorAll<HTMLElement>('[data-detail-tone]'))node.setAttribute('aria-pressed',String(node===button));};
+ const showTonePreview=(glyph:string)=>{tipGlyph=glyph;tip.querySelector<HTMLElement>('.reference-popover-preview')!.innerHTML=emojiGlyph(glyph);tip.querySelector<HTMLElement>('.reference-code')!.textContent=Array.from(glyph,c=>'U+'+c.codePointAt(0)!.toString(16).toUpperCase()).join(' ');};
+ const previewTone=(button:HTMLElement)=>{if(!tooltipAnchor||button.dataset.detailTone===undefined)return;const entry=entries[Number(tooltipAnchor.dataset.entry)];showTonePreview(entry.tones!.get(Number(button.dataset.detailTone))!);};
+ const restoreTonePreview=(related:EventTarget|null)=>{if(!tooltipAnchor||related instanceof Element&&related.closest('[data-detail-tone]'))return;showTonePreview(selectedGlyph(entries[Number(tooltipAnchor.dataset.entry)]));};
  tip.onpointerover=event=>{const button=(event.target as HTMLElement).closest<HTMLElement>('[data-detail-tone]');if(button)previewTone(button);};
+ tip.onpointerout=event=>{if((event.target as HTMLElement).closest('[data-detail-tone]'))restoreTonePreview(event.relatedTarget);};
  tip.addEventListener('focusin',event=>{const button=(event.target as HTMLElement).closest<HTMLElement>('[data-detail-tone]');if(button)previewTone(button);});
- tip.onclick=event=>{const button=(event.target as HTMLElement).closest<HTMLElement>('button');if(!button||!tooltipAnchor)return;const entry=entries[Number(tooltipAnchor.dataset.entry)];if(button.dataset.variant!==undefined)performCopy(entry.variants![Number(button.dataset.variant)]);else if(button.dataset.detailTone!==undefined){previewTone(button);performCopy(tipGlyph);}else performCopy(button.dataset.tipCopy==='secondary'?entry.secondary!:active==='emoji'?tipGlyph:entry.copy);};
+ tip.addEventListener('focusout',event=>{if((event.target as HTMLElement).closest('[data-detail-tone]'))restoreTonePreview(event.relatedTarget);});
+ tip.onclick=event=>{const button=(event.target as HTMLElement).closest<HTMLElement>('button');if(!button||!tooltipAnchor)return;const entry=entries[Number(tooltipAnchor.dataset.entry)];if(button.dataset.variant!==undefined)performCopy(entry.variants![Number(button.dataset.variant)]);else if(button.dataset.detailTone!==undefined){previewTone(button);toneOverrides.set(entry,Number(button.dataset.detailTone));for(const node of tip.querySelectorAll<HTMLElement>('[data-detail-tone]'))node.setAttribute('aria-pressed',String(node===button));const tile=tooltipAnchor.querySelector<HTMLElement>('.reference-emoji-glyph');if(tile){tile.dataset.emoji=tipGlyph;tile.textContent=tipGlyph;}performCopy(tipGlyph);}else performCopy(button.dataset.tipCopy==='secondary'?entry.secondary!:active==='emoji'?selectedGlyph(entry):entry.copy);};
  tip.onpointerenter=()=>clearTimeout(tooltipTimer);tip.onpointerleave=()=>{tooltipTimer=setTimeout(()=>{if(!tip.contains(document.activeElement))hideTip();},140);};
  const scheduleTip=(button:HTMLElement)=>{clearTimeout(tooltipTimer);tooltipTimer=setTimeout(()=>showTip(button),180);};
  results.onpointerover=event=>{if(awaitPointer)return;const button=(event.target as HTMLElement).closest<HTMLElement>('[data-entry]');if(button&&button!==tooltipAnchor)scheduleTip(button);};
@@ -71,7 +76,7 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
    const batch=document.createDocumentFragment();
    for(let index=left;index<rows.length&&rows[index].top<max;index++){
     wanted.add(index);if(mounted.has(index))continue;const row=rows[index],node=document.createElement('div');node.className=row.title?'reference-section-heading':'reference-virtual-row';node.style.top=row.top+'px';node.style.height=row.height+'px';
-    node.innerHTML=row.title?`<h2>${esc(row.title)}</h2><small>${formatNumber(sections.find(section=>section.group===row.group)!.count)}</small>`:row.items!.map(({entry,index})=>`<button type="button" class="reference-item reference-main" data-entry="${index}" tabindex="${index===focusIndex?0:-1}" aria-label="${esc(entry.title)}">${entry.color?`<i class="reference-swatch" style="background:${entry.color}"></i>`:active==='emoji'?emojiGlyph(toneGlyph(entry,tone)):`<span class="reference-glyph">${esc(entry.glyph||'␣')}</span>`}</button>`).join('');
+    node.innerHTML=row.title?`<h2>${esc(row.title)}</h2><small>${formatNumber(sections.find(section=>section.group===row.group)!.count)}</small>`:row.items!.map(({entry,index})=>`<button type="button" class="reference-item reference-main" data-entry="${index}" tabindex="${index===focusIndex?0:-1}" aria-label="${esc(entry.title)}">${entry.color?`<i class="reference-swatch" style="background:${entry.color}"></i>`:active==='emoji'?emojiGlyph(selectedGlyph(entry)):`<span class="reference-glyph">${esc(entry.glyph||'␣')}</span>`}</button>`).join('');
     batch.append(node);mounted.set(index,node);
    }
    if(batch.childNodes.length)results.append(batch);
@@ -134,7 +139,7 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  const navigationKey=(event:KeyboardEvent)=>{if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))cancelNavigation();};
  scroll.addEventListener('keydown',navigationKey);
  root.onclick=event=>{const link=(event.target as HTMLElement).closest<HTMLAnchorElement>('a[href]');if(!link)return;event.preventDefault();if(link.getAttribute('href')?.startsWith('#')){const anchor=decodeURIComponent(link.hash.slice(1)).toLocaleLowerCase();const topic=cheatTopics.find(topic=>topic.id===active);const section=topic?.sections.find(section=>section.name.toLocaleLowerCase().replace(/ /g,'-')===anchor);if(section)nav.querySelector<HTMLButtonElement>(`[data-category="${section.id}"]`)?.click();return;}void window.clipper.openReference(link.href).catch(error=>notify(String(error)));};
- results.onclick=event=>{const code=(event.target as HTMLElement).closest<HTMLElement>('[data-code]');if(code){performCopy(code.dataset.code!);return;}const button=(event.target as HTMLElement).closest<HTMLElement>('[data-entry],[data-copy]');if(!button)return;const entry=entries[Number(button.dataset.entry??button.dataset.copy)];performCopy(active==='emoji'&&kind==='symbols'?toneGlyph(entry,tone):entry.copy);};
+ results.onclick=event=>{const code=(event.target as HTMLElement).closest<HTMLElement>('[data-code]');if(code){performCopy(code.dataset.code!);return;}const button=(event.target as HTMLElement).closest<HTMLElement>('[data-entry],[data-copy]');if(!button)return;const entry=entries[Number(button.dataset.entry??button.dataset.copy)];performCopy(active==='emoji'&&kind==='symbols'?selectedGlyph(entry):entry.copy);};
  results.onkeydown=event=>{
   if(kind!=='symbols'||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key)||event.altKey||event.ctrlKey||event.metaKey)return;
   const button=(event.target as HTMLElement).closest<HTMLElement>('[data-entry]');if(!button)return;event.preventDefault();
@@ -146,11 +151,11 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  };
  root.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach(button=>button.onclick=()=>{active=button.dataset.tab!;input.value='';clearTimeout(queryTimer);scroll.scrollTo({top:0,behavior:'instant'});focusIndex=0;root.querySelectorAll<HTMLElement>('[data-tab]').forEach(node=>{node.classList.toggle('active',node.dataset.tab===active);node.setAttribute('aria-pressed',String(node.dataset.tab===active));});rebuild();});
  root.querySelectorAll<HTMLButtonElement>('[data-tone]').forEach(button=>button.onclick=()=>{
-  const next=Number(button.dataset.tone);if(tone===next)return;tone=next;
+  const next=Number(button.dataset.tone);tone=next;for(const entry of catalog.emoji.items)toneOverrides.delete(entry);
   root.querySelectorAll<HTMLElement>('[data-tone]').forEach(node=>node.setAttribute('aria-pressed',String(Number(node.dataset.tone)===tone)));hideTip();
   for(const [rowIndex,node]of mounted)if(rows[rowIndex].items){
    for(const {entry,index}of rows[rowIndex].items!){
-    const span=node.querySelector<HTMLElement>(`[data-entry="${index}"] .reference-emoji-glyph`),glyph=toneGlyph(entry,tone);
+    const span=node.querySelector<HTMLElement>(`[data-entry="${index}"] .reference-emoji-glyph`),glyph=selectedGlyph(entry);
     if(span&&span.dataset.emoji!==glyph){span.dataset.emoji=glyph;span.textContent=glyph;}
    }
   }
