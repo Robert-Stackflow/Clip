@@ -7,7 +7,10 @@
 .title-tools,#main{border-left:1px solid var(--line)}
 .title-tools{align-self:stretch}
 .sidebar{overflow:hidden;transition:padding .24s var(--ease);gap:3px}
-.sidebar-scroll{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;padding-bottom:12px}
+.sidebar-scroll{overflow-y:auto;overflow-x:hidden;scrollbar-width:auto;margin-right:-6px;padding:0 6px 12px 0}
+.sidebar-scroll::-webkit-scrollbar{width:6px}
+.sidebar-scroll::-webkit-scrollbar-button{display:none;width:0;height:0}
+.sidebar-scroll::-webkit-scrollbar-thumb{border:1px solid transparent;background:color-mix(in srgb,var(--fg) 19%,transparent);background-clip:padding-box;border-radius:999px}
 .sidebar-group{display:flex;flex-direction:column;gap:3px;flex-shrink:0;margin-top:14px}
 .sidebar-group:first-child{margin-top:0}
 .sidebar-group-caption,#categories .category-heading{display:flex;align-items:center;font-size:calc(11px * var(--text-scale,1));line-height:16px;font-weight:500;color:var(--muted);margin:0 10px 3px;max-height:18px;min-height:0;opacity:.85;white-space:nowrap;overflow:hidden;transition:opacity .15s var(--ease),max-height .24s var(--ease),margin .24s var(--ease)}
