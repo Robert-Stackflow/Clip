@@ -2,6 +2,8 @@
 
 0.50.1 后再次对照本机 One 0.16.15 的 `dialog.ts` 与 `components.css`：关闭动画开始前、关闭中途重新打开时读取对话框及背景当前样式，作为下一段动画的起点。Clipper 将同样的过渡接入共用 `dialog-motion.ts`，保留现有的表单操作锁与确认框整体滚动。`dialog-motion-reversal.cjs` 验证中途反转没有透明度跳变，旧关闭请求不会关掉重开的对话框；`dialog-038-ui.cjs` 继续检查布局和焦点。
 
+同次核对 `ONE-UI-REVIEW-0.44.json` 中固定的来源摘要：本机 One 0.16.15 的 `segments.ts` 和 `controls.ts` 哈希未变化；Clipper 已迁移相应键盘导航和滑动指示器，无需重复改写。`tooltip.ts` 的来源差异是 One 匹配 `.sidebar .nav`，Clipper 匹配自身的 `.sidebar button` / `.nav-item`；现有侧边栏展开与收起、窗口边缘翻转检查覆盖该适配。其余 One 页面文件的变化不自动等同于 Clipper 的需求或设计缺口。
+
 0.30 继续迁移 One 0.15.2 的 components.css、segments.ts 和 dialog.ts，来源摘要见 ONE-MOTION-SOURCES-0.30.json。分段控件共用滑动指示器，支持左右键、Home/End、动态页面、字号和尺寸变化；保留 Clipper 的 active 状态，并避免无变化时重复写入样式。应用确认沿用 One 的标题、正文、操作栏、背景和 120 ms 退出动画，表单对话框也统一进出场；减少动态效果时关闭动画。关闭请求、IPC 错误重试及旧保存回调不关闭新表单均纳入验证。
 
 0.29 按用户要求重新设计全部页面。实现依据为本机 `D:\Repositories\One`，提取时版本 0.15.1；参考仓库后续独立升级不改变此次基线。来源文件摘要见 ONE-UI-SOURCES.json。
