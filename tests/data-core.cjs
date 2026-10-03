@@ -31,6 +31,21 @@ test('v3 backups merge scripts transactionally without secrets, v1/v2 remain acc
  for(const version of [1,2])assert.deepEqual(validateBackup({...value,version,scripts:undefined}).scripts,[]);
  }finally{source.close();target.close();}
 });
+test('large import keeps the live capacity exact across new and duplicate records',()=>{
+ const source=new Store(':memory:'),target=new Store(':memory:');try{
+  const duplicate=source.add({text:'shared payload'},'backup');source.save({...duplicate,title:'Longer restored title',favorite:true,tags:['restored']});
+  for(let i=0;i<120;i++)source.add({text:'Imported '+i+' '+('x'.repeat(400))},'backup',undefined,undefined,false);
+  source.saveSnippet({title:'imported template',text:'template value'});
+  target.add({text:'shared payload'},'local');target.saveSnippet({title:'existing template',text:'local value'});
+  const backup=source.backup(),original=backup.clips.find(c=>c.payload.text==='shared payload');backup.clips=[original,...backup.clips.filter(c=>c!==original)];
+  const actual=()=>Number(target.db.prepare('SELECT (SELECT coalesce(sum(length(CAST(data AS BLOB))),0) FROM clips)+(SELECT coalesce(sum(length(CAST(data AS BLOB))),0) FROM snippets) AS n').get().n);
+  const checked=payload=>{assert.equal(target.bytes(),actual());return undefined;};
+  const initialBytes=target.bytes();let calls=0;assert.throws(()=>target.import(backup,payload=>{checked(payload);if(++calls===4)throw Error('thumbnail failed');return undefined;}),/thumbnail failed/);
+  assert.equal(target.bytes(),initialBytes);assert.equal(target.list().length,1);
+  target.import(backup,checked);assert.equal(target.bytes(),actual());assert.equal(target.list().length,121);
+  target.import(backup,checked);assert.equal(target.bytes(),actual());assert.equal(target.list().length,121);
+ }finally{source.close();target.close();}
+});
 test('scheduled backup handles due time, retains only owned files, verifies restore and backs off on errors',async()=>{
  const directory=await folder(),store=new Store(':memory:');store.add({text:'scheduled'},'fixture');const manager=new BackupManager(()=>store,'00000000-0000-4000-8000-000000000001',directory,fakeVault,()=>{});
  try{assert.equal(await manager.run(),null);await manager.configure({enabled:true,directory,intervalHours:1,keep:2,encrypted:true,password:'scheduled fixture password'});const start=Date.now()+1000;await fs.writeFile(path.join(directory,'manual.json'),'manual backup');await manager.run(start);assert.equal((await manager.entries()).length,1);assert.equal(await manager.run(start+100),null);await manager.run(start+3600001);await manager.run(start+7200002);assert.equal((await manager.entries()).length,2);assert.equal(await fs.readFile(path.join(directory,'manual.json'),'utf8'),'manual backup');
