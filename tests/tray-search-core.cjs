@@ -86,3 +86,25 @@ for(const encrypted of [false,true])test('metadata matches skip long preview rea
   assert.deepEqual(s.db.prepare('SELECT id,data FROM clips ORDER BY id').all(),raw);
  }finally{await f.search.cancel();s.close();key?.fill(0);}
 });
+
+for(const encrypted of [false,true])for(const legacy of [false,true])test('field searches preserve Unicode boundaries and newline-spanning categories: '+(encrypted?'encrypted':'plain')+' '+(legacy?'legacy':'indexed'),async()=>{
+ const f=await fixture();let s=f.store,key;
+ if(encrypted){s.close();await fs.unlink(f.file);key=Buffer.alloc(32,31);s=new Store(f.file,false,false,key);}
+ try{
+  const records=[];
+  records.push(s.add({text:'BODY CAFÉ Σ ΟΣ İ',files:['D:\\ONE','D:\\TWO']},'Editor.exe',undefined,{title:'PREFIX',tags:['标签'],updatedAt:1700000000000},false));
+  records.push(s.add({text:'Σ BODY',files:['D:\\ΟΣ','D:\\ΜΑ']},'Unicode.exe',undefined,{title:'ΟΣ',tags:['UPPER'],updatedAt:1700000000001},false));
+  records.push(s.add({text:'mixed\nline\tbreaks İ ΟΣ '+('long text '.repeat(64000))},'Long.exe',undefined,{title:'LONG',tags:['标签'],updatedAt:1700000000002},false));
+  records.push(s.add({attachments:[{name:'TAIL',data:'cHJlc2VydmVk'},{name:'İ COMBINING I\u0307',data:'cHJlc2VydmVk'}]},'Attachment.exe',undefined,{title:'ATTACHMENT',tags:['UPPER'],updatedAt:1700000000003},false));
+  s.saveCategory({name:'Title to body',contains:'PREFIX\nBODY',source:'',tag:'',kind:'all',color:'#7b8e9c'});
+  s.saveCategory({name:'File lines',contains:'ONE\nD:\\TWO',source:'',tag:'',kind:'all',color:'#7b8e9c'});
+  s.saveCategory({name:'Body to files',contains:'İ\nD:\\ONE',source:'',tag:'',kind:'all',color:'#7b8e9c'});
+  s.saveCategory({name:'Attachment lines',contains:'TAIL\nİ COMBINING I\u0307',source:'',tag:'',kind:'all',color:'#7b8e9c'});
+  s.saveCategory({name:'Case context',contains:'ος\nσ body',source:'',tag:'',kind:'all',color:'#7b8e9c'});
+  const categories=s.categories,queries=['prefix body one 标签','attachment tail combining','prefix body tail 标签','prefixbody','onetwo','two tail','café σ ος i\u0307','ος μα','mixed line breaks long','editor unicode','absent'].map(text=>({...trayQuery,text}));
+  queries.push(...categories.flatMap(c=>[{...trayQuery,category:c.id},{...trayQuery,category:c.id,text:'body upper'}]));
+  const raw=s.db.prepare('SELECT id,data FROM clips ORDER BY id').all();if(legacy)s.db.exec('DROP TABLE clip_list_cache');
+  for(const query of queries){const expected=expectedRows(records,categories,query);assert.deepEqual(readTrayRows(s.db,categories,query),expected,JSON.stringify(query));assert.deepEqual(await f.search.run(f.file,query,key?Buffer.from(key):undefined,()=>true),expected);}
+  assert.deepEqual(s.db.prepare('SELECT id,data FROM clips ORDER BY id').all(),raw);
+ }finally{await f.search.cancel();s.close();key?.fill(0);}
+});

@@ -9,17 +9,23 @@ if(process.argv[2]==='--read'){
   let querySql;const watched={prepare(sql){if(sql.includes(' AS summary'))querySql=sql;return store.db.prepare(sql);}};
   const before=process.resourceUsage().maxRSS,start=performance.now(),rows=readTrayRows(watched,[],{...trayQuery,text:queryName==='metadata'?'editor 标签':'café 标签'}),milliseconds=performance.now()-start,peakKiB=process.resourceUsage().maxRSS;
   const expected=store.db.prepare('SELECT id FROM clips ORDER BY updated DESC,id ASC LIMIT 80').all().map(row=>row.id);
-  assert.equal(rows.total,1500);assert.deepEqual(rows.items.map(row=>row.id),expected);assert.ok(rows.items.every(row=>!('payload'in row)&&!('thumbnail'in row)));
+  assert.equal(rows.total,process.env.CLIPPER_RECENT_SCAN_LARGE==='1'?96:1500);assert.deepEqual(rows.items.map(row=>row.id),expected);assert.ok(rows.items.every(row=>!('payload'in row)&&!('thumbnail'in row)));
   console.log(JSON.stringify({milliseconds,peakMiB:peakKiB/1024,queryPeakIncrementMiB:(peakKiB-before)/1024,plan:store.db.prepare('EXPLAIN QUERY PLAN '+querySql).all().map(row=>row.detail)}));
  }finally{store.close();key?.fill(0);}
 }else (async()=>{
- const implementation=process.env.CLIPPER_RECENT_SCAN_IMPLEMENTATION==='1',tableScan=process.env.CLIPPER_RECENT_SCAN_TABLE==='1',lazy=implementation||process.env.CLIPPER_RECENT_SCAN_LAZY==='1';
- const {beginCase}=await import('../scripts/workspace.mjs'),work=await beginCase('recent-search-scan-profile'+(implementation?'-implementation':lazy?'-lazy':tableScan?'-table':''));
- const baselineRevision='4c3644f';const report={prototype:!implementation,baselineRevision,tableScan,lazy,records:1500,rounds:3,samples:[]};
+ const implementation=process.env.CLIPPER_RECENT_SCAN_IMPLEMENTATION==='1',tableScan=process.env.CLIPPER_RECENT_SCAN_TABLE==='1',fieldwise=process.env.CLIPPER_RECENT_SCAN_FIELDS==='1',large=process.env.CLIPPER_RECENT_SCAN_LARGE==='1',lazy=implementation||fieldwise||process.env.CLIPPER_RECENT_SCAN_LAZY==='1';
+ const {beginCase}=await import('../scripts/workspace.mjs'),work=await beginCase('recent-search-scan-profile'+(fieldwise?'-fields':implementation?'-implementation':lazy?'-lazy':tableScan?'-table':'')+(large?'-large':''));
+ const baselineRevision=fieldwise?'c21af65':'4c3644f';const report={prototype:!implementation,baselineRevision,tableScan,lazy,fieldwise,large,records:large?96:1500,rounds:3,samples:[]};
  try{
   const original=(await promisify(execFile)('git',['show',baselineRevision+':src/main/tray-query.ts'],{windowsHide:true,maxBuffer:1024*1024})).stdout;let candidate=original;
   const replace=(before,after)=>{assert.equal(candidate.split(before).length,2,'Prototype source anchor changed');candidate=candidate.replace(before,after);};
   if(implementation)candidate=await fs.readFile('src/main/tray-query.ts','utf8');
+  else if(fieldwise){
+   const begin=candidate.indexOf('     const content=[item.title,'),end=candidate.indexOf('\n    }',begin);assert.ok(begin>0&&end>begin);
+   candidate=candidate.slice(0,begin)+`     const fields=[projected?.text??row.body,projected?.files?.join('\\n')??row.paths,projected?.attachments?.map(a=>a.name).join('\\n')??row.attachments];
+     if(categoryContains){const content=[item.title,...fields].join('\\n').toLocaleLowerCase();if(!content.includes(categoryContains)||!remaining.every(t=>content.includes(t)))continue;}
+     else{const content=fields.map(field=>(field??'').toLocaleLowerCase());if(!remaining.every(t=>content.some(field=>field.includes(t))))continue;}`+candidate.slice(end);
+  }
   else if(lazy){
    replace('SELECT ${summary} AS summary','SELECT c.id AS lookupId,${summary} AS summary');
    replace("indexed?',p.payload AS payload'","indexed?''");
@@ -54,7 +60,7 @@ if(process.argv[2]==='--read'){
   for(const encrypted of[false,true])for(const tied of[false,true]){
    const file=path.join(work.fixtures,(encrypted?'encrypted':'plain')+'-'+(tied?'tied':'distinct')+'.sqlite'),key=encrypted?Buffer.alloc(32,17):undefined;
    const writer=new Store(file,false,false,key);
-   try{for(let i=0;i<1500;i++)writer.add({text:'Fixture '+i+'\n'+'searchable long content '.repeat(2048)+'\nCAFÉ 尾部'},'Editor.exe',undefined,{tags:['标签'],updatedAt:1700000000000+(tied?0:i)},false);}finally{writer.close();}
+   try{for(let i=0;i<report.records;i++)writer.add({text:'Fixture '+i+'\n'+'searchable long content '.repeat(large?32768:2048)+'\nCAFÉ 尾部'},'Editor.exe',undefined,{tags:['标签'],updatedAt:1700000000000+(tied?0:i)},false);}finally{writer.close();}
    try{for(const queryName of(lazy?['body','metadata']:['body']))for(let round=0;round<3;round++)for(const mode of(round%2?['candidate','baseline']:['baseline','candidate'])){
     const result=await promisify(execFile)(process.execPath,[__filename,'--read',file,String(encrypted),modules[mode],queryName],{windowsHide:true,maxBuffer:1024*1024}),sample={encrypted,tied,round,mode,queryName,...JSON.parse(result.stdout)};
     report.samples.push(sample);console.log(JSON.stringify(sample));

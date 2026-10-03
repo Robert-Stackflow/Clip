@@ -3,14 +3,16 @@ const {_electron:electron}=require('@playwright/test'),assert=require('node:asse
 const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('node:crypto');
 const {Store,trayQuery}=require('../work/test-exports.cjs'),memory=require('./process-tree-memory.cjs');
 (async()=>{
- const {beginCase}=await import('../scripts/workspace.mjs'),work=await beginCase('recent-search-packaged-worker-0497');
- const baseline=path.resolve('release/0.49.6/win-unpacked/Clipper.exe'),candidate=path.resolve('release/0.49.7/win-unpacked/Clipper.exe');
- const report={baseline,candidate,records:1500,rounds:3,foregroundUI:false,samples:[]};let app;
+ const baselineVersion=process.env.CLIPPER_RECENT_PACKAGED_BASELINE||'0.49.6',candidateVersion=process.env.CLIPPER_RECENT_PACKAGED_CURRENT||'0.49.7',large=process.env.CLIPPER_RECENT_PACKAGED_LARGE==='1';
+ assert.match(baselineVersion,/^\d+\.\d+\.\d+$/);assert.match(candidateVersion,/^\d+\.\d+\.\d+$/);
+ const {beginCase}=await import('../scripts/workspace.mjs'),work=await beginCase('recent-search-packaged-worker-'+candidateVersion.replaceAll('.','')+(large?'-large':''));
+ const baseline=path.resolve('release/'+baselineVersion+'/win-unpacked/Clipper.exe'),candidate=path.resolve('release/'+candidateVersion+'/win-unpacked/Clipper.exe');
+ const report={baseline,candidate,baselineVersion,candidateVersion,large,records:large?96:1500,rounds:3,foregroundUI:false,samples:[]};let app;
  try{
   const fixtures={};
   for(const encrypted of[false,true]){
    const file=path.join(work.fixtures,(encrypted?'encrypted':'plain')+'.sqlite'),key=encrypted?Buffer.alloc(32,17):undefined,writer=new Store(file,false,false,key);
-   try{for(let i=0;i<1500;i++)writer.add({text:'Fixture '+i+'\n'+'searchable long content '.repeat(2048)+'\nCAFÉ 尾部'},'Editor.exe',undefined,{tags:['标签'],updatedAt:1700000000000},false);
+   try{for(let i=0;i<report.records;i++)writer.add({text:'Fixture '+i+'\n'+'searchable long content '.repeat(large?32768:2048)+'\nCAFÉ 尾部'},'Editor.exe',undefined,{tags:['标签'],updatedAt:1700000000000},false);
     fixtures[String(encrypted)]={file,expected:writer.db.prepare('SELECT id FROM clips ORDER BY updated DESC,id ASC LIMIT 80').all().map(row=>row.id)};
    }finally{writer.close();key?.fill(0);}
    fixtures[String(encrypted)].hash=crypto.createHash('sha256').update(await fs.readFile(file)).digest('hex');
@@ -22,7 +24,7 @@ const {Store,trayQuery}=require('../work/test-exports.cjs'),memory=require('./pr
    try{
     const page=await app.firstWindow();await page.waitForSelector('[data-page=history]');
     const version=await app.evaluate(({app,BrowserWindow})=>{for(const window of BrowserWindow.getAllWindows())window.hide();return app.getVersion();});
-    assert.equal(version,mode==='candidate'?'0.49.7':'0.49.6');
+    assert.equal(version,mode==='candidate'?candidateVersion:baselineVersion);
     for(const encrypted of[false,true])for(const queryName of(round%2?['metadata','body']:['body','metadata'])){
      const fixture=fixtures[String(encrypted)],before=memory(app.process().pid).totalMiB;let peak=before,finished=false;
      const sampling=setInterval(()=>{peak=Math.max(peak,memory(app.process().pid).totalMiB);},250);
@@ -40,7 +42,7 @@ const {Store,trayQuery}=require('../work/test-exports.cjs'),memory=require('./pr
      task.catch(()=>{});const ipc=[];let measured;
      try{while(!finished){const start=performance.now();await app.evaluate(({app})=>app.getVersion());ipc.push(performance.now()-start);await new Promise(resolve=>setTimeout(resolve,20));}measured=await task;}
      finally{clearInterval(sampling);await task.catch(()=>{});}
-     assert.equal(measured.result.total,1500);assert.deepEqual(measured.result.items.map(row=>row.id),fixture.expected);assert.ok(measured.result.items.every(row=>!('payload'in row)&&!('thumbnail'in row)));
+     assert.equal(measured.result.total,report.records);assert.deepEqual(measured.result.items.map(row=>row.id),fixture.expected);assert.ok(measured.result.items.every(row=>!('payload'in row)&&!('thumbnail'in row)));
      const sample={round,mode,version,encrypted,queryName,milliseconds:measured.milliseconds,ipcMaxMs:Math.max(0,...ipc),mainGapMaxMs:measured.mainGapMaxMs,peakDeltaMiB:peak-before};report.samples.push(sample);console.log(JSON.stringify(sample));
     }
    }finally{await app.close();app=undefined;}

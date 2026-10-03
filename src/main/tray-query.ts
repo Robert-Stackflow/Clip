@@ -31,8 +31,11 @@ export function readTrayRows(db:DatabaseConnection,categories:Category[],value:u
     if(categoryContains||remaining.length){
      const body=bodyReader?.get(row.lookupId)?.payload;
      const projected=body?JSON.parse(body) as {text?:string;files?:string[];attachments?:{name:string}[]}:undefined;
-     const content=[item.title,projected?.text??row.body,projected?.files?.join('\n')??row.paths,projected?.attachments?.map(a=>a.name).join('\n')??row.attachments].join('\n').toLocaleLowerCase();
-     if(categoryContains&&!content.includes(categoryContains)||!remaining.every(t=>content.includes(t)))continue;
+     const fields=[projected?.text??row.body,projected?.files?.join('\n')??row.paths,projected?.attachments?.map(a=>a.name).join('\n')??row.attachments];
+     // Content categories may span newlines; query terms cannot. Avoid
+     // copying a long body into another joined string for ordinary searches.
+     if(categoryContains){const content=[item.title,...fields].join('\n').toLocaleLowerCase();if(!content.includes(categoryContains)||!remaining.every(t=>content.includes(t)))continue;}
+     else{const content=fields.map(field=>(field??'').toLocaleLowerCase());if(!remaining.every(t=>content.some(field=>field.includes(t))))continue;}
     }
    }
    total++;if(items.length<TRAY_LIMIT)items.push(item);
