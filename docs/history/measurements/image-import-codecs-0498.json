@@ -1,0 +1,256 @@
+{
+  "result": "PASS",
+  "scope": "Isolated real Electron nativeImage versus WIC JPEG prototype for generated RGB, progressive, CMYK, grayscale, embedded sRGB ICC and EXIF orientations 1–8. Compare every decoded pixel and dimensions, preserve failures and source bytes. This characterizes compatibility rather than asserting that codecs are equivalent. No UI, clipboard or user files.",
+  "pillow": "10.4.0",
+  "baseline": "b9c63d1",
+  "compatible": false,
+  "rows": [
+    {
+      "name": "cmyk.jpg",
+      "size": {
+        "width": 64,
+        "height": 48
+      },
+      "sourceSHA256": "6760bd0cd04ce2ca3d405cab485c75528b8dc07ddde02958c9623fcbd1b172fe",
+      "baselinePixelSHA256": "e90365596a7c8ce0ebea91e71d2fa3c001c05eb10b95688f91e3d3d9c9ced2e5",
+      "prototypeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "prototypePixelSHA256": "30603908f8a58a3f8f3671fb341a5cee4f5ad2fb40a93e9e8ce7474a2429ebf1",
+      "sameDimensions": true,
+      "maxDifference": 90,
+      "differentChannels": 9082,
+      "meanDifference": 20.208821614583332,
+      "sourceUnchanged": true
+    },
+    {
+      "name": "gray.jpg",
+      "size": {
+        "width": 64,
+        "height": 48
+      },
+      "sourceSHA256": "4f9c289e7c98644e91b9b63c4ce6f34beaf4e47d4c89644ffd2713be8e0798ca",
+      "baselinePixelSHA256": "8a3e0d08443c070cb8dd3a1d1e38783d8453fcb2e076f4afb962ca1a16416bc9",
+      "prototypeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "prototypePixelSHA256": "8a3e0d08443c070cb8dd3a1d1e38783d8453fcb2e076f4afb962ca1a16416bc9",
+      "sameDimensions": true,
+      "maxDifference": 0,
+      "differentChannels": 0,
+      "meanDifference": 0,
+      "sourceUnchanged": true
+    },
+    {
+      "name": "icc-srgb.jpg",
+      "size": {
+        "width": 64,
+        "height": 48
+      },
+      "sourceSHA256": "96d1d04b5638d9cea4f58de206b840c9712633a31956f7e15f1712e7e6525c05",
+      "baselinePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "prototypeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "prototypePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "sameDimensions": true,
+      "maxDifference": 0,
+      "differentChannels": 0,
+      "meanDifference": 0,
+      "sourceUnchanged": true
+    },
+    {
+      "name": "orientation-1.jpg",
+      "size": {
+        "width": 64,
+        "height": 48
+      },
+      "sourceSHA256": "4dd656e8d7885532cfeaf3416992f63431264ae724d0000a5ed6ce4e0416474e",
+      "baselinePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "prototypeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "prototypePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "sameDimensions": true,
+      "maxDifference": 0,
+      "differentChannels": 0,
+      "meanDifference": 0,
+      "sourceUnchanged": true
+    },
+    {
+      "name": "orientation-2.jpg",
+      "size": {
+        "width": 64,
+        "height": 48
+      },
+      "sourceSHA256": "9e36e569ff0a607c3face692343f5f32d335a68c3f8c784401f1f25116b451f2",
+      "baselinePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "prototypeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "prototypePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "sameDimensions": true,
+      "maxDifference": 0,
+      "differentChannels": 0,
+      "meanDifference": 0,
+      "sourceUnchanged": true
+    },
+    {
+      "name": "orientation-3.jpg",
+      "size": {
+        "width": 64,
+        "height": 48
+      },
+      "sourceSHA256": "7f6291ee1830641714070283dd52451cbb36402153bbf3c6e77c50b6db60e4c0",
+      "baselinePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "prototypeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "prototypePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "sameDimensions": true,
+      "maxDifference": 0,
+      "differentChannels": 0,
+      "meanDifference": 0,
+      "sourceUnchanged": true
+    },
+    {
+      "name": "orientation-4.jpg",
+      "size": {
+        "width": 64,
+        "height": 48
+      },
+      "sourceSHA256": "b9028028be300ea7664af6579835e7d1e1767d7a9636f42b975aa43740e437a2",
+      "baselinePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "prototypeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "prototypePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "sameDimensions": true,
+      "maxDifference": 0,
+      "differentChannels": 0,
+      "meanDifference": 0,
+      "sourceUnchanged": true
+    },
+    {
+      "name": "orientation-5.jpg",
+      "size": {
+        "width": 64,
+        "height": 48
+      },
+      "sourceSHA256": "fbf566515f22486427766683f26acf4b671e86401b7f9e95f21a1b754f3667e9",
+      "baselinePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "prototypeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "prototypePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "sameDimensions": true,
+      "maxDifference": 0,
+      "differentChannels": 0,
+      "meanDifference": 0,
+      "sourceUnchanged": true
+    },
+    {
+      "name": "orientation-6.jpg",
+      "size": {
+        "width": 64,
+        "height": 48
+      },
+      "sourceSHA256": "1a6945f72144c5ca4be5d932206403489afdeb1393f6fb7e8c54c7e00514e70e",
+      "baselinePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "prototypeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "prototypePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "sameDimensions": true,
+      "maxDifference": 0,
+      "differentChannels": 0,
+      "meanDifference": 0,
+      "sourceUnchanged": true
+    },
+    {
+      "name": "orientation-7.jpg",
+      "size": {
+        "width": 64,
+        "height": 48
+      },
+      "sourceSHA256": "6bb1ceecadb80b8db85373411c7992512a3f9de7d3c41ee3b1fe6d4ba94e7047",
+      "baselinePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "prototypeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "prototypePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "sameDimensions": true,
+      "maxDifference": 0,
+      "differentChannels": 0,
+      "meanDifference": 0,
+      "sourceUnchanged": true
+    },
+    {
+      "name": "orientation-8.jpg",
+      "size": {
+        "width": 64,
+        "height": 48
+      },
+      "sourceSHA256": "322238f0c69cf9e438f03f10300ee445784239b455376f1d042a98b55f4f2144",
+      "baselinePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "prototypeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "prototypePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "sameDimensions": true,
+      "maxDifference": 0,
+      "differentChannels": 0,
+      "meanDifference": 0,
+      "sourceUnchanged": true
+    },
+    {
+      "name": "progressive.jpg",
+      "size": {
+        "width": 64,
+        "height": 48
+      },
+      "sourceSHA256": "9f54423909fcd906fcef684525e9808284cd6dc00d1212d021a6846434c3a15e",
+      "baselinePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "prototypeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "prototypePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "sameDimensions": true,
+      "maxDifference": 0,
+      "differentChannels": 0,
+      "meanDifference": 0,
+      "sourceUnchanged": true
+    },
+    {
+      "name": "rgb.jpg",
+      "size": {
+        "width": 64,
+        "height": 48
+      },
+      "sourceSHA256": "d52b50b4f8b1b1fa1ddc4ec174aab49cfdac2017c2f28d8610fc20b46be3f194",
+      "baselinePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "prototypeSize": {
+        "width": 64,
+        "height": 48
+      },
+      "prototypePixelSHA256": "6939b180b386cb02feac468331ca7f5d9f4eb4162d46a7c58aeb2fd23edef2b3",
+      "sameDimensions": true,
+      "maxDifference": 0,
+      "differentChannels": 0,
+      "meanDifference": 0,
+      "sourceUnchanged": true
+    }
+  ]
+}

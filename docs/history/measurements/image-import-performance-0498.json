@@ -1,0 +1,345 @@
+{
+  "result": "PASS",
+  "baseline": "b9c63d1",
+  "scope": "Six alternating pairs of isolated real Electron main processes; production incomingFiles reads a JPEG, validates the full payload, retains original bytes and obtains a production native PNG thumbnail. WIC full-size JPEG conversion is a prototype. No visible windows, clipboard, database save or desktop input. Windows independent parent/helper peaks are a conservative sum, not simultaneous all-app peak. Fixtures generated in a separate process. PNG byte differences are retained rather than asserted compatible.",
+  "summary": [
+    {
+      "fixture": "large",
+      "before": {
+        "completionMs": 386.4867,
+        "maxIntervalMs": 296.2529,
+        "parentPeakMiB": 254.76171875,
+        "peakSumUpperBoundMiB": 263.90625
+      },
+      "prototype": {
+        "completionMs": 692.8727,
+        "maxIntervalMs": 24.634100000000046,
+        "parentPeakMiB": 107.91796875,
+        "peakSumUpperBoundMiB": 118.31640625
+      }
+    },
+    {
+      "fixture": "noisy",
+      "before": {
+        "completionMs": 353.98569999999995,
+        "maxIntervalMs": 237.4362,
+        "parentPeakMiB": 164.62109375,
+        "peakSumUpperBoundMiB": 186.52734375
+      },
+      "prototype": {
+        "completionMs": 442.62659999999994,
+        "maxIntervalMs": 62.204399999999964,
+        "parentPeakMiB": 161.21875,
+        "peakSumUpperBoundMiB": 188.34375
+      }
+    }
+  ],
+  "rounds": [
+    {
+      "fixture": "large",
+      "round": 0,
+      "before": {
+        "mainPid": 17992,
+        "completionMs": 1169.752,
+        "maxIntervalMs": 1070.291,
+        "ticks": 12,
+        "beforeRSSMiB": 103.953125,
+        "afterRSSMiB": 254.4453125,
+        "thumbnailPeakMiB": 9.12109375,
+        "importDecoderPeakMiB": 0,
+        "pngHash": "75f5ed67a329698fe96421c58ac64d18d6682a30b97949d70d1e9a3ed6be17b5",
+        "returnedPNGBytes": 122001,
+        "originalHash": "d8871d143270e4bdb0f651e18c59d6e477b89b921963e7448adc5065eb90b047",
+        "sourceHash": "d8871d143270e4bdb0f651e18c59d6e477b89b921963e7448adc5065eb90b047",
+        "sourceUnchanged": true,
+        "workers": {
+          "active": 0,
+          "pending": 0,
+          "encodedBytes": 0
+        },
+        "electron": "44.5.1",
+        "parentPeakMiB": 254.6796875,
+        "peakSumUpperBoundMiB": 263.80078125
+      },
+      "prototype": {
+        "mainPid": 67460,
+        "completionMs": 708.3394,
+        "maxIntervalMs": 90.91820000000001,
+        "ticks": 47,
+        "beforeRSSMiB": 104.109375,
+        "afterRSSMiB": 107.7734375,
+        "thumbnailPeakMiB": 9.18359375,
+        "importDecoderPeakMiB": 11.0546875,
+        "pngHash": "f7bd59cb9487d33a93b60eabdc4f4456a4f155735e856a477e18306e0daad462",
+        "returnedPNGBytes": 158876,
+        "originalHash": "d8871d143270e4bdb0f651e18c59d6e477b89b921963e7448adc5065eb90b047",
+        "sourceHash": "d8871d143270e4bdb0f651e18c59d6e477b89b921963e7448adc5065eb90b047",
+        "sourceUnchanged": true,
+        "workers": {
+          "active": 0,
+          "pending": 0,
+          "encodedBytes": 0
+        },
+        "electron": "44.5.1",
+        "parentPeakMiB": 108.046875,
+        "peakSumUpperBoundMiB": 119.1015625
+      },
+      "samePNGBytes": false
+    },
+    {
+      "fixture": "large",
+      "round": 1,
+      "prototype": {
+        "mainPid": 66980,
+        "completionMs": 692.8727,
+        "maxIntervalMs": 24.634100000000046,
+        "ticks": 51,
+        "beforeRSSMiB": 104.296875,
+        "afterRSSMiB": 107.58203125,
+        "thumbnailPeakMiB": 9.18359375,
+        "importDecoderPeakMiB": 10.3984375,
+        "pngHash": "f7bd59cb9487d33a93b60eabdc4f4456a4f155735e856a477e18306e0daad462",
+        "returnedPNGBytes": 158876,
+        "originalHash": "d8871d143270e4bdb0f651e18c59d6e477b89b921963e7448adc5065eb90b047",
+        "sourceHash": "d8871d143270e4bdb0f651e18c59d6e477b89b921963e7448adc5065eb90b047",
+        "sourceUnchanged": true,
+        "workers": {
+          "active": 0,
+          "pending": 0,
+          "encodedBytes": 0
+        },
+        "electron": "44.5.1",
+        "parentPeakMiB": 107.91796875,
+        "peakSumUpperBoundMiB": 118.31640625
+      },
+      "before": {
+        "mainPid": 69384,
+        "completionMs": 386.4867,
+        "maxIntervalMs": 296.2529,
+        "ticks": 10,
+        "beforeRSSMiB": 104.40625,
+        "afterRSSMiB": 254.51953125,
+        "thumbnailPeakMiB": 9.14453125,
+        "importDecoderPeakMiB": 0,
+        "pngHash": "75f5ed67a329698fe96421c58ac64d18d6682a30b97949d70d1e9a3ed6be17b5",
+        "returnedPNGBytes": 122001,
+        "originalHash": "d8871d143270e4bdb0f651e18c59d6e477b89b921963e7448adc5065eb90b047",
+        "sourceHash": "d8871d143270e4bdb0f651e18c59d6e477b89b921963e7448adc5065eb90b047",
+        "sourceUnchanged": true,
+        "workers": {
+          "active": 0,
+          "pending": 0,
+          "encodedBytes": 0
+        },
+        "electron": "44.5.1",
+        "parentPeakMiB": 254.76171875,
+        "peakSumUpperBoundMiB": 263.90625
+      },
+      "samePNGBytes": false
+    },
+    {
+      "fixture": "large",
+      "round": 2,
+      "before": {
+        "mainPid": 64528,
+        "completionMs": 371.4661,
+        "maxIntervalMs": 285.3751,
+        "ticks": 9,
+        "beforeRSSMiB": 107.07421875,
+        "afterRSSMiB": 257.42578125,
+        "thumbnailPeakMiB": 9.12109375,
+        "importDecoderPeakMiB": 0,
+        "pngHash": "75f5ed67a329698fe96421c58ac64d18d6682a30b97949d70d1e9a3ed6be17b5",
+        "returnedPNGBytes": 122001,
+        "originalHash": "d8871d143270e4bdb0f651e18c59d6e477b89b921963e7448adc5065eb90b047",
+        "sourceHash": "d8871d143270e4bdb0f651e18c59d6e477b89b921963e7448adc5065eb90b047",
+        "sourceUnchanged": true,
+        "workers": {
+          "active": 0,
+          "pending": 0,
+          "encodedBytes": 0
+        },
+        "electron": "44.5.1",
+        "parentPeakMiB": 257.7421875,
+        "peakSumUpperBoundMiB": 266.86328125
+      },
+      "prototype": {
+        "mainPid": 61352,
+        "completionMs": 616.5073,
+        "maxIntervalMs": 16.586199999999963,
+        "ticks": 46,
+        "beforeRSSMiB": 104.375,
+        "afterRSSMiB": 107.53515625,
+        "thumbnailPeakMiB": 9.1796875,
+        "importDecoderPeakMiB": 10.3984375,
+        "pngHash": "f7bd59cb9487d33a93b60eabdc4f4456a4f155735e856a477e18306e0daad462",
+        "returnedPNGBytes": 158876,
+        "originalHash": "d8871d143270e4bdb0f651e18c59d6e477b89b921963e7448adc5065eb90b047",
+        "sourceHash": "d8871d143270e4bdb0f651e18c59d6e477b89b921963e7448adc5065eb90b047",
+        "sourceUnchanged": true,
+        "workers": {
+          "active": 0,
+          "pending": 0,
+          "encodedBytes": 0
+        },
+        "electron": "44.5.1",
+        "parentPeakMiB": 107.796875,
+        "peakSumUpperBoundMiB": 118.1953125
+      },
+      "samePNGBytes": false
+    },
+    {
+      "fixture": "noisy",
+      "round": 0,
+      "before": {
+        "mainPid": 10268,
+        "completionMs": 385.2334,
+        "maxIntervalMs": 263.7047,
+        "ticks": 23,
+        "beforeRSSMiB": 108.53515625,
+        "afterRSSMiB": 165.75390625,
+        "thumbnailPeakMiB": 21.875,
+        "importDecoderPeakMiB": 0,
+        "pngHash": "20728898bf2c5121433c6be422b96eadb9a7ecf60c464442c41ee5067d9dd69d",
+        "returnedPNGBytes": 7627958,
+        "originalHash": "affbc30f1700f0919f02fa4406870a9a94f07ab15476d3a7134bca02eb96dd87",
+        "sourceHash": "affbc30f1700f0919f02fa4406870a9a94f07ab15476d3a7134bca02eb96dd87",
+        "sourceUnchanged": true,
+        "workers": {
+          "active": 0,
+          "pending": 0,
+          "encodedBytes": 0
+        },
+        "electron": "44.5.1",
+        "parentPeakMiB": 167.515625,
+        "peakSumUpperBoundMiB": 189.390625
+      },
+      "prototype": {
+        "mainPid": 60280,
+        "completionMs": 444.73539999999997,
+        "maxIntervalMs": 62.204399999999964,
+        "ticks": 36,
+        "beforeRSSMiB": 108.515625,
+        "afterRSSMiB": 159.375,
+        "thumbnailPeakMiB": 21.9140625,
+        "importDecoderPeakMiB": 27.125,
+        "pngHash": "2f79d9253f60a95aef791f3ff33563c78694211f587b0e7060b9449838fb167f",
+        "returnedPNGBytes": 8474685,
+        "originalHash": "affbc30f1700f0919f02fa4406870a9a94f07ab15476d3a7134bca02eb96dd87",
+        "sourceHash": "affbc30f1700f0919f02fa4406870a9a94f07ab15476d3a7134bca02eb96dd87",
+        "sourceUnchanged": true,
+        "workers": {
+          "active": 0,
+          "pending": 0,
+          "encodedBytes": 0
+        },
+        "electron": "44.5.1",
+        "parentPeakMiB": 161.21875,
+        "peakSumUpperBoundMiB": 188.34375
+      },
+      "samePNGBytes": false
+    },
+    {
+      "fixture": "noisy",
+      "round": 1,
+      "prototype": {
+        "mainPid": 29504,
+        "completionMs": 434.30899999999997,
+        "maxIntervalMs": 60.9042,
+        "ticks": 39,
+        "beforeRSSMiB": 105.640625,
+        "afterRSSMiB": 156.78515625,
+        "thumbnailPeakMiB": 21.75,
+        "importDecoderPeakMiB": 27.16015625,
+        "pngHash": "2f79d9253f60a95aef791f3ff33563c78694211f587b0e7060b9449838fb167f",
+        "returnedPNGBytes": 8474685,
+        "originalHash": "affbc30f1700f0919f02fa4406870a9a94f07ab15476d3a7134bca02eb96dd87",
+        "sourceHash": "affbc30f1700f0919f02fa4406870a9a94f07ab15476d3a7134bca02eb96dd87",
+        "sourceUnchanged": true,
+        "workers": {
+          "active": 0,
+          "pending": 0,
+          "encodedBytes": 0
+        },
+        "electron": "44.5.1",
+        "parentPeakMiB": 158.5546875,
+        "peakSumUpperBoundMiB": 185.71484375
+      },
+      "before": {
+        "mainPid": 61420,
+        "completionMs": 353.98569999999995,
+        "maxIntervalMs": 237.4362,
+        "ticks": 17,
+        "beforeRSSMiB": 105.703125,
+        "afterRSSMiB": 162.8515625,
+        "thumbnailPeakMiB": 21.9140625,
+        "importDecoderPeakMiB": 0,
+        "pngHash": "20728898bf2c5121433c6be422b96eadb9a7ecf60c464442c41ee5067d9dd69d",
+        "returnedPNGBytes": 7627958,
+        "originalHash": "affbc30f1700f0919f02fa4406870a9a94f07ab15476d3a7134bca02eb96dd87",
+        "sourceHash": "affbc30f1700f0919f02fa4406870a9a94f07ab15476d3a7134bca02eb96dd87",
+        "sourceUnchanged": true,
+        "workers": {
+          "active": 0,
+          "pending": 0,
+          "encodedBytes": 0
+        },
+        "electron": "44.5.1",
+        "parentPeakMiB": 164.61328125,
+        "peakSumUpperBoundMiB": 186.52734375
+      },
+      "samePNGBytes": false
+    },
+    {
+      "fixture": "noisy",
+      "round": 2,
+      "before": {
+        "mainPid": 59520,
+        "completionMs": 339.10220000000004,
+        "maxIntervalMs": 237.36190000000002,
+        "ticks": 19,
+        "beforeRSSMiB": 105.56640625,
+        "afterRSSMiB": 162.85546875,
+        "thumbnailPeakMiB": 21.86328125,
+        "importDecoderPeakMiB": 0,
+        "pngHash": "20728898bf2c5121433c6be422b96eadb9a7ecf60c464442c41ee5067d9dd69d",
+        "returnedPNGBytes": 7627958,
+        "originalHash": "affbc30f1700f0919f02fa4406870a9a94f07ab15476d3a7134bca02eb96dd87",
+        "sourceHash": "affbc30f1700f0919f02fa4406870a9a94f07ab15476d3a7134bca02eb96dd87",
+        "sourceUnchanged": true,
+        "workers": {
+          "active": 0,
+          "pending": 0,
+          "encodedBytes": 0
+        },
+        "electron": "44.5.1",
+        "parentPeakMiB": 164.62109375,
+        "peakSumUpperBoundMiB": 186.484375
+      },
+      "prototype": {
+        "mainPid": 69376,
+        "completionMs": 442.62659999999994,
+        "maxIntervalMs": 71.2414,
+        "ticks": 41,
+        "beforeRSSMiB": 108.55859375,
+        "afterRSSMiB": 159.453125,
+        "thumbnailPeakMiB": 21.91796875,
+        "importDecoderPeakMiB": 27.109375,
+        "pngHash": "2f79d9253f60a95aef791f3ff33563c78694211f587b0e7060b9449838fb167f",
+        "returnedPNGBytes": 8474685,
+        "originalHash": "affbc30f1700f0919f02fa4406870a9a94f07ab15476d3a7134bca02eb96dd87",
+        "sourceHash": "affbc30f1700f0919f02fa4406870a9a94f07ab15476d3a7134bca02eb96dd87",
+        "sourceUnchanged": true,
+        "workers": {
+          "active": 0,
+          "pending": 0,
+          "encodedBytes": 0
+        },
+        "electron": "44.5.1",
+        "parentPeakMiB": 161.3046875,
+        "peakSumUpperBoundMiB": 188.4140625
+      },
+      "samePNGBytes": false
+    }
+  ]
+}
