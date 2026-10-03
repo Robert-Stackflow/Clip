@@ -105,3 +105,5 @@ export * from '../src/main/recording-sources-protocol';
 
 export * from '../src/main/tray-query';
 export * from '../src/main/tray-search';
+
+export * from '../src/main/record-json';

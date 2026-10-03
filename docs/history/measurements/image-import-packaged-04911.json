@@ -1,0 +1,217 @@
+{
+  "baseline": "0.49.10",
+  "candidate": "0.49.11",
+  "lockPhase": "conversion",
+  "samples": [
+    {
+      "version": "0.49.10",
+      "round": 0,
+      "fixture": "large",
+      "completionMs": 704.3793000000005,
+      "probeMaxMs": 34.8661000000011,
+      "mainGapMaxMs": 54.48929999999996,
+      "probeCount": 31,
+      "beforeMiB": 409.30859375,
+      "sampledPeakMiB": 434.14453125,
+      "sampledPeakDeltaMiB": 24.8359375,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    },
+    {
+      "version": "0.49.10",
+      "round": 0,
+      "fixture": "noisy",
+      "completionMs": 869.4643000000015,
+      "probeMaxMs": 77.38370000000032,
+      "mainGapMaxMs": 59.82510000000002,
+      "probeCount": 36,
+      "beforeMiB": 423.83984375,
+      "sampledPeakMiB": 645.07421875,
+      "sampledPeakDeltaMiB": 221.234375,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    },
+    {
+      "version": "0.49.11",
+      "round": 0,
+      "fixture": "large",
+      "completionMs": 703.9814999999999,
+      "probeMaxMs": 33.363500000001295,
+      "mainGapMaxMs": 54.25770000000011,
+      "probeCount": 31,
+      "beforeMiB": 409.24609375,
+      "sampledPeakMiB": 434.453125,
+      "sampledPeakDeltaMiB": 25.20703125,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    },
+    {
+      "version": "0.49.11",
+      "round": 0,
+      "fixture": "noisy",
+      "completionMs": 855.4883999999984,
+      "probeMaxMs": 83.90709999999854,
+      "mainGapMaxMs": 62.84130000000005,
+      "probeCount": 36,
+      "beforeMiB": 422.21484375,
+      "sampledPeakMiB": 611.33203125,
+      "sampledPeakDeltaMiB": 189.1171875,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    },
+    {
+      "version": "0.49.11",
+      "round": 1,
+      "fixture": "large",
+      "completionMs": 674.6624000000011,
+      "probeMaxMs": 28.64129999999932,
+      "mainGapMaxMs": 20.506000000000085,
+      "probeCount": 32,
+      "beforeMiB": 407.7578125,
+      "sampledPeakMiB": 435.78125,
+      "sampledPeakDeltaMiB": 28.0234375,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    },
+    {
+      "version": "0.49.11",
+      "round": 1,
+      "fixture": "noisy",
+      "completionMs": 787.1730000000025,
+      "probeMaxMs": 84.32690000000002,
+      "mainGapMaxMs": 65.18179999999984,
+      "probeCount": 33,
+      "beforeMiB": 425.015625,
+      "sampledPeakMiB": 509.37890625,
+      "sampledPeakDeltaMiB": 84.36328125,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    },
+    {
+      "version": "0.49.10",
+      "round": 1,
+      "fixture": "large",
+      "completionMs": 689.418999999998,
+      "probeMaxMs": 4.914199999999255,
+      "mainGapMaxMs": 20.085800000000063,
+      "probeCount": 34,
+      "beforeMiB": 410.5859375,
+      "sampledPeakMiB": 437.51953125,
+      "sampledPeakDeltaMiB": 26.93359375,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    },
+    {
+      "version": "0.49.10",
+      "round": 1,
+      "fixture": "noisy",
+      "completionMs": 796.0682000000015,
+      "probeMaxMs": 82.99009999999907,
+      "mainGapMaxMs": 61.74680000000012,
+      "probeCount": 35,
+      "beforeMiB": 422.921875,
+      "sampledPeakMiB": 550.8828125,
+      "sampledPeakDeltaMiB": 127.9609375,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    },
+    {
+      "version": "0.49.10",
+      "round": 2,
+      "fixture": "large",
+      "completionMs": 688.8703999999998,
+      "probeMaxMs": 7.062200000000303,
+      "mainGapMaxMs": 19.39519999999993,
+      "probeCount": 31,
+      "beforeMiB": 413.4921875,
+      "sampledPeakMiB": 440.82421875,
+      "sampledPeakDeltaMiB": 27.33203125,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    },
+    {
+      "version": "0.49.10",
+      "round": 2,
+      "fixture": "noisy",
+      "completionMs": 842.0833999999995,
+      "probeMaxMs": 52.59400000000096,
+      "mainGapMaxMs": 65.97419999999988,
+      "probeCount": 37,
+      "beforeMiB": 427.6796875,
+      "sampledPeakMiB": 622.47265625,
+      "sampledPeakDeltaMiB": 194.79296875,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    },
+    {
+      "version": "0.49.11",
+      "round": 2,
+      "fixture": "large",
+      "completionMs": 695.5371000000014,
+      "probeMaxMs": 20.47940000000017,
+      "mainGapMaxMs": 17.99599999999998,
+      "probeCount": 32,
+      "beforeMiB": 407.0078125,
+      "sampledPeakMiB": 435.8046875,
+      "sampledPeakDeltaMiB": 28.796875,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    },
+    {
+      "version": "0.49.11",
+      "round": 2,
+      "fixture": "noisy",
+      "completionMs": 797.9507999999987,
+      "probeMaxMs": 66.49599999999919,
+      "mainGapMaxMs": 59.9061999999999,
+      "probeCount": 36,
+      "beforeMiB": 425.19921875,
+      "sampledPeakMiB": 507.9296875,
+      "sampledPeakDeltaMiB": 82.73046875,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    }
+  ],
+  "foregroundUI": false,
+  "clipboard": false,
+  "lockedImportRejected": true,
+  "lockedWindows": [
+    "clipper://app/unlock.html"
+  ],
+  "noLateEncryptedWrite": true,
+  "summary": [
+    {
+      "fixture": "large",
+      "0.49.10": {
+        "completionMs": 689.418999999998,
+        "probeMaxMs": 7.062200000000303,
+        "mainGapMaxMs": 20.085800000000063,
+        "sampledPeakDeltaMiB": 26.93359375
+      },
+      "0.49.11": {
+        "completionMs": 695.5371000000014,
+        "probeMaxMs": 28.64129999999932,
+        "mainGapMaxMs": 20.506000000000085,
+        "sampledPeakDeltaMiB": 28.0234375
+      }
+    },
+    {
+      "fixture": "noisy",
+      "0.49.10": {
+        "completionMs": 842.0833999999995,
+        "probeMaxMs": 77.38370000000032,
+        "mainGapMaxMs": 61.74680000000012,
+        "sampledPeakDeltaMiB": 194.79296875
+      },
+      "0.49.11": {
+        "completionMs": 797.9507999999987,
+        "probeMaxMs": 83.90709999999854,
+        "mainGapMaxMs": 62.84130000000005,
+        "sampledPeakDeltaMiB": 84.36328125
+      }
+    }
+  ],
+  "lockOnly": false,
+  "scope": "Three alternating packaged app pairs. Paused owned histories and hidden trusted main renderers. The native file chooser is replaced with owned fixture paths; actual addFiles IPC, image conversion, thumbnails, storage/index/shelf mutation, broadcasts and updateState IPC are exercised. No physical drag/drop, foreground input or system clipboard. 100 ms process-tree working-set samples may miss peaks. Encryption/lock uses real public IPC; no blur or ownership guard is disabled.",
+  "result": "PASS"
+}

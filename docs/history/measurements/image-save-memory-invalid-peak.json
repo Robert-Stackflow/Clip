@@ -1,0 +1,596 @@
+{
+  "samples": [
+    {
+      "mode": "before",
+      "round": 0,
+      "elapsed": 409.1272,
+      "before": {
+        "rss": 120176640,
+        "heapTotal": 35397632,
+        "heapUsed": 32252596,
+        "external": 2745315,
+        "arrayBuffers": 0
+      },
+      "after": {
+        "rss": 117415936,
+        "heapTotal": 22691840,
+        "heapUsed": 19409184,
+        "external": 2745355,
+        "arrayBuffers": 0
+      },
+      "stages": [
+        {
+          "stage": "received",
+          "rss": 133869568,
+          "heapTotal": 22102016,
+          "heapUsed": 19496220,
+          "external": 3839114,
+          "arrayBuffers": 14747
+        },
+        {
+          "stage": "validated",
+          "rss": 133758976,
+          "heapTotal": 22364160,
+          "heapUsed": 19534160,
+          "external": 3839154,
+          "arrayBuffers": 14747
+        },
+        {
+          "stage": "before save",
+          "rss": 134135808,
+          "heapTotal": 22364160,
+          "heapUsed": 19584092,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        },
+        {
+          "stage": "serialized",
+          "rss": 159084544,
+          "heapTotal": 48824320,
+          "heapUsed": 44602644,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        },
+        {
+          "stage": "after save",
+          "rss": 174112768,
+          "heapTotal": 48824320,
+          "heapUsed": 44605372,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        }
+      ],
+      "originalContent": true,
+      "version": {
+        "node": "24.21.0",
+        "acorn": "8.18.0",
+        "ada": "4.0.0",
+        "amaro": "1.1.11",
+        "ares": "1.34.8",
+        "brotli": "1.2.0",
+        "cldr": "48.0",
+        "icu": "78.2",
+        "llhttp": "9.4.3",
+        "merve": "1.2.2",
+        "modules": "149",
+        "napi": "10",
+        "nbytes": "0.1.4",
+        "ncrypto": "0.0.1",
+        "nghttp2": "1.70.0",
+        "nghttp3": "",
+        "ngtcp2": "",
+        "openssl": "0.0.0",
+        "simdjson": "4.6.7",
+        "simdutf": "7.7.0",
+        "sqlite": "3.53.4",
+        "tz": "2025c",
+        "undici": "7.29.1",
+        "unicode": "17.0",
+        "uv": "1.52.1",
+        "uvwasi": "0.0.23",
+        "v8": "15.2.124.28-electron.0",
+        "zlib": "1.3.2.1-motley",
+        "zstd": "1.6.0",
+        "electron": "44.5.1",
+        "chrome": "152.0.7977.130"
+      },
+      "peakWorkingSetMiB": 7.2734375
+    },
+    {
+      "mode": "before",
+      "round": 1,
+      "elapsed": 357.4598,
+      "before": {
+        "rss": 117641216,
+        "heapTotal": 35397632,
+        "heapUsed": 32252556,
+        "external": 2745315,
+        "arrayBuffers": 0
+      },
+      "after": {
+        "rss": 117686272,
+        "heapTotal": 22691840,
+        "heapUsed": 19490484,
+        "external": 2745355,
+        "arrayBuffers": 0
+      },
+      "stages": [
+        {
+          "stage": "received",
+          "rss": 133791744,
+          "heapTotal": 21839872,
+          "heapUsed": 19496960,
+          "external": 3839114,
+          "arrayBuffers": 14747
+        },
+        {
+          "stage": "validated",
+          "rss": 134270976,
+          "heapTotal": 22102016,
+          "heapUsed": 19534900,
+          "external": 3839154,
+          "arrayBuffers": 14747
+        },
+        {
+          "stage": "before save",
+          "rss": 134639616,
+          "heapTotal": 22102016,
+          "heapUsed": 19584832,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        },
+        {
+          "stage": "serialized",
+          "rss": 159412224,
+          "heapTotal": 48562176,
+          "heapUsed": 44559548,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        },
+        {
+          "stage": "after save",
+          "rss": 174436352,
+          "heapTotal": 48562176,
+          "heapUsed": 44562276,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        }
+      ],
+      "originalContent": true,
+      "version": {
+        "node": "24.21.0",
+        "acorn": "8.18.0",
+        "ada": "4.0.0",
+        "amaro": "1.1.11",
+        "ares": "1.34.8",
+        "brotli": "1.2.0",
+        "cldr": "48.0",
+        "icu": "78.2",
+        "llhttp": "9.4.3",
+        "merve": "1.2.2",
+        "modules": "149",
+        "napi": "10",
+        "nbytes": "0.1.4",
+        "ncrypto": "0.0.1",
+        "nghttp2": "1.70.0",
+        "nghttp3": "",
+        "ngtcp2": "",
+        "openssl": "0.0.0",
+        "simdjson": "4.6.7",
+        "simdutf": "7.7.0",
+        "sqlite": "3.53.4",
+        "tz": "2025c",
+        "undici": "7.29.1",
+        "unicode": "17.0",
+        "uv": "1.52.1",
+        "uvwasi": "0.0.23",
+        "v8": "15.2.124.28-electron.0",
+        "zlib": "1.3.2.1-motley",
+        "zstd": "1.6.0",
+        "electron": "44.5.1",
+        "chrome": "152.0.7977.130"
+      },
+      "peakWorkingSetMiB": 7.2734375
+    },
+    {
+      "mode": "before",
+      "round": 2,
+      "elapsed": 319.9286,
+      "before": {
+        "rss": 117452800,
+        "heapTotal": 35397632,
+        "heapUsed": 32252500,
+        "external": 2745315,
+        "arrayBuffers": 0
+      },
+      "after": {
+        "rss": 114589696,
+        "heapTotal": 22691840,
+        "heapUsed": 19408692,
+        "external": 2745355,
+        "arrayBuffers": 0
+      },
+      "stages": [
+        {
+          "stage": "received",
+          "rss": 130658304,
+          "heapTotal": 21839872,
+          "heapUsed": 19495212,
+          "external": 3839114,
+          "arrayBuffers": 14747
+        },
+        {
+          "stage": "validated",
+          "rss": 130981888,
+          "heapTotal": 22102016,
+          "heapUsed": 19533152,
+          "external": 3839154,
+          "arrayBuffers": 14747
+        },
+        {
+          "stage": "before save",
+          "rss": 131342336,
+          "heapTotal": 22102016,
+          "heapUsed": 19583084,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        },
+        {
+          "stage": "serialized",
+          "rss": 156274688,
+          "heapTotal": 48562176,
+          "heapUsed": 44595456,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        },
+        {
+          "stage": "after save",
+          "rss": 171302912,
+          "heapTotal": 48562176,
+          "heapUsed": 44598184,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        }
+      ],
+      "originalContent": true,
+      "version": {
+        "node": "24.21.0",
+        "acorn": "8.18.0",
+        "ada": "4.0.0",
+        "amaro": "1.1.11",
+        "ares": "1.34.8",
+        "brotli": "1.2.0",
+        "cldr": "48.0",
+        "icu": "78.2",
+        "llhttp": "9.4.3",
+        "merve": "1.2.2",
+        "modules": "149",
+        "napi": "10",
+        "nbytes": "0.1.4",
+        "ncrypto": "0.0.1",
+        "nghttp2": "1.70.0",
+        "nghttp3": "",
+        "ngtcp2": "",
+        "openssl": "0.0.0",
+        "simdjson": "4.6.7",
+        "simdutf": "7.7.0",
+        "sqlite": "3.53.4",
+        "tz": "2025c",
+        "undici": "7.29.1",
+        "unicode": "17.0",
+        "uv": "1.52.1",
+        "uvwasi": "0.0.23",
+        "v8": "15.2.124.28-electron.0",
+        "zlib": "1.3.2.1-motley",
+        "zstd": "1.6.0",
+        "electron": "44.5.1",
+        "chrome": "152.0.7977.130"
+      },
+      "peakWorkingSetMiB": 7.265625
+    },
+    {
+      "mode": "jsonb",
+      "round": 0,
+      "elapsed": 304.5559,
+      "before": {
+        "rss": 117301248,
+        "heapTotal": 35921920,
+        "heapUsed": 32253468,
+        "external": 2745315,
+        "arrayBuffers": 0
+      },
+      "after": {
+        "rss": 114495488,
+        "heapTotal": 22953984,
+        "heapUsed": 19408680,
+        "external": 2745355,
+        "arrayBuffers": 0
+      },
+      "stages": [
+        {
+          "stage": "received",
+          "rss": 130351104,
+          "heapTotal": 21577728,
+          "heapUsed": 19496440,
+          "external": 3839114,
+          "arrayBuffers": 14747
+        },
+        {
+          "stage": "validated",
+          "rss": 131035136,
+          "heapTotal": 21577728,
+          "heapUsed": 19534380,
+          "external": 3839154,
+          "arrayBuffers": 14747
+        },
+        {
+          "stage": "before save",
+          "rss": 131420160,
+          "heapTotal": 21839872,
+          "heapUsed": 19584312,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        },
+        {
+          "stage": "serialized",
+          "rss": 156078080,
+          "heapTotal": 48300032,
+          "heapUsed": 44557440,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        },
+        {
+          "stage": "after save",
+          "rss": 175673344,
+          "heapTotal": 48300032,
+          "heapUsed": 44560168,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        }
+      ],
+      "originalContent": true,
+      "version": {
+        "node": "24.21.0",
+        "acorn": "8.18.0",
+        "ada": "4.0.0",
+        "amaro": "1.1.11",
+        "ares": "1.34.8",
+        "brotli": "1.2.0",
+        "cldr": "48.0",
+        "icu": "78.2",
+        "llhttp": "9.4.3",
+        "merve": "1.2.2",
+        "modules": "149",
+        "napi": "10",
+        "nbytes": "0.1.4",
+        "ncrypto": "0.0.1",
+        "nghttp2": "1.70.0",
+        "nghttp3": "",
+        "ngtcp2": "",
+        "openssl": "0.0.0",
+        "simdjson": "4.6.7",
+        "simdutf": "7.7.0",
+        "sqlite": "3.53.4",
+        "tz": "2025c",
+        "undici": "7.29.1",
+        "unicode": "17.0",
+        "uv": "1.52.1",
+        "uvwasi": "0.0.23",
+        "v8": "15.2.124.28-electron.0",
+        "zlib": "1.3.2.1-motley",
+        "zstd": "1.6.0",
+        "electron": "44.5.1",
+        "chrome": "152.0.7977.130"
+      },
+      "peakWorkingSetMiB": 7.265625
+    },
+    {
+      "mode": "jsonb",
+      "round": 1,
+      "elapsed": 329.54359999999997,
+      "before": {
+        "rss": 117477376,
+        "heapTotal": 35921920,
+        "heapUsed": 32253468,
+        "external": 2745315,
+        "arrayBuffers": 0
+      },
+      "after": {
+        "rss": 114778112,
+        "heapTotal": 22953984,
+        "heapUsed": 19409088,
+        "external": 2745355,
+        "arrayBuffers": 0
+      },
+      "stages": [
+        {
+          "stage": "received",
+          "rss": 130887680,
+          "heapTotal": 21839872,
+          "heapUsed": 19496604,
+          "external": 3839114,
+          "arrayBuffers": 14747
+        },
+        {
+          "stage": "validated",
+          "rss": 131293184,
+          "heapTotal": 21839872,
+          "heapUsed": 19534544,
+          "external": 3839154,
+          "arrayBuffers": 14747
+        },
+        {
+          "stage": "before save",
+          "rss": 131670016,
+          "heapTotal": 22102016,
+          "heapUsed": 19584504,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        },
+        {
+          "stage": "serialized",
+          "rss": 156385280,
+          "heapTotal": 48562176,
+          "heapUsed": 44604732,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        },
+        {
+          "stage": "after save",
+          "rss": 175960064,
+          "heapTotal": 48562176,
+          "heapUsed": 44607460,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        }
+      ],
+      "originalContent": true,
+      "version": {
+        "node": "24.21.0",
+        "acorn": "8.18.0",
+        "ada": "4.0.0",
+        "amaro": "1.1.11",
+        "ares": "1.34.8",
+        "brotli": "1.2.0",
+        "cldr": "48.0",
+        "icu": "78.2",
+        "llhttp": "9.4.3",
+        "merve": "1.2.2",
+        "modules": "149",
+        "napi": "10",
+        "nbytes": "0.1.4",
+        "ncrypto": "0.0.1",
+        "nghttp2": "1.70.0",
+        "nghttp3": "",
+        "ngtcp2": "",
+        "openssl": "0.0.0",
+        "simdjson": "4.6.7",
+        "simdutf": "7.7.0",
+        "sqlite": "3.53.4",
+        "tz": "2025c",
+        "undici": "7.29.1",
+        "unicode": "17.0",
+        "uv": "1.52.1",
+        "uvwasi": "0.0.23",
+        "v8": "15.2.124.28-electron.0",
+        "zlib": "1.3.2.1-motley",
+        "zstd": "1.6.0",
+        "electron": "44.5.1",
+        "chrome": "152.0.7977.130"
+      },
+      "peakWorkingSetMiB": 7.27734375
+    },
+    {
+      "mode": "jsonb",
+      "round": 2,
+      "elapsed": 311.1831,
+      "before": {
+        "rss": 117334016,
+        "heapTotal": 35921920,
+        "heapUsed": 32253524,
+        "external": 2745315,
+        "arrayBuffers": 0
+      },
+      "after": {
+        "rss": 114454528,
+        "heapTotal": 22429696,
+        "heapUsed": 19408796,
+        "external": 2745355,
+        "arrayBuffers": 0
+      },
+      "stages": [
+        {
+          "stage": "received",
+          "rss": 130793472,
+          "heapTotal": 21577728,
+          "heapUsed": 19499376,
+          "external": 3839114,
+          "arrayBuffers": 14747
+        },
+        {
+          "stage": "validated",
+          "rss": 130965504,
+          "heapTotal": 21839872,
+          "heapUsed": 19537316,
+          "external": 3839154,
+          "arrayBuffers": 14747
+        },
+        {
+          "stage": "before save",
+          "rss": 131338240,
+          "heapTotal": 21839872,
+          "heapUsed": 19587248,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        },
+        {
+          "stage": "serialized",
+          "rss": 156139520,
+          "heapTotal": 48300032,
+          "heapUsed": 44589744,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        },
+        {
+          "stage": "after save",
+          "rss": 175685632,
+          "heapTotal": 48300032,
+          "heapUsed": 44592472,
+          "external": 3841202,
+          "arrayBuffers": 16795
+        }
+      ],
+      "originalContent": true,
+      "version": {
+        "node": "24.21.0",
+        "acorn": "8.18.0",
+        "ada": "4.0.0",
+        "amaro": "1.1.11",
+        "ares": "1.34.8",
+        "brotli": "1.2.0",
+        "cldr": "48.0",
+        "icu": "78.2",
+        "llhttp": "9.4.3",
+        "merve": "1.2.2",
+        "modules": "149",
+        "napi": "10",
+        "nbytes": "0.1.4",
+        "ncrypto": "0.0.1",
+        "nghttp2": "1.70.0",
+        "nghttp3": "",
+        "ngtcp2": "",
+        "openssl": "0.0.0",
+        "simdjson": "4.6.7",
+        "simdutf": "7.7.0",
+        "sqlite": "3.53.4",
+        "tz": "2025c",
+        "undici": "7.29.1",
+        "unicode": "17.0",
+        "uv": "1.52.1",
+        "uvwasi": "0.0.23",
+        "v8": "15.2.124.28-electron.0",
+        "zlib": "1.3.2.1-motley",
+        "zstd": "1.6.0",
+        "electron": "44.5.1",
+        "chrome": "152.0.7977.130"
+      },
+      "peakWorkingSetMiB": 7.26953125
+    }
+  ],
+  "summary": [
+    {
+      "mode": "before",
+      "elapsed": 357.4598,
+      "peakWorkingSetMiB": 7.2734375
+    },
+    {
+      "mode": "jsonb",
+      "elapsed": 311.1831,
+      "peakWorkingSetMiB": 7.26953125
+    }
+  ],
+  "result": "PASS",
+  "scope": "Owned isolated real Electron main processes and real capture workers; unchanged image content, SQL summaries, original bytes and shelf. Worker memory snapshots include process RSS but worker-local V8 heap. Windows parent peak includes the later content check. No app UI, native JPEG conversion, clipboard, physical input, forced GC or working-set trimming. Prototype changes only SQL projection construction.",
+  "peakMeasurementValid": false,
+  "peakLimitation": "Measured Playwright launcher PID instead of the Electron main PID; do not use peakWorkingSetMiB as application memory evidence."
+}

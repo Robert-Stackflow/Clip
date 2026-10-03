@@ -1,0 +1,65 @@
+{
+  "baseline": "0.49.10",
+  "candidate": "0.49.11",
+  "lockPhase": "save",
+  "samples": [
+    {
+      "version": "0.49.11",
+      "round": 0,
+      "fixture": "large",
+      "completionMs": 805.981499999999,
+      "probeMaxMs": 41.158300000000054,
+      "mainGapMaxMs": 61.588199999999915,
+      "probeCount": 33,
+      "beforeMiB": 410.0078125,
+      "sampledPeakMiB": 436.0234375,
+      "sampledPeakDeltaMiB": 26.015625,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    },
+    {
+      "version": "0.49.11",
+      "round": 0,
+      "fixture": "noisy",
+      "completionMs": 892.7709999999988,
+      "probeMaxMs": 88.1888999999992,
+      "mainGapMaxMs": 65.05240000000003,
+      "probeCount": 37,
+      "beforeMiB": 410.5078125,
+      "sampledPeakMiB": 510.7421875,
+      "sampledPeakDeltaMiB": 100.234375,
+      "originalBytesPreserved": true,
+      "savedAndIndexed": true
+    }
+  ],
+  "foregroundUI": false,
+  "clipboard": false,
+  "lockedImportRejected": true,
+  "lockedWindows": [
+    "clipper://app/unlock.html"
+  ],
+  "noLateEncryptedWrite": true,
+  "summary": [
+    {
+      "fixture": "large",
+      "0.49.11": {
+        "completionMs": 805.981499999999,
+        "probeMaxMs": 41.158300000000054,
+        "mainGapMaxMs": 61.588199999999915,
+        "sampledPeakDeltaMiB": 26.015625
+      }
+    },
+    {
+      "fixture": "noisy",
+      "0.49.11": {
+        "completionMs": 892.7709999999988,
+        "probeMaxMs": 88.1888999999992,
+        "mainGapMaxMs": 65.05240000000003,
+        "sampledPeakDeltaMiB": 100.234375
+      }
+    }
+  ],
+  "lockOnly": true,
+  "scope": "One candidate packaged app; two image imports prepare the owned encrypted history. Paused owned histories and hidden trusted main renderers. The native file chooser is replaced with owned fixture paths; actual addFiles IPC, image conversion, thumbnails, storage/index/shelf mutation, broadcasts and updateState IPC are exercised. No physical drag/drop, foreground input or system clipboard. 100 ms process-tree working-set samples may miss peaks. Encryption/lock uses real public IPC; no blur or ownership guard is disabled.",
+  "result": "PASS"
+}
