@@ -31,6 +31,7 @@
 .image-workbench .selected-mark button{min-height:30px;padding:5px 8px;font-size:11px}
 .image-workbench .selected-mark button:hover{background:var(--hover)}
 .image-workbench .options #fill-field{min-height:32px}
+@media(max-width:800px){.image-workbench .options label:has(.number-control){display:grid;grid-template-columns:minmax(0,1fr);gap:8px;justify-items:stretch}.image-workbench .options label>.number-control{width:100%;max-width:none;box-sizing:border-box}}
 .image-workbench #viewport{scrollbar-width:none;padding:24px;box-sizing:border-box}
 .image-workbench #viewport::-webkit-scrollbar{display:none}
 .editor-footer button.quiet:hover{background:var(--hover)}
