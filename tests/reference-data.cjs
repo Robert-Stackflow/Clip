@@ -6,8 +6,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=r
   assert.equal(data.revision,'6f382a13d72f3c4ce67f3d6f3f38f6f930d01a6c');
   assert.deepEqual(data.topics.map(topic=>[topic.id,topic.sections.length,topic.sections.reduce((sum,section)=>sum+section.items,0)]),[['git',100,147],['latex',50,334],['bash',92,244],['linux',25,181],['regex',104,371]]);
   for(const topic of data.topics)assert.equal(createHash('sha256').update(topic.markdown).digest('hex'),topic.sha256);
-  await require('esbuild').build({stdin:{contents:"export {renderCheatBlocks} from './src/renderer/cheatsheet-renderer';export {highlightCheatCode} from './src/renderer/cheatsheet-highlight';export {rendererAssetAllowed} from './src/shared/renderer-assets';",resolveDir:process.cwd()},outfile:path.join(work.output,'renderer.cjs'),bundle:true,platform:'node'});
-  const {renderCheatBlocks,highlightCheatCode,rendererAssetAllowed}=require(path.join(work.output,'renderer.cjs'));
+  await require('esbuild').build({stdin:{contents:"export {renderCheatBlocks} from './src/renderer/cheatsheet-renderer';export {highlightCheatCode} from './src/renderer/cheatsheet-highlight';export {rendererAssetAllowed} from './src/shared/renderer-assets';export {referenceCatalog} from './src/renderer/reference-catalog';export {setInterfaceLanguage} from './src/shared/i18n';",resolveDir:process.cwd()},outfile:path.join(work.output,'renderer.cjs'),bundle:true,platform:'node'});
+  const {renderCheatBlocks,highlightCheatCode,rendererAssetAllowed,referenceCatalog,setInterfaceLanguage}=require(path.join(work.output,'renderer.cjs'));
   const rendered=renderCheatBlocks([{type:'paragraph',text:'<img src=x onerror=alert(1)> [bad](javascript:alert(1))'},{type:'code',language:'bash',text:'echo "<test> & ok"\n'}]);
   assert.ok(!rendered.includes('<img')&&!rendered.includes('href="javascript:'));
   assert.ok(rendered.includes('data-code="echo &quot;&lt;test&gt; &amp; ok&quot;\n"'));
@@ -24,6 +24,20 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=r
   const emoji=JSON.parse(await fs.readFile('src/renderer/reference-data/emoji.json','utf8'));
   assert.equal(emoji.length,3944);
   assert.ok(emoji.some(([glyph])=>glyph==='👍🏿')&&emoji.some(([glyph])=>glyph==='🧑🏻'));
+  const mime=JSON.parse(await fs.readFile('src/renderer/reference-data/mime-details.json','utf8'));
+  const supplement=JSON.parse(await fs.readFile('src/renderer/reference-data/mime-wikidata.json','utf8'));
+  const mimeTypes=new Set(mime.map(([type])=>type));
+  assert.equal(Object.keys(supplement).length,50);
+  for(const [type,[zh,en,id]] of Object.entries(supplement)){
+   assert.ok(mimeTypes.has(type),type+' must exist in the offline MIME catalog');
+   assert.ok(zh&&en&&/^Q\d+$/.test(id),type+' must have bilingual text and a source item');
+  }
+  const entry=type=>referenceCatalog().mime.items.find(item=>item.title===type);
+  assert.match(entry('model/stl').detail,/CAD.*3D/);
+  assert.match(entry('application/geo+json').detail,/地理空间/);
+  setInterfaceLanguage('en');
+  assert.match(entry('model/stl').detail,/CAD software and 3D printers/);
+  setInterfaceLanguage('zh-CN');
   for(const name of ['reference-emoji-worker.js','emoji-atlas/sheet-00.png','emoji-atlas/../app.js','katex-fonts/../../main/index.cjs'])assert.equal(rendererAssetAllowed('main',name),false);
   assert.equal(rendererAssetAllowed('main','reference-flags.ttf'),true);
   for(const scope of ['recording','scroll','image-editor'])assert.equal(rendererAssetAllowed(scope,'reference-flags.ttf'),false);

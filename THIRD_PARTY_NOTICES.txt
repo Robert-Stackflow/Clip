@@ -9276,6 +9276,7 @@ Tika-mimetypes.xml includes mimetype definitions that were adapted from the PRON
 by The National Archives (http://www.nationalarchives.gov.uk/PRONOM/Default.aspx). PRONOM is published
 under the Open Government License 3.0 (http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/)
 
+Wikidata MIME type descriptions (human-reviewed and paraphrased) — CC0 1.0 — https://www.wikidata.org/wiki/Property:P1163 and https://www.wikidata.org/wiki/Wikidata:Licensing
 Quick Reference — complete Git, LaTeX, Bash, Linux and Regex documents — https://github.com/jaywcjlove/reference
 MIT License
 

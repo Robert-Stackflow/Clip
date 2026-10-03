@@ -5,6 +5,7 @@ import symbols from './reference-data/symbols.json';
 import entities from './reference-data/entities.json';
 import mime from './reference-data/mime-details.json';
 import mimeSourceDescriptions from './reference-data/mime-descriptions.json';
+import mimeWikidata from './reference-data/mime-wikidata.json';
 import mimeRFC from './reference-data/mime-rfc.json';
 import colors from './reference-data/colors.json';
 import {interfaceLanguage} from '../shared/i18n';
@@ -38,6 +39,7 @@ function colorGroup(hex:string){
 function mimeDescription(type:string){
  const description=(mimeDescriptions as Record<string,string[]>)[type];if(description)return tx(description[0],description[1]);
  const sourceDescription=(mimeSourceDescriptions as Record<string,string>)[type];if(sourceDescription)return sourceDescription;
+ const wikidataDescription=(mimeWikidata as Record<string,string[]>)[type];if(wikidataDescription)return tx(wikidataDescription[0],wikidataDescription[1]);
  const [group,subtype]=type.split('/');
  const suffix=subtype.endsWith('+json')?'JSON':subtype.endsWith('+xml')?'XML':subtype.endsWith('+zip')?'ZIP':subtype.endsWith('+cbor')?'CBOR':'';
  return suffix?tx(`${groupLabel(group)}，使用 ${suffix} 格式；${subtype} 定义其具体用途`,`${groupLabel(group)} using ${suffix}; ${subtype} defines its purpose`):tx(`${groupLabel(group)}媒体类型；具体格式由 ${subtype} 的规范定义`,`${groupLabel(group)} media type; its format is defined by the ${subtype} specification`);
