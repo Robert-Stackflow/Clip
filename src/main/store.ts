@@ -116,7 +116,20 @@ export class Store {
     }catch(e){this.db.exec('ROLLBACK TO batch_change; RELEASE batch_change');this.queue=queue;this.shelf=shelf;throw e;}
   }
   backup(){return {format:'clipper-backup',version:7,exportedAt:new Date().toISOString(),clips:this.all(),snippets:this.snippets(),categories:this.categories,scripts:this.meta('text-scripts',[])};}
-  import(value:unknown,thumbnail:(p:Payload)=>string|undefined=()=>undefined){const data=validateBackup(value),previousCategories=[...this.categories];this.importTotal=this.bytes();try{this.db.exec('BEGIN');try{for(const c of data.clips)this.add(c.payload,c.source,thumbnail(c.payload),c,false);const snippets=this.snippets();for(const s of data.snippets)if(!snippets.some(x=>x.title===s.title&&JSON.stringify(x.payload)===JSON.stringify(s.payload))){this.saveSnippet({title:s.title,payload:s.payload},thumbnail(s.payload));snippets.push(s);}for(const c of data.categories)if(!this.categories.some(x=>x.name===c.name&&x.kind===c.kind&&x.contains===c.contains&&x.source===c.source&&x.tag===c.tag))this.saveCategory({...c,id:undefined});if(data.scripts.length){const scripts=this.meta('text-scripts',[]);for(const script of data.scripts)if(!scripts.some((s:any)=>s.name===script.name&&s.code===script.code))scripts.push({...script,id:randomUUID(),updatedAt:Date.now()});if(scripts.length>100||Buffer.byteLength(JSON.stringify(scripts))>4*1024*1024)throw new Error(tr('合并后脚本超过容量限制'));this.setMeta('text-scripts',scripts);}this.db.exec('COMMIT');return data.clips.length;}catch(e){this.db.exec('ROLLBACK');this.categories=previousCategories;throw e;}}finally{this.importTotal=undefined;}}
+  import(value:unknown,thumbnail:(p:Payload)=>string|undefined=()=>undefined){
+    const data=validateBackup(value),previousCategories=[...this.categories];this.importTotal=this.bytes();
+    try{
+      this.db.exec('BEGIN');
+      try{
+        for(const c of data.clips)this.add(c.payload,c.source,thumbnail(c.payload),c,false);
+        const seenSnippets=new Set(this.snippets().map(s=>JSON.stringify([s.title,s.payload])));
+        for(const s of data.snippets){const identity=JSON.stringify([s.title,s.payload]);if(seenSnippets.has(identity))continue;this.saveSnippet({title:s.title,payload:s.payload},thumbnail(s.payload));seenSnippets.add(identity);}
+        for(const c of data.categories)if(!this.categories.some(x=>x.name===c.name&&x.kind===c.kind&&x.contains===c.contains&&x.source===c.source&&x.tag===c.tag))this.saveCategory({...c,id:undefined});
+        if(data.scripts.length){const scripts=this.meta('text-scripts',[]);for(const script of data.scripts)if(!scripts.some((s:any)=>s.name===script.name&&s.code===script.code))scripts.push({...script,id:randomUUID(),updatedAt:Date.now()});if(scripts.length>100||Buffer.byteLength(JSON.stringify(scripts))>4*1024*1024)throw new Error(tr('合并后脚本超过容量限制'));this.setMeta('text-scripts',scripts);}
+        this.db.exec('COMMIT');return data.clips.length;
+      }catch(e){this.db.exec('ROLLBACK');this.categories=previousCategories;throw e;}
+    }finally{this.importTotal=undefined;}
+  }
   close(){if(this.closed)return;try{this.db.exec(this.readOnly?'ROLLBACK':'PRAGMA wal_checkpoint(TRUNCATE)');}finally{this.closed=true;this.categories=[];this.queue=[];this.shelf=[];this.onChange=undefined;this.db.close();}}
 }
 

@@ -46,6 +46,16 @@ test('large import keeps the live capacity exact across new and duplicate record
   target.import(backup,checked);assert.equal(target.bytes(),actual());assert.equal(target.list().length,121);
  }finally{source.close();target.close();}
 });
+test('maximum-size template list merges unique entries once and skips existing content',()=>{
+ const target=new Store(':memory:');try{
+  target.saveSnippet({title:'already here',text:'shared'});
+  const backup={format:'clipper-backup',version:7,clips:[],snippets:[...Array.from({length:1998},(_,i)=>({title:'template '+i,payload:{text:'value '+i}})),{title:'already here',payload:{text:'shared'}},{title:'template 0',payload:{text:'value 0'}}],categories:[],scripts:[]};
+  let rendered=0;target.import(backup,()=>{rendered++;return undefined;});
+  assert.equal(target.snippets().length,1999);assert.equal(rendered,1998);
+  target.import(backup,()=>{rendered++;return undefined;});
+  assert.equal(target.snippets().length,1999);assert.equal(rendered,1998);
+ }finally{target.close();}
+});
 test('scheduled backup handles due time, retains only owned files, verifies restore and backs off on errors',async()=>{
  const directory=await folder(),store=new Store(':memory:');store.add({text:'scheduled'},'fixture');const manager=new BackupManager(()=>store,'00000000-0000-4000-8000-000000000001',directory,fakeVault,()=>{});
  try{assert.equal(await manager.run(),null);await manager.configure({enabled:true,directory,intervalHours:1,keep:2,encrypted:true,password:'scheduled fixture password'});const start=Date.now()+1000;await fs.writeFile(path.join(directory,'manual.json'),'manual backup');await manager.run(start);assert.equal((await manager.entries()).length,1);assert.equal(await manager.run(start+100),null);await manager.run(start+3600001);await manager.run(start+7200002);assert.equal((await manager.entries()).length,2);assert.equal(await fs.readFile(path.join(directory,'manual.json'),'utf8'),'manual backup');
