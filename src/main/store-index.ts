@@ -2,6 +2,7 @@ import type {DatabaseConnection} from './database';
 /** Rebuildable summaries. Primary rows, backup format and version remain unchanged. */
 export function initializeListIndex(db:DatabaseConnection){
  db.exec(`SAVEPOINT list_index;
+ CREATE INDEX IF NOT EXISTS clips_recent_order ON clips(updated DESC,id ASC);
  CREATE TABLE IF NOT EXISTS clip_list_cache(id TEXT PRIMARY KEY,data TEXT NOT NULL,bytes INTEGER NOT NULL);
  CREATE TRIGGER IF NOT EXISTS clip_list_insert AFTER INSERT ON clips BEGIN
   INSERT OR REPLACE INTO clip_list_cache VALUES(new.id,json_remove(new.data,'$.payload'),length(CAST(new.data AS BLOB)));

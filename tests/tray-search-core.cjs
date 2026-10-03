@@ -19,6 +19,26 @@ function expectedRows(records,categories,q){
  }).sort((a,b)=>b.updatedAt-a.updatedAt||(a.id<b.id?-1:a.id>b.id?1:0));
  return {total:matching.length,items:matching.slice(0,80).map(({payload,thumbnail,...item})=>item),categories:categories.map(({id,name})=>({id,name}))};
 }
+for(const encrypted of [false,true])test('legacy ordering index upgrades without changing payloads or read-only inspection: '+(encrypted?'encrypted':'plain'),async()=>{
+ const f=await fixture();let s=f.store,key;
+ if(encrypted){s.close();await fs.unlink(f.file);key=Buffer.alloc(32,23);s=new Store(f.file,false,false,key);}
+ try{
+  const records=[];for(let i=0;i<93;i++)records.push(s.add({text:'Tie '+i+' '+'preserved '.repeat(4096)+' CAFÉ 尾部'},'Fixture',undefined,{updatedAt:1700000000000,tags:['标签'],favorite:i%3===0},false));
+  const queries=[trayQuery,{...trayQuery,text:'café 标签'},{...trayQuery,category:'favorites'}],raw=s.db.prepare('SELECT id,data FROM clips ORDER BY id').all();
+  s.db.exec('DROP INDEX clips_recent_order');s.close();s=new Store(f.file,false,true,key);
+  assert.equal(s.db.prepare("SELECT count(*) AS n FROM sqlite_master WHERE name='clips_recent_order'").get().n,0);
+  for(const q of queries)assert.deepEqual(readTrayRows(s.db,[],q),expectedRows(records,[],q));
+  s.close();s=new Store(f.file,false,false,key);
+  assert.deepEqual(s.db.prepare('SELECT id,data FROM clips ORDER BY id').all(),raw);assert.equal(s.db.prepare('PRAGMA user_version').get().user_version,7);
+  assert.deepEqual(s.all().map(row=>row.id),records.map(row=>row.id));assert.deepEqual(s.list().map(row=>row.id),records.map(row=>row.id));
+  for(const q of queries){let querySql;const watched={prepare(sql){if(sql.startsWith('SELECT json_remove'))querySql=sql;return s.db.prepare(sql);}};
+   assert.deepEqual(readTrayRows(watched,[],q),expectedRows(records,[],q));const plan=s.db.prepare('EXPLAIN QUERY PLAN '+querySql).all().map(row=>row.detail);
+   assert.ok(plan.some(row=>row.includes('COVERING INDEX clips_recent_order')));assert.ok(plan.every(row=>!row.includes('TEMP B-TREE')));
+   assert.deepEqual(await f.search.run(f.file,q,key?Buffer.from(key):undefined,()=>true),expectedRows(records,[],q));
+  }
+  s.close();s=new Store(f.file,false,false,key);assert.deepEqual(s.db.prepare('SELECT id,data FROM clips ORDER BY id').all(),raw);
+ }finally{await f.search.cancel();s.close();key?.fill(0);}
+});
 for(const encrypted of [false,true])for(const legacy of [false,true])test('recent search agrees with full-record semantics without reading binary bodies: '+(encrypted?'encrypted':'plain')+' '+(legacy?'legacy':'indexed'),async()=>{
  const f=await fixture();let s=f.store,key;
  if(encrypted){s.close();await fs.unlink(f.file);key=Buffer.alloc(32,19);s=new Store(f.file,false,false,key);}

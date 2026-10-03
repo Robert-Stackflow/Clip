@@ -1,6 +1,6 @@
 const generated=require('./generated-fixtures.cjs');
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),{Store}=require('../work/test-exports.cjs');
-const legacy=s=>(s.db.prepare("SELECT json_remove(data,'$.payload') AS data FROM clips ORDER BY updated DESC").all()).map(r=>JSON.parse(r.data)).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||b.updatedAt-a.updatedAt);
+const legacy=s=>(s.db.prepare("SELECT json_remove(data,'$.payload') AS data FROM clips ORDER BY updated DESC,rowid ASC").all()).map(r=>JSON.parse(r.data)).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||b.updatedAt-a.updatedAt);
 const bytes=s=>s.db.prepare('SELECT (SELECT coalesce(sum(length(CAST(data AS BLOB))),0) FROM clips)+(SELECT coalesce(sum(length(CAST(data AS BLOB))),0) FROM snippets) AS n').get().n;
 function equal(s){assert.deepEqual(s.list(),legacy(s));assert.equal(s.bytes(),bytes(s));}
 test('lightweight list remains identical through edits, duplicates, protection, queues, delete/undo and failed writes',()=>{const s=new Store(':memory:');try{

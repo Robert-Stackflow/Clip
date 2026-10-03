@@ -11,7 +11,7 @@ try{
  // Project searchable fields inside SQLite so image/file bytes never enter the JS heap.
  const rows=db.prepare(`SELECT json_extract(data,'$.id','$.title','$.payload.text','$.payload.files','$.tags','$.source','$.kind') AS fields,
  (SELECT json_group_array(json_object('name',json_extract(value,'$.name'))) FROM json_each(clips.data,'$.payload.attachments')) AS names
- FROM clips ORDER BY updated DESC`).iterate();
+ FROM clips ORDER BY updated DESC,rowid ASC`).iterate();
  for(const row of rows){
   const [id,title,text,files,tags,source,kind]=JSON.parse(row.fields),attachments=JSON.parse(row.names);
   const item={id,title,tags,source,kind,payload:{text,files,attachments}} as Detail;
