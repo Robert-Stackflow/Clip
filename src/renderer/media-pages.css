@@ -27,7 +27,7 @@
 .editor-commandbar #shape-kind-trigger>svg{width:12px;height:12px}
 .editor-commandbar .image-transform-tools{display:inline-flex;align-items:center;gap:2px;flex-shrink:0}
 @media(max-width:800px){.editor-commandbar .image-transform-tools button{width:32px;min-width:32px;justify-content:center;padding-inline:5px}.editor-commandbar .image-transform-tools button>span{display:none}.image-workbench footer.editor-footer .status{flex:1 1 auto}}
-@media(max-width:700px){.editor-commandbar>.toolbar>button,.editor-commandbar>.actions>button{width:32px;min-width:32px;justify-content:center;padding-inline:5px;font-size:0}.editor-commandbar #shape-kind-trigger{width:42px;min-width:42px;justify-content:center;padding-inline:5px;gap:2px;font-size:0}.editor-commandbar>.toolbar>button svg,.editor-commandbar>.actions>button svg{flex-shrink:0}}
+@media(max-width:800px){.editor-commandbar>.toolbar>button,.editor-commandbar>.actions>button{width:32px;min-width:32px;justify-content:center;padding-inline:5px;font-size:0}.editor-commandbar #shape-kind-trigger{width:42px;min-width:42px;justify-content:center;padding-inline:5px;gap:2px;font-size:0}.editor-commandbar>.toolbar>button svg,.editor-commandbar>.actions>button svg{flex-shrink:0}}
 .image-workbench .selected-mark{padding:0 0 12px;border-bottom:1px solid var(--line);font-size:12px}
 .selected-mark>div{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
 .image-workbench .selected-mark button{min-height:30px;padding:5px 8px;font-size:11px}
