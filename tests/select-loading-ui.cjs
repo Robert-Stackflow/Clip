@@ -17,6 +17,11 @@ const {build}=require('esbuild'),{chromium,expect}=require('@playwright/test'),a
   await load();const shape=await trigger.boundingBox();await page.emulateMedia({reducedMotion:'reduce'});assert.equal(await trigger.evaluate(n=>getComputedStyle(n,'::after').animationName),'none');const reduced=await trigger.boundingBox();assert.deepEqual(reduced,shape);await trigger.press('Escape');await page.evaluate(()=>requests[4].resolve());await page.waitForTimeout(20);assert.equal(await page.locator('.select-popup').count(),0);cases.push('Loading indicator has stable dimensions and honors reduced motion');
   await load();await page.evaluate(()=>requests[5].resolve());await expect(page.locator('.select-popup')).toBeVisible();await trigger.press('Escape');assert.equal(await page.locator('.select-popup').count(),0);assert.equal(await page.locator('#dialog').evaluate(node=>node.open),true);cases.push('First Escape dismisses an open select popup');
   await trigger.press('Escape');assert.equal(await page.locator('#dialog').evaluate(node=>node.open),false);cases.push('Second Escape closes the dialog after the select popup');
+  await page.locator('#dialog').evaluate(node=>node.showModal());await trigger.press('ArrowDown');await expect(trigger).toHaveAttribute('aria-busy','true');
+  await trigger.press('End');assert.equal(await page.evaluate(()=>requests.length),7);
+  await page.evaluate(()=>{pick.append(new Option('Gamma','c'));requests[6].resolve();});
+  await expect(page.locator('.select-popup .focused')).toHaveText('Gamma');await trigger.press('Enter');
+  assert.equal(await page.locator('#pick').inputValue(),'c');cases.push('Navigation pressed while loading focuses the requested option');
   assert.deepEqual(errors,[]);const result={result:'PASS',cases};await fs.writeFile(path.join(work.output,'result.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result));
  }finally{await browser.close();await work.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

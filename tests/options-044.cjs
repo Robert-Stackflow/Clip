@@ -31,6 +31,14 @@ for(const mode of ['after','reference',...(baseline?['before']:[])]){
   const id=mode==='reference'?'options-test':'options-test-trigger',button=page.locator('#'+id);await button.click();const selected=()=>page.locator('.select-popup .focused').innerText();assert.equal(await selected(),'Alpha');await button.press('ArrowDown');assert.equal(await selected(),'Beta');await button.press('ArrowUp');assert.equal(await selected(),'Alpha');await button.press('End');assert.equal(await selected(),'Beta');await button.press('Home');assert.equal(await selected(),'Alpha');await button.press('b');assert.equal(await selected(),'Beta');cases.push({name:mode+' select arrows/home/end/typeahead skip disabled rows'});
   await page.locator('.select-popup [aria-disabled=true]').first().dispatchEvent('pointerenter');assert.equal(await selected(),'Beta');await page.locator('.select-popup [aria-disabled=true]').first().dispatchEvent('click');assert.equal(await button.getAttribute('aria-expanded'),'true');cases.push({name:mode+' disabled rows ignore pointer focus and choose'});
   await button.press('Enter');assert.equal(await button.evaluate(e=>e.value),'3');cases.push({name:mode+' select keyboard choice'});
+  if(mode==='after'){
+   await button.press('ArrowUp');assert.equal(await selected(),'Alpha');await button.press('Escape');
+   await button.press('Home');assert.equal(await selected(),'Alpha');await button.press('Escape');
+   await button.press('End');assert.equal(await selected(),'Beta');await button.press('Escape');
+   await page.evaluate(()=>{document.getElementById('options-test').value='1';});
+   await button.press('ArrowDown');assert.equal(await selected(),'Beta');await button.press('Escape');
+   cases.push({name:'Closed select uses first navigation key and skips disabled rows'});
+  }
   await page.evaluate(id=>document.getElementById(id).dispatchEvent(new CustomEvent('one:options',{detail:[{label:'Disabled',value:'x',disabled:true}]})),id);await button.click();assert.equal(await button.getAttribute('aria-activedescendant'),null);assert.equal(await page.locator('.select-popup .focused').count(),0);await button.press('Enter');assert.equal(await button.getAttribute('aria-expanded'),'true');cases.push({name:mode+' all disabled options have no invalid active descendant'});await button.press('Escape');
   await page.evaluate(id=>document.getElementById(id).dispatchEvent(new CustomEvent('one:options',{detail:[]})),id);await button.click();assert.equal(await page.locator('.select-empty').innerText(),'没有可选项');assert.equal(await button.getAttribute('aria-activedescendant'),null);cases.push({name:mode+' empty select uses One status row'});await button.press('Escape');
   if(mode==='after'){
