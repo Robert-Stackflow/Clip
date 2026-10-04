@@ -80,8 +80,9 @@ export function customControls(root: HTMLElement) {
     };
     button.addEventListener('click',()=>{if(menu||loading)close();else void requestOpen()});
     button.addEventListener('keydown',event=>{
-      event.stopPropagation();if(event.isComposing)return;
-      if(event.key==='Escape'){event.preventDefault();close();return} if(event.key==='Tab'){close();return}
+      if(event.isComposing)return;
+      if(event.key==='Escape'){if(menu||loading){event.preventDefault();event.stopPropagation();close();}return;}
+      event.stopPropagation();if(event.key==='Tab'){close();return}
       if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();if(!menu){void requestOpen();return}if(event.key==='Home')move(0,1);else if(event.key==='End')move(options.length-1,-1);else{const direction=event.key==='ArrowDown'?1:-1;move(active<0?direction>0?0:options.length-1:active+direction,direction);}return}
       if(event.key==='Enter'||event.key===' '){event.preventDefault();if(menu)choose(active);else void requestOpen();return}
       if(event.key.length===1&&!event.ctrlKey&&!event.altKey){event.preventDefault();if(Date.now()-typedAt>700)prefix='';prefix+=event.key.toLowerCase();typedAt=Date.now();void requestOpen();const index=options.findIndex(option=>!option.disabled&&option.label.toLowerCase().startsWith(prefix));if(index>=0)activate(index)}
