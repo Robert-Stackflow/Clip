@@ -29,7 +29,28 @@ const output=deviceScaleFactor===1?'work/redesign':`work/redesign-dpi-${deviceSc
  }
  // Category rail preserves unsaved values across switching and saves the original data.
  await page.locator('[data-page="settings"]').click();const settingsNav=page.locator('.settings-nav button'),privacy=()=>settingsNav.filter({hasText:language==='en'?'History & privacy':'记录与隐私'});await privacy().click();await page.locator('#max-items').fill('650');await settingsNav.first().click();await page.waitForFunction(()=>fixture.calls.some(c=>c[0]==='settings'&&c[1].maxItems===650));await privacy().click();assert.equal(await page.locator('#max-items').inputValue(),'650');assert.equal(await page.locator('#save-settings').count(),0);assert.equal(await page.evaluate(()=>fixture.state.settings.maxItems),650);
- await page.locator('#sidebar-toggle').click();assert.equal(await page.locator('#sidebar-toggle').getAttribute('aria-expanded'),'false');await page.reload();await page.waitForSelector('#sidebar-toggle');assert.equal(await page.locator('#sidebar-toggle').getAttribute('aria-expanded'),'false');await page.locator('#sidebar-toggle').click();
+ await page.locator('#sidebar-toggle').click();
+ assert.equal(await page.locator('#sidebar-toggle').getAttribute('aria-expanded'),'false');
+ const category=page.locator('#categories [data-category="work"]');
+ assert.equal(await category.isVisible(),true);
+ assert.equal(await category.getAttribute('aria-label'),'工作');
+ assert.equal(await category.getAttribute('data-tooltip'),'工作');
+ const collapsedCategory=await category.evaluate(node=>{
+  const button=node.getBoundingClientRect(),dot=node.querySelector('.category-dot').getBoundingClientRect();
+  return {width:button.width,height:button.height,dotWidth:dot.width,dotHeight:dot.height};
+ });
+ assert.equal(collapsedCategory.width,44);
+ assert.equal(collapsedCategory.height,40);
+ assert.equal(collapsedCategory.dotWidth,16);
+ assert.equal(collapsedCategory.dotHeight,16);
+ await category.click();
+ assert.equal(await category.getAttribute('aria-current'),'page');
+ assert.equal(await page.locator('#content h1').textContent(),'工作');
+ if(language==='zh-CN'&&theme==='light')await page.screenshot({path:`${output}/sidebar-collapsed-category.png`});
+ await page.reload();await page.waitForSelector('#sidebar-toggle');
+ assert.equal(await page.locator('#sidebar-toggle').getAttribute('aria-expanded'),'false');
+ assert.equal(await page.locator('#categories [data-category="work"]').isVisible(),true);
+ await page.locator('#sidebar-toggle').click();
  for(const [name,size,selectors]of [['tray',[740,560],['#search','#copy-selected']],['shelf',[420,440],['#items','#choose']],['recorder',[960,780],['#sources','#start']],['scroll',[840,780],['#start']],['image-editor',[960,780],['#viewport','#save']],['unlock',[680,760],['#unlock-submit']],['recovery',[840,780],['#retry']],['capture',[1000,700],['#capture-hint']]]){
   await page.setViewportSize({width:size[0],height:size[1]});await page.goto(`https://clipper.test/${name}.html`);await page.waitForTimeout(150);const geometry=await measure(page,selectors);results.push({language,theme,name,geometry});if(Object.values(geometry).some(v=>v===false||typeof v==='object'&&(v.missing||!v.visible||(name!=='capture'&&!v.reachable))))failures.push({language,theme,name,geometry});if(language==='zh-CN'&&theme==='light')await page.screenshot({path:`${output}/${name}.png`});
  }
