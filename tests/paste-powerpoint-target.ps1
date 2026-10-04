@@ -2,7 +2,8 @@ param(
   [Parameter(Mandatory = $true)][string]$Ready,
   [Parameter(Mandatory = $true)][string]$Result,
   [Parameter(Mandatory = $true)][string]$Stop,
-  [Parameter(Mandatory = $true)][string]$Failure
+  [Parameter(Mandatory = $true)][string]$Failure,
+  [switch]$Details
 )
 
 $ErrorActionPreference = 'Stop'
@@ -20,11 +21,19 @@ try {
   $presentation.Windows.Item(1).Activate()
   $shape.TextFrame.TextRange.Select()
   [System.IO.File]::WriteAllText($Ready, 'ready')
+  $inspected = $false
   $deadline = [DateTime]::UtcNow.AddSeconds(45)
   while ([DateTime]::UtcNow -lt $deadline -and -not (Test-Path -LiteralPath $Stop)) {
     $value = [string]$shape.TextFrame.TextRange.Text
-    if ($value -ne 'Replace this text' -and $value.Trim().Length -gt 0) {
-      [System.IO.File]::WriteAllText($Result, $value)
+    if (-not $inspected -and $value -ne 'Replace this text' -and $value.Trim().Length -gt 0) {
+      if ($Details) {
+        $font = $shape.TextFrame.TextRange.Characters(1, $value.Length).Font
+        $summary = @{ text = $value; bold = [int]$font.Bold; color = [long]$font.Color.RGB; size = [double]$font.Size }
+        [System.IO.File]::WriteAllText($Result, ($summary | ConvertTo-Json -Compress))
+      } else {
+        [System.IO.File]::WriteAllText($Result, $value)
+      }
+      $inspected = $true
     }
     Start-Sleep -Milliseconds 100
   }
