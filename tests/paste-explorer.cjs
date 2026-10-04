@@ -62,7 +62,30 @@ async function run(){
   assert.deepEqual(await fs.readFile(destination),bytes);
   assert.deepEqual(await fs.readFile(source),bytes);
   assert.equal(await native('foreground'),hwnd,'Explorer should regain foreground after paste');
-  console.log(JSON.stringify({result:'PASS',explorerFilePaste:true,sourceUnchanged:true,foregroundRestored:true}));
+
+  const secondName='Clipper Explorer 多文件 '+randomUUID()+'.bin';
+  const secondSource=path.join(sourceDir,secondName),secondDestination=path.join(targetDir,secondName);
+  const folderName='Clipper Explorer 文件夹 '+randomUUID();
+  const folderSource=path.join(sourceDir,folderName),folderDestination=path.join(targetDir,folderName);
+  const nestedName='内层文件.txt',nestedBytes=Buffer.from('Nested file '+randomUUID()+'\r\n','utf8');
+  const secondBytes=Buffer.from(Array.from({length:4096},(_,index)=>index%251));
+  await fs.mkdir(path.join(folderSource,'子目录'),{recursive:true});
+  await fs.mkdir(path.join(folderSource,'空目录'));
+  await fs.writeFile(path.join(folderSource,'子目录',nestedName),nestedBytes);
+  await fs.writeFile(secondSource,secondBytes);
+  await f.helper.evaluate((_event,files)=>global.native.writeFiles(files,Number(global.helperWindow.getNativeWindowHandle().readBigUInt64LE())),[secondSource,folderSource]);
+  await expect.poll(async()=>(await f.page.evaluate(()=>window.clipper.state())).clips.some(item=>item.kind==='files'&&item.title.includes(secondName)&&item.title.startsWith('2 ')),{timeout:10000}).toBe(true);
+  await f.page.evaluate(()=>window.clipper.showTray());
+  const secondRow=panel.locator('.tray-row').filter({hasText:secondName});
+  await expect(secondRow).toBeVisible();
+  await secondRow.click({button:'right'});
+  await expect.poll(async()=>{try{return await fs.readFile(secondDestination);}catch{return null;}},{timeout:10000}).toEqual(secondBytes);
+  await expect.poll(async()=>{try{return await fs.readFile(path.join(folderDestination,'子目录',nestedName),'utf8');}catch{return ''; }},{timeout:10000}).toBe(nestedBytes.toString('utf8'));
+  assert.equal((await fs.stat(path.join(folderDestination,'空目录'))).isDirectory(),true);
+  assert.deepEqual(await fs.readFile(secondSource),secondBytes);
+  assert.deepEqual(await fs.readFile(path.join(folderSource,'子目录',nestedName)),nestedBytes);
+  assert.equal(await native('foreground'),hwnd,'Explorer should regain foreground after multi-item paste');
+  console.log(JSON.stringify({result:'PASS',explorerFilePaste:true,multipleFilesAndFolder:true,nestedAndEmptyFolders:true,sourceUnchanged:true,foregroundRestored:true}));
  }finally{
   if(hwnd)try{closeExplorer(targetDir,hwnd);}catch(error){console.error('Could not close isolated Explorer window:',error);}
   await f.close();
