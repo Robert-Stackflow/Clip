@@ -1,7 +1,11 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{randomBytes}=require('node:crypto'),{execFileSync}=require('node:child_process');
-if(!process.versions.electron){const result=execFileSync(require('electron'),[__filename,'--host'],{encoding:'utf8',env:{...process.env,ELECTRON_RUN_AS_NODE:'1'},windowsHide:true,timeout:60000});process.stdout.write(result);}
+if(!process.versions.electron){
+ const exportsFile=path.resolve('work/search-030-native/exports.cjs');fs.mkdirSync(path.dirname(exportsFile),{recursive:true});
+ require('esbuild').buildSync({entryPoints:['tests/performance-030-exports.ts'],outfile:exportsFile,bundle:true,platform:'node',external:['better-sqlite3-multiple-ciphers']});
+ const result=execFileSync(require('electron'),[__filename,'--host',exportsFile],{encoding:'utf8',env:{...process.env,ELECTRON_RUN_AS_NODE:'1'},windowsHide:true,timeout:60000});process.stdout.write(result);
+}
 else (async()=>{
- const {Store,HistorySearch}=require('../work/performance-030/after.cjs'),root=fs.mkdtempSync(path.resolve('work/search-030-native-')),service=new HistorySearch(path.resolve('dist/main/search-worker.cjs')),results=[];
+ const {Store,HistorySearch}=require(process.argv[3]),root=fs.mkdtempSync(path.resolve('work/search-030-native-')),service=new HistorySearch(path.resolve('dist/main/search-worker.cjs')),results=[];
  const legacy=(s,q,category)=>s.all().filter(c=>q.toLocaleLowerCase().trim().split(/\s+/).every(term=>[c.title,c.payload.text,...(c.payload.files||[]),...(c.payload.attachments?.map(a=>a.name)||[]),...c.tags,c.source].join('\n').toLocaleLowerCase().includes(term))&&(!category||(category.kind==='all'||category.kind===c.kind)&&(!category.source||c.source.toLocaleLowerCase().includes(category.source.toLocaleLowerCase()))&&(!category.tag||c.tags.some(t=>t.toLocaleLowerCase()===category.tag.toLocaleLowerCase()))&&(!category.contains||[c.title,c.payload.text,...(c.payload.files||[]),...(c.payload.attachments?.map(a=>a.name)||[])].join('\n').toLocaleLowerCase().includes(category.contains.toLocaleLowerCase())))).map(c=>c.id);
  for(const encrypted of [false,true]){
   const key=encrypted?randomBytes(32):undefined,file=path.join(root,encrypted?'cipher.sqlite':'plain.sqlite'),s=new Store(file,false,false,key);
