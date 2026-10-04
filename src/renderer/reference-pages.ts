@@ -6,10 +6,10 @@ import {icon,registerIcons} from './ui';
 import {Copy,Search} from 'lucide';
 import {referenceSegments} from './reference-segments';
 import {mountEmojiFont} from './emoji-font';
+import {copyTextValue} from './copy-text';
 registerIcons({copy:Copy,search:Search});
 const esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const emojiGlyph=(glyph:string)=>`<span class="reference-emoji-glyph${/^(?:[\u{1F1E6}-\u{1F1FF}]{2}|\u{1F3F4}[\u{E0061}-\u{E007A}]+\u{E007F})$/u.test(glyph)?' reference-emoji-flag':''}" data-emoji="${esc(glyph)}" aria-hidden="true">${esc(glyph)}</span>`;
-const copy=async(value:string)=>{try{await navigator.clipboard.writeText(value);}catch{const field=document.createElement('textarea');field.value=value;field.style.position='fixed';field.style.opacity='0';document.body.append(field);try{field.select();if(!document.execCommand('copy'))throw new Error('Clipboard unavailable');}finally{field.remove();}}};
 const mimeSpecifications=(entry:Entry)=>entry.specifications?.length?`<div class="reference-detail-label">${tx('登记参考','Registration references')}</div><div class="reference-mime-specifications">${entry.specifications.map(([id,title])=>`<div><b>${esc(id)}</b><span>${esc(title)}</span></div>`).join('')}</div>`:'';
 
 type Row={top:number;height:number;group:string;title?:string;items?:{entry:Entry;index:number}[]};
@@ -33,7 +33,7 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  root.innerHTML=`<section class="reference-page ${kind==='cheats'?'reference-sheet':''}"><header class="reference-heading"><h1>${kind==='symbols'?tx('表情符号','Symbols & Emoji'):'CheetSheet'}</h1></header><div class="reference-primary-controls"><div class="reference-tab-viewport"><div class="tabs reference-tabs" aria-label="${tx('资料分类','Reference categories')}">${tabs.map(({id,label,count})=>`<button type="button" data-tab="${id}" class="${id===active?'active':''}" aria-label="${esc(label)}"><span>${esc(label)}</span><small data-tab-count="${id}">${formatNumber(count)}</small></button>`).join('')}</div></div><label class="reference-search">${icon('lucide:search')}<input type="search" id="reference-search" autocomplete="off" placeholder="${kind==='symbols'?tx('搜索字符、名称或代码','Search characters, names or codes'):tx('搜索命令、语法或用途','Search commands, syntax or purpose')}" aria-label="${tx('搜索资料','Search references')}"></label></div><div class="reference-workspace"><aside class="reference-nav" aria-label="${tx('分类导航','Category navigation')}">${tonePicker}<nav id="reference-categories"></nav><p class="reference-attribution" id="reference-attribution"></p></aside><div class="reference-scroll" tabindex="-1"><div id="reference-results" class="reference-results"></div></div></div></section>`;
  const input=root.querySelector<HTMLInputElement>('#reference-search')!,results=root.querySelector<HTMLElement>('#reference-results')!,scroll=root.querySelector<HTMLElement>('.reference-scroll')!,nav=root.querySelector<HTMLElement>('#reference-categories')!,attribution=root.querySelector<HTMLElement>('#reference-attribution')!,tones=root.querySelector<HTMLElement>('.reference-tones');
  const setCount=(value:number)=>{root.querySelector<HTMLElement>(`[data-tab-count="${active}"]`)!.textContent=formatNumber(value);};
- const performCopy=(value:string)=>void copy(value).then(()=>{if(!disposed)notify(tx('已复制','Copied'));}).catch(error=>{if(!disposed)notify(String(error));});
+ const performCopy=(value:string)=>void copyTextValue(value).then(()=>{if(!disposed)notify(tx('已复制','Copied'));}).catch(error=>{if(!disposed)notify(String(error));});
  const hideTip=()=>{clearTimeout(tooltipTimer);tooltipAnchor?.removeAttribute('aria-describedby');tooltipAnchor=undefined;if(!tip.hidden)tip.hidden=true;};
  const showTip=(button:HTMLElement)=>{
   if(disposed||!button.isConnected)return;const entry=entries[Number(button.dataset.entry)];if(!entry)return;

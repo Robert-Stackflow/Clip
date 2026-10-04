@@ -60,3 +60,6 @@ html[data-theme=dark] .nav-secondary .nav-service-status{color:#91b39c}
 @media(max-width:1000px){.sync-settings-footer{flex-wrap:wrap}.sync-settings-card .sync-settings-footer>.sync-note{max-width:none;flex:1 0 100%}.sync-settings-footer>button{margin-left:auto}}
 
 .web-workbench>.web-connections,.web-page #web-clips{scrollbar-gutter:stable;overflow-anchor:none}
+.tool-workbench .url-example code{flex:1}
+.url-example>[data-uri-copy]{flex:0 0 30px;width:30px;height:30px;min-height:30px;padding:6px;margin-left:auto}
+@media(max-width:800px){.url-example>[data-uri-copy]{order:1}.url-example>code{order:2}}

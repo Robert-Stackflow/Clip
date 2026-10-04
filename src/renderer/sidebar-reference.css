@@ -42,6 +42,7 @@
 .reference-loading i:last-child{height:220px}
 @media(max-width:1100px){#app{grid-template-columns:184px minmax(0,1fr)}.brand{width:184px}.sidebar-collapsed #app{grid-template-columns:60px minmax(0,1fr)}.sidebar-collapsed .brand{width:60px}}
 @media(max-width:900px){#app{grid-template-columns:184px minmax(0,1fr)}.brand{width:184px}.sidebar .nav-item{font-size:calc(12px * var(--text-scale,1))}.sidebar-collapsed #app{grid-template-columns:60px minmax(0,1fr)}.sidebar-collapsed .brand{width:60px}}
+@media(max-width:600px){#app{grid-template-columns:168px minmax(0,1fr)}.brand{width:168px}.sidebar-collapsed #app{grid-template-columns:60px minmax(0,1fr)}.sidebar-collapsed .brand{width:60px}}
 @media(prefers-reduced-motion:reduce){#app,.brand,.brand strong,.sidebar,.sidebar .nav-item span:not(.status-dot),.sidebar-group-caption,#categories .category-heading{transition:none}}
 .sidebar-collapsed .sidebar-bottom #pause-nav{width:44px;height:40px;min-height:40px;padding:0;gap:0;align-self:center}
 .sidebar-collapsed #pause-nav .recording-indicator{margin:0;flex:0 0 16px}
