@@ -31,7 +31,7 @@
     "test:attachments": "npm run build && node tests/attachments-ui.cjs && node tests/attachments-boundaries.cjs",
     "test:metadata": "npm run build && node scripts/test.mjs && node tests/metadata-ui.cjs && node tests/metadata-boundaries.cjs",
     "test:efficiency": "npm run build && node scripts/test.mjs && node tests/efficiency-ui.cjs && node tests/efficiency-boundaries.cjs",
-    "test:stack": "npm run build && node tests/stack-ui.cjs && node tests/stack-boundaries.cjs",
+    "test:stack": "npm run build && node tests/stack-ui.cjs && node tests/stack-boundaries.cjs && node tests/stack-multi-app.cjs",
     "test:folders": "npm run build && node tests/folders-ui.cjs && node tests/folders-boundaries.cjs",
     "test:tray": "npm run build && node tests/tray-ui.cjs && node tests/tray-boundaries.cjs && node tests/tray-drag.cjs && node tests/tray-native.cjs",
     "test:appearance": "npm run build && node tests/appearance-layout.cjs",
