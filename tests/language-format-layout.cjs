@@ -8,7 +8,7 @@ function setupFormatting({epoch,raw}){
  fixture.state.clips[0].title=raw;
  const base=window.clipper;
  window.clipper=new Proxy({settings:async value=>{fixture.formatCalls.push(['settings',value.paused]);fixture.state.settings=value;fixture.refresh();}}, {get:(obj,key)=>key in obj?obj[key]:base[key]});
- const tray=window.clipperTray,trayState=tray.state;window.clipperTray={...tray,state:async()=>({...await trayState(),total:12345})};
+ const tray=window.clipperTray,trayState=tray.state;window.clipperTray={...tray,state:async()=>({...await trayState(),total:12345,counts:{all:12345,text:1,image:1,files:1,link:0,code:0}})};
  fixture.recording={phase:'recording',dark:true,bytes:0,seconds:65,message:raw,token:'fixture-only'};
  window.clipperRecorder={...window.clipperRecorder,state:async()=>fixture.recording,onChange:fn=>{fixture.recordingRefresh=fn;return()=>{};}};
 }
@@ -54,8 +54,8 @@ function setupFormatting({epoch,raw}){
    await page.goto('https://clipper.test/tray.html');await page.waitForSelector('#copy-selected');
    for(const scale of [100,150]){
     await page.evaluate(scale=>fixture.appearance({font:'mono',scale,density:'compact'}),scale);
-    const count=await page.locator('#count').textContent();assert.ok(count.includes('12,345'));
-    const metrics=await measure(page,['#count','#copy-selected','#paste-selected']);results.push({language,surface:'tray-count',scale,text:count,metrics});
+    const count=await page.locator('#filters [data-kind="all"] small').textContent();assert.ok(count.includes('12,345'));
+    const metrics=await measure(page,['#filters [data-kind="all"]','#copy-selected','#paste-selected']);results.push({language,surface:'tray-count',scale,text:count,metrics});
     for(const [key,value]of Object.entries(metrics))if(value===false||typeof value==='object'&&(value.missing||!value.visible||!value.reachable||value.overflow))failures.push({language,scale,key,value});
    }
    await page.setViewportSize({width:680,height:520});await page.goto('https://clipper.test/recorder.html');await page.waitForSelector('#size');

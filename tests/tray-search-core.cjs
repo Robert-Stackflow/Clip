@@ -13,11 +13,12 @@ function expectedRows(records,categories,q){
  const terms=q.text.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean),category=categories.find(c=>c.id===q.category);
  const matching=records.filter(item=>{
   const content=[item.title,item.payload.text,item.payload.files?.join('\n'),item.payload.attachments?.map(a=>a.name).join('\n')].join('\n').toLocaleLowerCase();
-  return (q.kind==='all'||item.kind===q.kind)&&(q.category!=='favorites'||item.favorite)&&(!category||
+  return (q.category!=='favorites'||item.favorite)&&(!category||
    (category.kind==='all'||item.kind===category.kind)&&(!category.source||item.source.toLocaleLowerCase().includes(category.source.toLocaleLowerCase()))&&(!category.tag||item.tags.some(t=>t.toLocaleLowerCase()===category.tag.toLocaleLowerCase()))&&(!category.contains||content.includes(category.contains.toLocaleLowerCase())))&&
    terms.every(term=>[content,item.source,...item.tags].join('\n').toLocaleLowerCase().includes(term));
  }).sort((a,b)=>b.updatedAt-a.updatedAt||(a.id<b.id?-1:a.id>b.id?1:0));
- return {total:matching.length,items:matching.slice(0,80).map(({payload,thumbnail,...item})=>item),categories:categories.map(({id,name})=>({id,name}))};
+ const counts={all:matching.length,text:0,image:0,files:0,link:0,code:0};for(const item of matching)counts[item.kind]++;
+ return {total:counts[q.kind],counts,items:matching.filter(item=>q.kind==='all'||item.kind===q.kind).slice(0,80).map(({payload,thumbnail,...item})=>item),categories:categories.map(({id,name})=>({id,name}))};
 }
 for(const encrypted of [false,true])test('legacy ordering index upgrades without changing payloads or read-only inspection: '+(encrypted?'encrypted':'plain'),async()=>{
  const f=await fixture();let s=f.store,key;

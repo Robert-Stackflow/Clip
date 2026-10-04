@@ -23,7 +23,6 @@ header button{padding:6px}
 #filters .active{background:var(--hover);color:var(--fg)}
 .workspace{display:grid;grid-template-columns:minmax(220px,.94fr) minmax(260px,1fr);flex:1;min-height:0;border-top:1px solid var(--line)}
 .list-pane{display:flex;flex-direction:column;min-height:0;overflow:hidden}
-#count{font-size:calc(11px * var(--text-scale,1));color:var(--muted);padding:10px 13px 6px}
 #items{overflow:auto;min-height:0;padding:4px 6px 9px;}
 .tray-row{display:flex;align-items:flex-start;width:100%;min-height:77px;gap:10px;padding:10px 8px;text-align:left;margin-bottom:3px}
 .tray-row.selected{background:var(--hover);border-color:var(--line)}
@@ -77,7 +76,6 @@ footer{font-size:calc(11px * var(--text-scale,1));color:var(--muted);padding:9px
 .preview-image{max-height:150px}
 .tray-row{min-height:62px}
 .row-body small{display:none}
-#count{padding:6px 12px 3px}
 footer{padding:7px 10px}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}

@@ -33,7 +33,7 @@ export class TrayPanel{
  }
  private available(){if(this.ctx.blocked()||!this.opened||!this.window?.isVisible())throw new Error(tr('托盘面板已关闭或不可用'));}
  state(value:unknown):TrayState|Promise<TrayState>{this.available();if(this.busy)throw new Error(tr('请等待当前操作完成'));const query=validateTrayQuery(value),serial=this.serial;
-  const state=(result:Pick<TrayState,'items'|'total'|'categories'>)=>{this.available();if(serial!==this.serial)throw new Error(tr('最近记录查询已取消'));return {...result,dark:this.ctx.dark(),canPaste:!!this.target&&this.ctx.validTarget(this.target)};};
+  const state=(result:Pick<TrayState,'items'|'total'|'counts'|'categories'>)=>{this.available();if(serial!==this.serial)throw new Error(tr('最近记录查询已取消'));return {...result,dark:this.ctx.dark(),canPaste:!!this.target&&this.ctx.validTarget(this.target)};};
   if(!query.text&&!query.category&&query.kind==='all'){void this.search.cancel();return state(this.history.query(query));}
   return this.history.queryAsync(query,query=>this.search.run(this.ctx.source(),query,this.ctx.key(),()=>serial===this.serial&&!this.ctx.blocked()&&!!this.window?.isVisible())).then(state);
  }

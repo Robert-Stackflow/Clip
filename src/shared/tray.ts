@@ -7,7 +7,8 @@ export const TRAY_CATEGORY_MISSING='CLIPPER_TRAY_CATEGORY_MISSING';
 export interface TrayQuery{text:string;kind:'all'|Kind;category:string}
 export const trayQuery:TrayQuery={text:'',kind:'all',category:''};
 export interface TrayItem extends Pick<Clip,'id'|'kind'|'title'|'preview'|'source'|'updatedAt'|'favorite'|'pinned'|'bytes'>{token:string;previewKey:string;draggable:boolean}
-export interface TrayState{items:TrayItem[];total:number;dark:boolean;canPaste:boolean;categories:{id:string;name:string}[]}
+export type TrayCounts=Record<'all'|Kind,number>;
+export interface TrayState{items:TrayItem[];total:number;counts:TrayCounts;dark:boolean;canPaste:boolean;categories:{id:string;name:string}[]}
 export interface TrayPreview{token:string;kind:Kind;title:string;source:string;bytes:number;updatedAt:number;text:string;truncated:boolean;image?:string;files:{name:string;directory:boolean;saved:boolean}[]}
 export interface TrayAPI{state(query:TrayQuery):Promise<TrayState>;preview(token:string):Promise<TrayPreview>;use(token:string,paste:boolean):Promise<void>;drag(token:string):void;hide():Promise<void>;main():Promise<void>;onChange(callback:()=>void):()=>void;onSession?(callback:(open:boolean)=>void):()=>void;onNotice(callback:(text:string)=>void):()=>void}
 export function validateTrayQuery(value:unknown):TrayQuery{const v=value as TrayQuery;if(!v||typeof v.text!=='string'||v.text.length>512||!['all','text','link','code','image','files'].includes(v.kind)||typeof v.category!=='string'||v.category!==''&&v.category!=='favorites'&&!/^[0-9a-f-]{36}$/.test(v.category))throw new Error(tr('托盘搜索条件无效'));return {text:v.text.trim(),kind:v.kind,category:v.category};}

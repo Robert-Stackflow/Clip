@@ -8,14 +8,15 @@
 .recent-shell .header-actions button:hover{background:var(--hover);color:var(--fg)}
 .recent-shell .header-actions #close:hover{background:#c42b1c;color:#fff}
 .recent-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 14px 10px;flex-shrink:0;min-width:0}
-.recent-toolbar #filters{padding:0;margin:0;min-height:28px;display:flex;gap:2px;align-items:center;flex-wrap:wrap}
-.recent-toolbar #filters button{border:0;background:transparent;border-radius:999px;min-height:26px;padding:4px 9px;color:var(--muted);font-size:calc(11px * var(--text-scale,1));box-shadow:none}
-.recent-toolbar #filters button:hover{background:var(--hover);color:var(--fg)}
-.recent-toolbar #filters button.active{background:var(--selected);color:var(--fg);font-weight:550}
-.recent-category{flex-shrink:0;max-width:150px;min-width:0}.recent-category .custom-select{border:0;background:transparent;min-height:28px;height:28px;padding:4px 8px;font-size:calc(11px * var(--text-scale,1));color:var(--muted);gap:8px}
-.recent-category .custom-select:hover,.recent-category .custom-select[aria-expanded=true]{background:var(--hover);color:var(--fg)}
+.recent-toolbar #filters,.recent-toolbar #categories{margin:0;min-height:28px;min-width:0;max-width:100%;display:flex;gap:2px;align-items:center;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.recent-toolbar #filters{flex:0 1 auto}
+.recent-toolbar #categories{flex:0 1 auto;max-width:44%;margin-left:auto}
+.recent-toolbar #filters::-webkit-scrollbar,.recent-toolbar #categories::-webkit-scrollbar{display:none}
+.recent-toolbar #filters button,.recent-toolbar #categories button{border:0;background:transparent;border-radius:999px;min-height:26px;flex:0 0 auto;padding:4px 9px;color:var(--muted);font-size:calc(11px * var(--text-scale,1));box-shadow:none;gap:4px;white-space:nowrap}
+.recent-toolbar #filters button small{font-size:calc(10px * var(--text-scale,1));color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
+.recent-toolbar #filters button:hover,.recent-toolbar #categories button:hover{background:var(--hover);color:var(--fg)}
+.recent-toolbar #filters button.active,.recent-toolbar #categories button.active{background:var(--selected);color:var(--fg);font-weight:550}
 .recent-workspace{border:0!important;grid-template-columns:minmax(200px,.9fr) minmax(240px,1.1fr);gap:0;min-height:0}
-.recent-shell #count{font-size:calc(11px * var(--text-scale,1));padding:0 18px 8px;color:var(--muted)}
 .recent-shell #items{padding:0 8px 10px 10px;overscroll-behavior:contain}
 .recent-shell .tray-row{border:0!important;box-shadow:none;background:transparent;border-radius:var(--radius);min-height:78px;padding:12px 10px;margin:0 0 4px;gap:12px;align-items:flex-start}
 .recent-shell .tray-row:hover{background:var(--hover)}
@@ -44,15 +45,14 @@ body[data-view=shelf] .toolbar button,body[data-view=shelf] .actions button{bord
 body[data-view=shelf] .toolbar button:hover,body[data-view=shelf] .actions button:hover{background:var(--hover);color:var(--fg)}body[data-view=shelf] .toolbar button.active{background:var(--selected);color:var(--fg)}
 body[data-view=shelf] .shelf-row{margin:0 2px 3px;border:0;border-radius:var(--radius);min-height:66px;padding:10px 9px;background:transparent;gap:10px}body[data-view=shelf] .shelf-row:hover,body[data-view=shelf] .shelf-row:focus-within{background:var(--hover)}
 body[data-view=shelf] .visual{width:36px;height:38px;background:var(--soft);border:0;border-radius:9px}body[data-view=shelf] .actions{gap:2px}body[data-view=shelf] .actions button{width:26px;height:28px;min-height:28px;padding:5px}body[data-view=shelf] .empty{min-height:0;padding:18px;gap:10px}body[data-view=shelf] .empty button{border:0;background:var(--soft)}
-@media(max-width:600px){.recent-toolbar{gap:6px;padding-inline:10px}.recent-toolbar #filters button{padding-inline:7px}.recent-category{max-width:120px}.recent-shell #preview{padding:14px 14px 0}.recent-shell .preview-actions{padding-inline:14px}.recent-shell .row-meta time{display:none}.recent-workspace{grid-template-columns:minmax(180px,.9fr) minmax(200px,1.1fr)}}
-@media(max-width:480px){.recent-toolbar{align-items:flex-start;flex-direction:column;gap:4px}.recent-category{align-self:flex-end}.recent-workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,.9fr) minmax(0,1.1fr)}.recent-shell .preview-pane{display:flex;border-radius:10px}.recent-shell #preview{padding:10px 12px 0}.recent-shell .preview-actions{padding:8px 12px 12px}.recent-shell .preview-actions button{min-height:28px}.recent-shell #count{padding-inline:14px}}
+@media(max-width:600px){.recent-toolbar{gap:6px;padding-inline:10px}.recent-toolbar #filters button,.recent-toolbar #categories button{padding-inline:7px}.recent-shell #preview{padding:14px 14px 0}.recent-shell .preview-actions{padding-inline:14px}.recent-shell .row-meta time{display:none}.recent-workspace{grid-template-columns:minmax(180px,.9fr) minmax(200px,1.1fr)}}
+@media(max-width:480px){.recent-toolbar{align-items:flex-start;flex-direction:column;gap:4px}.recent-toolbar #filters{max-width:100%;width:100%}.recent-toolbar #categories{max-width:100%;width:100%;margin-left:0}.recent-workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,.9fr) minmax(0,1.1fr)}.recent-shell .preview-pane{display:flex;border-radius:10px}.recent-shell #preview{padding:10px 12px 0}.recent-shell .preview-actions{padding:8px 12px 12px}.recent-shell .preview-actions button{min-height:28px}}
 @media(max-height:320px){
  .recent-shell .recent-header{height:44px}
  .recent-toolbar{align-items:center;flex-direction:row;gap:6px;padding:0 10px 6px}
- .recent-toolbar #filters{min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
- .recent-toolbar #filters::-webkit-scrollbar{display:none}
- .recent-toolbar #filters button{flex:0 0 auto}
- .recent-category{align-self:center;max-width:96px}
+ .recent-toolbar #filters,.recent-toolbar #categories{min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+ .recent-toolbar #filters{flex:1 1 65%}
+ .recent-toolbar #categories{flex:1 1 35%;max-width:35%;margin-left:0}
  body[data-view=tray] .recent-shell .recent-workspace{grid-template-rows:minmax(0,1fr) auto;gap:6px;padding:0 8px 8px}
  .recent-shell #preview{display:none}
  .recent-shell .preview-actions{padding:6px 8px 8px}
