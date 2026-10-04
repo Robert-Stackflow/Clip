@@ -1,2 +1,30 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' clipper-font:; connect-src 'none'; base-uri 'none'; form-action 'none'"><title>Clipper · 解锁历史</title><link rel="stylesheet" href="unlock.css"><link rel="stylesheet" href="one-ui.css"></head><body><header class="protection-header">Clipper</header><main><div class="intro"><h1 id="heading">正在关闭资料…</h1><p id="description">正在停止共享和后台任务。</p></div><section class="protection-card settings-card"><form id="unlock-form" hidden><label for="unlock-value" id="value-label">解锁密码</label><div class="input-row"><input id="unlock-value" type="password" autocomplete="off" maxlength="1024" required autofocus></div><div id="new-password-fields" hidden><label for="new-password">设置新密码（至少 12 个字符）</label><div class="input-row"><input id="new-password" type="password" autocomplete="new-password" maxlength="1024"></div><label for="repeat-password">再次输入新密码</label><div class="input-row"><input id="repeat-password" type="password" autocomplete="new-password" maxlength="1024"></div></div><button class="primary" type="submit" id="unlock-submit">解锁历史</button><button class="text" type="button" id="use-recovery">使用恢复密钥</button></form><button class="option" id="hello" hidden><b>使用 Windows Hello</b><span>通过本机身份验证后打开历史</span><i>↗</i></button></section><p id="feedback" role="alert"></p><footer><button id="recover" class="text" disabled>从资料或备份恢复</button><button id="quit" class="text">退出 Clipper</button></footer></main><script src="unlock.js"></script></body></html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' clipper-font:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Clipper · 解锁历史</title><link rel="stylesheet" href="unlock.css"><link rel="stylesheet" href="one-ui.css">
+</head>
+<body>
+  <header class="protection-header">Clipper</header>
+  <main class="unlock-page">
+    <div class="unlock-content">
+      <div class="intro"><div class="unlock-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div><h1 id="heading">正在关闭资料…</h1><p id="description">正在停止共享和后台任务。</p></div>
+      <section class="protection-card settings-card" aria-labelledby="heading">
+        <form id="unlock-form" hidden>
+          <label for="unlock-value" id="value-label">解锁密码</label>
+          <div class="input-row"><input id="unlock-value" type="password" autocomplete="off" maxlength="1024" required autofocus></div>
+          <div id="new-password-fields" hidden><label for="new-password">设置新密码（至少 12 个字符）</label><div class="input-row"><input id="new-password" type="password" autocomplete="new-password" maxlength="1024"></div><label for="repeat-password">再次输入新密码</label><div class="input-row"><input id="repeat-password" type="password" autocomplete="new-password" maxlength="1024"></div></div>
+          <button class="primary" type="submit" id="unlock-submit"><span class="unlock-spinner" aria-hidden="true"></span><span id="unlock-submit-label">解锁历史</span></button>
+          <button class="unlock-secondary" type="button" id="use-recovery" aria-expanded="false"><span class="unlock-secondary-copy"><strong id="recovery-action">使用恢复密钥</strong><small id="recovery-hint">忘记密码时，可用保存的密钥重设密码</small></span><span class="unlock-chevron" aria-hidden="true">›</span></button>
+        </form>
+        <button class="unlock-secondary" id="hello" hidden><span class="unlock-secondary-copy"><strong>使用 Windows Hello</strong><small>通过本机身份验证后打开历史</small></span><span class="unlock-chevron" aria-hidden="true">›</span></button>
+      </section>
+      <p id="feedback" role="alert" aria-live="assertive"></p>
+      <p id="unlock-progress" role="status" aria-live="polite" hidden>正在验证，请稍候…</p>
+    </div>
+    <footer><button id="recover" class="text" disabled>从资料或备份恢复</button><button id="quit" class="text">退出 Clipper</button></footer>
+  </main>
+  <script src="unlock.js"></script>
+</body>
+</html>

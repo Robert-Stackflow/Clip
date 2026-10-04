@@ -79,6 +79,23 @@ export class StorageManager {
    next=new Store(file,false,false,p.key);const cleanup={directory:previous,fingerprint:expected,profileId:this.profileId};await writeAtomic(join(target,'plaintext-predecessor.json'),JSON.stringify({...cleanup,mac:createHmac('sha256',p.key).update(JSON.stringify(cleanup)).digest('hex')}));await this.savePointer(target,previous,true);committed=true;this.protectionExpected=true;const old=this.store;this.store=next;this.directory=target;this.previousDirectory=previous;this.vault.adopt(target,p.record,p.key);old.close();return next;
   }catch(e){if(!committed){next?.close();for(const name of ['history.sqlite','history.sqlite-wal','history.sqlite-shm','history-vault.json','plaintext-predecessor.json'])await unlink(join(target,name)).catch(()=>{});}throw e;}finally{this.cancelEncryption();}
  }
+ async decrypt(){
+  if(!this.vault.state().encrypted||!this.vault.unlocked)throw new Error(tr('请先解锁加密资料'));
+  const previous=this.directory,target=join(this.defaultDirectory,'plaintext-'+randomUUID()),file=join(target,'history.sqlite'),key=this.vault.copyKey();let next:Store|undefined,committed=false;
+  if(!key)throw new Error(tr('请先解锁加密资料'));
+  try{
+   await mkdir(target);
+   const copied=await recoveryJob<{profileId:string;fingerprint:string}>({operation:'copy',source:join(previous,'history.sqlite'),file,sourceKey:key});
+   if(copied.profileId!==this.profileId)throw new Error(tr('迁移副本与当前数据不一致'));
+   const handle=await open(file,'r+');try{await handle.sync();}finally{await handle.close();}
+   next=new Store(file,false,false);if(fingerprint(next.db)!==copied.fingerprint)throw new Error(tr('迁移副本与当前数据不一致'));
+   await this.savePointer(target,previous,false);committed=true;
+   const old=this.store;this.store=next;this.directory=target;this.previousDirectory=previous;this.protectionExpected=false;this.vault.reset(target);
+   try{old.close();}catch{console.warn(tr('原数据库关闭时发生错误，当前数据目录已切换'));}
+   return next;
+  }catch(e){if(!committed){next?.close();for(const suffix of ['','-wal','-shm'])await unlink(file+suffix).catch(()=>{});}throw e;}
+  finally{key.fill(0);}
+ }
  async predecessor(){try{const p=JSON.parse(await readFile(join(this.directory,'plaintext-predecessor.json'),'utf8')),key=this.vault.copyKey();try{const data={directory:p.directory,fingerprint:p.fingerprint,profileId:p.profileId};if(!key||typeof p.directory!=='string'||p.profileId!==this.profileId||typeof p.fingerprint!=='string'||p.mac!==createHmac('sha256',key).update(JSON.stringify(data)).digest('hex'))throw new Error(tr('原副本清理信息无效'));return data as {directory:string;fingerprint:string;profileId:string};}finally{key?.fill(0);}}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return null;throw e;}}
  /** Explicitly requested only after the encrypted copy has passed inspection. Never recursive. */
  async removePredecessor(){if(!this.vault.unlocked)throw new Error(tr('请先解锁'));const p=await this.predecessor();if(!p)return;const root=await localDirectory(p.directory),file=resolve(root,'history.sqlite');if(root.toLowerCase()===this.directory.toLowerCase()||dirname(file)!==resolve(root))throw new Error(tr('原目录不允许清理'));const key=this.vault.copyKey();try{checkDatabase(join(this.directory,'history.sqlite'),this.profileId,undefined,key);}finally{key?.fill(0);}const exists=await stat(file).then(()=>true,e=>{if(e.code==='ENOENT')return false;throw e;});if(exists&&inspectDatabase(file).fingerprint!==p.fingerprint)throw new Error(tr('原副本已改变，未删除任何内容'));for(const suffix of ['','-wal','-shm'])await unlink(file+suffix).catch(e=>{if(e.code!=='ENOENT')throw e;});await unlink(join(this.directory,'plaintext-predecessor.json'));}
