@@ -51,7 +51,35 @@ async function run(){
   await expect(edge.locator('#input')).toHaveValue(second);
   await expect.poll(async()=>(await state()).queue.length).toBe(0);
   assert.equal(await f.helper.evaluate(({clipboard})=>clipboard.readText()),second);
-  console.log(JSON.stringify({result:'PASS',packaged:!!process.env.CLIPPER_PACKAGED_EXE,firstApp:'Electron helper',secondApp:'Microsoft Edge',normalPastePreservesQueue:true,queueConsumedInOrder:true}));
+
+  // The main-window button must return to the last real target application.
+  const third='堆栈按钮粘贴 '+randomUUID(),fourth='等待目标 '+randomUUID();
+  const remaining=await f.page.evaluate(async values=>{
+   const ids=[];for(const value of values){const id=await window.clipper.saveOcr(value);await window.clipper.action(id,'enqueue');ids.push(id);}return ids;
+  },[third,fourth]);
+  await edge.locator('#input').fill('');await edge.locator('#input').focus();
+  assert.equal(await activate(hwnd),true);await expect.poll(foreground).toBe(hwnd);
+  await f.key((await state()).settings.shortcut);
+  await f.page.locator('[data-page=stack]').click();await f.page.locator('#paste-next').click();
+  await expect(edge.locator('#input')).toHaveValue(third);
+  assert.deepEqual((await state()).queue,[remaining[1]]);
+
+  // Once Edge closes, the remembered handle is stale: preserve queue and clipboard.
+  const mainHandle=await f.app.evaluate(({BrowserWindow})=>{
+   const main=BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/index.html'));
+   main.show();main.focus();return Number(main.getNativeWindowHandle().readBigUInt64LE());
+  });
+  await f.click('#search');
+  await f.app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/index.html')).setAlwaysOnTop(false));
+  await expect.poll(foreground).toBe(mainHandle);
+  await browser.close();browser=undefined;
+  const failure=await f.page.evaluate(async()=>{
+   try{await window.clipper.next();return '';}catch(error){return String(error.message);}
+  });
+  assert.match(failure,/请先切换到需要粘贴的应用/);
+  assert.deepEqual((await state()).queue,[remaining[1]]);
+  assert.equal(await f.helper.evaluate(({clipboard})=>clipboard.readText()),third);
+  console.log(JSON.stringify({result:'PASS',packaged:!!process.env.CLIPPER_PACKAGED_EXE,firstApp:'Electron helper',secondApp:'Microsoft Edge',normalPastePreservesQueue:true,queueConsumedInOrder:true,mainButtonPastes:true,staleTargetRejected:true}));
  }finally{
   if(browser)await browser.close();
   await f.close();
