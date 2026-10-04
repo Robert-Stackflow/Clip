@@ -64,6 +64,13 @@ async function run(){
   await expect(edge.locator('#input')).toHaveValue(third);
   assert.deepEqual((await state()).queue,[remaining[1]]);
 
+  // A normal history paste uses the same target check without consuming the queue.
+  await edge.locator('#input').fill('');await edge.locator('#input').focus();
+  assert.equal(await activate(hwnd),true);await expect.poll(foreground).toBe(hwnd);
+  await f.page.evaluate(id=>window.clipper.copy(id,true),remaining[1]);
+  await expect(edge.locator('#input')).toHaveValue(fourth);
+  assert.deepEqual((await state()).queue,[remaining[1]]);
+
   // Once Edge closes, the remembered handle is stale: preserve queue and clipboard.
   const mainHandle=await f.app.evaluate(({BrowserWindow})=>{
    const main=BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/index.html'));
@@ -78,8 +85,10 @@ async function run(){
   });
   assert.match(failure,/请先切换到需要粘贴的应用/);
   assert.deepEqual((await state()).queue,[remaining[1]]);
-  assert.equal(await f.helper.evaluate(({clipboard})=>clipboard.readText()),third);
-  console.log(JSON.stringify({result:'PASS',packaged:!!process.env.CLIPPER_PACKAGED_EXE,firstApp:'Electron helper',secondApp:'Microsoft Edge',normalPastePreservesQueue:true,queueConsumedInOrder:true,mainButtonPastes:true,staleTargetRejected:true}));
+  await assert.rejects(f.page.evaluate(id=>window.clipper.copy(id,true),remaining[1]),/请先切换到需要粘贴的应用/);
+  assert.deepEqual((await state()).queue,[remaining[1]]);
+  assert.equal(await f.helper.evaluate(({clipboard})=>clipboard.readText()),fourth);
+  console.log(JSON.stringify({result:'PASS',packaged:!!process.env.CLIPPER_PACKAGED_EXE,firstApp:'Electron helper',secondApp:'Microsoft Edge',normalPastePreservesQueue:true,queueConsumedInOrder:true,mainButtonPastes:true,historyPasteChecksTarget:true,staleTargetRejected:true}));
  }finally{
   if(browser)await browser.close();
   await f.close();
