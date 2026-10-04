@@ -10,8 +10,8 @@ const {setup}=require('./renderer-fixture.cjs');
  const errors=[];let context;
  try{
   context=await browser.newContext({viewport:{width:1280,height:820}});
-  await context.grantPermissions(['clipboard-read','clipboard-write'],{origin:'https://clipper.test'});
   await context.addInitScript(setup);
+  await context.addInitScript(()=>{let copied='';Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async value=>{copied=String(value);},readText:async()=>copied}});});
   await context.route('https://clipper.test/**',async route=>{
    const name=new URL(route.request().url()).pathname.slice(1);
    if(!/^(?:[\w.-]+|(?:katex-fonts|emoji-atlas)\/[\w.-]+)$/.test(name))return route.abort();
@@ -285,6 +285,8 @@ const {setup}=require('./renderer-fixture.cjs');
   await page.waitForFunction(()=>document.querySelectorAll('[data-section]').length===1&&document.querySelector('[data-section] h3')?.textContent==='希腊和希伯来字母');
   await page.waitForSelector('.reference-formula');
   assert.ok(await page.locator('.katex').count()>20);
+  assert.equal(await page.locator('.reference-formula-grid').count(),2);
+  assert.ok(await page.locator('.reference-formula-command code').first().evaluate(node=>node.getBoundingClientRect().height<=parseFloat(getComputedStyle(node).lineHeight)+1),'LaTeX commands should stay on one line');
   const formula=page.getByRole('button',{name:'\\alpha',exact:true}).first();await formula.click();
   assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),'\\alpha');
   await page.screenshot({path:'work/reference-ui/latex.png'});

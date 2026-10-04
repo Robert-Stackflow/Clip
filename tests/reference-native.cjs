@@ -6,7 +6,11 @@ const assert=require('node:assert/strict');
 
 (async()=>{
  const {beginCase}=await import('../scripts/workspace.mjs'),work=await beginCase('reference-native');
- const profile=path.join(work.fixtures,'profile'),{StorageManager}=require('../work/test-exports.cjs'),storage=new StorageManager(profile),store=await storage.start();store.saveSettings({...store.settings,paused:true});store.close();
+ const profile=path.join(work.fixtures,'profile'),{StorageManager}=require('../work/test-exports.cjs'),storage=new StorageManager(profile),store=await storage.start();
+ store.saveSettings({...store.settings,paused:true,shortcut:'Control+Shift+F18',quickShortcut:'Control+Alt+F19',nextShortcut:'Control+Alt+F20'});
+ store.setMeta('desktop-options',{shelfShortcut:'Control+Alt+F21'});
+ store.setMeta('efficiency',{historyEnabled:false,repliesShortcut:'Control+Alt+F23',bindings:[]});
+ store.close();
  const env={...process.env,CLIPPER_TEST_MODE:'1',CLIPPER_DATA_DIR:profile};delete env.ELECTRON_RUN_AS_NODE;
  const app=await electron.launch(process.env.CLIPPER_PACKAGED_EXE?{executablePath:process.env.CLIPPER_PACKAGED_EXE,args:[],env}:{args:[path.resolve('.')],env});
  try{

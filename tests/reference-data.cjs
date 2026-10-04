@@ -12,6 +12,10 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=r
   assert.ok(!rendered.includes('<img')&&!rendered.includes('href="javascript:'));
   assert.ok(rendered.includes('data-code="echo &quot;&lt;test&gt; &amp; ok&quot;\n"'));
   const formula=renderCheatBlocks([{type:'paragraph',text:'`KaTeX:\\alpha`'}]);assert.ok(formula.includes('class="katex"')&&formula.includes('data-code="\\alpha"'));
+  const greek=data.topics.find(topic=>topic.id==='latex').sections.find(section=>section.name==='希腊和希伯来字母').blocks[0];
+  const formulaGrid=renderCheatBlocks([greek],'latex');assert.ok(formulaGrid.includes('reference-formula-grid')&&!formulaGrid.includes('<table>'));
+  assert.ok(formulaGrid.includes('data-code="\\lambda"'),'LaTeX commands remain complete and copyable');
+  assert.ok(renderCheatBlocks([greek],'git').includes('<table>'),'Ordinary tables retain their column layout');
   const samples={git:'git config --global core.quotepath false\n# 注释\n',bash:'if true; then echo "$HOME <&>"; fi',linux:'sudo chmod 755 ./file',latex:'\\documentclass{article}\n% 注释\n\\alpha',regex:'^(?<name>\\w+)[0-9]{2,4}$',python:'if True: print("<img>")',javascript:'const value = /a+/g;',php:'echo preg_match("/a+/", $value);',sql:'SELECT * FROM users WHERE id = 42;',ini:'[core]\neditor = vim'};
   const decode=value=>value.replace(/<span class="reference-syntax-[\w -]+">|<\/span>/g,'').replace(/&(?:amp|lt|gt|quot|#39);/g,entity=>({'&amp;':'&','&lt;':'<','&gt;':'>','&quot;':'"','&#39;':"'"}[entity]));
   for(const [language,text] of Object.entries(samples)){

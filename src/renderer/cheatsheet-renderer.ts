@@ -6,6 +6,12 @@ import {highlightCheatCode} from './cheatsheet-highlight';
 const esc=(value:string)=>value.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const math=(text:string,displayMode=false)=>katex.renderToString(text,{displayMode,throwOnError:false,trust:false,strict:'ignore',maxExpand:1000});
 const parsers=new Map<string,Marked>();
+function formulaPairs(block:Extract<CheatBlock,{type:'table'}>,language:string):string|undefined{
+ if(language!=='latex'||block.header.length<4||block.header.length%2)return;
+ const pairs=block.rows.flatMap(row=>Array.from({length:block.header.length/2},(_,index)=>[row[index*2]||'',row[index*2+1]||'']));
+ if(!pairs.length||pairs.filter(([preview])=>/^`KaTex:/i.test(preview)).length<pairs.length*.7)return;
+ return `<div class="reference-formula-grid">${pairs.filter(([preview,command])=>preview||command).map(([preview,command])=>`<div class="reference-formula-entry"><div class="reference-formula-preview">${inline(preview,language)}</div><div class="reference-formula-command">${inline(command,language)}</div></div>`).join('')}</div>`;
+}
 function inline(text:string,language:string){
  let parser=parsers.get(language);if(!parser){parser=new Marked({gfm:true,renderer:{
  html({text}){return text.startsWith('<!--')?'':/^<\/?pur\s*>$/i.test(text)?'':/^<br\s*\/?\s*>$/i.test(text)?'<br>':esc(text);},
@@ -20,7 +26,7 @@ export function renderCheatBlocks(blocks:CheatBlock[],language=''):string{return
  switch(block.type){
   case 'paragraph':return `<p>${inline(block.text,language)}</p>`;
   case 'code':{const preview=/^katex$/i.test(block.language)?`<div class="reference-math-preview">${math(block.text,true)}</div>`:'';return `${preview}<div class="reference-code-block"><div class="reference-code-caption"><span>${esc(block.language)}</span><button type="button" class="reference-code-copy" data-code="${esc(block.text)}">${tx('复制','Copy')}</button></div><pre><code>${highlightCheatCode(block.text,block.language||language)}</code></pre></div>`;}
-  case 'table':return `<div class="reference-table-wrap"><table><thead><tr>${block.header.map(cell=>`<th>${inline(cell,language)}</th>`).join('')}</tr></thead><tbody>${block.rows.map(row=>`<tr>${row.map(cell=>`<td>${inline(cell,language)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  case 'table':return formulaPairs(block,language)||`<div class="reference-table-wrap"><table><thead><tr>${block.header.map(cell=>`<th>${inline(cell,language)}</th>`).join('')}</tr></thead><tbody>${block.rows.map(row=>`<tr>${row.map(cell=>`<td>${inline(cell,language)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
   case 'list':{const tag=block.ordered?'ol':'ul';return `<${tag}${block.ordered?` start="${block.start}"`:''}>${block.items.map(item=>`<li>${renderCheatBlocks(item,language)}</li>`).join('')}</${tag}>`;}
   case 'quote':return `<blockquote>${renderCheatBlocks(block.blocks,language)}</blockquote>`;
   case 'divider':return '<hr>';
