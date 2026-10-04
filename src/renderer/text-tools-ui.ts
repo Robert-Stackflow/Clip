@@ -80,15 +80,15 @@ export function textToolsUI(ctx:Context){
  }
  async function external(){
   const dialog=q<HTMLDialogElement>('dialog');if(externalBusy||dialog.open)return;
-  externalBusy=true;let awaitingDecision=false;
+  externalBusy=true;let awaitingDecision=false,handled=false;
   try{
    const state=await api.integrations(),pending=state.pending;if(!pending||dialog.open)return;
-   if(['open','search'].includes(pending.intent.action)){const result=await api.resolveExternal(pending.id,true);if(result)ctx.navigate('history',result.action==='search'?result.text:'');return;}
+   if(['open','search'].includes(pending.intent.action)){const result=await api.resolveExternal(pending.id,true);handled=true;if(result)ctx.navigate('history',result.action==='search'?result.text:'');return;}
    let accepted=false;
    modal(pending.intent.action==='add'?tr('外部请求：新增记录'):tr('外部请求：复制文字'),tr`<p class="field-help">以下文字来自外部链接，确认后才会${pending.intent.action==='add'?tr('加入历史'):tr('覆盖系统剪贴板')}。</p><pre class="external-preview">${esc(pending.intent.text)}</pre>`,async()=>{const result=await api.resolveExternal(pending.id,true);accepted=true;if(result?.clipId)await ctx.select(result.clipId);ctx.toast(pending.intent.action==='add'?tr('已添加记录'):tr('文字已复制'));},pending.intent.action==='add'?tr('添加记录'):tr('复制文字'));
    awaitingDecision=true;
    dialog.addEventListener('close',()=>{void(async()=>{if(!accepted)await api.resolveExternal(pending.id,false).catch(()=>{});externalBusy=false;await external();})().catch(ctx.toast);},{once:true});
-  }finally{if(!awaitingDecision)externalBusy=false;}
+  }finally{if(!awaitingDecision){externalBusy=false;if(handled)queueMicrotask(()=>void external().catch(ctx.toast));}}
  }
 
  return {render,ai,script,external};

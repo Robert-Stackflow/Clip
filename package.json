@@ -18,7 +18,7 @@
     "test:advanced": "npm run build && node tests/advanced-ui.cjs",
     "test:capture": "npm run build && node tests/capture.cjs",
     "test:drag": "npm run build && node tests/drag.cjs",
-    "test:text-tools": "npm run build && node tests/text-tools-ui.cjs && node tests/text-tools-boundaries.cjs",
+    "test:text-tools": "npm run build && node tests/text-tools-ui.cjs && node tests/text-tools-boundaries.cjs && node tests/integration-queue.cjs",
     "test:data": "npm run build && node tests/data-ui.cjs",
     "test:backup-preview": "npm test && npm run build && node tests/backup-preview-performance.cjs && node tests/backup-preview-native.cjs",
     "test:vault": "npm run build && node tests/vault-ui.cjs && node tests/vault-boundaries.cjs",

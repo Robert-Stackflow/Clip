@@ -905,6 +905,7 @@ export const english:Readonly<Record<string,string>>={
   "Windows 未能注册 URL 协议": "Windows could not register the URL protocol",
   "Windows 未能移除 URL 协议": "Windows could not remove the URL protocol",
   "外部请求已过期": "The external request has expired",
+  "外部请求过多，请稍后重试": "Too many external requests; try again later",
   "脚本运行失败": "Script execution failed",
   "脚本超过运行时限": "Script exceeded its time limit",
   "脚本必须返回字符串，不支持异步任务": "Scripts must return a string; asynchronous tasks are unsupported",
