@@ -15,7 +15,10 @@ const {chromium}=require('@playwright/test');
   const result=await page.evaluate(async()=>{
    const dialog=document.querySelector('dialog');
    const exit=motion.exitDialog(dialog);
-   await new Promise(resolve=>setTimeout(resolve,48));
+   const animation=dialog.getAnimations().find(item=>item.animationName==='dialog-out');
+   if(!animation)throw Error('Dialog exit animation did not start');
+   animation.pause();animation.currentTime=48;
+   await new Promise(requestAnimationFrame);
    const before=Number(getComputedStyle(dialog).opacity);
    motion.resetDialogMotion(dialog);
    const captured=Number(dialog.style.getPropertyValue('--dialog-enter-opacity'));
