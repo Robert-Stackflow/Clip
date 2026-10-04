@@ -22,6 +22,7 @@ const {setup}=require('./renderer-fixture.cjs');
    page.on('pageerror',error=>errors.push(error.message));
    await page.goto('https://clipper.test/tray.html');
    await page.waitForSelector('.preview-content pre');
+   assert.equal(await page.evaluate(()=>document.activeElement?.id),'search','Opening the active recent panel should be ready for typing');
    const layout=await page.evaluate(()=>{
     const rect=selector=>document.querySelector(selector).getBoundingClientRect();
     const container=document.querySelector('#preview');
