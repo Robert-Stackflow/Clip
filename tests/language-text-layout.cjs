@@ -10,8 +10,10 @@ const cases=[['ai',['#new-ai-profile','[data-ai-default="local"]']],['scripts',[
    for(const font of language==='en'?['system','sans','mono']:['mono'])for(const scale of language==='en'?[100,110,125,150]:[100,150])for(const density of ['comfortable','compact']){
     await page.evaluate(v=>fixture.appearance(v),{font,scale,density});await page.evaluate(()=>new Promise(requestAnimationFrame));const label=`${language} ${name} ${font} ${scale} ${density}`,metrics={};
     for(const selector of all){await page.locator(selector).scrollIntoViewIfNeeded();Object.assign(metrics,await measure(page,[selector]));}
-    const horizontal=await page.locator(dialog?'.modal-body':'.tools-scroll').evaluate(el=>el.scrollWidth>el.clientWidth+1);results.push({label,metrics,horizontal});
-    for(const [key,value] of Object.entries(metrics))if(value===false||typeof value==='object'&&(value.missing||!value.visible||!value.reachable))failures.push({label,key,value});if(horizontal)failures.push({label,key:'horizontal overflow'});
+    const horizontal=await page.locator(dialog?'.modal-body':'.tools-scroll').evaluate(el=>el.scrollWidth>el.clientWidth+1);
+    const clippedNav=scale===150?await page.locator('.sidebar .nav-item span:not(.status-dot)').evaluateAll(nodes=>nodes.filter(node=>node.scrollWidth>node.clientWidth+1).map(node=>node.textContent?.trim())):[];
+    results.push({label,metrics,horizontal,clippedNav});
+    for(const [key,value] of Object.entries(metrics))if(value===false||typeof value==='object'&&(value.missing||!value.visible||!value.reachable))failures.push({label,key,value});if(horizontal)failures.push({label,key:'horizontal overflow'});if(clippedNav.length)failures.push({label,key:'clipped sidebar labels',clippedNav});
    }
    await page.locator(dialog?'.modal-body':'.tools-scroll').evaluate(el=>el.scrollTop=0);await page.screenshot({path:`work/language-text/${name}-${language}-150.png`});assert.equal(await page.locator('#injected-profile,#injected-script,#injected-model,#injected-external').count(),0);
   }await context.close();context=undefined;
