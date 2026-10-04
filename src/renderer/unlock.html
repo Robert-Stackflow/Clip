@@ -15,15 +15,14 @@
           <label for="unlock-value" id="value-label">解锁密码</label>
           <div class="input-row"><input id="unlock-value" type="password" autocomplete="off" maxlength="1024" required autofocus></div>
           <div id="new-password-fields" hidden><label for="new-password">设置新密码（至少 12 个字符）</label><div class="input-row"><input id="new-password" type="password" autocomplete="new-password" maxlength="1024"></div><label for="repeat-password">再次输入新密码</label><div class="input-row"><input id="repeat-password" type="password" autocomplete="new-password" maxlength="1024"></div></div>
-          <button class="primary" type="submit" id="unlock-submit"><span class="unlock-spinner" aria-hidden="true"></span><span id="unlock-submit-label">解锁历史</span></button>
+          <button class="primary" type="submit" id="unlock-submit"><span class="unlock-spinner" aria-hidden="true"></span><span id="unlock-submit-label" aria-live="polite">解锁历史</span></button>
           <button class="unlock-secondary" type="button" id="use-recovery" aria-expanded="false"><span class="unlock-secondary-copy"><strong id="recovery-action">使用恢复密钥</strong><small id="recovery-hint">忘记密码时，可用保存的密钥重设密码</small></span><span class="unlock-chevron" aria-hidden="true">›</span></button>
         </form>
-        <button class="unlock-secondary" id="hello" hidden><span class="unlock-secondary-copy"><strong>使用 Windows Hello</strong><small>通过本机身份验证后打开历史</small></span><span class="unlock-chevron" aria-hidden="true">›</span></button>
+        <button class="unlock-secondary" id="hello" hidden><span class="unlock-secondary-copy"><strong id="hello-action" aria-live="polite">使用 Windows Hello</strong><small>通过本机身份验证后打开历史</small></span><span class="unlock-spinner" aria-hidden="true"></span><span class="unlock-chevron" aria-hidden="true">›</span></button>
       </section>
       <p id="feedback" role="alert" aria-live="assertive"></p>
-      <p id="unlock-progress" role="status" aria-live="polite" hidden>正在验证，请稍候…</p>
     </div>
-    <footer><button id="recover" class="text" disabled>从资料或备份恢复</button><button id="quit" class="text">退出 Clipper</button></footer>
+    <footer><button id="recover" class="text" disabled><span class="unlock-spinner" aria-hidden="true"></span><span id="recover-action" aria-live="polite">从资料或备份恢复</span></button><button id="quit" class="text">退出 Clipper</button></footer>
   </main>
   <script src="unlock.js"></script>
 </body>

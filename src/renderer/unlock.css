@@ -8,7 +8,7 @@ body[data-view=unlock]>main.unlock-page{max-width:600px;display:flex;flex-direct
 .unlock-icon svg{width:22px;height:22px}
 body[data-view=unlock] .protection-card{padding:22px 22px 0;margin:0;border-radius:16px}
 #unlock-form{display:flex;flex-direction:column;gap:0;margin:0}
-#unlock-form[hidden],#new-password-fields[hidden],#hello[hidden],#unlock-progress[hidden]{display:none!important}
+#unlock-form[hidden],#new-password-fields[hidden],#hello[hidden]{display:none!important}
 #unlock-form>label,#new-password-fields>label{font-size:calc(12px * var(--text-scale,1));font-weight:550}
 #unlock-form .input-row{margin:9px 0 0}
 #unlock-form .input-row input{width:100%;min-height:42px}
@@ -16,7 +16,8 @@ body[data-view=unlock] .protection-card{padding:22px 22px 0;margin:0;border-radi
 #new-password-fields>label{margin-top:14px}
 body[data-view=unlock] #unlock-submit{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:42px;margin:18px 0 20px}
 .unlock-spinner{display:none;width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:unlock-spin .7s linear infinite}
-body[data-view=unlock][data-busy-inline=true] .unlock-spinner{display:block}
+body[data-view=unlock][data-busy-target=unlock-submit-label] #unlock-submit .unlock-spinner,body[data-view=unlock][data-busy-target=hello-action] #hello .unlock-spinner,body[data-view=unlock][data-busy-target=recover-action] #recover .unlock-spinner{display:block}
+body[data-view=unlock][data-busy-target=hello-action] #hello .unlock-chevron{display:none}
 @keyframes unlock-spin{to{transform:rotate(360deg)}}
 .unlock-page .unlock-secondary{width:calc(100% + 44px);margin:0 -22px;padding:14px 22px;min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:18px;text-align:left;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent;color:var(--fg)}
 body[data-view=unlock] main.unlock-page #use-recovery,body[data-view=unlock] main.unlock-page #hello{margin:0 -22px}
@@ -25,10 +26,9 @@ body[data-view=unlock] main.unlock-page #use-recovery,body[data-view=unlock] mai
 .unlock-page .unlock-secondary-copy strong{font-size:calc(12px * var(--text-scale,1));font-weight:550}
 .unlock-page .unlock-secondary-copy small{font-size:calc(11px * var(--text-scale,1));font-weight:400;line-height:1.45;color:var(--muted);white-space:normal}
 .unlock-page .unlock-chevron{font-size:24px;line-height:1;color:var(--muted)}
-.unlock-page #feedback,.unlock-page #unlock-progress{max-width:460px;margin:12px auto 0;font-size:calc(12px * var(--text-scale,1));line-height:1.6}
-.unlock-page #unlock-progress{color:var(--muted);display:flex;align-items:center;gap:9px}
-.unlock-page #unlock-progress:before{content:'';display:block;width:13px;height:13px;border:2px solid var(--muted);border-right-color:transparent;border-radius:50%;animation:unlock-spin .7s linear infinite}
+.unlock-page #feedback{max-width:460px;margin:12px auto 0;font-size:calc(12px * var(--text-scale,1));line-height:1.6}
 body[data-view=unlock] main.unlock-page footer{width:100%;padding:12px 0 0;margin-top:auto;border-top:1px solid var(--line)}
 body[data-view=unlock] footer button{font-size:calc(11px * var(--text-scale,1));color:var(--muted)}
+body[data-view=unlock] #recover{display:inline-flex;align-items:center;gap:8px}
 body[data-view=unlock] footer button:hover{color:var(--fg)}
 @media(max-height:620px){body[data-view=unlock]>main.unlock-page{justify-content:flex-start;padding-top:18px}.unlock-page .intro{margin-bottom:14px}.unlock-icon{width:36px;height:36px;margin-bottom:10px}.unlock-icon svg{width:19px;height:19px}}
