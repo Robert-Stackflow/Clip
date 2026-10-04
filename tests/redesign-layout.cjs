@@ -29,6 +29,21 @@ const output=deviceScaleFactor===1?'work/redesign':`work/redesign-dpi-${deviceSc
  }
  // Category rail preserves unsaved values across switching and saves the original data.
  await page.locator('[data-page="settings"]').click();const settingsNav=page.locator('.settings-nav button'),privacy=()=>settingsNav.filter({hasText:language==='en'?'History & privacy':'记录与隐私'});await privacy().click();await page.locator('#max-items').fill('650');await settingsNav.first().click();await page.waitForFunction(()=>fixture.calls.some(c=>c[0]==='settings'&&c[1].maxItems===650));await privacy().click();assert.equal(await page.locator('#max-items').inputValue(),'650');assert.equal(await page.locator('#save-settings').count(),0);assert.equal(await page.evaluate(()=>fixture.state.settings.maxItems),650);
+ const storageTab=settingsNav.filter({hasText:language==='en'?'Current storage':'当前存储'});
+ await storageTab.click();
+ await page.waitForSelector('#settings-storage-summary');
+ await page.locator('#migrate-storage').focus();
+ const storageScroll=await page.locator('.settings-panels').evaluate(node=>{node.scrollTop=120;return node.scrollTop;});
+ assert.ok(storageScroll>0);
+ const expectedCount=await page.evaluate(()=>fixture.state.clips.length+1);
+ await page.evaluate(()=>{fixture.state.clips.push({...fixture.state.clips[0],id:'new-storage-record'});fixture.state.bytes=4096;fixture.refresh();});
+ await page.waitForFunction(()=>document.getElementById('settings-storage-summary')?.textContent?.includes('4 KB'));
+ const summaryText=await page.locator('#settings-storage-summary').textContent();
+ assert.ok(summaryText.includes(String(expectedCount))&&summaryText.includes('4 KB'));
+ assert.equal(await page.locator('#migrate-storage').evaluate(node=>node===document.activeElement),true);
+ assert.equal(await page.locator('.settings-panels').evaluate(node=>node.scrollTop),storageScroll);
+ await page.evaluate(()=>{fixture.state.clips.pop();fixture.state.bytes=1024;fixture.refresh();});
+ await page.waitForFunction(()=>document.getElementById('settings-storage-summary')?.textContent?.includes('1 KB'));
  await page.locator('#sidebar-toggle').click();
  assert.equal(await page.locator('#sidebar-toggle').getAttribute('aria-expanded'),'false');
  const category=page.locator('#categories [data-category="work"]');
