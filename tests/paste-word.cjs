@@ -5,8 +5,10 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const {randomUUID}=require('node:crypto');
 const {fixture}=require('./efficiency-fixture.cjs');
+const {Store}=require('../work/test-exports.cjs');
 
 async function run(){
+ const rich=process.env.CLIPPER_PASTE_WORD_RICH==='1';
  const existing=execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',"@(Get-Process -Name WINWORD -ErrorAction SilentlyContinue).Count"],{encoding:'utf8',windowsHide:true}).trim();
  assert.equal(Number(existing),0,'Close existing Word windows before this isolated test');
  const output=path.resolve('work/paste-word');await fs.mkdir(output,{recursive:true});
@@ -26,8 +28,19 @@ async function run(){
   }
  },{action,arg});
  try{
-  const value='Clipper Word paste check '+randomUUID();await f.page.evaluate(text=>window.clipper.saveOcr(text),value);
-  child=spawn('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.resolve('tests/paste-word-target.ps1'),'-Ready',ready,'-Result',result,'-Stop',stop,'-Failure',failure],{stdio:'ignore',windowsHide:true});
+  const value='Clipper Word paste check '+randomUUID();
+  if(rich){
+   const store=new Store(':memory:');
+   try{
+    const html='<span style="color:#d7263d;font-weight:700;font-size:18pt">'+value+'</span>';
+    const rtf='{\\rtf1\\ansi{\\colortbl ;\\red215\\green38\\blue61;}\\cf1\\b\\fs36 '+value+'\\b0\\cf0\\fs24}';
+    store.add({text:value,html,rtf},'Word rich paste test');
+    const seed=path.join(output,prefix+'-seed.json');await fs.writeFile(seed,JSON.stringify(store.backup()));
+    await f.app.evaluate(({dialog},file)=>dialog.showOpenDialog=async()=>({canceled:false,filePaths:[file]}),seed);
+    await f.page.evaluate(()=>window.clipper.backup('import'));
+   }finally{store.close();}
+  }else await f.page.evaluate(text=>window.clipper.saveOcr(text),value);
+  child=spawn('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.resolve('tests/paste-word-target.ps1'),'-Ready',ready,'-Result',result,'-Stop',stop,'-Failure',failure,...(rich?['-Details']:[])],{stdio:'ignore',windowsHide:true});
   await expect.poll(async()=>{if(await fs.stat(failure).then(()=>true,()=>false))throw Error(await fs.readFile(failure,'utf8'));return fs.readFile(ready,'utf8').catch(()=>'');},{timeout:45000}).toBe('ready');
   const source=execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',"Get-Process -Name WINWORD | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1 Id,MainWindowHandle | ConvertTo-Json -Compress"],{encoding:'utf8',windowsHide:true}).trim();
   const found=JSON.parse(source);hwnd=found.MainWindowHandle;wordPid=found.Id;
@@ -37,7 +50,9 @@ async function run(){
   const opened=f.app.waitForEvent('window');await f.page.evaluate(()=>window.clipper.showTray());const panel=await opened;
   await panel.waitForSelector('.tray-row');await panel.locator('.tray-row').filter({hasText:value}).click({button:'right'});
   await expect.poll(async()=>{if(await fs.stat(failure).then(()=>true,()=>false))throw Error(await fs.readFile(failure,'utf8'));return fs.readFile(result,'utf8').catch(()=>'');},{timeout:10000}).toContain(value);
-  console.log(JSON.stringify({result:'PASS',wordPaste:true,foregroundRestored:await native('foreground')===hwnd}));
+  const details=rich?JSON.parse(await fs.readFile(result,'utf8')):undefined;
+  if(rich){const clipboard=JSON.parse(execFileSync('powershell.exe',['-Sta','-NoProfile','-NonInteractive','-Command',"Add-Type -AssemblyName System.Windows.Forms; $d=[System.Windows.Forms.Clipboard]::GetDataObject(); $r=$d.GetData('Rich Text Format',$false); $h=$d.GetData('HTML Format',$false); @{formats=@($d.GetFormats($false));rtf=[string]$r;html=[string]$h} | ConvertTo-Json -Compress"],{encoding:'utf8',windowsHide:true}));assert.ok(details.normal.text.includes(value),'Word did not receive the text');assert.ok(details.rtf.text.includes(value),'Word did not receive RTF text');assert.ok(clipboard.rtf.includes(value)&&clipboard.html.includes(value),'Clipboard lost a rich format');assert.equal(details.rtf.bold,-1,'Word did not preserve RTF bold formatting');assert.equal(details.rtf.color,0x3d26d7,'Word did not preserve RTF text color');assert.equal(details.rtf.size,18,'Word did not preserve RTF font size');}
+  console.log(JSON.stringify({result:'PASS',wordPaste:true,rich,bold:details?.rtf.bold,color:details?.rtf.color,size:details?.rtf.size,wordPasteOption:details?.pasteOption}));
  }finally{
   await fs.writeFile(stop,'stop');
   if(child)await new Promise(resolve=>{if(child.exitCode!==null)return resolve();child.once('exit',resolve);setTimeout(()=>{child.kill();resolve();},5000).unref();});
