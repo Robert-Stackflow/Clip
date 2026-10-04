@@ -33,6 +33,14 @@ const {setup}=require('./renderer-fixture.cjs');
   assert.ok(await page.locator('.reference-virtual-row').first().evaluate(row=>row.querySelector('.reference-emoji-glyph').getBoundingClientRect().bottom<=row.getBoundingClientRect().bottom-3),'Scaled emoji must fit inside its virtual row');
   await page.setViewportSize({width:520,height:700});
   await page.waitForFunction(()=>document.querySelector('#reference-results')?.style.getPropertyValue('--reference-columns')==='2');
+  assert.equal(await page.locator('.sidebar').evaluate(node=>Math.round(node.getBoundingClientRect().width)),168,'Narrow windows reserve room for the reference list');
+  assert.equal(await page.evaluate(()=>document.body.scrollWidth>innerWidth),false,'Narrow window must not scroll horizontally');
+  await page.screenshot({path:'work/reference-ui/emoji-narrow-150.png'});
+  for(const [viewport,sidebar] of [[560,208],[600,236]]){
+   await page.setViewportSize({width:viewport,height:700});
+   await page.waitForFunction(expected=>Math.abs(document.querySelector('.sidebar').getBoundingClientRect().width-expected)<.25,sidebar);
+   assert.equal(await page.locator('.sidebar').evaluate(node=>Math.round(node.getBoundingClientRect().width)),sidebar,'Sidebar should grow smoothly with available space');
+  }
   assert.ok(await page.locator('.reference-virtual-row').first().evaluate(row=>[...row.querySelectorAll('.reference-item')].every(item=>item.getBoundingClientRect().right<=row.getBoundingClientRect().right+1)),'Narrow emoji columns must remain inside the list');
   await page.evaluate(()=>fixture.appearance({...fixture.value(),scale:100}));
   await page.setViewportSize({width:1280,height:820});
