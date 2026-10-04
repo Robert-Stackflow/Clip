@@ -33,7 +33,7 @@
     "test:efficiency": "npm run build && node scripts/test.mjs && node tests/efficiency-ui.cjs && node tests/efficiency-boundaries.cjs",
     "test:stack": "npm run build && node tests/stack-ui.cjs && node tests/stack-boundaries.cjs && node tests/stack-multi-app.cjs",
     "test:folders": "npm run build && node tests/folders-ui.cjs && node tests/folders-boundaries.cjs",
-    "test:tray": "npm run build && node tests/tray-ui.cjs && node tests/tray-boundaries.cjs && node tests/tray-drag.cjs && node tests/tray-native.cjs",
+    "test:tray": "npm run build && node tests/tray-ui.cjs && node tests/recent-preview-layout.cjs && node tests/tray-boundaries.cjs && node tests/tray-drag.cjs && node tests/tray-native.cjs",
     "test:appearance": "npm run build && node tests/appearance-layout.cjs",
     "test:reference": "npm run build && node tests/reference-data.cjs && node tests/reference-ui.cjs && node tests/reference-native.cjs",
     "check:language": "node scripts/check-language.mjs",
