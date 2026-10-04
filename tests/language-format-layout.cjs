@@ -36,17 +36,17 @@ function setupFormatting({epoch,raw}){
      results.push({...label,surface:'sidebar',metrics,words});
      for(const [key,value]of Object.entries(metrics))if(value===false||typeof value==='object'&&(value.missing||!value.visible||!value.reachable))failures.push({...label,key,value});
      if(language==='en')for(const word of words)if(word.parts!==1||!word.full)failures.push({...label,key:'split or clipped word',word});
-     assert.equal(await page.locator('[data-page="favorites"]').getAttribute('title'),language==='en'?'Favorites':'收藏');
+     assert.equal(await page.locator('[data-page="favorites"]').getAttribute('aria-label'),language==='en'?'Favorites':'收藏');
      assert.equal(await page.locator('[data-id="text"] .row-title').textContent(),raw);assert.equal(await page.locator('#injected-sidebar').count(),0);
      const expectedDate=await page.evaluate(epoch=>new Date(epoch).toLocaleDateString(document.documentElement.lang==='en'?'en-US':'zh-CN',{month:'short',day:'numeric'}),epoch);
      assert.ok((await page.locator('[data-id="text"] .row-meta').textContent()).includes(expectedDate));
      assert.equal(await page.locator('#result-count,.collection-footer').count(),0);
      if(width===860&&count===1000&&font==='mono'&&scale===150&&density==='compact'){
       await page.screenshot({path:`work/language-format/sidebar-${language}-150.png`});await page.locator('#pause-nav').click();
-      await page.waitForFunction(()=>fixture.state.settings.paused);assert.equal(await page.locator('#pause-nav').getAttribute('title'),language==='en'?'Resume capture':'恢复记录');
+      await page.waitForFunction(()=>fixture.state.settings.paused);await page.waitForFunction(label=>document.querySelector('#pause-nav')?.getAttribute('aria-label')===label,language==='en'?'Resume capture':'恢复记录');
       const paused=await page.locator('#pause-nav > span:not(.status-dot)').evaluate(span=>{const rect=span.getBoundingClientRect();return {text:span.textContent,overflow:span.scrollWidth>span.clientWidth+1,clipped:span.scrollHeight>span.clientHeight+1};});
       assert.equal(paused.overflow,false);assert.equal(paused.clipped,false);results.at(-1).paused=paused;
-      await page.screenshot({path:`work/language-format/sidebar-paused-${language}-150.png`});await page.locator('#pause-nav').click();await page.waitForFunction(()=>!fixture.state.settings.paused);
+      await page.screenshot({path:`work/language-format/sidebar-paused-${language}-150.png`});await page.locator('#pause-nav').click();await page.waitForFunction(()=>!fixture.state.settings.paused);await page.waitForFunction(label=>document.querySelector('#pause-nav')?.getAttribute('aria-label')===label,language==='en'?'Pause capture':'暂停记录');
      }
     }
    }
