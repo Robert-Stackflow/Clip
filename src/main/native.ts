@@ -37,10 +37,11 @@ export function writeFiles(files:string[],hwnd:number){
   try{const p=api.lock(h);if(!p)throw new Error(tr('剪贴板内存访问失败'));try{api.move(p,b,b.length);}finally{api.unlock(h);}if(!api.open(hwnd))throw new Error(tr('剪贴板正被其他应用使用'));try{if(!api.empty()||!api.set(15,h))throw new Error(tr('写入文件剪贴板失败'));transferred=true;}finally{api.closeClipboard();}}finally{if(!transferred)api.free(h);}
 }
 const delay=(ms:number)=>new Promise(r=>setTimeout(r,ms));
-export async function pasteTo(hwnd:number,valid:()=>boolean=()=>true){
+export async function pasteTo(hwnd:number,valid:()=>boolean=()=>true,dismiss:()=>void=()=>{}){
   if(!valid())throw new Error(tr('粘贴已取消'));
   if(!api||!hwnd||!api.isWindow(hwnd))throw new Error(tr('没有可用的目标窗口，已复制，请切换应用后按 Ctrl+V'));
-  api.setForeground(hwnd);await delay(140);
+  // Request activation while Clipper still owns the foreground window.
+  api.setForeground(hwnd);dismiss();await delay(140);
   for(let i=0;i<30;i++){if(![0x10,0x11,0x12,0x5b,0x5c].some(k=>api.key(k)&0x8000))break;await delay(25);}
   if([0x10,0x11,0x12,0x5b,0x5c].some(k=>api.key(k)&0x8000))throw new Error(tr('请松开修饰键后重新粘贴'));
   if(api.foreground()!==hwnd)throw new Error(tr('无法恢复目标窗口，已复制，请手动 Ctrl+V'));

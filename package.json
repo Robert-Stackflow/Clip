@@ -1,6 +1,6 @@
 {
   "name": "clipper-desktop",
-  "version": "0.50.4",
+  "version": "0.50.5",
   "private": true,
   "description": "Windows 本地剪贴板工作台",
   "author": "Clipper",
@@ -98,7 +98,7 @@
     "productName": "Clipper",
     "electronDist": "node_modules/electron/dist",
     "directories": {
-      "output": "release/0.50.4"
+      "output": "release/0.50.5"
     },
     "files": [
       "dist/**/*",
