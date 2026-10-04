@@ -20,7 +20,7 @@ function launch(){
  quitRequested=false;clearTimeout(quitTimer);
  const args=['.'],port=process.env.CLIPPER_DEV_DEBUG_PORT;
  if(port){if(!/^\d+$/.test(port)||+port<1024||+port>65535)throw new Error('Invalid development debug port');args.unshift('--remote-debugging-address=127.0.0.1','--remote-debugging-port='+port);}
- child=spawn(electron,args,{cwd:root,env,stdio:['inherit','inherit','inherit','ipc'],windowsHide:true});
+ child=spawn(electron,args,{cwd:root,env,stdio:['inherit','inherit','inherit','ipc'],windowsHide:false});
  child.on('error',error=>{console.error(error);void finish(1);});
  child.on('message',message=>{if(message?.type==='clipper:dev-deferred')console.log('当前有未保存的捕获或图片编辑；保存后继续修改可刷新。');if(message?.type==='clipper:dev-quit-canceled'){quitRequested=false;clearTimeout(quitTimer);console.log('开发窗口取消退出；下次修改主进程时再重试。');}if(message?.type==='clipper:dev-renderer-gone')console.warn('开发窗口渲染进程退出：'+message.reason+'；恢复尝试 '+Math.min(message.retry,3)+'/3'+(message.retry>3?'，已停止自动重试':''));if(message?.type==='clipper:dev-ready')console.log('Clipper 开发窗口已就绪；资料：'+message.profile);});
  child.once('exit',code=>{clearTimeout(quitTimer);child=undefined;if(restarting&&!stopping){restarting=false;launch();}else void finish(stopping?exitCode:code??0);});
