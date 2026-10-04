@@ -344,6 +344,7 @@ export const english:Readonly<Record<string,string>>={
   "拖入文件或图片，或点击右上角添加文件": "Drop files or images here, or use Add files above",
   "复制符合规则的内容，或编辑分类条件": "Copy matching content or edit the category rules",
   "在其他应用复制文字、图片或文件，记录会出现在这里": "Copy text, images or files in another app to see them here",
+  "自动记录已暂停。点击侧边栏底部的播放按钮继续记录。": "Automatic recording is paused. Use the play button at the bottom of the sidebar to resume.",
   "<span>内容预览</span></div>": "<span>Content preview</span></div>",
   "<div class=\"preview-empty\"><span>原始图片已保留，可复制或另存。此格式暂不提供预览。</span></div>": "<div class=\"preview-empty\"><span>The original image is kept for copying or saving. Preview is unavailable for this format.</span></div>",
   "<div class=\"image-preview\"><img src=\"data:image/png;base64,⟦0⟧\" alt=\"剪贴板图片预览\"></div>": "<div class=\"image-preview\"><img src=\"data:image/png;base64,⟦0⟧\" alt=\"Clipboard image preview\"></div>",
