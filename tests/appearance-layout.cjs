@@ -21,6 +21,7 @@ const {setup,measure}=require('./renderer-fixture.cjs');
    await page.evaluate(v=>fixture.appearance(v),{font,scale,density});await page.evaluate(()=>new Promise(requestAnimationFrame));const label=`${file} ${size.join('x')} ${font} ${scale} ${density}`;let metrics={};
    for(const selector of selectors){if(scrollable)await page.locator(selector).scrollIntoViewIfNeeded();const m=await measure(page,[selector]);metrics={...metrics,...m};}
    results.push({label,metrics});for(const [key,value] of Object.entries(metrics)){if(value===false||typeof value==='object'&&(value.missing||!value.visible||key!=='#capture-hint'&&!value.reachable))failures.push({label,key,value});}
+   if(file==='recovery'){const warning=await page.locator('#startup-error').evaluate(node=>{const style=getComputedStyle(node);return {height:node.getBoundingClientRect().height,min:Number.parseFloat(style.lineHeight)+Number.parseFloat(style.paddingTop)+Number.parseFloat(style.paddingBottom),text:node.textContent?.trim()};});if(warning.text&&warning.height+1<warning.min)failures.push({label,key:'recovery warning clipped',warning});}
    if(file==='image-editor')assert.deepEqual(await page.locator('#image').evaluate(c=>[c.width,c.height]),[640,360],'font scaling must not resample image canvas');
   }
   await page.screenshot({path:path.join(out,file+'-minimum.png')});
