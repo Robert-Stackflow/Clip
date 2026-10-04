@@ -31,13 +31,31 @@ function categoriesFixture(){
   await expect(page.locator('#count')).toHaveCount(0);
   for(const [width,height] of [[740,560],[420,340],[280,240]]){
    await page.setViewportSize({width,height});
+   await fs.mkdir('work/recent-category-segments',{recursive:true});
+   await page.screenshot({path:`work/recent-category-segments/${width}.png`});
    assert.equal(await page.evaluate(()=>document.body.scrollWidth>innerWidth),false,`${width}px body overflow`);
+   if(width===280){
+    const layout=await page.evaluate(()=>{const types=document.querySelector('#filters').getBoundingClientRect(),categories=document.querySelector('#categories').getBoundingClientRect(),actions=document.querySelector('.preview-actions').getBoundingClientRect(),items=document.querySelector('#items').getBoundingClientRect(),row=document.querySelector('.tray-row').getBoundingClientRect();return {typesBottom:types.bottom,categoryTop:categories.top,categoryWidth:categories.width,actionsBottom:actions.bottom,actionsTop:actions.top,itemsTop:items.top,itemsBottom:items.bottom,rowTop:row.top,rowBottom:row.bottom};});
+    assert(layout.categoryTop>=layout.typesBottom-1,'compact categories stay on their own row');
+    assert(layout.categoryWidth>=width-32,`compact categories remain usable across the window: ${JSON.stringify(layout)}`);
+    assert(layout.rowBottom<=layout.itemsBottom+1,'at least one complete recent record stays visible');
+    assert(layout.actionsBottom<=height,'compact copy and paste actions remain visible');
+   }
    const last=page.locator('#categories button').last();await last.click();
    await expect(last).toHaveAttribute('aria-pressed','true');
    await expect(page.locator('.tray-row')).toHaveCount(1);
    assert.equal((await page.evaluate(()=>categoryQueries.at(-1))).category,'00000000-0000-0000-0000-000000000012');
    await page.locator('#categories [data-category=""]').click();
    await expect(page.locator('.tray-row')).toHaveCount(3);
+   if(width===280){
+    await page.locator('#categories [data-category=""]').focus();
+    await page.keyboard.press('End');
+    await expect(last).toHaveAttribute('aria-pressed','true');
+    const visibility=await last.evaluate(button=>{const group=button.parentElement,box=group.getBoundingClientRect(),rect=button.getBoundingClientRect();return {visible:rect.left>=box.left-2&&rect.right<=box.right+2,buttonLeft:rect.left,buttonRight:rect.right,groupLeft:box.left,groupRight:box.right,scrollLeft:group.scrollLeft,offsetLeft:button.offsetLeft};});
+    assert(visibility.visible,`keyboard-selected category remains visible in its segment row: ${JSON.stringify(visibility)}`);
+    await page.keyboard.press('Home');
+    await expect(page.locator('#categories [data-category=""]')).toHaveAttribute('aria-pressed','true');
+   }
   }
   assert.deepEqual(errors,[]);
   await context.close();
