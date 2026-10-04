@@ -257,6 +257,28 @@ const {setup}=require('./renderer-fixture.cjs');
    const targetVisible=await page.locator(`[data-section="${last.id}"]`).evaluate(node=>{const r=node.getBoundingClientRect(),v=document.querySelector('.reference-scroll').getBoundingClientRect();return r.top<v.bottom&&r.bottom>v.top;});assert.ok(targetVisible,'The selected section must remain visible after lazy rendering: '+topic.id);
    assert.ok(await page.locator('#reference-categories').evaluate(node=>node.scrollWidth<=node.clientWidth),'Category names must wrap without horizontal overflow');
   }
+  for(const [topic,source,href,target] of [
+   ['bash','section-5','#bash-函数','section-50'],
+   ['bash','section-6','#bash-条件句','section-26'],
+   ['regex','section-1','#python-中的正则表达式','section-53'],
+   ['regex','section-1','#javascript-中的正则表达式','section-63'],
+   ['regex','section-1','#php中的正则表达式','section-76'],
+   ['regex','section-1','#java-中的正则表达式','section-82'],
+   ['regex','section-1','#mysql中的正则表达式','section-91']
+  ]){
+   await chooseReferenceTab(page,topic);
+   await page.locator(`[data-category="${source}"]`).click();
+   await page.locator(`[data-section="${source}"] a[href="${href}"]`).click();
+   await page.waitForFunction(id=>document.querySelector('#reference-categories [aria-current]')?.dataset.category===id,target);
+   await page.waitForTimeout(600);
+   assert.ok(await page.locator(`[data-section="${target}"]`).evaluate(node=>{const rect=node.getBoundingClientRect(),view=document.querySelector('.reference-scroll').getBoundingClientRect();return rect.top<view.bottom&&rect.bottom>view.top;}),`${topic} ${href} must navigate to ${target}`);
+  }
+  await chooseReferenceTab(page,'bash');
+  await page.locator('#reference-search').fill('见：[函数]');
+  await page.waitForFunction(()=>document.querySelectorAll('[data-section]').length===1);
+  await page.locator('[data-section="section-5"] a[href="#bash-函数"]').click();
+  await page.waitForFunction(()=>document.getElementById('reference-search').value===''&&document.querySelector('#reference-categories [aria-current]')?.dataset.category==='section-50');
+  assert.equal(await page.locator('[data-section]').count(),snapshot.topics.find(topic=>topic.id==='bash').sections.length,'An internal link restores hidden target sections');
   assert.equal(await page.locator('.reference-popover').count(),1);
   await chooseReferenceTab(page,'latex');
   await page.locator('#reference-search').fill('希腊和希伯来字母');

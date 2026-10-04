@@ -9,6 +9,7 @@ import {mountEmojiFont} from './emoji-font';
 import {copyTextValue} from './copy-text';
 registerIcons({copy:Copy,search:Search});
 const esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
+const anchorKey=(value:string)=>value.trim().toLocaleLowerCase().replace(/\s+/g,'-');
 const emojiGlyph=(glyph:string)=>{
  const pair=Array.from(glyph),regional=pair.length===2&&pair.every(char=>{const point=char.codePointAt(0)!;return point>=0x1F1E6&&point<=0x1F1FF;});
  const flag=/^\u{1F3F4}[\u{E0061}-\u{E007A}]+\u{E007F}$/u.test(glyph);
@@ -158,7 +159,7 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  scroll.addEventListener('scrollend',finishSymbolNavigation);
  const navigationKey=(event:KeyboardEvent)=>{if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))cancelNavigation();};
  scroll.addEventListener('keydown',navigationKey);
- root.onclick=event=>{const link=(event.target as HTMLElement).closest<HTMLAnchorElement>('a[href]');if(!link)return;event.preventDefault();if(link.getAttribute('href')?.startsWith('#')){const anchor=decodeURIComponent(link.hash.slice(1)).toLocaleLowerCase();const topic=cheatTopics.find(topic=>topic.id===active);const section=topic?.sections.find(section=>section.name.toLocaleLowerCase().replace(/ /g,'-')===anchor);if(section)nav.querySelector<HTMLButtonElement>(`[data-category="${section.id}"]`)?.click();return;}void window.clipper.openReference(link.href).catch(error=>notify(String(error)));};
+ root.onclick=event=>{const link=(event.target as HTMLElement).closest<HTMLAnchorElement>('a[href]');if(!link)return;event.preventDefault();if(link.getAttribute('href')?.startsWith('#')){const anchor=decodeURIComponent(link.hash.slice(1)).toLocaleLowerCase();const topic=cheatTopics.find(topic=>topic.id===active);const section=topic?.sections.find(section=>anchorKey(section.name)===anchor||anchorKey(section.group)===anchor);if(section){if(input.value){input.value='';scroll.scrollTo({top:0,behavior:'instant'});rebuild();}nav.querySelector<HTMLButtonElement>(`[data-category="${section.id}"]`)?.click();}return;}void window.clipper.openReference(link.href).catch(error=>notify(String(error)));};
  results.onclick=event=>{const code=(event.target as HTMLElement).closest<HTMLElement>('[data-code]');if(code){performCopy(code.dataset.code!);return;}const button=(event.target as HTMLElement).closest<HTMLElement>('[data-entry],[data-copy]');if(!button)return;const entry=entries[Number(button.dataset.entry??button.dataset.copy)];performCopy(active==='emoji'&&kind==='symbols'?selectedGlyph(entry):entry.copy);};
  results.onkeydown=event=>{
   if(kind!=='symbols'||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key)||event.altKey||event.ctrlKey||event.metaKey)return;
