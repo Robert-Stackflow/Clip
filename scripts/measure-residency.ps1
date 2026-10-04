@@ -1,4 +1,4 @@
-param([ValidateRange(1,20)][int]$Samples=3,[ValidateRange(100,5000)][int]$IntervalMs=1000)
+param([ValidateRange(1,20)][int]$Samples=3,[ValidateRange(100,5000)][int]$IntervalMs=1000,[ValidateRange(0,2147483647)][int]$RootPid=0)
 $ErrorActionPreference='Stop'
 $clipperRoot=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..')).TrimEnd('\')
 if($clipperRoot -ne 'D:\Repositories\Clipper'){throw 'Run the measurement from the canonical Clipper repository.'}
@@ -13,6 +13,7 @@ for($sample=0;$sample -lt $Samples;$sample++){
    ($_.Name -eq 'electron.exe' -and $_.ExecutablePath -eq ($clipperRoot+'\node_modules\electron\dist\electron.exe'))
   )
  })
+ if($RootPid){$roots=@($roots | Where-Object {$_.ProcessId -eq $RootPid});if($roots.Count -ne 1){throw "Target process $RootPid is not a running Clipper or One root"}}
  $counters=@(Get-CimInstance Win32_PerfFormattedData_PerfProc_Process)
  foreach($root in $roots){
   $owned=[Collections.Generic.HashSet[uint32]]::new();$null=$owned.Add($root.ProcessId)

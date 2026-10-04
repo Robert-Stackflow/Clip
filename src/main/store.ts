@@ -83,7 +83,11 @@ export class Store {
     const protectedIDs=JSON.stringify([...new Set([...this.queue,...this.shelf])]);
     return cutoff===undefined?this.db.prepare(`SELECT id FROM (${eligible}) ORDER BY ${order}`).all(protectedIDs):this.db.prepare(`SELECT id FROM (SELECT id,updated,row_number() OVER (ORDER BY ${order}) AS position FROM (${eligible})) WHERE updated<? OR position>? ORDER BY position`).all(protectedIDs,cutoff,this.settings.maxItems);
   }
-  clear(){this.db.exec('BEGIN');try{const removable=this.retentionCandidates();this.db.exec('DELETE FROM temp.clipper_delete_undo');const remove=this.db.prepare('DELETE FROM clips WHERE id=?');for(const i of removable){this.rememberDeletion(i.id);remove.run(i.id);}this.db.exec('COMMIT');}catch(e){this.db.exec('ROLLBACK');throw e;}}
+  clear(){this.db.exec('BEGIN');try{const removable=this.retentionCandidates();this.db.exec('DELETE FROM temp.clipper_delete_undo');const remove=this.db.prepare('DELETE FROM clips WHERE id=?');for(const i of removable){this.rememberDeletion(i.id);remove.run(i.id);}this.db.exec('COMMIT');}catch(e){this.db.exec('ROLLBACK');throw e;}
+   // Keep the undo rows, but release cache pages left by a large deletion.
+   // This is best effort after commit: cache cleanup must not report a saved deletion as failed.
+   try{this.db.exec('PRAGMA shrink_memory');}catch{}
+  }
   protected(i:Clip){return i.favorite||i.pinned||i.shared||this.queue.includes(i.id)||this.shelf.includes(i.id);}
   prune(){this.db.exec('SAVEPOINT retention_prune');try{const remove=this.db.prepare('DELETE FROM clips WHERE id=?');for(const item of this.retentionCandidates(Date.now()-this.settings.retentionDays*86400000))remove.run(item.id);this.db.exec('RELEASE retention_prune');}catch(e){this.db.exec('ROLLBACK TO retention_prune; RELEASE retention_prune');throw e;}}
   setQueue(ids:string[]){this.queue=[...ids].filter(id=>this.has(id)).slice(0,200);this.setMeta('queue',this.queue);}
