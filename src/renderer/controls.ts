@@ -9,6 +9,17 @@ let activeAnchor:HTMLElement|null=null;
 const disposers=new Map<HTMLElement,()=>void>();
 export function onRemoval(node:HTMLElement,dispose:()=>void){disposers.set(node,dispose);}
 
+function fieldName(field:HTMLSelectElement|HTMLInputElement,fallback:string){
+  const explicit=field.getAttribute('aria-label')?.trim();if(explicit)return explicit;
+  const referenced=field.getAttribute('aria-labelledby')?.split(/\s+/).map(id=>document.getElementById(id)?.textContent?.trim()).filter(Boolean).join(' ');if(referenced)return referenced;
+  const labels=Array.from(field.labels||[]).map(label=>{
+    const copy=label.cloneNode(true) as HTMLElement;
+    copy.querySelectorAll('select,input,textarea,button').forEach(control=>control.remove());
+    return copy.textContent?.replace(/\s+/g,' ').trim()||'';
+  }).filter(Boolean).join(' ');
+  return labels||field.title.trim()||fallback;
+}
+
 /** Replace native selection controls with a keyboard-accessible popup. */
 export function customControls(root: HTMLElement) {
   for (const select of root.querySelectorAll<HTMLSelectElement>('select')) {
@@ -16,7 +27,7 @@ export function customControls(root: HTMLElement) {
     let options = [...select.options].map(option => ({ label: option.text, value: option.value, disabled: option.disabled,source:option.dataset.sourceApp }));
     const button = document.createElement('button'); button.type = 'button'; button.className = 'custom-select'; button.id = (select.id||'select-'+crypto.randomUUID())+'-trigger';
     button.setAttribute('role','combobox'); button.setAttribute('aria-haspopup','listbox'); button.setAttribute('aria-expanded','false');
-    button.setAttribute('aria-label', select.getAttribute('aria-label') || select.closest('label')?.textContent?.trim() || tr('选择'));
+    button.setAttribute('aria-label', fieldName(select,tr('选择')));
     const label = document.createElement('span');button.append(label);button.insertAdjacentHTML('beforeend',icon('chevron-down')); 
     let value = select.value; let menu: HTMLDivElement | null = null; let modal:HTMLDialogElement|null=null;let active = 0; let prefix = ''; let typedAt = 0;let menuWidth=0;
     let focused:HTMLElement|null=null,selected:HTMLElement|null=null;let opening=0,loading=false;
@@ -79,7 +90,7 @@ export function customControls(root: HTMLElement) {
   }
   for (const input of root.querySelectorAll<HTMLInputElement>('input[type=number]')) {
     if(input.closest('.number-control'))continue;const wrapper=document.createElement('span');wrapper.className='number-control';input.replaceWith(wrapper);wrapper.append(input);
-    for (const [text,direction] of [['−',-1],['+',1]] as const) { const button=document.createElement('button');button.type='button';button.innerHTML=icon(direction<0?'minus':'plus');button.setAttribute('aria-label',tr(direction<0?'减少':'增加')+(input.getAttribute('aria-label')||input.closest('label')?.textContent?.trim()||tr('数值')));button.addEventListener('click',()=>{if(input.disabled)return;const number=Number(input.value)+(Number(input.step)||1)*direction;input.value=String(Math.max(input.min?Number(input.min):-Infinity,Math.min(input.max?Number(input.max):Infinity,number)));input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));});wrapper.append(button); }
+    for (const [text,direction] of [['−',-1],['+',1]] as const) { const button=document.createElement('button');button.type='button';button.innerHTML=icon(direction<0?'minus':'plus');button.setAttribute('aria-label',tr(direction<0?'减少':'增加')+fieldName(input,tr('数值')));button.addEventListener('click',()=>{if(input.disabled)return;const number=Number(input.value)+(Number(input.step)||1)*direction;input.value=String(Math.max(input.min?Number(input.min):-Infinity,Math.min(input.max?Number(input.max):Infinity,number)));input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));});wrapper.append(button); }
   }
 }
 export function closeControls() { closeActive?.(); }
