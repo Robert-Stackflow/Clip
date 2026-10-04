@@ -6,12 +6,12 @@ import './appearance';
 import './recorder.css';
 import {WavRecorder} from './wav-recorder';
 import {cropStream} from './region-stream';
-import {createElement,Video,Mic,AudioLines,Monitor,SlidersHorizontal,Pause,Play,Square,X,type IconNode} from 'lucide';
+import {createElement,Video,Mic,AudioLines,Monitor,SlidersHorizontal,Pause,Play,Square,Trash2,type IconNode} from 'lucide';
 import {recordingMime,recordingExtension,RECORD_CHUNK,RECORD_SECONDS,type RecorderAPI,type RecordingOptions,type RecordingSource,type RecordingState} from '../shared/recording';
 declare global {interface Window{clipperRecorder:RecorderAPI}}
 const api=window.clipperRecorder,q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
-function command(id:string,shape:IconNode,label:string,key:string){const button=q(id);if(button.dataset.command===key)return;button.dataset.command=key;button.setAttribute('aria-label',label);const caption=document.createElement('span');caption.textContent=label;button.replaceChildren(createElement(shape,{'aria-hidden':'true','stroke-width':1.75}),caption);}
-command('discard',X,tr('放弃'),'discard');command('stop',Square,tr('停止并预览'),'stop');
+function command(id:string,shape:IconNode,label:string,key:string){const button=q(id);if(button.dataset.command===key)return;button.dataset.command=key;button.setAttribute('aria-label',label);button.title=label;const caption=document.createElement('span');caption.textContent=label;button.replaceChildren(createElement(shape,{'aria-hidden':'true','stroke-width':1.75}),caption);}
+command('discard',Trash2,tr('放弃'),'discard');command('stop',Square,tr('停止并预览'),'stop');
 q('brand').appendChild(createElement(Video,{'aria-hidden':'true','stroke-width':1.75}));
 q('audio-brand').appendChild(createElement(Mic,{'aria-hidden':'true','stroke-width':1.75}));
 q('meter-icon').appendChild(createElement(AudioLines,{'aria-hidden':'true','stroke-width':1.75}));
