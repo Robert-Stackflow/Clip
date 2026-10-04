@@ -29,8 +29,8 @@ function emojiEntries():Entry[]{
  return [...families.values()];
 }
 export const toneGlyph=(item:Entry,tone:number)=>item.tones?.get(tone)||item.tones?.get(0)||item.glyph;
-const symbolGroups=new Map((symbols as string[][]).map(([glyph,,group])=>[glyph,group]));
-function entityGroup(glyph:string){return symbolGroups.get(glyph)||(/^[A-Za-zÀ-ʯ]/u.test(glyph)?'Letters':/^[0-9]/.test(glyph)?'Digits':'Other');}
+let symbolGroups:Map<string,string>|undefined;
+function entityGroup(glyph:string){return (symbolGroups??=new Map((symbols as string[][]).map(([symbol,,group])=>[symbol,group]))).get(glyph)||(/^[A-Za-zÀ-ʯ]/u.test(glyph)?'Letters':/^[0-9]/.test(glyph)?'Digits':'Other');}
 function colorGroup(hex:string){
  const rgb=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255),max=Math.max(...rgb),min=Math.min(...rgb),delta=max-min;
  if(delta<.06||max<.12)return 'Neutral';
@@ -45,12 +45,20 @@ function mimeDescription(type:string){
  const suffix=subtype.endsWith('+json')?'JSON':subtype.endsWith('+xml')?'XML':subtype.endsWith('+zip')?'ZIP':subtype.endsWith('+cbor')?'CBOR':'';
  return suffix?tx(`${groupLabel(group)}，使用 ${suffix} 格式；${subtype} 定义其具体用途`,`${groupLabel(group)} using ${suffix}; ${subtype} defines its purpose`):tx(`${groupLabel(group)}媒体类型；具体格式由 ${subtype} 的规范定义`,`${groupLabel(group)} media type; its format is defined by the ${subtype} specification`);
 }
-export function referenceCatalog():Record<string,{label:string;source:string;items:Entry[]}>{return {
- emoji:{label:'Emoji',source:'https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt',items:emojiEntries()},
- kaomoji:{label:tx('颜文字','Kaomoji'),source:'',items:Object.entries(kaomojiGroups).flatMap(([group,values])=>values.map(glyph=>({glyph,title:groupLabel(group),detail:'',group,copy:glyph})))},
- symbols:{label:tx('符号','Symbols'),source:'https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt',items:(symbols as string[][]).map(([glyph,title,group,code])=>({glyph,title,detail:'U+'+code,group,copy:glyph}))},
- entities:{label:tx('HTML 实体','HTML entities'),source:'https://html.spec.whatwg.org/entities.json',items:(entities as string[][]).map(([title,glyph])=>({glyph,title,detail:Array.from(glyph,c=>'U+'+c.codePointAt(0)!.toString(16).toUpperCase()).join(' '),group:entityGroup(glyph),copy:title,secondary:glyph}))},
- colors:{label:tx('命名颜色','Named Colors'),source:'https://www.w3.org/TR/css-color-4/#named-colors',items:(colors as string[][]).map(([title,color])=>({glyph:'',title,detail:color.toUpperCase(),group:colorGroup(color),copy:color,secondary:title,color}))},
- mime:{label:'MIME',source:'https://www.iana.org/assignments/media-types/',items:(mime as [string,string[],string][]).map(([type,extensions,charset])=>({glyph:type,title:type,detail:mimeDescription(type)+(charset?` · ${charset}`:''),group:type.split('/')[0],copy:type,extensions:[...new Set([...extensions,...((mimeExtensionSupplements as Record<string,string[]>)[type]||[])])],specifications:(mimeRFC as Record<string,string[][]>)[type]}))},
- ascii:{label:'ASCII',source:'https://www.rfc-editor.org/rfc/rfc20',items:Array.from({length:128},(_,code)=>({glyph:code<32?asciiNames[code]:code===32?'␣':code===127?'DEL':String.fromCharCode(code),title:code<32?asciiNames[code]:code===32?'SPACE':code===127?'DEL':String.fromCharCode(code),detail:`${code} · 0x${code.toString(16).toUpperCase().padStart(2,'0')} · ${code.toString(2).padStart(8,'0')}`,group:code<32||code===127?'Control':code<48?'Punctuation':code<58?'Digits':code<65?'Punctuation':code<91?'Uppercase':code<97?'Punctuation':code<123?'Lowercase':'Punctuation',copy:code<32||code===127?'\\x'+code.toString(16).toUpperCase().padStart(2,'0'):String.fromCharCode(code)}))}
+type CatalogTab={label:string;source:string;readonly items:Entry[]};
+function lazyTab(label:string,source:string,build:()=>Entry[]):CatalogTab{let items:Entry[]|undefined;return {label,source,get items(){return items??=build();}};}
+let tabCounts:Record<string,number>|undefined;
+export function referenceTabCounts():Record<string,number>{return tabCounts??={
+ emoji:new Set((emoji as string[][]).map(([glyph])=>family(glyph))).size,
+ kaomoji:Object.values(kaomojiGroups).reduce((count,values)=>count+values.length,0),
+ symbols:symbols.length,entities:entities.length,colors:colors.length,mime:mime.length,ascii:128
+};}
+export function referenceCatalog():Record<string,CatalogTab>{return {
+ emoji:lazyTab('Emoji','https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt',emojiEntries),
+ kaomoji:lazyTab(tx('颜文字','Kaomoji'),'',()=>Object.entries(kaomojiGroups).flatMap(([group,values])=>values.map(glyph=>({glyph,title:groupLabel(group),detail:'',group,copy:glyph})))),
+ symbols:lazyTab(tx('符号','Symbols'),'https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt',()=>(symbols as string[][]).map(([glyph,title,group,code])=>({glyph,title,detail:'U+'+code,group,copy:glyph}))),
+ entities:lazyTab(tx('HTML 实体','HTML entities'),'https://html.spec.whatwg.org/entities.json',()=>(entities as string[][]).map(([title,glyph])=>({glyph,title,detail:Array.from(glyph,c=>'U+'+c.codePointAt(0)!.toString(16).toUpperCase()).join(' '),group:entityGroup(glyph),copy:title,secondary:glyph}))),
+ colors:lazyTab(tx('命名颜色','Named Colors'),'https://www.w3.org/TR/css-color-4/#named-colors',()=>(colors as string[][]).map(([title,color])=>({glyph:'',title,detail:color.toUpperCase(),group:colorGroup(color),copy:color,secondary:title,color}))),
+ mime:lazyTab('MIME','https://www.iana.org/assignments/media-types/',()=>(mime as [string,string[],string][]).map(([type,extensions,charset])=>({glyph:type,title:type,detail:mimeDescription(type)+(charset?` · ${charset}`:''),group:type.split('/')[0],copy:type,extensions:[...new Set([...extensions,...((mimeExtensionSupplements as Record<string,string[]>)[type]||[])])],specifications:(mimeRFC as Record<string,string[][]>)[type]}))),
+ ascii:lazyTab('ASCII','https://www.rfc-editor.org/rfc/rfc20',()=>Array.from({length:128},(_,code)=>({glyph:code<32?asciiNames[code]:code===32?'␣':code===127?'DEL':String.fromCharCode(code),title:code<32?asciiNames[code]:code===32?'SPACE':code===127?'DEL':String.fromCharCode(code),detail:`${code} · 0x${code.toString(16).toUpperCase().padStart(2,'0')} · ${code.toString(2).padStart(8,'0')}`,group:code<32||code===127?'Control':code<48?'Punctuation':code<58?'Digits':code<65?'Punctuation':code<91?'Uppercase':code<97?'Punctuation':code<123?'Lowercase':'Punctuation',copy:code<32||code===127?'\\x'+code.toString(16).toUpperCase().padStart(2,'0'):String.fromCharCode(code)})))
 };}
