@@ -15,7 +15,7 @@ export interface OcrLanguage { tag:string; name:string }
 export interface OcrStatus { languages:OcrLanguage[]; maxDimension:number; error?:string }
 export interface OcrResult { text:string; language:string; scaled:boolean }
 export interface CaptureScreen { id:number; name:string; width:number; height:number }
-export interface Settings { theme: 'system'|'light'|'dark'; view: 'list'|'grid'; paused: boolean; maxItems: number; retentionDays: number; excludedApps: string[]; shortcut: string; quickShortcut: string; nextShortcut: string; launchAtLogin: boolean }
+export interface Settings { theme: 'system'|'light'|'dark'; view: 'list'|'grid'; paused: boolean; maxItems: number; retentionDays: number; maxHistoryMiB:number; excludedApps: string[]; shortcut: string; nextShortcut: string; launchAtLogin: boolean }
 export interface State { services?:{sync:'off'|'ready'|'busy'|'error';web:boolean}; stack:import('./stack').StackState; clips: Clip[]; snippets: import('./preview').SnippetSummary[]; queue: string[]; shelf:string[]; categories:Category[]; settings: Settings; desktop:DesktopOptions; dark: boolean; native: boolean; status: string; bytes: number; hotkeyError: string }
 export type BatchAction='delete'|'favorite'|'enqueue'|'shelf'|'unshelf'|'tag';
 export type ClipAction = 'favorite'|'pin'|'delete'|'enqueue'|'dequeue'|'up'|'down'|'split';
@@ -34,7 +34,7 @@ export interface API {
   rememberSearch(query:string):Promise<void>;removeSearch(query:string|null):Promise<void>;
   replyIntent():Promise<import('./efficiency').ReplyIntent|null>;resolveReply(token:string,values:Record<string,string>|null):Promise<void>;
   openRecorder():Promise<void>;
-  showTray():Promise<void>;desktopState():Promise<DesktopState>;configureDesktop(value:DesktopOptions):Promise<void>;showQuick():Promise<void>;showShelf():Promise<void>;
+  showTray():Promise<void>;desktopState():Promise<DesktopState>;configureDesktop(value:DesktopOptions):Promise<void>;showShelf():Promise<void>;
   vaultState():Promise<VaultState>; prepareEncryption(password:string):Promise<{token:string;recoveryKey:string}>; cancelEncryption():Promise<void>; encryptHistory(token:string,proof:string):Promise<void>; decryptHistory():Promise<void>; cleanupPlaintext():Promise<void>; changeHistoryPassword(password:string):Promise<void>; configureVault(hello:boolean,idleMinutes:number):Promise<void>; lockHistory():Promise<void>;
   webState():Promise<WebState>;webStart(value:WebOptions):Promise<void>;webStop():Promise<void>;webInvite():Promise<string>;webCopyInvite():Promise<void>;webApprove(id:string,accept:boolean,allowSend:boolean):Promise<void>;webRevoke(id:string):Promise<void>;webPublish(id:string):Promise<void>;webRemove(id:string):Promise<void>;webFollow(value:boolean):Promise<void>;
   syncState():Promise<SyncState>;syncConfigure(value:SyncOptions):Promise<void>;syncInvite(host:string):Promise<string>;syncJoin(code:string):Promise<void>;syncApprove(id:string,accept:boolean):Promise<void>;syncCancel():Promise<void>;syncRevoke(id:string):Promise<void>;syncNow():Promise<void>;syncShare(id:string):Promise<void>;syncLocal(id:string,only:boolean):Promise<void>;

@@ -13,6 +13,20 @@ export function readTrayRows(db:DatabaseConnection,categories:Category[],value:u
   const indexed=!!db.prepare("SELECT 1 FROM sqlite_master WHERE name='clip_list_cache'").get();
   const summary=indexed?"json_remove(i.data,'$.thumbnail')":"json_remove(c.data,'$.payload','$.thumbnail')";
   const payload=indexed?'p.payload':"json_extract(c.data,'$.payload')";
+  const listSource=indexed?'i.data':'c.data',listJoin=indexed?'JOIN clip_list_cache i ON i.id=c.id':'';
+  const countsFromSql=()=>{const counts:TrayCounts={all:0,text:0,image:0,files:0,link:0,code:0};
+   for(const row of db.prepare(`SELECT json_extract(${listSource},'$.kind') AS kind,count(*) AS n FROM clips c ${listJoin} GROUP BY kind`).iterate() as Iterable<{kind:keyof TrayCounts;n:number}>){
+    if(row.kind in counts){counts[row.kind]=Number(row.n);counts.all+=Number(row.n);}
+   }
+   return counts;
+  };
+  // A type tab without text or category filters only needs the first page of
+  // that type. Let SQLite filter and count compact summaries instead of
+  // parsing every record on the main process side.
+  if(!needsText&&!query.category&&query.kind!=='all'){
+   const rows=db.prepare(`SELECT ${summary} AS summary FROM clips c ${listJoin} WHERE json_extract(${listSource},'$.kind')=? ORDER BY c.updated DESC,c.id ASC LIMIT ${TRAY_LIMIT}`).iterate(query.kind) as Iterable<{summary:string}>;
+   const items=Array.from(rows,row=>JSON.parse(row.summary) as Clip),counts=countsFromSql();return {items,total:counts[query.kind],counts,categories:categories.map(c=>({id:c.id,name:c.name}))};
+  }
   // Match compact metadata first. The preview body is fetched only when a
   // remaining term or a content-based category needs it. Keep the cache join
   // so incomplete projections retain the existing inner-join behavior.
@@ -41,11 +55,6 @@ export function readTrayRows(db:DatabaseConnection,categories:Category[],value:u
    }
    counts.all++;counts[item.kind]++;if((query.kind==='all'||item.kind===query.kind)&&items.length<TRAY_LIMIT)items.push(item);
   }
- if(unfiltered){
-  counts.all=0;for(const kind of ['text','image','files','link','code'] as const)counts[kind]=0;
-  for(const row of db.prepare(`SELECT json_extract(${indexed?'i.data':'c.data'},'$.kind') AS kind,count(*) AS n FROM clips c ${indexed?'JOIN clip_list_cache i ON i.id=c.id':''} GROUP BY kind`).iterate() as Iterable<{kind:keyof TrayCounts;n:number}>){
-   if(row.kind in counts){counts[row.kind]=Number(row.n);counts.all+=Number(row.n);}
-  }
- }
- return {items,total:counts[query.kind],counts,categories:categories.map(c=>({id:c.id,name:c.name}))};
+ const finalCounts=unfiltered?countsFromSql():counts;
+ return {items,total:finalCounts[query.kind],counts:finalCounts,categories:categories.map(c=>({id:c.id,name:c.name}))};
 }

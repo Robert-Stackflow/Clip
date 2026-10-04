@@ -1,6 +1,6 @@
 import type {Settings} from '../shared/types';
 import {onRemoval} from './controls';
-const keys:Record<string,keyof Settings>={'paused':'paused','launch-login':'launchAtLogin','max-items':'maxItems','retention':'retentionDays','excluded-apps':'excludedApps',shortcut:'shortcut',quickShortcut:'quickShortcut',nextShortcut:'nextShortcut'};
+const keys:Record<string,keyof Settings>={'paused':'paused','launch-login':'launchAtLogin','max-items':'maxItems','retention':'retentionDays','history-cap':'maxHistoryMiB','excluded-apps':'excludedApps',shortcut:'shortcut',nextShortcut:'nextShortcut'};
 /** Read the latest persisted settings before each patch, preserving other windows' edits. */
 export function bindSettingsPreferences(root:HTMLElement,initial:Settings,report:(error:unknown)=>void){
  let chain=Promise.resolve();const timers=new Map<string,ReturnType<typeof setTimeout>>(),saved={...initial};

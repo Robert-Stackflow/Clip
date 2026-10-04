@@ -1,0 +1,67 @@
+const {_electron:electron,expect}=require('@playwright/test');
+const assert=require('node:assert/strict');
+const fs=require('node:fs/promises');
+const path=require('node:path');
+
+async function run(){
+ const output=path.resolve('work/shelf-mode-ui');
+ await fs.mkdir(output,{recursive:true});
+ const profile=await fs.mkdtemp(path.join(output,'profile-'));
+ const env={...process.env,CLIPPER_TEST_MODE:'1',CLIPPER_DATA_DIR:profile};
+ delete env.ELECTRON_RUN_AS_NODE;
+ const app=await electron.launch({args:[path.resolve('.')],env});
+ try{
+  const main=await app.firstWindow();
+  await main.waitForSelector('#search');
+  const opened=app.waitForEvent('window');
+  await main.evaluate(()=>window.clipper.showShelf());
+  const shelf=await opened;
+  await shelf.waitForSelector('#items');
+  const bounds=()=>app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/shelf.html')).getBounds());
+  const expanded=await bounds();
+  await expect(shelf.locator('html')).toHaveAttribute('data-mode','expanded');
+  await shelf.locator('#mode').click();
+  await expect(shelf.locator('html')).toHaveAttribute('data-mode','compact');
+  await expect(shelf.locator('#transition-mask')).toBeVisible();
+  const compactCoveredLayout=await shelf.evaluate(()=>({main:getComputedStyle(document.querySelector('main')).display,compact:getComputedStyle(document.querySelector('.compact-view')).display}));
+  assert.equal(compactCoveredLayout.main,'none','expanded content must be replaced underneath the transition mask');
+  assert.notEqual(compactCoveredLayout.compact,'none','compact content must be laid out underneath the transition mask');
+  await expect.poll(async()=>shelf.evaluate(()=>getComputedStyle(document.querySelector('main')).display)).toBe('none');
+  await expect.poll(async()=>{const b=await bounds();return Math.abs(b.width-300)<=3&&Math.abs(b.height-138)<=3}).toBe(true);
+  await expect(shelf.locator('html')).not.toHaveAttribute('data-transitioning','');
+  await shelf.mouse.move(1,1);
+  await shelf.screenshot({path:path.join(output,'compact.png')});
+  await shelf.evaluate(()=>{const data=new DataTransfer();data.setData('text/plain','紧凑模式拖入测试');document.querySelector('#compact-open').dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:data}));});
+  await expect(shelf.locator('#compact-count')).toContainText('1 项已暂存');
+  await shelf.locator('#mode').click();
+  await expect(shelf.locator('html')).toHaveAttribute('data-transitioning','');
+  await expect(shelf.locator('html')).toHaveAttribute('data-mode','expanded');
+  await expect(shelf.locator('.shelf-row')).toHaveCount(1);
+  await expect(shelf.locator('#transition-mask')).toBeVisible();
+  await shelf.screenshot({path:path.join(output,'transition.png')});
+  const coveredLayout=await shelf.evaluate(()=>({main:getComputedStyle(document.querySelector('main')).display,compact:getComputedStyle(document.querySelector('.compact-view')).display,mask:getComputedStyle(document.querySelector('#transition-mask')).display}));
+  assert.notEqual(coveredLayout.main,'none','expanded content must be laid out underneath the transition mask');
+  assert.equal(coveredLayout.compact,'none','compact content must be replaced underneath the transition mask');
+  assert.equal(coveredLayout.mask,'grid','mask must remain opaque while the destination layout is prepared');
+  await expect(shelf.locator('html')).toHaveAttribute('data-mode','expanded');
+  await expect.poll(async()=>{const b=await bounds();return Math.abs(b.width-expanded.width)<=3&&Math.abs(b.height-expanded.height)<=3}).toBe(true);
+  await expect(shelf.locator('html')).not.toHaveAttribute('data-transitioning','');
+  await expect(shelf.locator('#transition-mask')).toBeHidden();
+  const content=await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/shelf.html')).getContentBounds());
+  const viewport=await shelf.evaluate(()=>({width:innerWidth,height:innerHeight}));
+  assert.ok(Math.abs(content.width-viewport.width)<=4&&Math.abs(content.height-viewport.height)<=4,'mask must remain until the renderer reaches the final size');
+  await expect(shelf.locator('.shelf-row')).toHaveCount(1);
+  await shelf.screenshot({path:path.join(output,'expanded.png')});
+  await shelf.locator('#mode').click();
+  await expect(shelf.locator('html')).toHaveAttribute('data-mode','compact');
+  await expect(shelf.locator('html')).not.toHaveAttribute('data-transitioning','');
+  await shelf.evaluate(async()=>{const first=window.clipperShelf.mode('expanded',false);await new Promise(resolve=>setTimeout(resolve,60));const second=window.clipperShelf.mode('compact',false);await Promise.all([first,second]);});
+  await expect(shelf.locator('html')).toHaveAttribute('data-transitioning','');
+  await expect(shelf.locator('html')).toHaveAttribute('data-mode','compact');
+  await expect(shelf.locator('html')).not.toHaveAttribute('data-transitioning','');
+  await expect(shelf.locator('#transition-mask')).toBeHidden();
+  await expect(shelf.locator('#compact-count')).toContainText('1 项已暂存');
+  console.log(JSON.stringify({result:'PASS',compactDrop:true,animatedResize:true,expandedBoundsRestored:true,rapidInterrupt:true,output},null,2));
+ }finally{await app.close();}
+}
+run().catch(error=>{console.error(error);process.exitCode=1});

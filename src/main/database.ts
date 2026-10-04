@@ -2,6 +2,8 @@ import {t as tr} from '../shared/i18n';
 import {DatabaseSync} from 'node:sqlite';
 import CipherDatabase from 'better-sqlite3-multiple-ciphers';
 export interface DatabaseConnection {
+ readonly isTransaction?:boolean;
+ readonly inTransaction?:boolean;
  exec(sql:string):unknown;
  prepare(sql:string):{get(...args:any[]):any;all(...args:any[]):any[];iterate(...args:any[]):Iterable<any>;run(...args:any[]):unknown};
  close():unknown;

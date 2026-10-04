@@ -1,8 +1,30 @@
 import type {MenuItemConstructorOptions} from 'electron';
 import {t as tr} from '../shared/i18n';
-export interface TrayMenuState {secured:boolean;stackActive:boolean;paused:boolean;encrypted:boolean}
-export interface TrayMenuActions {recent():void;open():void;quick():void;replies():void;shelf():void;record():void;stack():void;pause():void;lock():void;quit():void}
+export interface TrayMenuState {initializing:boolean;secured:boolean;stackActive:boolean;paused:boolean;encrypted:boolean;launchAtLogin:boolean}
+export interface TrayMenuActions {recent():void;open():void;replies():void;shelf():void;record():void;stack():void;pause():void;lock():void;startup():void;quit():void}
+export type TrayMenuAction=keyof TrayMenuActions;
+export interface TrayMenuEntry {id:TrayMenuAction;label:string;group:'header'|'primary'|'tools'|'privacy'|'system';icon:string;tone?:'danger';active?:boolean}
+export interface TrayMenuView {entries:TrayMenuEntry[];dark:boolean;initializing:boolean;secured:boolean;paused:boolean;stackActive:boolean}
+export function trayMenuEntries(state:TrayMenuState):TrayMenuEntry[]{
+ if(state.initializing)return [{id:'quit',label:tr('退出 Clipper'),group:'system',icon:'power',tone:'danger'}];
+ if(state.secured)return [
+  {id:'open',label:tr('解锁历史'),group:'primary',icon:'lock-open'},
+  {id:'quit',label:tr('退出 Clipper'),group:'system',icon:'power',tone:'danger'}
+ ];
+ return [
+  {id:'open',label:tr('打开 Clipper'),group:'primary',icon:'app-window'},
+  {id:'recent',label:tr('最近记录'),group:'primary',icon:'history'},
+  {id:'replies',label:tr('快捷回复'),group:'tools',icon:'message-square-text'},
+  {id:'shelf',label:tr('浮动拖放窗口'),group:'tools',icon:'panel-top'},
+  {id:'record',label:tr('录屏与录音'),group:'tools',icon:'circle-play'},
+  {id:'stack',label:state.stackActive?tr('停止自动加入堆栈'):tr('开始自动加入堆栈'),group:'header',icon:'layers-2',active:state.stackActive},
+  {id:'pause',label:state.paused?tr('恢复记录'):tr('暂停记录'),group:'header',icon:state.paused?'play':'pause',active:state.paused},
+  ...(state.encrypted?[{id:'lock' as const,label:tr('锁定历史'),group:'privacy' as const,icon:'lock-keyhole'}]:[]),
+  {id:'startup',label:tr('开机自启动'),group:'system',icon:'monitor',active:state.launchAtLogin},
+  {id:'quit',label:tr('退出 Clipper'),group:'system',icon:'power',tone:'danger'}
+ ];
+}
 export function trayMenuTemplate(state:TrayMenuState,actions:TrayMenuActions):MenuItemConstructorOptions[]{
- if(state.secured)return [{label:tr('解锁历史'),click:actions.open},{label:tr('退出 Clipper'),click:actions.quit}];
- return [{label:tr('最近记录'),click:actions.recent},{label:tr('打开 Clipper'),click:actions.open},{label:tr('快速粘贴'),click:actions.quick},{label:tr('快捷回复'),click:actions.replies},{label:tr('浮动拖放窗口'),click:actions.shelf},{label:tr('录屏与录音'),click:actions.record},{label:state.stackActive?tr('停止自动加入堆栈'):tr('开始自动加入堆栈'),click:actions.stack},{type:'separator'},{label:state.paused?tr('恢复记录'):tr('暂停记录'),click:actions.pause},...(state.encrypted?[{label:tr('锁定历史'),click:actions.lock}]:[]),{label:tr('退出 Clipper'),click:actions.quit}];
+ const entries=trayMenuEntries(state),divider=entries.findIndex(item=>item.group==='system');
+ return entries.flatMap((item,index)=>index===divider&&!state.secured?[{type:'separator' as const},{label:item.label,click:actions[item.id]}]:[{label:item.label,click:actions[item.id]}]);
 }

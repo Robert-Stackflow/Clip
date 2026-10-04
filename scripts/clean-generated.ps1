@@ -37,14 +37,6 @@ if(Test-Path -LiteralPath $failedCandidate){
 }
 Add-ClipperTarget (Join-Path $clipperRoot 'work\obsolete-node_modules') (Join-Path $clipperRoot 'work') 'Obsolete dependency tree, replaced by the current node_modules'
 Add-ClipperTarget (Join-Path $clipperRoot 'dist\main\index.cjs.map') (Join-Path $clipperRoot 'dist') 'Unused legacy debug map; production and development builds do not emit it'
-$retired='E:\CodexWork';$retiredCheckout='E:\CodexWork\Clipper\2026-10-02\work\Clipper'
-if(Test-Path -LiteralPath $retired){
- $top=@(Get-ChildItem -LiteralPath $retired -Force);$clipperChildren=@(Get-ChildItem -LiteralPath (Join-Path $retired 'Clipper') -Force)
- if($top.Count -ne 1 -or $top[0].Name -ne 'Clipper' -or $clipperChildren.Count -ne 1 -or $clipperChildren[0].Name -ne '2026-10-02'){throw 'Unexpected content inside the retired E:\CodexWork directory.'}
- $status=@(& git -C $retiredCheckout status --porcelain);if($LASTEXITCODE -ne 0 -or $status.Count){throw 'Retired checkout has unpreserved changes.'}
- $oldCommit=& git -C $retiredCheckout rev-parse HEAD; if($LASTEXITCODE -ne 0){throw 'Retired checkout is missing Git history.'}; & git -C $clipperRoot merge-base --is-ancestor $oldCommit HEAD; if($LASTEXITCODE -ne 0){throw 'Current checkout does not preserve the retired commit.'}
- Add-ClipperTarget $retired 'E:\' 'Retired temporary checkout; preserved in the D: Git repository'
-}
 if($Caches){
  $usingWorkspace=$active | Where-Object {$_.ExecutablePath -and $_.ExecutablePath.StartsWith((Join-Path $clipperRoot 'node_modules')+'\',[StringComparison]::OrdinalIgnoreCase) -or $_.CommandLine -and $_.CommandLine.Contains($clipperRoot) -and $_.CommandLine -match 'scripts[\\/]|tests[\\/]'}
  foreach($lock in Get-ChildItem -LiteralPath (Join-Path $clipperRoot 'work\current') -Filter '.active' -File -Recurse -ErrorAction SilentlyContinue){$testProcess=[int](Get-Content -LiteralPath $lock.FullName);if(Get-Process -Id $testProcess -ErrorAction SilentlyContinue){throw 'Verification is running; close it before clearing caches.'}}

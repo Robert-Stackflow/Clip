@@ -33,11 +33,10 @@
 .sidebar-collapsed .sidebar .nav-item{width:44px;height:40px;min-height:40px;padding:0;gap:0;justify-content:center}
 .sidebar-collapsed .sidebar .nav-item span:not(.status-dot){display:block;flex:0 0 0;max-width:0;opacity:0;transform:translateX(-7px);pointer-events:none}
 .sidebar-collapsed .sidebar-group-caption,.sidebar-collapsed #categories .category-heading{max-height:0;margin-bottom:0;opacity:0}
-.sidebar-collapsed .sidebar-group{margin-top:12px}
+.sidebar-collapsed .sidebar-group{margin-top:10px}
+.sidebar-collapsed .sidebar-group:first-child{margin-top:0}
+.sidebar-collapsed .sidebar-group:not(:first-child){border-top:1px solid var(--line);padding-top:10px}
 .sidebar-collapsed #categories{display:none}
-.sidebar-collapsed #categories:has([data-category]){display:flex;flex-direction:column;gap:3px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
-.sidebar-collapsed #categories .category-heading{display:none}
-.sidebar-collapsed #categories .category-dot{width:16px;height:16px;margin:0}
 .sidebar-collapsed .nav-item small{display:none}
 .reference-loading{max-width:1192px;margin:auto;padding:32px 36px;display:flex;flex-direction:column;gap:14px}
 .reference-loading i{display:block;height:42px;border-radius:9px;background:var(--soft)}
@@ -47,5 +46,6 @@
 @media(max-width:900px){.sidebar .nav-item{font-size:calc(12px * var(--text-scale,1))}.sidebar-collapsed #app{grid-template-columns:60px minmax(0,1fr)}.sidebar-collapsed .brand{width:60px}}
 @media(max-width:570px){.sidebar .nav-item small{display:none}}
 @media(prefers-reduced-motion:reduce){#app,.brand,.brand strong,.sidebar,.sidebar .nav-item span:not(.status-dot),.sidebar-group-caption,#categories .category-heading{transition:none}}
-.sidebar-collapsed .sidebar-bottom #pause-nav{width:44px;height:40px;min-height:40px;padding:0;gap:0;align-self:center}
-.sidebar-collapsed #pause-nav .recording-indicator{margin:0;flex:0 0 16px}
+.sidebar-collapsed .sidebar-bottom #pause-nav{width:44px;height:40px;min-height:40px;padding:0;gap:0;align-self:center;display:grid;place-items:center}
+.sidebar-collapsed #pause-nav .recording-indicator{margin:0;left:-1px}
+.sidebar-collapsed #pause-nav>span{display:none}

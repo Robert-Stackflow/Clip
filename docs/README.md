@@ -7,6 +7,7 @@
 ## 开发资料
 
 - [代码、开发与存储规则](development/代码与构建管理.md)
+- [当前状态与待办](development/当前状态与待办.md)
 - [功能交付约定](development/功能交付约定.md)
 - [需求](development/需求.md)
 - [开发计划](development/开发计划.md)

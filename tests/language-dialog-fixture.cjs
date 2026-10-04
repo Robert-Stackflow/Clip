@@ -2,7 +2,7 @@ function setupDialogs(){
  const api=window.clipper,language=window.clipperLanguage.current,english=language==='en',calls=[];
  const options={historyEnabled:true,repliesShortcut:'Control+Alt+R',bindings:[]},history=['设置 保存','<img id="injected-search">'];
  fixture.calls=calls;fixture.efficiency={options,history};fixture.state.snippets[0].title='保存 {{姓名}}';fixture.state.snippets[0].text='你好 {{姓名}} · {{日期}} {{时间}}';fixture.state.snippets[0].payload={text:fixture.state.snippets[0].text};
- fixture.desktop={dockEnabled:true,dockEdge:'left',dwellMs:450,displayId:null,autoHide:true,shelfTop:true,shelfOnTop:true,shelfShortcut:'Control+Alt+D',cardDirection:'grid'};
+ fixture.desktop={dwellMs:450,displayId:null,shelfTop:true,shelfAutoDrag:false,shelfOnTop:true,shelfPosition:'top-right',shelfShortcut:'Control+Alt+D',cardDirection:'grid'};
  const record=(name,result=null)=>(...args)=>{calls.push([name,...args]);return Promise.resolve(typeof result==='function'?result(...args):result);};
  const data={formats:[{name:'PNG',label:english?'PNG image':'PNG 图像',bytes:123456,exportable:true},{name:'Rich Text Format',label:english?'RTF rich text':'RTF 富文本',bytes:1234,exportable:true}],image:{width:640,height:360},sourceUrl:'https://资料.test/保存?主题=中文',attachments:[{index:0,name:'资料\\保存.txt',directory:false,bytes:2048,modified:1700000000000,created:1600000000000}],files:[{name:'中文 文件.txt',path:'D:\\资料\\中文 文件.txt',type:english?'Document':'文档',bytes:4096,modified:1700000000000,status:'not-read'}]};
  const overrides={

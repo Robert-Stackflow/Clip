@@ -7,7 +7,7 @@ const assert=require('node:assert/strict');
 (async()=>{
  const {beginCase}=await import('../scripts/workspace.mjs'),work=await beginCase('reference-native');
  const profile=path.join(work.fixtures,'profile'),{StorageManager}=require('../work/test-exports.cjs'),storage=new StorageManager(profile),store=await storage.start();
- store.saveSettings({...store.settings,paused:true,shortcut:'Control+Shift+F18',quickShortcut:'Control+Alt+F19',nextShortcut:'Control+Alt+F20'});
+ store.saveSettings({...store.settings,paused:true,shortcut:'Control+Shift+F18',nextShortcut:'Control+Alt+F20'});
  store.setMeta('desktop-options',{shelfShortcut:'Control+Alt+F21'});
  store.setMeta('efficiency',{historyEnabled:false,repliesShortcut:'Control+Alt+F23',bindings:[]});
  store.close();
