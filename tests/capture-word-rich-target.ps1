@@ -2,10 +2,12 @@ param(
   [Parameter(Mandatory = $true)][string]$Value,
   [Parameter(Mandatory = $true)][string]$Ready,
   [Parameter(Mandatory = $true)][string]$Stop,
-  [Parameter(Mandatory = $true)][string]$Failure
+  [Parameter(Mandatory = $true)][string]$Failure,
+  [Parameter(Mandatory = $true)][uint32]$ExpectedSequence
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'clipboard-guard.ps1')
 $word = $null
 $document = $null
 $range = $null
@@ -20,6 +22,7 @@ try {
   $range.Font.Bold = -1
   $range.Font.Size = 18
   $range.Font.Color = 4007639
+  Assert-ClipboardUnchanged $ExpectedSequence
   [void]$range.Copy()
   [System.IO.File]::WriteAllText($Ready, 'ready')
   $deadline = [DateTime]::UtcNow.AddSeconds(45)

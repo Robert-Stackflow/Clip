@@ -6,6 +6,7 @@ const path=require('node:path');
 const {randomUUID}=require('node:crypto');
 const {fixture}=require('./efficiency-fixture.cjs');
 const {png}=require('./png-fixture.cjs');
+const {requireEmptyClipboard}=require('./clipboard-guard.cjs');
 
 function readClipboard(){return JSON.parse(execFileSync('powershell.exe',['-Sta','-NoProfile','-NonInteractive','-Command',"Add-Type -AssemblyName System.Windows.Forms; $d=[System.Windows.Forms.Clipboard]::GetDataObject(); @{formats=@($d.GetFormats($false));text=[System.Windows.Forms.Clipboard]::GetText();html=[string]$d.GetData('HTML Format',$false);rtf=[string]$d.GetData('Rich Text Format',$false)} | ConvertTo-Json -Compress"],{encoding:'utf8',windowsHide:true}));}
 function powerpointCount(){return Number(execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',"@(Get-Process -Name POWERPNT -ErrorAction SilentlyContinue).Count"],{encoding:'utf8',windowsHide:true}).trim());}
@@ -13,6 +14,7 @@ function powerpointCount(){return Number(execFileSync('powershell.exe',['-NoProf
 async function run(){
  const imageMode=process.env.CLIPPER_CAPTURE_POWERPOINT_IMAGE==='1';
  assert.equal(powerpointCount(),0,'Close existing PowerPoint windows before this isolated test');
+ const clipboardGuard=requireEmptyClipboard();
  const name=imageMode?'capture-powerpoint-image':'capture-powerpoint-rich';
  const output=path.resolve('work/'+name);await fs.mkdir(output,{recursive:true});
  const prefix=randomUUID(),ready=path.join(output,prefix+'-ready.txt'),stop=path.join(output,prefix+'-stop.txt'),failure=path.join(output,prefix+'-error.txt'),picture=path.join(output,prefix+'.png');
@@ -45,6 +47,7 @@ async function run(){
    await new Promise(resolve=>setTimeout(resolve,200));
   }
   await expect.poll(()=>native('foreground')).toBe(hwnd);
+  clipboardGuard.assertUnchanged();
   await f.key('Control+C');
   if(imageMode)await expect.poll(()=>readClipboard().formats.includes('PNG'),{timeout:5000}).toBe(true);
   else await expect.poll(()=>readClipboard().text,{timeout:5000}).toContain(value);
