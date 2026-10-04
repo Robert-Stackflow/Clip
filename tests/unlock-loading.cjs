@@ -12,6 +12,21 @@ const {setup}=require('./renderer-fixture.cjs');
   await page.locator('#hello').click();await expect(page.locator('#hello-action')).toHaveText('正在验证 Windows Hello…');assert.equal(await page.locator('#hello .unlock-spinner').evaluate(node=>getComputedStyle(node).display),'block');assert.equal(await page.locator('#unlock-submit .unlock-spinner').evaluate(node=>getComputedStyle(node).display),'none');await page.evaluate(()=>window.finishUnlock());await expect(page.locator('#hello-action')).toHaveText('使用 Windows Hello');
   await page.locator('#recover').click();await expect(page.locator('#recover-action')).toHaveText('正在打开恢复…');assert.equal(await page.locator('#recover .unlock-spinner').evaluate(node=>getComputedStyle(node).display),'block');await page.evaluate(()=>window.finishRecover());await expect(page.locator('#recover-action')).toHaveText('从资料或备份恢复');
   for(const [width,height] of [[480,570],[550,650]]){await page.setViewportSize({width,height});assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.locator('#use-recovery').scrollIntoViewIfNeeded();await page.screenshot({path:path.join(out,`recovery-${width}x${height}.png`)});}
-  assert.deepEqual(errors,[]);await context.close();console.log(JSON.stringify({result:'PASS',loading:true,recovery:true,hello:true,errors}));
+  await context.close();
+  const preparing=await browser.newContext({viewport:{width:550,height:650}});
+  await preparing.addInitScript({content:`(${setup.toString()})();window.unlock.state=async()=>({ready:false,hello:false,helloAvailable:false,error:window.unlockError||''});`});
+  await preparing.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);if(!/^[\w.-]+$/.test(name))return route.abort();try{await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'application/javascript'});}catch{return route.abort();}});
+  const pending=await preparing.newPage();pending.on('pageerror',e=>errors.push(e.message));await pending.goto('https://clipper.test/unlock.html');
+  await expect(pending.locator('#heading')).toHaveText('正在关闭资料…');
+  await expect(pending.locator('#unlock-options')).toBeHidden();
+  assert.equal(await pending.locator('#initial-progress').evaluate(node=>getComputedStyle(node).display),'block');
+  await pending.screenshot({path:path.join(out,'unlock-preparing.png')});
+  await pending.evaluate(()=>window.unlockError='资料关闭失败，请退出后重新打开：测试');
+  await expect(pending.locator('#heading')).toHaveText('解锁暂不可用');
+  await expect(pending.locator('#feedback')).toContainText('资料关闭失败');
+  await expect(pending.locator('#initial-progress')).toBeHidden();
+  await expect(pending.locator('#recover')).toBeDisabled();
+  await pending.screenshot({path:path.join(out,'unlock-unavailable.png')});
+  await preparing.close();assert.deepEqual(errors,[]);console.log(JSON.stringify({result:'PASS',loading:true,recovery:true,hello:true,preparing:true,unavailable:true,errors}));
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});

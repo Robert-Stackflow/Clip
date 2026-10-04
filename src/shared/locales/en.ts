@@ -243,6 +243,8 @@ export const english:Readonly<Record<string,string>>={
   "你的剪贴板，只在需要时打开": "Your clipboard history, available when you need it",
   "正在关闭资料…": "Closing data…",
   "正在停止共享和后台任务。": "Stopping sharing and background tasks.",
+  "解锁暂不可用": "Unlock is unavailable",
+  "请退出后重新打开 Clipper。": "Quit and reopen Clipper.",
   "设置新密码（至少 12 个字符）": "Set a new password (at least 12 characters)",
   "解锁历史": "Unlock history",
   "取消加密": "Turn off encryption",
