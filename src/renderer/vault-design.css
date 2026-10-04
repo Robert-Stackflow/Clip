@@ -1,7 +1,8 @@
 #history-vault{min-width:0}
 #history-vault>.tools-section-heading{min-height:28px;margin:0 0 14px;align-items:center}
 #history-vault .vault-badge{padding:5px 9px;border-radius:999px;background:var(--soft);font-size:calc(11px * var(--text-scale,1));white-space:nowrap}
-#history-vault .vault-card{margin:0;padding:20px 22px;display:block;background:var(--surface);border:1px solid var(--line);border-radius:var(--panel-radius) var(--panel-radius) 0 0}
+#history-vault .vault-card{margin:0;padding:20px 22px;display:block;background:var(--surface);border:1px solid var(--line);border-radius:var(--panel-radius)}
+#history-vault.has-vault-options .vault-card{border-radius:var(--panel-radius) var(--panel-radius) 0 0}
 #history-vault .vault-card>div:last-child{min-width:0}
 #history-vault .vault-card h3{margin:0 0 6px;font-size:calc(15px * var(--text-scale,1));font-weight:600}
 #history-vault .vault-card p{max-width:640px;font-size:calc(12px * var(--text-scale,1));line-height:1.6}
@@ -21,4 +22,22 @@
 #history-vault .vault-warning p{margin:5px 0;line-height:1.6}
 #history-vault .vault-warning #vault-plaintext-path{font:calc(11px * var(--text-scale,1))/1.5 Consolas,monospace;overflow-wrap:anywhere}
 #history-vault .vault-warning button{margin-top:8px}
+.settings-page #history-vault{margin-top:26px}
+.settings-page .settings-card .storage-location{border:0;border-radius:0;background:transparent;padding:16px 4px 18px;margin:0}
+.settings-page .storage-location-label{display:block;margin-bottom:8px;color:var(--fg);font-size:calc(12px * var(--text-scale,1))}
+.settings-page .settings-card .storage-location code{font-size:calc(11px * var(--text-scale,1));line-height:1.6}
+.settings-page .settings-card .storage-location small{margin-top:5px;font-size:calc(11px * var(--text-scale,1))}
+.storage-previous{margin-top:10px;border:1px solid var(--line);border-radius:var(--panel-radius);background:var(--surface);font-size:calc(12px * var(--text-scale,1))}
+.storage-previous summary{display:flex;justify-content:space-between;gap:16px;align-items:center;cursor:pointer;list-style:none;padding:13px 16px;color:var(--muted)}
+.storage-previous summary::-webkit-details-marker{display:none}
+.storage-previous summary span:first-child{color:var(--fg)}
+.storage-previous[open] summary{border-bottom:1px solid var(--line)}
+.storage-previous-action{white-space:nowrap}
+.storage-previous[open] .storage-previous-action{color:var(--fg)}
+.storage-previous-body{padding:13px 16px 15px}
+.storage-previous code{display:block;overflow-wrap:anywhere;font:calc(11px * var(--text-scale,1))/1.6 Consolas,monospace}
+.storage-previous p{margin:6px 0 0;color:var(--muted);line-height:1.6}
+.settings-page .settings-card .storage-previous{margin:0 -18px;border:0;border-top:1px solid var(--line);border-radius:0 0 var(--panel-radius) var(--panel-radius)}
+.settings-page .settings-card .storage-previous summary{padding:14px 22px}
+.settings-page .settings-card .storage-previous-body{padding:13px 22px 16px}
 @media(max-width:600px){#history-vault .vault-card .data-controls{flex-wrap:wrap}#history-vault .vault-options>.field{align-items:flex-start;flex-direction:column}#history-vault .vault-options select,#history-vault .vault-options>.field .custom-select-wrap{width:100%;flex-basis:auto}}

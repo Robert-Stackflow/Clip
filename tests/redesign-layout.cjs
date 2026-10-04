@@ -32,6 +32,15 @@ const output=deviceScaleFactor===1?'work/redesign':`work/redesign-dpi-${deviceSc
  const storageTab=settingsNav.filter({hasText:language==='en'?'Current storage':'当前存储'});
  await storageTab.click();
  await page.waitForSelector('#settings-storage-summary');
+ const storageLayout=await page.evaluate(()=>{const card=document.querySelector('#settings-storage-summary').closest('.settings-card'),location=document.querySelector('#storage-directory').closest('.storage-location'),previous=document.querySelector('.storage-previous'),vault=document.querySelector('#history-vault');const cardRect=card.getBoundingClientRect(),vaultRect=vault.getBoundingClientRect();return {locationInsideCard:card.contains(location),previousInsideCard:card.contains(previous),vaultAfterCard:vaultRect.top-cardRect.bottom>=20,optionsAttached:!!vault.querySelector('.vault-options'),optionsRadius:getComputedStyle(vault.querySelector('.vault-options')).borderBottomLeftRadius};});
+ assert.equal(storageLayout.locationInsideCard,true);
+ assert.equal(storageLayout.previousInsideCard,true);
+ assert.equal(storageLayout.vaultAfterCard,true);
+ assert.equal(storageLayout.optionsAttached,true);
+ assert.notEqual(storageLayout.optionsRadius,'0px');
+ await page.locator('.storage-previous summary').click();
+ assert.ok((await page.locator('.storage-previous code').textContent()).includes('D:\\旧资料'));
+ await page.locator('.storage-previous summary').click();
  await page.locator('#migrate-storage').focus();
  const storageScroll=await page.locator('.settings-panels').evaluate(node=>{node.scrollTop=120;return node.scrollTop;});
  assert.ok(storageScroll>0);
@@ -44,6 +53,12 @@ const output=deviceScaleFactor===1?'work/redesign':`work/redesign-dpi-${deviceSc
  assert.equal(await page.locator('.settings-panels').evaluate(node=>node.scrollTop),storageScroll);
  await page.evaluate(()=>{fixture.state.clips.pop();fixture.state.bytes=1024;fixture.refresh();});
  await page.waitForFunction(()=>document.getElementById('settings-storage-summary')?.textContent?.includes('1 KB'));
+ await page.evaluate(()=>{fixture.vault.encrypted=false;fixture.vault.plaintextDirectory='';});
+ await page.locator('[data-page="history"]').click();await page.locator('[data-page="settings"]').click();await storageTab.click();
+ await page.waitForSelector('#vault-enable');
+ assert.notEqual(await page.locator('#history-vault .vault-card').evaluate(node=>getComputedStyle(node).borderBottomLeftRadius),'0px');
+ assert.equal(await page.locator('#history-vault .vault-options').count(),0);
+ if(language==='zh-CN'&&theme==='light')await page.screenshot({path:`${output}/settings-storage-plaintext.png`});
  await page.locator('#sidebar-toggle').click();
  assert.equal(await page.locator('#sidebar-toggle').getAttribute('aria-expanded'),'false');
  const category=page.locator('#categories [data-category="work"]');
