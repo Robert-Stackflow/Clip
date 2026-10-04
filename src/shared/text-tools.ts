@@ -13,7 +13,7 @@ export interface ScriptRequest {requestId:string;scriptId:string;input:string;pe
 export interface TextApply {mode:'copy'|'save'|'replace';text:string;source:'AI 处理'|'脚本处理';clipId?:string;expectedHash?:string}
 export interface ExternalIntent {action:'open'|'search'|'add'|'copy';text:string}
 export interface IntegrationState {registered:boolean;pending:{id:string;intent:ExternalIntent}|null}
-export const MAX_TOOL_INPUT=256*1024,MAX_TOOL_OUTPUT=1024*1024,MAX_SCRIPT_CODE=64*1024;
+export const MAX_TOOL_INPUT=256*1024,MAX_TOOL_OUTPUT=1024*1024,MAX_SCRIPT_CODE=64*1024,MAX_EXTERNAL_URL_LENGTH=8192;
 const byteLength=(v:string)=>new TextEncoder().encode(v).length;
 export function toolText(v:unknown,limit=MAX_TOOL_INPUT):string {if(typeof v!=='string'||!v.trim())throw new Error(tr('请输入要处理的文字'));if(byteLength(v)>limit)throw new Error(tr`文字超过 ${Math.round(limit/1024)} KiB 限制`);return v;}
 export function requestId(v:unknown):string {if(typeof v!=='string'||! /^[a-zA-Z0-9_-]{8,80}$/.test(v))throw new Error(tr('请求编号无效'));return v;}
@@ -36,7 +36,7 @@ export function aiMessages(value:Pick<AIRequest,'input'|'action'|'language'|'ins
 }
 export function validateScript(value:unknown):TextScriptInput {const v=value as TextScriptInput;if(!v||typeof v.name!=='string'||!v.name.trim()||v.name.length>60||typeof v.description!=='string'||v.description.length>240||v.permission!=='selected-text'||!Number.isInteger(v.timeoutMs)||v.timeoutMs<100||v.timeoutMs>5000)throw new Error(tr('脚本名称、说明、权限或时限无效'));toolText(v.code,MAX_SCRIPT_CODE);return {id:v.id,name:v.name.trim(),description:v.description.trim(),code:v.code,timeoutMs:v.timeoutMs,permission:'selected-text'};}
 export function parseExternalUrl(value:unknown):ExternalIntent {
- if(typeof value!=='string'||value.length>8192||/[\r\n\0]/.test(value))throw new Error(tr('外部请求过长或无效'));let u:URL;try{u=new URL(value);}catch{throw new Error(tr('外部请求无效'));}
+ if(typeof value!=='string'||value.length>MAX_EXTERNAL_URL_LENGTH||/[\r\n\0]/.test(value))throw new Error(tr('外部请求过长或无效'));let u:URL;try{u=new URL(value);}catch{throw new Error(tr('外部请求无效'));}
  if(u.protocol!=='clipper-win:'||u.username||u.password||u.port||u.hash||(u.pathname&&u.pathname!=='/'))throw new Error(tr('不支持的外部请求'));
  const action=u.hostname;if(!['open','search','add','copy'].includes(action))throw new Error(tr('不支持此 URL 动作'));const key=action==='search'?'q':'text';
  if([...u.searchParams.keys()].some(k=>k!==key)||u.searchParams.getAll(key).length>1||(action==='open'&&u.search))throw new Error(tr('外部请求参数无效'));const text=u.searchParams.get(key)||'';

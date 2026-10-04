@@ -45,8 +45,8 @@ import { ocrStatus, recognize, cancelOcr, clearOcrTemporary } from './ocr';
 import { CaptureService } from './capture';
 import {AIService} from './ai';
 import {ScriptService} from './scripts';
-import {IntegrationService} from './integrations';
-import {toolText,MAX_TOOL_OUTPUT,type TextApply} from '../shared/text-tools';
+import {IntegrationService,MAX_EXTERNAL_PENDING} from './integrations';
+import {toolText,MAX_TOOL_OUTPUT,MAX_EXTERNAL_URL_LENGTH,type TextApply} from '../shared/text-tools';
 import {safeStorage,powerMonitor} from 'electron';
 import {HistoryVault} from './history-vault';
 import {unlockStorage} from './unlock-window';
@@ -94,7 +94,10 @@ let storageManager:StorageManager,backupManager:BackupManager,backupTimer:NodeJS
 let checkpointRecovery:CheckpointRecovery;
 let syncService:SyncService;
 let webService:WebShareService;
-let startupArgv=process.argv;
+const startupUrls:string[]=[];
+let startupOverflow=false,startupTooLong=false;
+function queueStartupExternal(argv:string[]){const url=argv.find(s=>/^clipper-win:/i.test(s));if(!url)return;if(url.length>MAX_EXTERNAL_URL_LENGTH){startupTooLong=true;return;}if(startupUrls.length<MAX_EXTERNAL_PENDING)startupUrls.push(url);else startupOverflow=true;}
+queueStartupExternal(process.argv);
 let secured=true,storeOpen=false,vaultSetup=false,sessionEpoch=0,lastUnlock=0,systemPaused=false,vaultSetupExpires=0;let unlockWindow:BrowserWindow|undefined;
 const localProtector={available:()=>safeStorage.isAsyncEncryptionAvailable(),encrypt:async(value:string)=>(await safeStorage.encryptStringAsync(value)).toString('base64'),decrypt:async(value:string)=>(await safeStorage.decryptStringAsync(Buffer.from(value,'base64'))).result};
 function activeStore(){if(secured||!storeOpen)throw new Error(tr('历史已锁定'));return store;}
@@ -286,7 +289,7 @@ async function activateStore(){checkpointRecovery?.cancel();checkpointRecovery=n
   syncService=new SyncService(activeStore,localProtector,broadcast,enqueue,undefined,{...(testing?{bindHost:'127.0.0.1',discovery:false}:{}),history:()=>({source:join(storageManager.directory,'history.sqlite'),key:storageManager.vault.copyKey()}),prepareThumbnail,afterMutation:(p,n)=>webService.observe(p,n)});await background(syncService.resume());if(secured||quitting||epoch!==sessionEpoch)return;
   if(!nativeAvailable())status=tr`Windows 接口不可用：${nativeError}`;
   store.db.prepare("DELETE FROM meta WHERE key='selection-options'").run();aiService=new AIService(store);scriptService=new ScriptService(store);main=createWindow();trayPanel?.dispose();trayPanel=new TrayPanel({source:()=>join(storageManager.directory,'history.sqlite'),key:()=>storageManager.vault.copyKey(),image:(window,item)=>previewImages.register(window.webContents.id,previewSource(window.webContents.id,item.id,false,item.hash)),releaseImage:owner=>previewImages.clear(owner),store:activeStore,blocked:()=>repliesBlocked()||vaultSetup,dark,target:trayTarget,validTarget:target=>windowInfo(target.hwnd)?.pid===target.pid,main:()=>show(),copy:(item,paste,target,valid)=>enqueue(async()=>{if(!valid())throw new Error(tr('托盘操作已失效'));await copyPayload(item.payload,paste,false,target,valid);}),drag:(window,item,valid)=>{const epoch=sessionEpoch;return startDrag(window.webContents,item,()=>valid()&&transferValid(item,epoch));}});desktop=new DesktopController({store:activeStore,blocked:()=>updateService?.installing||programRollback?.installing||secured||quitting||changingStore||captureService.active||recorder?.active||scrollCapture?.active||recordingShortcut,openRecent:(bounds,activate,sticky)=>trayPanel?.open(undefined,{bounds,activate,sticky}),peekQuick:()=>trayPanel?.window,rememberTarget,dark,changed:broadcast,enqueue});integrationService=new IntegrationService(broadcast,()=>show(),notice);trayMenu();
-  hotkeys.clear();globalShortcut.unregisterAll();try{hotkeyError=registerHotkeys(store.settings,undefined,undefined,false);}catch(e){hotkeyError=String((e as Error).message);}lastSequence=sequence();show();if(startupArgv.length){integrationService.receive(startupArgv);startupArgv=[];}
+  hotkeys.clear();globalShortcut.unregisterAll();try{hotkeyError=registerHotkeys(store.settings,undefined,undefined,false);}catch(e){hotkeyError=String((e as Error).message);}lastSequence=sequence();show();for(const url of startupUrls.splice(0))integrationService.receive([url]);if(startupOverflow){startupOverflow=false;notice(tr('外部请求过多，请稍后重试'));}if(startupTooLong){startupTooLong=false;notice(tr('外部请求过长或无效'));}
 }
 async function start(){
   initLanguageService(languageStore);if(process.platform==='win32')app.setAppUserModelId('local.clipper.desktop');
@@ -309,6 +312,6 @@ async function start(){
   const checkUpdates=()=>{if(!testing&&!development&&!secured&&!quitting)void updateService.scheduled().catch(()=>{});};updateTimer=setInterval(checkUpdates,3600000);setTimeout(checkUpdates,15000);
 }
 installDevelopmentBridge(()=>secured||changingStore||vaultSetup||!!captureService?.active||!!recorder?.hasUnsaved||!!scrollCapture?.hasUnsaved||!!imageEditor?.hasUnsaved);
-if(!testing&&!app.requestSingleInstanceLock())app.quit();else{app.on('second-instance',(_event,argv)=>{show();if(!secured&&integrationService)integrationService.receive(argv);else if(argv.some(s=>/^clipper-win:/i.test(s)))startupArgv=argv;});app.whenReady().then(start).then(()=>developmentMessage({type:'clipper:dev-ready',profile:app.getPath('userData'),pid:process.pid})).catch(e=>{if(!quitting){if(development)console.error(e);else dialog.showErrorBox(tr('Clipper 启动失败'),String(e));}app.quit();});}
+if(!testing&&!app.requestSingleInstanceLock())app.quit();else{app.on('second-instance',(_event,argv)=>{show();if(!secured&&integrationService)integrationService.receive(argv);else queueStartupExternal(argv);});app.whenReady().then(start).then(()=>developmentMessage({type:'clipper:dev-ready',profile:app.getPath('userData'),pid:process.pid})).catch(e=>{if(!quitting){if(development)console.error(e);else dialog.showErrorBox(tr('Clipper 启动失败'),String(e));}app.quit();});}
 app.on('before-quit',event=>{if(quitting)return;event.preventDefault();if((recorder?.hasUnsaved||scrollCapture?.hasUnsaved||imageEditor?.hasUnsaved)&&!quitRecordingConfirmed){if(!quitRecordingPrompt){quitRecordingPrompt=true;void confirmWindow([imageEditor?.window,recorder?.window,scrollCapture?.window,main].find(w=>w&&!w.isDestroyed()),{type:'question',message:tr('退出并放弃尚未保存的捕获内容和图片修改？'),buttons:[tr('返回'),tr('退出并放弃')],defaultId:0,cancelId:0}).then(result=>{if(result.response===1){quitRecordingConfirmed=true;app.quit();}else{developmentMessage({type:'clipper:dev-quit-canceled'});if(recorder?.active)void recorder.open();else if(scrollCapture?.hasUnsaved)void scrollCapture.open();else if(imageEditor?.window)imageEditor.window.show();else void recorder.open();}}).catch(()=>{}).finally(()=>quitRecordingPrompt=false);}return;}flushDesktopBounds();checkpointRecovery?.cancel();quitting=true;sessionEpoch++;clearInterval(timer);clearInterval(backupTimer);hotkeys.clear();globalShortcut.unregisterAll();desktop?.dispose();desktop=undefined;stopTools(false);if(updateService)background(updateService.stop());if(webService)background(webService.stop());if(syncService)background(syncService.stop());void serial.catch(()=>{}).then(async()=>{await webService?.stop();await syncService?.stop();return Promise.allSettled([...backgroundTasks]);}).then(()=>app.quit());});
 app.on('will-quit',()=>{clearInterval(updateTimer);void updateService?.stop();trayPanel?.dispose();imageEditor?.abort();void recorder?.dispose();scrollCapture?.dispose();disposeTransfer();if(storeOpen)store?.close();storageManager?.cancelEncryption();storageManager?.vault.lock();});app.on('window-all-closed',()=>{});
