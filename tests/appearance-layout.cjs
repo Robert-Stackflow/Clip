@@ -24,6 +24,7 @@ const {setup,measure}=require('./renderer-fixture.cjs');
    if(file==='recovery'){const warning=await page.locator('#startup-error').evaluate(node=>{const style=getComputedStyle(node);return {height:node.getBoundingClientRect().height,min:Number.parseFloat(style.lineHeight)+Number.parseFloat(style.paddingTop)+Number.parseFloat(style.paddingBottom),text:node.textContent?.trim()};});if(warning.text&&warning.height+1<warning.min)failures.push({label,key:'recovery warning clipped',warning});}
    if(file==='image-editor')assert.deepEqual(await page.locator('#image').evaluate(c=>[c.width,c.height]),[640,360],'font scaling must not resample image canvas');
   }
+  if(file==='recorder'){await page.locator('.recording-layout').evaluate(node=>node.scrollTop=0);const source=await page.locator('#video-settings').boundingBox();assert(source&&source.y<size[1]&&source.height>100,'The selected recording source must be visible on initial setup');}
   await page.screenshot({path:path.join(out,file+'-minimum.png')});
  }
  for(const theme of ['light','dark'])for(const view of ['text','image','files','stack','shelf','replies','batch','grid'])for(const scale of [100,150])for(const density of ['comfortable','compact']){
