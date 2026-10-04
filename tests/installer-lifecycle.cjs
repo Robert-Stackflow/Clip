@@ -6,7 +6,7 @@ function run(file,args,options={}){return new Promise((resolve,reject)=>{const c
 const sleep=delay=>new Promise(resolve=>setTimeout(resolve,delay));
 const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 (async()=>{
- const delivery=path.resolve('../delivery-0.22.0');
+ const delivery=path.resolve('.');
  const reuse=process.env.CLIPPER_INSTALLER_TEST_SESSION;
  if(reuse)assert(/^[0-9a-f-]{36}$/.test(reuse),'Invalid verification session');
  const id=reuse||crypto.randomUUID(),name='ClipperVerification-'+id;
@@ -16,7 +16,7 @@ const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest
  const configuration=path.join(folder,'config.json');fs.writeFileSync(configuration,JSON.stringify(config,null,2));
  if(!reuse){
   const log=fs.openSync(path.join(folder,'build.log'),'w');
-  try{assert.equal(await run(process.execPath,[path.join(delivery,'node_modules/electron-builder/cli.js'),'--projectDir',delivery,'--config',configuration,'--win','nsis','--x64','--publish','never'],{cwd:delivery,stdio:['ignore',log,log]}),0,'Verification installer build must pass');}finally{fs.closeSync(log);}
+  try{assert.equal(await run(process.execPath,[path.join(delivery,'node_modules/electron-builder/out/cli/cli.js'),'--projectDir',delivery,'--config',configuration,'--win','nsis','--x64','--publish','never'],{cwd:delivery,stdio:['ignore',log,log]}),0,'Verification installer build must pass');}finally{fs.closeSync(log);}
  }
  const installer=path.join(folder,'build/verification-setup.exe');assert(fs.existsSync(installer));
  const profile=path.resolve(process.env.APPDATA,name.toLowerCase()),productProfile=path.resolve(process.env.APPDATA,name);
@@ -63,6 +63,7 @@ const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest
   if(isInstalled){const file=fs.existsSync(installed)&&fs.readdirSync(installed).find(value=>/^Uninstall.*\.exe$/i.test(value));if(file)await run(path.join(installed,file),['/S'],{env:installerEnv});}
   // Only the exact unique directory created above is removed. Do not touch Clipper.
   assert.equal(path.dirname(profile).toLowerCase(),path.resolve(process.env.APPDATA).toLowerCase());assert.equal(path.basename(profile),name.toLowerCase());
+  assert.equal(fs.lstatSync(profile).isSymbolicLink(),false,'Test profile must not be a link');
   fs.rmSync(profile,{recursive:true,force:true});
  }
 })().catch(error=>{console.error(error);process.exitCode=1;});

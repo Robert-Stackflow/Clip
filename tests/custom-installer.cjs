@@ -94,6 +94,8 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
       if (uninstaller) await run(path.join(installed, uninstaller), ['/S']);
     }
     assert.equal(path.dirname(profile).toLowerCase(), path.resolve(process.env.APPDATA).toLowerCase());
-    assert.equal(path.basename(profile), name.toLowerCase()); fs.rmSync(profile, { recursive: true, force: true });
+    assert.equal(path.basename(profile), name.toLowerCase());
+    assert.equal(fs.lstatSync(profile).isSymbolicLink(), false, 'Test profile must not be a link');
+    fs.rmSync(profile, { recursive: true, force: true });
   }
 })().catch(error => { console.error(error); process.exitCode = 1; });
