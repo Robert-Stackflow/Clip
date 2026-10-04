@@ -1,7 +1,7 @@
 import referenceLinks from '../renderer/reference-data/reference-links.json';
 import {AppIcons} from './app-icons';
 import {rendererAssetAllowed} from '../shared/renderer-assets';
-import {development,developmentHidden,developmentMessage,installDevelopmentBridge} from './development';
+import {development,developmentHidden,developmentMessage,installDevelopmentBridge,recoverDevelopmentRenderer} from './development';
 import {CaptureWriter,CaptureCancelledError,heavyCapture} from './capture-writer';
 import {Thumbnails} from './thumbnails';
 import {PreviewImages} from './preview-images';
@@ -124,6 +124,7 @@ function rememberTarget(){const f=foregroundTarget();if(f&&f.pid!==process.pid){
 function trayTarget(){rememberTarget();const target=windowInfo(lastTarget);return target&&target.pid===lastTargetPid&&target.pid!==process.pid?target:undefined;}
 function createWindow(){const w=new BrowserWindow({width:1180,height:780,minWidth:860,minHeight:600,show:false,title:'Clipper',icon:join(__dirname,'../clipper.png'),titleBarStyle:'hidden',titleBarOverlay:false,frame:true,thickFrame:true,hasShadow:true,backgroundColor:dark()?'#181818':'#ffffff',autoHideMenuBar:true,skipTaskbar:false,resizable:true,webPreferences:{additionalArguments:interfaceLanguageArguments(),preload:join(__dirname,'../preload/index.cjs'),backgroundThrottling:!developmentHidden,sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true}});
   w.webContents.setWindowOpenHandler(()=>({action:'deny'}));w.webContents.on('will-navigate',e=>e.preventDefault());w.webContents.on('will-attach-webview',e=>e.preventDefault());
+  recoverDevelopmentRenderer(w);
   w.on('close',e=>{if(!quitting){e.preventDefault();w.hide();}});w.on('blur',endShortcutRecording);
   const caller=w.webContents.id;watchCollectionWindow(w,()=>{void historySearch.cancel(caller);previewImages.clear(caller);});w.webContents.on('destroyed',()=>previewImages.clear(caller));void w.loadURL('clipper://app/index.html');return w;
 }
