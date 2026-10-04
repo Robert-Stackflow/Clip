@@ -45,4 +45,15 @@ body[data-view=shelf] .toolbar button:hover,body[data-view=shelf] .actions butto
 body[data-view=shelf] .shelf-row{margin:0 2px 3px;border:0;border-radius:var(--radius);min-height:66px;padding:10px 9px;background:transparent;gap:10px}body[data-view=shelf] .shelf-row:hover,body[data-view=shelf] .shelf-row:focus-within{background:var(--hover)}
 body[data-view=shelf] .visual{width:36px;height:38px;background:var(--soft);border:0;border-radius:9px}body[data-view=shelf] .actions{gap:2px}body[data-view=shelf] .actions button{width:26px;height:28px;min-height:28px;padding:5px}body[data-view=shelf] .empty{min-height:0;padding:18px;gap:10px}body[data-view=shelf] .empty button{border:0;background:var(--soft)}
 @media(max-width:600px){.recent-toolbar{gap:6px;padding-inline:10px}.recent-toolbar #filters button{padding-inline:7px}.recent-category{max-width:120px}.recent-shell #preview{padding:14px 14px 0}.recent-shell .preview-actions{padding-inline:14px}.recent-shell .row-meta time{display:none}.recent-workspace{grid-template-columns:minmax(180px,.9fr) minmax(200px,1.1fr)}}
-@media(max-width:480px){.recent-toolbar{align-items:flex-start;flex-direction:column;gap:4px}.recent-category{align-self:flex-end}.recent-workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(120px,.9fr) minmax(150px,1.1fr)}.recent-shell .preview-pane{display:flex;border-radius:10px}.recent-shell #preview{padding:10px 12px 0}.recent-shell .preview-actions{padding:8px 12px 12px}.recent-shell .preview-actions button{min-height:28px}.recent-shell #count{padding-inline:14px}}
+@media(max-width:480px){.recent-toolbar{align-items:flex-start;flex-direction:column;gap:4px}.recent-category{align-self:flex-end}.recent-workspace{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,.9fr) minmax(0,1.1fr)}.recent-shell .preview-pane{display:flex;border-radius:10px}.recent-shell #preview{padding:10px 12px 0}.recent-shell .preview-actions{padding:8px 12px 12px}.recent-shell .preview-actions button{min-height:28px}.recent-shell #count{padding-inline:14px}}
+@media(max-height:320px){
+ .recent-shell .recent-header{height:44px}
+ .recent-toolbar{align-items:center;flex-direction:row;gap:6px;padding:0 10px 6px}
+ .recent-toolbar #filters{min-width:0;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+ .recent-toolbar #filters::-webkit-scrollbar{display:none}
+ .recent-toolbar #filters button{flex:0 0 auto}
+ .recent-category{align-self:center;max-width:96px}
+ body[data-view=tray] .recent-shell .recent-workspace{grid-template-rows:minmax(0,1fr) auto;gap:6px;padding:0 8px 8px}
+ .recent-shell #preview{display:none}
+ .recent-shell .preview-actions{padding:6px 8px 8px}
+}

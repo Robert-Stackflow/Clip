@@ -34,6 +34,22 @@ const {setup}=require('./renderer-fixture.cjs');
     assert(layout.scrollHeight>layout.clientHeight,'Long text should scroll inside the preview');
     await page.locator('#preview').evaluate(element=>{element.scrollTop=element.scrollHeight;});
     assert(await page.locator('#preview dl').isVisible(),'Metadata remains reachable after scrolling');
+   }else{
+    for(const scale of [1,1.5]){
+     await page.evaluate(value=>document.documentElement.style.setProperty('--text-scale',value),String(scale));
+     for(const [width,height] of [[740,560],[480,420],[420,340],[360,300],[280,240]]){
+      await page.setViewportSize({width,height});
+      const narrow=await page.evaluate(()=>{
+       const rect=selector=>document.querySelector(selector).getBoundingClientRect();
+       const item=rect('.tray-row'),list=rect('.list-pane'),copy=rect('#copy-selected'),paste=rect('#paste-selected'),preview=document.querySelector('#preview');
+       return {horizontalOverflow:document.body.scrollWidth>innerWidth,visibleRow:item.top<list.bottom&&item.bottom>list.top,copyBottom:copy.bottom,pasteBottom:paste.bottom,previewVisible:getComputedStyle(preview).display!=='none',height:innerHeight};
+      });
+      assert.equal(narrow.horizontalOverflow,false,`${width}x${height} at ${scale} has horizontal overflow`);
+      assert(narrow.visibleRow,`${width}x${height} at ${scale} hides every record`);
+      assert(narrow.copyBottom<=height+1&&narrow.pasteBottom<=height+1,`${width}x${height} at ${scale} hides actions: ${JSON.stringify(narrow)}`);
+      assert.equal(narrow.previewVisible,height>320,`${width}x${height} at ${scale} preview mode`);
+     }
+    }
    }
    await context.close();
   }
