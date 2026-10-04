@@ -11,7 +11,12 @@ export const MAX_TOTAL = 256*1024*1024;
 export function contentBytes(value:Payload|Detail|Snippet){let binary=0;const metadata=JSON.stringify(value,(key,entry)=>{if((key==='png'||key==='data')&&typeof entry==='string'){binary+=entry.length;return '';}return entry;});return binary+Buffer.byteLength(metadata);}
 export const defaults:Settings={theme:'system',view:'list',paused:false,maxItems:1000,retentionDays:30,excludedApps:['1password.exe','bitwarden.exe','keepass.exe','keepassxc.exe'],shortcut:'Control+Shift+V',quickShortcut:'Control+Alt+V',nextShortcut:'Control+Alt+N',launchAtLogin:false};
 export function classify(p:Payload):Kind {
-  if(p.files?.length||p.attachments?.length)return 'files'; if(p.png||p.formats?.some(f=>formatDefinition(f.name)?.mime.startsWith('image/')))return 'image';
+  if(p.files?.length||p.attachments?.length)return 'files';
+  // A PowerPoint text selection also includes a rendered PNG. Its explicit
+  // text-selection format keeps the history row editable as text while the
+  // original image and private formats remain available for faithful paste.
+  const selectedText=!!p.text?.trim()&&!!(p.html||p.rtf)&&!!p.formats?.some(f=>f.name==='Art::Text ClipFormat');
+  if(!selectedText&&(p.png||p.formats?.some(f=>formatDefinition(f.name)?.mime.startsWith('image/'))))return 'image';
   const t=(p.text||'').trim();
   if(/^https?:\/\/\S+$/i.test(t))return 'link';
   if(/^(\s*(import .+ from |export (default |const |function )|function \w+\(|(?:const|let|var) \w+\s*=|def \w+\(|class \w+[({:]|SELECT .+ FROM |\{\s*"[^"\n]+"\s*:))/im.test(t))return 'code';
