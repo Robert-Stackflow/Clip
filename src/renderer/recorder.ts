@@ -22,7 +22,7 @@ const error=(value:unknown)=>{q('message').textContent=String(value instanceof E
 let state:RecordingState|undefined,sources:RecordingSource[]=[],sourceId='',sourceType:'screen'|'window'='screen',recordMode:'video'|'audio'='video',refreshId=0;
 interface Run{abort:AbortController;cropDispose?:()=>void;token:string;streams:MediaStream[];context?:AudioContext;recorder?:MediaRecorder|WavRecorder;analyser?:AnalyserNode;chain:Promise<void>;sequence:number;queued:number;written:number;started:number;pausedAt:number;pausedMs:number;ending:boolean;reason:string;timer?:ReturnType<typeof setInterval>}
 let sourceRequest=0,choosingRegion=false,loadingSources=false;let run:Run|undefined;let regionChoice:{token:string;width:number;height:number}|undefined;function regionLabel(){q('region-label').textContent=regionChoice?tr`${regionChoice.width} × ${regionChoice.height} 像素选区`:tr('录制整个来源');q('clear-region').hidden=!regionChoice;q<HTMLButtonElement>('choose-region').disabled=loadingSources||!sourceId.startsWith('screen:');}function clearRegion(){regionChoice=undefined;regionLabel();}
-function updateStartAvailability(){q<HTMLButtonElement>('start').disabled=!!run||choosingRegion||loadingSources||(recordMode==='video'&&!sourceId);}
+function updateStartAvailability(){q<HTMLButtonElement>('start').disabled=!!run||choosingRegion||loadingSources||(recordMode==='video'&&!sourceId)||(recordMode==='audio'&&!q<HTMLInputElement>('system-audio').checked&&!q<HTMLInputElement>('microphone').checked);}
 const elapsed=(r:Run)=>(r.started?((r.pausedAt||performance.now())-r.started-r.pausedMs)/1000:0);
 function release(r:Run){r.abort.abort();r.cropDispose?.();clearInterval(r.timer);if(r.recorder){r.recorder.ondataavailable=null;r.recorder.onstop=null;r.recorder.onerror=null;if(r.recorder.state!=='inactive')r.recorder.stop();}for(const stream of r.streams)for(const track of stream.getTracks())track.stop();void r.context?.close().catch(()=>{});if(run===r)run=undefined;}
 async function fail(r:Run,value:unknown){if(run!==r)return;release(r);await api.fail(r.token,String(value instanceof Error?value.message:value)).catch(()=>{});error(value);}
@@ -63,6 +63,6 @@ function loadMicrophones():Promise<void>{
   select.value=[...select.options].some(option=>option.value===selected)?selected:'';microphonesLoaded=true;
  }).catch(()=>{}).finally(()=>microphonesLoading=undefined);return microphonesLoading;
 }
-q('microphone').onchange=()=>{const enabled=q<HTMLInputElement>('microphone').checked;q<HTMLSelectElement>('microphone-device').disabled=!enabled;};q<HTMLSelectElement>('microphone-device').disabled=true;
+q('microphone').onchange=()=>{const enabled=q<HTMLInputElement>('microphone').checked;q<HTMLSelectElement>('microphone-device').disabled=!enabled;updateStartAvailability();};q('system-audio').onchange=updateStartAvailability;q<HTMLSelectElement>('microphone-device').disabled=true;
 setSelectLoader(q<HTMLSelectElement>('microphone-device'),()=>loadMicrophones());
 api.onChange(()=>void refresh());api.onStop(()=>{void api.state().then(next=>{if(run&&next.token===run.token&&next.phase==='stopping')stop(next.message);else if(run)release(run);}).catch(()=>{if(run)release(run);});});window.addEventListener('beforeunload',()=>{if(run)release(run);});void refresh();
