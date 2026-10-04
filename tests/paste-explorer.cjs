@@ -6,6 +6,7 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const {build}=require('esbuild');
 const {fixture}=require('./efficiency-fixture.cjs');
+const {fixture:virtualFixture}=require('./virtual-fixture.cjs');
 
 const ps=script=>execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',script],{encoding:'utf8',windowsHide:true}).trim();
 const quote=value=>"'"+value.replaceAll("'","''")+"'";
@@ -31,7 +32,7 @@ async function run(){
  const bytes=Buffer.from('Clipper file paste check '+randomUUID()+'\r\n第二行：文件内容必须完全一致。\r\n','utf8');
  await fs.writeFile(source,bytes);
  await build({entryPoints:['src/main/native.ts'],outfile:path.join(root,'native-test.cjs'),bundle:true,platform:'node',external:['koffi']});
- const f=await fixture('paste-explorer');let hwnd=0;
+ const f=await fixture('paste-explorer');let hwnd=0,ole;
  const native=(action,arg)=>f.helper.evaluate(({app},{action,arg})=>{
   const req=process.getBuiltinModule('node:module').createRequire(process.getBuiltinModule('node:path').join(app.getAppPath(),'package.json'));
   const u=req('koffi').load('user32.dll');
@@ -47,17 +48,25 @@ async function run(){
    if(send(3,buffer,40)!==3)throw Error('Explorer click rejected');
   }
  },{action,arg});
+ const focusExplorer=async()=>{await native('activate',hwnd);await native('click',hwnd);await expect.poll(()=>native('foreground'),{timeout:5000}).toBe(hwnd);};
+ const openTray=async()=>{
+  await f.page.evaluate(()=>window.clipper.showTray());
+  for(let attempt=0;attempt<50;attempt++){
+   const visible=await f.app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().some(window=>window.isVisible()&&window.webContents.getURL().endsWith('/tray.html')));
+   if(visible){const pages=await f.app.windows(),panel=pages.find(page=>!page.isClosed()&&page.url().endsWith('/tray.html'));if(panel){await panel.waitForSelector('.tray-row');return panel;}}
+   await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  throw Error('Recent records panel did not open');
+ };
  try{
   await f.helper.evaluate(({app},nativePath)=>{const req=process.getBuiltinModule('node:module').createRequire(process.getBuiltinModule('node:path').join(app.getAppPath(),'package.json'));global.native=req(nativePath);global.native.initNative();},path.join(root,'native-test.cjs'));
   await f.helper.evaluate((_event,file)=>global.native.writeFiles([file],Number(global.helperWindow.getNativeWindowHandle().readBigUInt64LE())),source);
   await expect.poll(async()=>(await f.page.evaluate(()=>window.clipper.state())).clips.some(item=>item.kind==='files'),{timeout:10000}).toBe(true);
   hwnd=openExplorer(targetDir);
   await f.helper.evaluate(async()=>{await global.focusTarget();global.helperWindow.setAlwaysOnTop(false);});
-  assert.equal(await native('activate',hwnd),true,'Explorer activation rejected');
-  await native('click',hwnd);
-  await expect.poll(()=>native('foreground')).toBe(hwnd);
-  const opened=f.app.waitForEvent('window');await f.page.evaluate(()=>window.clipper.showTray());const panel=await opened;
-  await panel.waitForSelector('.tray-row');await panel.locator('.tray-row').filter({hasText:fileName}).click({button:'right'});
+  await focusExplorer();
+  let panel=await openTray();
+  await panel.locator('.tray-row').filter({hasText:fileName}).click({button:'right'});
   await expect.poll(async()=>{try{return await fs.readFile(destination,'utf8');}catch{return ''; }},{timeout:10000}).toBe(bytes.toString('utf8'));
   assert.deepEqual(await fs.readFile(destination),bytes);
   assert.deepEqual(await fs.readFile(source),bytes);
@@ -75,7 +84,8 @@ async function run(){
   await fs.writeFile(secondSource,secondBytes);
   await f.helper.evaluate((_event,files)=>global.native.writeFiles(files,Number(global.helperWindow.getNativeWindowHandle().readBigUInt64LE())),[secondSource,folderSource]);
   await expect.poll(async()=>(await f.page.evaluate(()=>window.clipper.state())).clips.some(item=>item.kind==='files'&&item.title.includes(secondName)&&item.title.startsWith('2 ')),{timeout:10000}).toBe(true);
-  await f.page.evaluate(()=>window.clipper.showTray());
+  await focusExplorer();
+  panel=await openTray();
   const secondRow=panel.locator('.tray-row').filter({hasText:secondName});
   await expect(secondRow).toBeVisible();
   await secondRow.click({button:'right'});
@@ -85,8 +95,26 @@ async function run(){
   assert.deepEqual(await fs.readFile(secondSource),secondBytes);
   assert.deepEqual(await fs.readFile(path.join(folderSource,'子目录',nestedName)),nestedBytes);
   assert.equal(await native('foreground'),hwnd,'Explorer should regain foreground after multi-item paste');
-  console.log(JSON.stringify({result:'PASS',explorerFilePaste:true,multipleFilesAndFolder:true,nestedAndEmptyFolders:true,sourceUnchanged:true,foregroundRestored:true}));
+
+  const virtualName='虚拟附件 '+randomUUID()+'.txt';
+  const virtualBytes=Buffer.from('OLE attachment '+randomUUID()+'\r\n中文内容\r\n','utf8');
+  ole=await virtualFixture();
+  await ole.request({action:'set',entries:[{name:virtualName,data:virtualBytes.toString('base64'),type:'stream'}]});
+  await expect.poll(async()=>(await f.page.evaluate(()=>window.clipper.state())).clips.some(item=>item.kind==='files'&&item.title.includes(virtualName)),{timeout:12000}).toBe(true);
+  const virtualId=(await f.page.evaluate(()=>window.clipper.state())).clips.find(item=>item.kind==='files'&&item.title.includes(virtualName)).id;
+  const virtualDetail=await f.page.evaluate(id=>window.clipper.detail(id),virtualId);
+  assert.deepEqual(Buffer.from(virtualDetail.payload.attachments[0].data,'base64'),virtualBytes);
+  await ole.close();ole=undefined;
+  await focusExplorer();
+  panel=await openTray();
+  const virtualRow=panel.locator('.tray-row').filter({hasText:virtualName});
+  await expect(virtualRow).toBeVisible();
+  await virtualRow.click({button:'right'});
+  await expect.poll(async()=>{try{return await fs.readFile(path.join(targetDir,virtualName));}catch{return null;}},{timeout:10000}).toEqual(virtualBytes);
+  assert.equal(await native('foreground'),hwnd,'Explorer should regain foreground after virtual attachment paste');
+  console.log(JSON.stringify({result:'PASS',explorerFilePaste:true,multipleFilesAndFolder:true,nestedAndEmptyFolders:true,virtualOleAttachmentAfterSourceExit:true,sourceUnchanged:true,foregroundRestored:true}));
  }finally{
+  if(ole)await ole.close().catch(()=>{});
   if(hwnd)try{closeExplorer(targetDir,hwnd);}catch(error){console.error('Could not close isolated Explorer window:',error);}
   await f.close();
  }
