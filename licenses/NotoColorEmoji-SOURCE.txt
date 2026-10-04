@@ -2,6 +2,7 @@ Noto Color Emoji COLRv1 font, subset to the Unicode Flags group used by Clipper
 Source: https://github.com/googlefonts/noto-emoji/blob/e20cbc2bbec1926686be9f9bee7d1d2cfa1fea0e/2D/fonts/Noto-COLRv1.ttf
 Revision: e20cbc2bbec1926686be9f9bee7d1d2cfa1fea0e
 Subset command: pyftsubset Noto-COLRv1.ttf --text-file=flags.txt --output-file=reference-flags.ttf --layout-features='*' --no-hinting
+Local modification: python scripts/patch-reference-flags.py maps 259 regional-indicator ligatures to private-use display glyphs. The interface retains and copies the original Unicode flag sequence.
 The flags.txt input contains the glyph strings in the Flags group of src/renderer/reference-data/emoji.json, one per line.
-SHA-256 of bundled subset: 232ede78304a696e6797e464995191269c77fcbe0a9fd799233d30495036b2e5
+SHA-256 of bundled modified subset: e8672741e5fedddc44ae2ec5ab7688af6d88d6dcebe29e45197bb87c2c9d3965
 License: SIL Open Font License 1.1, see NotoColorEmoji-OFL.txt

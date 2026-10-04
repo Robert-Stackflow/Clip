@@ -2,7 +2,7 @@
 
 资料文字与分组元数据保存在 JSON，进入页面时才加载。reference-catalog.ts 整理条目，reference-pages.ts 管理搜索、分类和虚拟列表；cheatsheet-renderer.ts 用本应用组件渲染结构化块。程序运行和正常构建均不访问资料网站。
 
-- emoji.json：Unicode **17.0** 的 3,944 个 fully-qualified 变体，合并为 1,926 个表情家族。来源：[emoji-test.txt](https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt)。直接显示 Unicode 字符，由系统 Emoji 字体绘制；肤色只使用规范定义的变体，笑脸没有肤色修饰符。系统字体未覆盖的较新字符可能显示缺字；Unicode 18 的新增条目尚未收录。
+- emoji.json：Unicode **17.0** 的 3,944 个 fully-qualified 变体，合并为 1,926 个表情家族。来源：[emoji-test.txt](https://www.unicode.org/Public/17.0.0/emoji/emoji-test.txt)。条目和复制值保留标准 Unicode；普通表情由系统 Emoji 字体绘制。部分 Windows 字体把地区旗帜显示成字母，因此旗帜使用本地 Noto Color Emoji 字体的彩色字形，显示映射由 `scripts/patch-reference-flags.py` 生成，不使用图片。肤色只使用规范定义的变体，笑脸没有肤色修饰符。系统字体未覆盖的较新字符可能显示缺字；Unicode 18 的新增条目尚未收录。
 - symbols.json：Unicode [字符名称与选定符号区段](https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt)，2,339 项。
 - entities.json：WHATWG [HTML 命名实体](https://html.spec.whatwg.org/entities.json)，2,125 项。
 - colors.json：color-name 与 CSS Color 4 的 149 个名称。

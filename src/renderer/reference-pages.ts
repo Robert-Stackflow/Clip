@@ -9,7 +9,12 @@ import {mountEmojiFont} from './emoji-font';
 import {copyTextValue} from './copy-text';
 registerIcons({copy:Copy,search:Search});
 const esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
-const emojiGlyph=(glyph:string)=>`<span class="reference-emoji-glyph${/^(?:[\u{1F1E6}-\u{1F1FF}]{2}|\u{1F3F4}[\u{E0061}-\u{E007A}]+\u{E007F})$/u.test(glyph)?' reference-emoji-flag':''}" data-emoji="${esc(glyph)}" aria-hidden="true">${esc(glyph)}</span>`;
+const emojiGlyph=(glyph:string)=>{
+ const pair=Array.from(glyph),regional=pair.length===2&&pair.every(char=>{const point=char.codePointAt(0)!;return point>=0x1F1E6&&point<=0x1F1FF;});
+ const flag=/^\u{1F3F4}[\u{E0061}-\u{E007A}]+\u{E007F}$/u.test(glyph);
+ const visual=regional?String.fromCodePoint(0xE000+(pair[0].codePointAt(0)!-0x1F1E6)*26+pair[1].codePointAt(0)!-0x1F1E6):'';
+ return `<span class="reference-emoji-glyph${regional||flag?' reference-emoji-flag':''}" data-emoji="${esc(glyph)}"${visual?` data-flag-render="${visual}"`:''} aria-hidden="true">${esc(glyph)}</span>`;
+};
 const mimeSpecifications=(entry:Entry)=>entry.specifications?.length?`<div class="reference-detail-label">${tx('登记参考','Registration references')}</div><div class="reference-mime-specifications">${entry.specifications.map(([id,title])=>`<div><b>${esc(id)}</b><span>${esc(title)}</span></div>`).join('')}</div>`:'';
 
 type Row={top:number;height:number;group:string;title?:string;items?:{entry:Entry;index:number}[]};
