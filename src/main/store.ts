@@ -1,11 +1,13 @@
 import {recordJSON} from './record-json';
+import {promisify} from 'node:util';
+const compressDeletion=promisify(zstdCompress);
 import {t as tr} from '../shared/i18n';
 import {openDatabase,type DatabaseConnection} from './database';
 import { createHash, randomUUID } from 'node:crypto';
-import {zstdCompressSync,zstdDecompressSync,constants as zlibConstants} from 'node:zlib';
+import {zstdCompress,zstdCompressSync,zstdDecompressSync,constants as zlibConstants} from 'node:zlib';
 import { defaults, classify, validatePayload, validateSettings, validateTags, validateBackup, MAX_TOTAL, MAX_TEXT, contentBytes } from '../shared/core';
 import type { Clip, Detail, Payload, Settings, Snippet, Category, BatchAction } from '../shared/types';
-import { validateCategory, templateVariables } from '../shared/advanced';
+import { validateCategory, categoryPredicate, templateVariables } from '../shared/advanced';
 import {initializePreviewIndex} from './preview-index';
 import {previewPayload,type ClipPreview,type SnippetPreview,type SnippetSummary,type PreviewPayload} from '../shared/preview';
 import {initializeListIndex} from './store-index';
@@ -26,7 +28,7 @@ export class Store {
     // encrypted history. It never becomes a plaintext temporary file or part
     // of the persistent database/backup, and closing the connection discards it.
     if(!readOnly)this.db.exec('PRAGMA temp_store=MEMORY;CREATE TEMP TABLE clipper_delete_undo(position INTEGER PRIMARY KEY,data BLOB NOT NULL);');
-    this.settings=validateSettings({...defaults,...this.meta('settings',{})});this.queue=this.meta('queue',[]).filter((id:unknown)=>typeof id==='string'&&this.has(id));this.shelf=this.meta('shelf',[]).filter((id:unknown)=>typeof id==='string'&&this.has(id));this.categories=this.meta('categories',[]);if(prune&&!readOnly)this.prune();
+    this.settings=validateSettings({...defaults,...this.meta('settings',{})});this.queue=this.meta('queue',[]).filter((id:unknown)=>typeof id==='string'&&this.has(id));this.shelf=this.meta('shelf',[]).filter((id:unknown)=>typeof id==='string'&&this.has(id));this.categories=(this.meta('categories',[]) as Category[]).map(category=>({...category,permanent:category.permanent??!!category.manual}));if(prune&&!readOnly)this.prune();
     }catch(e){try{this.db.close();}catch{}throw e;}
   }
   meta(key:string,fallback:any){const row=this.db.prepare('SELECT value FROM meta WHERE key=?').get(key) as any;return row?JSON.parse(row.value):fallback;}
@@ -43,7 +45,7 @@ export class Store {
   sourceApplications():string[]{return (this.db.prepare(this.indexed?'SELECT DISTINCT s.source FROM clip_source_cache s JOIN clips c ON c.id=s.id':"SELECT DISTINCT json_extract(data,'$.source') AS source FROM clips").all() as {source:string}[]).map(row=>row.source);}
   preview(id:string):ClipPreview{if(!this.indexed){const {payload,...item}=this.get(id);return {...item,payload:previewPayload(payload)};}const row=this.db.prepare('SELECT i.data,p.payload FROM clips c JOIN clip_list_cache i ON i.id=c.id JOIN clip_preview_cache p ON p.id=c.id WHERE c.id=?').get(id) as {data:string;payload:string}|undefined;if(!row)throw new Error(tr('记录已不存在'));return {...JSON.parse(row.data),payload:cleanPreview(JSON.parse(row.payload))};}
   snippetIDs(){return (this.db.prepare('SELECT id FROM snippets').all() as {id:string}[]).map(s=>s.id);}
-  snippetList():SnippetSummary[]{if(!this.indexed)return this.snippets().map(({payload,...s})=>({...s,revision:0}));return (this.db.prepare('SELECT i.data,i.payload,i.revision FROM snippets s JOIN snippet_list_cache i ON i.id=s.id').all() as {data:string;payload:string;revision:number}[]).map(row=>{const s=JSON.parse(row.data),p=JSON.parse(row.payload);return {...s,kind:previewKind(s.text,p),revision:row.revision};}).sort((a,b)=>b.updatedAt-a.updatedAt);}
+  snippetList():SnippetSummary[]{if(!this.indexed)return this.snippets().map(({payload,...s})=>({...s,revision:0}));const order=new Map(this.snippetOrder().map((id,index)=>[id,index]));return (this.db.prepare('SELECT i.data,i.payload,i.revision FROM snippets s JOIN snippet_list_cache i ON i.id=s.id').all() as {data:string;payload:string;revision:number}[]).map(row=>{const s=JSON.parse(row.data),p=JSON.parse(row.payload);return {...s,kind:previewKind(s.text,p),revision:row.revision};}).sort((a,b)=>(order.get(a.id)??Infinity)-(order.get(b.id)??Infinity));}
   snippet(id:string):Snippet{const row=this.db.prepare('SELECT data FROM snippets WHERE id=?').get(id) as {data:string}|undefined;if(!row)throw new Error(tr('模板已不存在'));const s=JSON.parse(row.data),payload=s.payload||{text:s.text};return {...s,payload,kind:classify(payload),text:payload.text||''};}
   snippetPreview(id:string):SnippetPreview{if(!this.indexed){const {payload,...s}=this.snippet(id);return {...s,payload:{...previewPayload(payload),text:s.text},revision:0};}const row=this.db.prepare('SELECT i.data,i.payload,i.revision FROM snippets s JOIN snippet_list_cache i ON i.id=s.id WHERE s.id=?').get(id) as {data:string;payload:string;revision:number}|undefined;if(!row)throw new Error(tr('模板已不存在'));const s=JSON.parse(row.data),p=cleanPreview(JSON.parse(row.payload));return {...s,kind:previewKind(s.text,p),payload:{...p,text:s.text},revision:row.revision};}
   snippetRevision(id:string){return (this.db.prepare('SELECT i.revision FROM snippets s JOIN snippet_list_cache i ON i.id=s.id WHERE s.id=?').get(id) as {revision:number}|undefined)?.revision;}
@@ -65,9 +67,9 @@ export class Store {
   addPrepared(token:PreparedCapture,source:string,thumbnail?:string,metadata?:Partial<Detail>,prune=true,publication?:{retained:boolean;resetRetained?:boolean}):Detail{
     const prepared=preparedCaptures.get(token);if(!prepared)throw new Error(tr('内容校验已失效'));preparedCaptures.delete(token);const {payload,hash}=prepared;
     const existing=this.db.prepare('SELECT data FROM clips WHERE hash=?').get(hash) as any;
-    if(existing){const item:Detail=JSON.parse(existing.data);item.updatedAt=Math.max(item.updatedAt,metadata?.updatedAt||Date.now());if(metadata){item.favorite ||= !!metadata.favorite;item.pinned ||= !!metadata.pinned;item.tags=[...new Set([...item.tags,...(metadata.tags||[])])].slice(0,12);}if(publication){item.shared=true;if(publication.retained)item.syncRetained=true;else if(publication.resetRetained)item.syncRetained=false;}this.save(item);return item;}
+    if(existing){const item:Detail=JSON.parse(existing.data);item.updatedAt=Math.max(item.updatedAt,metadata?.updatedAt||Date.now());if(metadata){item.favorite ||= !!metadata.favorite;item.pinned ||= !!metadata.pinned;item.tags=[...new Set([...item.tags,...(metadata.tags||[])])].slice(0,12);item.manualCategories=[...new Set([...(item.manualCategories||[]),...(metadata.manualCategories||[])])].slice(0,50);}if(publication){item.shared=true;if(publication.retained)item.syncRetained=true;else if(publication.resetRetained)item.syncRetained=false;}this.save(item);return item;}
     const now=Date.now(),kind=classify(payload),text=payload.text||payload.files?.join('\n')||payload.attachments?.map(a=>a.name).join('\n')||(kind==='image'?tr('图片'):tr('富文本内容'));
-    const item:Detail={id:randomUUID(),hash,kind,title:kind==='image'?tr('剪贴板图片'):kind==='files'?(payload.attachments?(payload.attachments.some(a=>a.directory)?tr`${payload.attachments.length} 项文件与文件夹 · ${payload.attachments[0].name}`:tr`${payload.attachments.length} 个附件 · ${payload.attachments[0].name}`):tr`${payload.files!.length} 个文件 · ${payload.files![0].split('\\').pop()}`):text.trim().split(/\r?\n/)[0].slice(0,100),preview:text.slice(0,240),source:source.slice(0,256),createdAt:metadata?.createdAt||now,updatedAt:metadata?.updatedAt||now,favorite:!!metadata?.favorite,pinned:!!metadata?.pinned,tags:metadata?.tags||[],bytes:contentBytes(payload),payload,thumbnail};
+    const item:Detail={id:randomUUID(),hash,kind,title:kind==='image'?tr('剪贴板图片'):kind==='files'?(payload.attachments?(payload.attachments.some(a=>a.directory)?tr`${payload.attachments.length} 项文件与文件夹 · ${payload.attachments[0].name}`:tr`${payload.attachments.length} 个附件 · ${payload.attachments[0].name}`):tr`${payload.files!.length} 个文件 · ${payload.files![0].split('\\').pop()}`):text.trim().split(/\r?\n/)[0].slice(0,100),preview:text.slice(0,240),source:source.slice(0,256),createdAt:metadata?.createdAt||now,updatedAt:metadata?.updatedAt||now,favorite:!!metadata?.favorite,pinned:!!metadata?.pinned,tags:metadata?.tags||[],manualCategories:[...new Set(metadata?.manualCategories||[])].slice(0,50),bytes:contentBytes(payload),payload,thumbnail};
     // Restore and undo preserve saved labels across language changes; legacy backups may omit them.
     if(typeof metadata?.title==='string'&&metadata.title.length<=33000)item.title=metadata.title;
     if(typeof metadata?.preview==='string'&&metadata.preview.length<=240)item.preview=metadata.preview;
@@ -83,20 +85,76 @@ export class Store {
   private rememberDeletion(id:string){const row=this.db.prepare('SELECT data FROM clips WHERE id=?').get(id),data=zstdCompressSync(row.data,{params:{[zlibConstants.ZSTD_c_compressionLevel]:1}});try{this.db.prepare('INSERT INTO temp.clipper_delete_undo(data) VALUES(?)').run(data);}finally{data.fill(0);}}
   private deletedDetail(data:Uint8Array):Detail{const bytes=zstdDecompressSync(data,{maxOutputLength:MAX_TOTAL});try{return JSON.parse(bytes.toString('utf8'));}finally{bytes.fill(0);}}
   get undoItems():Detail[]{return this.readOnly?[]:[...this.db.prepare('SELECT data FROM temp.clipper_delete_undo ORDER BY position').iterate()].map(row=>this.deletedDetail(row.data));}
-  undo(){if(this.readOnly||!this.db.prepare('SELECT 1 FROM temp.clipper_delete_undo LIMIT 1').get())throw new Error(tr('没有可撤销的删除'));this.db.exec('BEGIN');try{const next=this.db.prepare('SELECT position,data FROM temp.clipper_delete_undo WHERE position>? ORDER BY position LIMIT 1');let position=0;for(let row=next.get(position);row;row=next.get(position)){position=row.position;const i=this.deletedDetail(row.data);this.add(i.payload,i.source,i.thumbnail,{...i,updatedAt:Date.now()},false);}this.db.exec('DELETE FROM temp.clipper_delete_undo;COMMIT');}catch(e){this.db.exec('ROLLBACK');throw e;}}
+  private *restoreDeleted(){
+    if(this.readOnly||!this.db.prepare('SELECT 1 FROM temp.clipper_delete_undo LIMIT 1').get())throw new Error(tr('没有可撤销的删除'));
+    let total=this.bytes(),committed=false;const capacity=this.settings.maxHistoryMiB*1024*1024;this.db.exec('BEGIN');
+    try{
+      const next=this.db.prepare('SELECT position,data FROM temp.clipper_delete_undo WHERE position>? ORDER BY position LIMIT 1'),insert=this.db.prepare("INSERT INTO clips VALUES(?,?,?,json_set(CAST(? AS TEXT),'$.id',?))");let position=0;
+      for(let row=next.get(position);row;row=next.get(position)){
+        position=row.position;const bytes=zstdDecompressSync(row.data,{maxOutputLength:MAX_TOTAL});
+        try{
+          // The snapshot contains trusted, already validated records. Revalidating PNGs,
+          // hashing binary payloads and scanning all capacity rows again is unnecessary.
+          const item=JSON.parse(bytes.toString('utf8')) as Detail,existing=this.db.prepare('SELECT id FROM clips WHERE hash=?').get(item.hash) as {id:string}|undefined;
+          if(existing){const current=this.get(existing.id),before=current;const restored={...current,updatedAt:Math.max(current.updatedAt,item.updatedAt),favorite:current.favorite||item.favorite,pinned:current.pinned||item.pinned,tags:[...new Set([...current.tags,...item.tags])].slice(0,12),manualCategories:[...new Set([...(current.manualCategories||[]),...(item.manualCategories||[])])].slice(0,50)};const oldBytes=this.indexed?Number(this.db.prepare('SELECT bytes FROM clip_list_cache WHERE id=?').get(current.id).bytes):Buffer.byteLength(JSON.stringify(before)),size=Buffer.byteLength(JSON.stringify(restored));if(total-oldBytes+size>capacity)throw new Error(tr('历史容量已满'));this.save(restored);total+=size-oldBytes;}
+          else{const id=randomUUID();if(total+bytes.length>capacity)throw new Error(tr('历史容量已满'));insert.run(id,item.hash,item.updatedAt,bytes,id);total+=bytes.length;if(this.onChange)this.onChange(undefined,{...item,id});}
+        }finally{bytes.fill(0);}
+        yield;
+      }
+      this.db.exec('DELETE FROM temp.clipper_delete_undo;COMMIT');committed=true;if(this.importTotal!==undefined)this.importTotal=total;
+    }finally{if(!committed)this.db.exec('ROLLBACK');}
+  }
+  private undoPending?:Promise<void>;
+  waitForUndo(){return this.undoPending?.catch(()=>{});}
+  undo(){for(const _ of this.restoreDeleted()){};}
+  undoAsync(valid:()=>boolean=()=>true){
+    if(this.undoPending)throw new Error(tr('请等待当前操作完成'));
+    const check=()=>{if(!valid())throw new Error(tr('操作已失效，请重试'));};check();
+    const pending=(async()=>{const rows=this.restoreDeleted();let deadline=performance.now()+8;try{for(const _ of rows){check();if(performance.now()>=deadline){await new Promise<void>(resolve=>setImmediate(resolve));check();deadline=performance.now()+8;}}}finally{rows.return();}})();
+    this.undoPending=pending;return pending.finally(()=>{if(this.undoPending===pending)this.undoPending=undefined;});
+  }
   /** Cleanup selects IDs in SQL; thumbnails and full record bodies stay out of JS. */
   private retentionCandidates(cutoff?:number):{id:string}[]{
     const fields=this.indexed?'SELECT c.id,r.updated,r.protected,c.updated AS stored_updated,c.rowid AS sequence FROM clip_retention_cache r JOIN clips c ON c.id=r.id':"SELECT c.id,json_extract(c.data,'$.updatedAt') AS updated,(coalesce(json_extract(c.data,'$.favorite'),0) OR coalesce(json_extract(c.data,'$.pinned'),0) OR coalesce(json_extract(c.data,'$.shared'),0)) AS protected,c.updated AS stored_updated,c.rowid AS sequence FROM clips c";
     const eligible=`SELECT * FROM (${fields}) WHERE protected=0 AND id NOT IN (SELECT value FROM json_each(?))`,order='updated DESC,stored_updated DESC,sequence';
     const protectedIDs=JSON.stringify([...new Set([...this.queue,...this.shelf])]);
-    return cutoff===undefined?this.db.prepare(`SELECT id FROM (${eligible}) ORDER BY ${order}`).all(protectedIDs):this.db.prepare(`SELECT id FROM (SELECT id,updated,row_number() OVER (ORDER BY ${order}) AS position FROM (${eligible})) WHERE updated<? OR position>? ORDER BY position`).all(protectedIDs,cutoff,this.settings.maxItems);
+    const permanent=this.categories.filter(category=>category.permanent);
+    if(!permanent.length)return cutoff===undefined?this.db.prepare(`SELECT id FROM (${eligible}) ORDER BY ${order}`).all(protectedIDs):this.db.prepare(`SELECT id FROM (SELECT id,updated,row_number() OVER (ORDER BY ${order}) AS position FROM (${eligible})) WHERE updated<? OR position>? ORDER BY position`).all(protectedIDs,cutoff,this.settings.maxItems);
+    const rows=this.db.prepare(`SELECT id,updated FROM (${eligible}) ORDER BY ${order}`).all(protectedIDs) as {id:string;updated:number}[];
+    const rules=permanent.filter(category=>!category.manual).map(category=>categoryPredicate(category));
+    let position=0;return rows.filter(row=>{const item=this.get(row.id);if(permanent.some(category=>category.manual&&item.manualCategories?.includes(category.id))||rules.some(match=>match(item)))return false;position++;return cutoff===undefined||row.updated<cutoff||position>this.settings.maxItems;}).map(row=>({id:row.id}));
   }
   clear(){this.db.exec('BEGIN');try{const removable=this.retentionCandidates();this.db.exec('DELETE FROM temp.clipper_delete_undo');const remove=this.db.prepare('DELETE FROM clips WHERE id=?');for(const i of removable){this.rememberDeletion(i.id);remove.run(i.id);}this.db.exec('COMMIT');}catch(e){this.db.exec('ROLLBACK');throw e;}
    // Keep the undo rows, but release cache pages left by a large deletion.
    // This is best effort after commit: cache cleanup must not report a saved deletion as failed.
    try{this.db.exec('PRAGMA shrink_memory');}catch{}
   }
-  protected(i:Clip){return i.favorite||i.pinned||i.shared||this.queue.includes(i.id)||this.shelf.includes(i.id);}
+  /** Prepare the memory-only undo snapshot asynchronously; deletion still commits atomically. */
+  clearAsync(valid:()=>boolean=()=>true){return this.deletePrepared(()=>this.retentionCandidates(),valid,false);}
+  deleteAsync(ids:unknown,valid:()=>boolean=()=>true){
+    if(!Array.isArray(ids)||!ids.length||ids.length>500||ids.some(id=>typeof id!=='string'))throw new Error(tr('一次选择 1–500 条记录'));
+    const unique=[...new Set(ids)] as string[];return this.deletePrepared(()=>{if(unique.some(id=>!this.has(id)))throw new Error(tr('记录已不存在'));return unique.map(id=>({id}));},valid,true);
+  }
+  private async deletePrepared(candidates:()=>{id:string}[],valid:()=>boolean,explicit:boolean){
+    const check=()=>{if(!valid())throw new Error(tr('操作已失效，请重试'));};check();
+    this.db.exec('CREATE TEMP TABLE clipper_pending_delete(position INTEGER PRIMARY KEY,id TEXT,data BLOB NOT NULL)');
+    try{
+      const removable=candidates(),version=Number(this.db.prepare('PRAGMA data_version').get().data_version),changes=Number(this.db.prepare('SELECT total_changes() AS n').get().n),read=this.db.prepare('SELECT data FROM clips WHERE id=?'),stage=this.db.prepare('INSERT INTO temp.clipper_pending_delete VALUES(?,?,?)');let cursor=0,failed:unknown;
+      const worker=async()=>{while(cursor<removable.length&&!failed){const index=cursor++;try{check();const input=Buffer.from(read.get(removable[index].id).data);try{const data=await compressDeletion(input,{chunkSize:1024*1024,params:{[zlibConstants.ZSTD_c_compressionLevel]:1}});try{check();stage.run(index+1,removable[index].id,data);}finally{data.fill(0);}}finally{input.fill(0);}}catch(error){failed=error;}}};
+      await Promise.all([worker(),worker()]);if(failed)throw failed;check();
+      this.db.exec('BEGIN IMMEDIATE');try{
+        if(Number(this.db.prepare('PRAGMA data_version').get().data_version)!==version||Number(this.db.prepare('SELECT total_changes() AS n').get().n)!==changes+removable.length)throw new Error(tr('操作已失效，请重试'));
+        const queue=[...this.queue],shelf=[...this.shelf];
+        try{if(explicit&&this.onChange)for(const item of removable)this.onChange(this.get(item.id));this.db.exec('DELETE FROM clips WHERE id IN (SELECT id FROM temp.clipper_pending_delete)');if(explicit){const removed=new Set(removable.map(item=>item.id));this.setQueue(this.queue.filter(id=>!removed.has(id)));this.shelf=this.shelf.filter(id=>!removed.has(id));this.setMeta('shelf',this.shelf);}
+          // Swap the prepared snapshot instead of copying every compressed BLOB again.
+          // Both names roll back with the deletion; keep the previous undo until commit.
+          this.db.exec('ALTER TABLE temp.clipper_delete_undo RENAME TO clipper_previous_delete;ALTER TABLE temp.clipper_pending_delete RENAME TO clipper_delete_undo;COMMIT');}
+        catch(error){this.queue=queue;this.shelf=shelf;throw error;}
+      }catch(error){this.db.exec('ROLLBACK');throw error;}
+    }finally{this.db.exec('DROP TABLE IF EXISTS temp.clipper_pending_delete;DROP TABLE IF EXISTS temp.clipper_previous_delete');}
+    try{this.db.exec('PRAGMA shrink_memory');}catch{}
+  }
+  protected(i:Clip){if(i.favorite||i.pinned||i.shared||this.queue.includes(i.id)||this.shelf.includes(i.id))return true;const permanent=this.categories.filter(category=>category.permanent);if(permanent.some(category=>category.manual&&i.manualCategories?.includes(category.id)))return true;if(!permanent.some(category=>!category.manual))return false;const item=this.get(i.id);return permanent.some(category=>!category.manual&&categoryPredicate(category)(item));}
   prune(){this.db.exec('SAVEPOINT retention_prune');try{const remove=this.db.prepare('DELETE FROM clips WHERE id=?');for(const item of this.retentionCandidates(Date.now()-this.settings.retentionDays*86400000))remove.run(item.id);this.db.exec('RELEASE retention_prune');}catch(e){this.db.exec('ROLLBACK TO retention_prune; RELEASE retention_prune');throw e;}}
   setQueue(ids:string[]){this.queue=[...ids].filter(id=>this.has(id)).slice(0,200);this.setMeta('queue',this.queue);}
   queueAction(index:unknown,id:unknown,action:unknown,expected:unknown){
@@ -104,18 +162,25 @@ export class Store {
     const next=[...this.queue],from=index as number;if(action==='dequeue')next.splice(from,1);else{const to=from+(action==='up'?-1:1);if(to>=0&&to<next.length)[next[from],next[to]]=[next[to],next[from]];}this.setQueue(next);
   }
   saveSettings(value:Settings){const next=validateSettings(value);this.setMeta('settings',next);this.settings=next;this.prune();}
-  snippets():Snippet[]{return (this.db.prepare('SELECT data FROM snippets').all() as any[]).map(r=>{const s=JSON.parse(r.data);const payload=s.payload||{text:s.text};return {...s,payload,kind:classify(payload),text:payload.text||''};}).sort((a,b)=>b.updatedAt-a.updatedAt);}
+  favoriteOrder():string[]{const current=this.list().filter(item=>item.favorite).map(item=>item.id),saved=this.meta('favorite-order',[]) as string[],currentIDs=new Set(current),savedIDs=new Set(saved);return [...saved.filter(id=>currentIDs.has(id)),...current.filter(id=>!savedIDs.has(id))];}
+  reorderFavorites(ids:unknown){const current=this.favoriteOrder();if(!Array.isArray(ids)||ids.length!==current.length||new Set(ids).size!==current.length||ids.some(id=>typeof id!=='string'||!current.includes(id)))throw new Error(tr('收藏顺序已变化，请重试'));this.setMeta('favorite-order',ids);}
+  snippetOrder():string[]{const rows=this.db.prepare("SELECT id,json_extract(data,'$.updatedAt') AS updated FROM snippets ORDER BY updated DESC").all() as {id:string;updated:number}[],current=rows.map(row=>row.id),saved=this.meta('snippet-order',[]) as string[],currentIDs=new Set(current),savedIDs=new Set(saved);return [...saved.filter(id=>currentIDs.has(id)),...current.filter(id=>!savedIDs.has(id))];}
+  reorderSnippets(ids:unknown){const current=this.snippetOrder();if(!Array.isArray(ids)||ids.length!==current.length||new Set(ids).size!==current.length||ids.some(id=>typeof id!=='string'||!current.includes(id)))throw new Error(tr('快捷回复顺序已变化，请重试'));this.setMeta('snippet-order',ids);}
+  snippets():Snippet[]{const order=new Map(this.snippetOrder().map((id,index)=>[id,index]));return (this.db.prepare('SELECT data FROM snippets').all() as any[]).map(r=>{const s=JSON.parse(r.data);const payload=s.payload||{text:s.text};return {...s,payload,kind:classify(payload),text:payload.text||''};}).sort((a,b)=>(order.get(a.id)??Infinity)-(order.get(b.id)??Infinity));}
   saveSnippet(value:{id?:string;title:string;text?:string;payload?:Payload},thumbnail?:string){
     if(typeof value?.title!=='string'||!value.title.trim()||value.title.length>120)throw new Error(tr('填写标题，最多 120 字'));
     const previous=value.id?this.snippet(value.id):undefined;if(value.id&&!previous)throw new Error(tr('模板已不存在'));if(!value.id&&Number((this.db.prepare('SELECT count(*) AS n FROM snippets').get() as any).n)>=2000)throw new Error(tr('模板数量已达上限'));
     const payload=validatePayload(value.payload??(value.text!==undefined?{text:value.text}:previous?.payload));if(templateVariables(payload.text||'').length>30)throw new Error(tr('模板变量最多 30 个'));
     const s:Snippet={id:value.id||randomUUID(),title:value.title.trim(),text:payload.text||'',payload,kind:classify(payload),thumbnail:thumbnail??previous?.thumbnail,updatedAt:Date.now()};
     const oldBytes=previous?Number((this.db.prepare('SELECT length(CAST(data AS BLOB)) AS n FROM snippets WHERE id=?').get(previous.id) as any).n):0;
-    const data=JSON.stringify(s),newBytes=Buffer.byteLength(data);if(this.bytes()-oldBytes+newBytes>this.settings.maxHistoryMiB*1024*1024)throw new Error(tr('本地历史已达到容量上限')+` (${this.settings.maxHistoryMiB} MiB)`);this.db.prepare('INSERT INTO snippets VALUES(?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(s.id,data);if(this.importTotal!==undefined)this.importTotal+=newBytes-oldBytes;return s.id;
+    const data=JSON.stringify(s),newBytes=Buffer.byteLength(data);if(this.bytes()-oldBytes+newBytes>this.settings.maxHistoryMiB*1024*1024)throw new Error(tr('本地历史已达到容量上限')+` (${this.settings.maxHistoryMiB} MiB)`);const previousOrder=previous?undefined:this.snippetOrder();this.db.prepare('INSERT INTO snippets VALUES(?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data').run(s.id,data);if(previousOrder)this.setMeta('snippet-order',[s.id,...previousOrder]);if(this.importTotal!==undefined)this.importTotal+=newBytes-oldBytes;return s.id;
   }
-  removeSnippet(id:string){this.db.prepare('DELETE FROM snippets WHERE id=?').run(id);}
-  saveCategory(value:unknown){const c=validateCategory(value);if(c.id&&!this.categories.some(x=>x.id===c.id))throw new Error(tr('分类已不存在'));if(!c.id&&this.categories.length>=50)throw new Error(tr('最多 50 个自定义分类'));const category:Category={...c,id:c.id||randomUUID()};const next=[...this.categories.filter(x=>x.id!==category.id),category];this.setMeta('categories',next);this.categories=next;}
-  removeCategory(id:string){const next=this.categories.filter(x=>x.id!==id);this.setMeta('categories',next);this.categories=next;}
+  removeSnippet(id:string){this.removeSnippets([id]);}
+  removeSnippets(ids:string[]){if(!ids.length)return;this.db.prepare('DELETE FROM snippets WHERE id IN ('+ids.map(()=>'?').join(',')+')').run(...ids);this.setMeta('snippet-order',this.snippetOrder());}
+  saveCategory(value:unknown){const c=validateCategory(value),previous=c.id?this.categories.find(item=>item.id===c.id):undefined;if(c.id&&!previous)throw new Error(tr('分类已不存在'));if(!c.id&&this.categories.length>=50)throw new Error(tr('最多 50 个自定义分类'));const parent=c.parentId?this.categories.find(item=>item.id===c.parentId):undefined;if(c.parentId&&(!parent||!parent.allowChildren||parent.parentId))throw new Error(tr('上级分类不可用'));if(c.id&&this.categories.some(item=>item.parentId===c.id)&&(c.parentId||!c.allowChildren))throw new Error(tr('请先移动或删除子分类'));const category:Category={...c,id:c.id||randomUUID()},next=previous?this.categories.map(item=>item.id===category.id?category:item):[...this.categories,category];this.db.exec('SAVEPOINT category_save');try{if(previous?.manual&&!category.manual)for(const item of this.all())if(item.manualCategories?.includes(category.id)){item.manualCategories=item.manualCategories.filter(categoryID=>categoryID!==category.id);this.save(item);}this.setMeta('categories',next);this.categories=next;this.db.exec('RELEASE category_save');return category.id;}catch(error){this.db.exec('ROLLBACK TO category_save; RELEASE category_save');throw error;}}
+  removeCategory(id:string){const category=this.categories.find(x=>x.id===id);if(!category)return;const next=this.categories.filter(x=>x.id!==id).map(item=>item.parentId===id?{...item,parentId:undefined}:item);this.db.exec('SAVEPOINT category_remove');try{if(category.manual)for(const item of this.all())if(item.manualCategories?.includes(id)){item.manualCategories=item.manualCategories.filter(categoryID=>categoryID!==id);this.save(item);}this.setMeta('categories',next);this.categories=next;this.db.exec('RELEASE category_remove');}catch(error){this.db.exec('ROLLBACK TO category_remove; RELEASE category_remove');throw error;}}
+  reorderCategories(ids:unknown){if(!Array.isArray(ids)||ids.length!==this.categories.length||ids.some(id=>typeof id!=='string')||new Set(ids).size!==ids.length||ids.some(id=>!this.categories.some(category=>category.id===id)))throw new Error(tr('分类顺序已变化，请重新打开管理'));const byID=new Map(this.categories.map(category=>[category.id,category]));const next=ids.map(id=>byID.get(id)!);this.setMeta('categories',next);this.categories=next;}
+  setManualCategory(ids:unknown,categoryID:unknown,assigned:unknown){if(!Array.isArray(ids)||!ids.length||ids.length>500||ids.some(id=>typeof id!=='string')||typeof categoryID!=='string'||typeof assigned!=='boolean')throw new Error(tr('手动分类参数无效'));const category=this.categories.find(item=>item.id===categoryID);if(!category?.manual)throw new Error(tr('请选择一个手动分类'));const unique=[...new Set(ids)];if(unique.some(id=>!this.has(id)))throw new Error(tr('记录已不存在'));this.db.exec('SAVEPOINT manual_category');try{for(const id of unique){const item=this.get(id),current=item.manualCategories||[];item.manualCategories=assigned?[...new Set([...current,categoryID])]:current.filter(value=>value!==categoryID);this.save(item);}this.db.exec('RELEASE manual_category');}catch(error){this.db.exec('ROLLBACK TO manual_category; RELEASE manual_category');throw error;}}
   batch(ids:string[],action:BatchAction,tags:string[]=[]){
     if(!Array.isArray(ids)||!ids.length||ids.length>500||ids.some(x=>typeof x!=='string'))throw new Error(tr('一次选择 1–500 条记录'));const unique=[...new Set(ids)];if(unique.some(id=>!this.has(id)))throw new Error(tr('记录已不存在'));
     const queue=[...this.queue],shelf=[...this.shelf];const validTags=validateTags(tags);this.db.exec('SAVEPOINT batch_change');
@@ -130,18 +195,21 @@ export class Store {
     }this.db.exec('RELEASE batch_change');
     }catch(e){this.db.exec('ROLLBACK TO batch_change; RELEASE batch_change');this.queue=queue;this.shelf=shelf;throw e;}
   }
-  backup(){return {format:'clipper-backup',version:7,exportedAt:new Date().toISOString(),clips:this.all(),snippets:this.snippets(),categories:this.categories,scripts:this.meta('text-scripts',[])};}
+  backup(){return {format:'clipper-backup',version:7,exportedAt:new Date().toISOString(),clips:this.all(),snippets:this.snippets(),categories:this.categories,scripts:this.meta('text-scripts',[]),commands:this.meta('text-commands',[])};}
   import(value:unknown,thumbnail:(p:Payload)=>string|undefined=()=>undefined,control?:{check():void;beforeCommit():void}){
     control?.check();
     const data=validateBackup(value),previousCategories=[...this.categories];this.importTotal=this.bytes();
     try{
       this.db.exec('BEGIN');
       try{
-        for(const c of data.clips){control?.check();this.add(c.payload,c.source,thumbnail(c.payload),c,false);}
+        const categoryIDs=new Map<string,string>();for(const c of [...data.categories].sort((a,b)=>Number(!!a.parentId)-Number(!!b.parentId))){const parentId=c.parentId?categoryIDs.get(c.parentId):undefined;if(c.parentId&&!parentId)throw new Error(tr('备份子分类无效'));const identity=JSON.stringify([c.name,c.kind,c.contains,c.containsRegex,c.source,c.tag,c.period,c.from,c.to,c.favorite,c.pinned,c.extensions,c.size,c.manual,c.permanent,c.allowChildren,parentId]);const existing=this.categories.find(x=>JSON.stringify([x.name,x.kind,x.contains,x.containsRegex,x.source,x.tag,x.period,x.from,x.to,x.favorite,x.pinned,x.extensions,x.size,x.manual,x.permanent,x.allowChildren,x.parentId])===identity),target=existing?.id||this.saveCategory({...c,id:undefined,parentId});if(c.id)categoryIDs.set(c.id,target);}
+        for(const c of data.clips){control?.check();const manualCategories=(c.manualCategories||[]).map(category=>categoryIDs.get(category)).filter((category):category is string=>!!category);this.add(c.payload,c.source,thumbnail(c.payload),{...c,manualCategories},false);}
+        const existingSnippetOrder=this.snippetOrder(),importedSnippetOrder:string[]=[];
         const seenSnippets=new Set(this.snippets().map(s=>JSON.stringify([s.title,s.payload])));
-        for(const s of data.snippets){control?.check();const identity=JSON.stringify([s.title,s.payload]);if(seenSnippets.has(identity))continue;this.saveSnippet({title:s.title,payload:s.payload},thumbnail(s.payload));seenSnippets.add(identity);}
-        for(const c of data.categories)if(!this.categories.some(x=>x.name===c.name&&x.kind===c.kind&&x.contains===c.contains&&x.source===c.source&&x.tag===c.tag))this.saveCategory({...c,id:undefined});
+        for(const s of data.snippets){control?.check();const identity=JSON.stringify([s.title,s.payload]);if(seenSnippets.has(identity))continue;importedSnippetOrder.push(this.saveSnippet({title:s.title,payload:s.payload},thumbnail(s.payload)));seenSnippets.add(identity);}
+        if(importedSnippetOrder.length)this.reorderSnippets([...existingSnippetOrder,...importedSnippetOrder]);
         if(data.scripts.length){const scripts=this.meta('text-scripts',[]);for(const script of data.scripts)if(!scripts.some((s:any)=>s.name===script.name&&s.code===script.code))scripts.push({...script,id:randomUUID(),updatedAt:Date.now()});if(scripts.length>100||Buffer.byteLength(JSON.stringify(scripts))>4*1024*1024)throw new Error(tr('合并后脚本超过容量限制'));this.setMeta('text-scripts',scripts);}
+        if(data.commands.length){const commands=this.meta('text-commands',[]);for(const command of data.commands)if(!commands.some((item:any)=>item.title===command.title&&item.icon===command.icon&&item.prompt===command.prompt))commands.push({...command,id:randomUUID(),revision:randomUUID(),builtin:false});if(commands.length>100)throw new Error(tr('合并后指令超过容量限制'));this.setMeta('text-commands',commands);}
         control?.check();control?.beforeCommit();this.db.exec('COMMIT');return data.clips.length;
       }catch(e){this.db.exec('ROLLBACK');this.categories=previousCategories;throw e;}
     }finally{this.importTotal=undefined;}

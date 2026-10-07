@@ -1,0 +1,52 @@
+const { _electron: electron } = require('@playwright/test');
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+
+(async () => {
+  const root = path.resolve('.');
+  const version = require('../package.json').version;
+  const output = path.resolve(process.env.CLIPPER_INSTALLER_OUTPUT || path.join(root, 'release', version));
+  const info = path.join(output, 'electron-installer-build', 'build-info.json');
+  const engine = path.join(output, `Clipper-${version}-Setup-Engine-x64.exe`);
+  assert(fs.existsSync(info) && fs.existsSync(engine), 'Build the Electron installer first');
+  const packaged = process.env.CLIPPER_INSTALLER_PACKAGED === '1';
+  const app = await electron.launch({executablePath:packaged ? path.join(output,'electron-installer-build','win-unpacked','ClipperSetup.exe') : path.join(root,'node_modules/electron/dist/electron.exe'),args:packaged ? [] : [path.join(root,'installer')],cwd:root,env:packaged ? {...process.env,CLIPPER_INSTALLER_TEST_HEADLESS:'1'} : {...process.env,CLIPPER_INSTALLER_BUILD_INFO:info,CLIPPER_INSTALLER_PAYLOAD:engine,CLIPPER_INSTALLER_TEST_HEADLESS:'1'}});
+  try {
+    const page = await app.firstWindow();
+    await page.getByRole('heading',{name:'安装 Clipper'}).waitFor();
+    await page.waitForFunction(() => document.querySelector('#directory').value.length > 0);
+    assert.match(await page.locator('#directory').inputValue(),/\\Clipper$/i);
+    const selection=await page.evaluate(()=>({body:getComputedStyle(document.body).userSelect,input:getComputedStyle(document.querySelector('#directory')).userSelect}));
+    assert.deepEqual(selection,{body:'none',input:'text'});
+    await app.evaluate(({dialog})=>{dialog.showOpenDialog=async()=>({canceled:false,filePaths:['D:\\Apps']});});
+    await page.getByRole('button',{name:'浏览'}).click();
+    assert.equal(await page.locator('#directory').inputValue(),'D:\\Apps\\Clipper');
+    await page.locator('#directory').fill('D:\\Tools');
+    await page.locator('#directory').blur();
+    assert.equal(await page.locator('#directory').inputValue(),'D:\\Tools\\Clipper');
+    await page.locator('#directory').fill('invalid');
+    await page.getByRole('button',{name:'开始安装'}).click();
+    assert.match(await page.locator('#path-error').innerText(),/有效的安装位置/);
+    await page.locator('#directory').fill('D:\\Programs\\Clipper');
+    await page.locator('#directory').blur();
+    assert.equal(await page.locator('#path-error').innerText(),'');
+    await app.evaluate(({BrowserWindow})=>{const window=BrowserWindow.getAllWindows()[0];window.setPosition(-10000,-10000);window.showInactive();});
+    const preview=path.join(output,packaged?'electron-installer-packaged-preview.png':'electron-installer-preview.png');
+    await page.screenshot({path:preview,animations:'disabled'});
+    await page.evaluate(()=>progress({stage:'failed',reason:'engine',message:'Command failed: '+('very-long-technical-path/'.repeat(60))}));
+    assert.equal(await page.locator('#failure-message').innerText(),'安装未能完成，请检查文件权限后重试。');
+    assert.equal(await page.locator('#failure-details').getAttribute('open'),null);
+    const failurePreview=path.join(output,packaged?'electron-installer-packaged-failure.png':'electron-installer-failure.png');
+    await page.waitForTimeout(250);
+    await page.screenshot({path:failurePreview,animations:'disabled'});
+    await page.locator('#failure-details summary').click();
+    const geometry=await page.evaluate(()=>({body:document.body.scrollWidth<=innerWidth,failed:document.querySelector('#failed').scrollHeight<=document.querySelector('#failed').clientHeight+1,detail:document.querySelector('#failure-technical').getBoundingClientRect().right<=innerWidth,failedSize:[document.querySelector('#failed').clientHeight,document.querySelector('#failed').scrollHeight],detailSize:[document.querySelector('#failure-technical').clientHeight,document.querySelector('#failure-technical').scrollHeight]}));
+    assert.equal(geometry.body,true);
+    assert.equal(geometry.failed,true);
+    assert.equal(geometry.detail,true);
+    const failureExpandedPreview=path.join(output,packaged?'electron-installer-packaged-failure-details.png':'electron-installer-failure-details.png');
+    await page.screenshot({path:failureExpandedPreview,animations:'disabled'});
+    console.log(JSON.stringify({passed:true,renderer:'Electron',packaged,directoryEditable:true,automaticClipperDirectory:true,selectionRestricted:true,invalidPathGuard:true,failureLayout:true,preview,failurePreview,failureExpandedPreview}));
+  } finally {await app.close();}
+})().catch(error=>{console.error(error);process.exitCode=1;});

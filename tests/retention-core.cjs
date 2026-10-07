@@ -12,6 +12,12 @@ test('Automatic retention matches existing rules across age, count and all prote
  store.setQueue([items[1].id,items[1].id,items[35].id]);store.batch([items[7].id,items[56].id],'shelf');store.settings={...store.settings,maxItems:50,retentionDays:30};
  const wanted=expected(store,now);store.prune();assert.deepEqual(ids(store),wanted);for(const item of store.list())if(store.protected(item))assert(wanted.has(item.id));
 })));
+test('permanent manual and rule categories survive pruning and clear; disabling protection restores cleanup',()=>freeze(now=>use(store=>{
+ const manual=store.saveCategory({name:'重要',color:'#7b8e9c',kind:'all',contains:'',source:'',tag:'',manual:true,permanent:true});
+ const dynamic=store.saveCategory({name:'发票',color:'#7b8e9c',kind:'text',contains:'Invoice [0-9]+',containsRegex:true,source:'',tag:'',permanent:true});
+ const a=store.add({text:'archive'},'Fixture',undefined,{updatedAt:now-60*day},false),b=store.add({text:'Invoice 42'},'Fixture',undefined,{updatedAt:now-60*day},false),c=store.add({text:'expired'},'Fixture',undefined,{updatedAt:now-60*day},false);
+ store.setManualCategory([a.id],manual,true);store.prune();assert(store.has(a.id)&&store.has(b.id)&&!store.has(c.id));store.clear();assert(store.has(a.id)&&store.has(b.id));store.saveCategory({...store.categories.find(x=>x.id===manual),permanent:false});store.saveCategory({...store.categories.find(x=>x.id===dynamic),permanent:false});store.prune();assert(!store.has(a.id)&&!store.has(b.id));
+})));
 
 test('Equal timestamps retain the same stable order and protected copies do not consume the ordinary count',()=>freeze(now=>use(store=>{
  const items=Array.from({length:70},(_,i)=>store.add({text:'Tie '+i},'Fixture',undefined,{updatedAt:now},false));store.setQueue([items[5].id,items[5].id]);store.batch([items[6].id],'shelf');store.settings.maxItems=50;

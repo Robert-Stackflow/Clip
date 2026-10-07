@@ -1,0 +1,7 @@
+import './language';
+import './appearance';
+import {contextBridge,ipcRenderer} from 'electron';
+import type {ChatAPI,ChatEvent} from '../shared/chat';
+const invoke=(name:string,...args:unknown[])=>ipcRenderer.invoke('clipper:chat-'+name,...args);
+const api:ChatAPI={state:id=>invoke('state',id),create:()=>invoke('create'),remove:id=>invoke('remove',id),rename:(id,title)=>invoke('rename',id,title),draft:(id,value,profile)=>invoke('draft',id,value,profile),send:value=>invoke('send',value),cancel:id=>invoke('cancel',id),retry:(id,profile,revision,destination,selection)=>invoke('retry',id,profile,revision,destination,selection),image:(data,name)=>invoke('image',data,name),chooseImages:()=>invoke('choose-images'),records:()=>invoke('records'),record:id=>invoke('record',id),apply:(id,message,mode)=>invoke('apply',id,message,mode),sidebar:open=>invoke('sidebar',open),models:(profile,request)=>invoke('models',profile,request),cancelModels:request=>invoke('cancel-models',request),copyText:text=>invoke('copy-text',text),configure:value=>invoke('configure',value),hide:()=>invoke('hide'),main:()=>invoke('main'),openURL:url=>invoke('open-url',url),onEvent:callback=>{const listener=(_event:unknown,value:ChatEvent)=>callback(value);ipcRenderer.on('clipper:chat-event',listener);return()=>ipcRenderer.removeListener('clipper:chat-event',listener);},onShow:callback=>{const listener=()=>callback();ipcRenderer.on('clipper:chat-show',listener);return()=>ipcRenderer.removeListener('clipper:chat-show',listener);}};
+contextBridge.exposeInMainWorld('clipperChat',api);

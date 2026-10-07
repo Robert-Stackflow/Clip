@@ -1,5 +1,5 @@
 import {t as tr} from '../shared/i18n';
-import {app,BrowserWindow,ipcMain,session,net,type IpcMainInvokeEvent} from 'electron';
+import {app,BrowserWindow,ipcMain,session,net,webContents,type IpcMainInvokeEvent} from 'electron';
 import {randomUUID} from 'node:crypto';
 import {pathToFileURL} from 'node:url';
 import {installedFonts,fontSource} from './fonts';
@@ -37,5 +37,5 @@ export class AppearanceService {
   ipcMain.handle('clipper:chrome-action',(event,kind)=>{const w=trusted(event);if(kind==='close')w.close();else if(kind==='minimize'&&w.isMinimizable())w.minimize();else if(kind==='maximize'&&w.isMaximizable()){if(w.isMaximized())w.unmaximize();else w.maximize();}else throw new Error('Invalid window action');});
   app.on('browser-window-created',(_event,w)=>watchNativeWindowState(w));
  }
- async save(value:unknown){const state=await this.store.save(value);for(const window of BrowserWindow.getAllWindows()){if(window.isDestroyed()||window.webContents.isDestroyed()||!trustedAppearancePage(window.webContents.getURL()))continue;try{window.webContents.send('clipper:appearance-changed',state);}catch{/* A closing renderer will read the saved value when it opens again. */}}return state;}
+ async save(value:unknown){const state=await this.store.save(value);for(const contents of webContents.getAllWebContents()){const owner=BrowserWindow.fromWebContents(contents);if(contents.isDestroyed()||!owner||owner.isDestroyed()||!trustedAppearancePage(contents.getURL()))continue;try{contents.send('clipper:appearance-changed',state);}catch{/* A closing renderer will read the saved value when it opens again. */}}return state;}
 }

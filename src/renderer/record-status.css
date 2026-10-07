@@ -1,0 +1,16 @@
+/* Persisted record states use the same visual cues in every clipboard surface. */
+:root{--record-star:#dfa308;--record-pin:#547ba4}
+:root[data-theme=dark]{--record-star:#f4c34d;--record-pin:#8ab7e1}
+.icon-button[aria-pressed=true]:has(>[data-lucide-icon="lucide:star"]){background:color-mix(in srgb,var(--record-star) 12%,transparent)}
+.icon-button[aria-pressed=true]>[data-lucide-icon="lucide:star"],.record-favorite>.icon,.recent-shell .flag-favorite svg{color:var(--record-star);fill:currentColor;stroke-width:1.5}
+.icon-button[aria-pressed=true]>[data-lucide-icon="lucide:pin"]{color:var(--record-pin);fill:currentColor}
+.icon-button[aria-pressed=true]:has(>[data-lucide-icon="lucide:pin"]){background:color-mix(in srgb,var(--record-pin) 12%,transparent)}
+.row-flags>.record-flag{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:21px;height:21px;border-radius:6px}
+.collection .row-heading>.row-flags{flex:0 0 47px;width:47px;min-width:47px;height:21px;justify-content:flex-end;gap:5px}
+.row-flags>.record-pinned{background:transparent}
+.row-flags>.record-pinned>.icon,.recent-shell .flag-pinned svg{color:var(--record-pin);fill:currentColor}
+.collection .clip-row[data-pinned=true],.quick-record[data-pinned=true]{box-shadow:none;background:color-mix(in srgb,var(--record-pin) 5%,var(--stage))}
+.collection .clip-row[data-pinned=true]::before,.quick-record[data-pinned=true]::before{content:"";position:absolute;left:0;top:50%;width:3px;height:28px;max-height:calc(100% - 24px);border-radius:999px;background:var(--record-pin);transform:translateY(-50%);pointer-events:none}
+.collection .clip-row[data-pinned=true]:hover,.quick-record[data-pinned=true]:hover{background:color-mix(in srgb,var(--record-pin) 8%,var(--soft))}
+.collection .clip-row[data-pinned=true].selected{background:color-mix(in srgb,var(--record-pin) 7%,var(--selected))}
+@media(forced-colors:active){.icon-button[aria-pressed=true]>[data-lucide-icon="lucide:star"],.record-favorite>.icon{color:Highlight}.collection .clip-row[data-pinned=true],.quick-record[data-pinned=true]{outline:1px solid Highlight}}

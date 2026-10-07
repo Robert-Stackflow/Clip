@@ -1,6 +1,7 @@
 import {closeControls} from './controls';
 import {t} from '../shared/i18n';
 import {createElement,type IconNode} from 'lucide';
+import {organizeSettingsPanel} from './settings-layout';
 
 /** Reuses live form nodes so switching sections preserves unsaved values and focus. */
 export function sectionLayout(root:HTMLElement, labels:string[], starts:HTMLElement[], storageKey:string,options:{groups?:string[];icons?:IconNode[];onSelect?:(index:number)=>void}={}){
@@ -12,7 +13,7 @@ export function sectionLayout(root:HTMLElement, labels:string[], starts:HTMLElem
     const panel=document.createElement('section');panel.className='section-panel';panel.id=storageKey+'-panel-'+i;
     const begin=nodes.indexOf(starts[i]),end=i+1<starts.length?nodes.indexOf(starts[i+1]):nodes.length;
     nodes.slice(Math.max(0,begin),end).forEach(node=>panel.append(node));
-    if(root.closest('.settings-page')){const rows=Array.from(panel.querySelectorAll<HTMLElement>(':scope > .setting-row')).filter(row=>!row.querySelector('.theme-modes'));if(rows.length){const separate=rows.some(row=>row.querySelector('#max-items,#clear-history'));if(separate){for(const row of rows){const card=document.createElement('section');card.className='settings-card';row.before(card);card.append(row);}}else{const card=document.createElement('section');card.className='settings-card';rows[0].before(card);rows.forEach(row=>card.append(row));}}panel.querySelector('#updates')?.classList.add('update-settings-card');}
+    if(root.closest('.settings-page')){panel.querySelector('#updates')?.classList.add('update-settings-card');organizeSettingsPanel(panel);}
     const button=document.createElement('button');button.type='button';button.className='quiet';const glyph=options.icons?.[i];if(glyph)button.append(createElement(glyph,{'class':'icon lucide','aria-hidden':'true','focusable':'false','stroke-width':1.75}));const caption=document.createElement('span');caption.className='section-nav-label';caption.textContent=label;button.append(caption);button.dataset.section=String(i);button.setAttribute('aria-controls',panel.id);
     button.onclick=()=>select(i);const group=options.groups?.[i];if(group&&(i===0||options.groups?.[i-1]!==group)){const heading=document.createElement('h2');heading.className='section-nav-group';heading.textContent=group;nav.append(heading);}nav.append(button);content.append(panel);return panel;
   });

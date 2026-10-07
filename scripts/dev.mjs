@@ -22,7 +22,7 @@ function launch(){
  if(port){if(!/^\d+$/.test(port)||+port<1024||+port>65535)throw new Error('Invalid development debug port');args.unshift('--remote-debugging-address=127.0.0.1','--remote-debugging-port='+port);}
  child=spawn(electron,args,{cwd:root,env,stdio:['inherit','inherit','inherit','ipc'],windowsHide:false});
  child.on('error',error=>{console.error(error);void finish(1);});
- child.on('message',message=>{if(message?.type==='clipper:dev-deferred')console.log('当前有未保存的捕获或图片编辑；保存后继续修改可刷新。');if(message?.type==='clipper:dev-quit-canceled'){quitRequested=false;clearTimeout(quitTimer);console.log('开发窗口取消退出；下次修改主进程时再重试。');}if(message?.type==='clipper:dev-renderer-gone')console.warn('开发窗口渲染进程退出：'+message.reason+'；恢复尝试 '+Math.min(message.retry,3)+'/3'+(message.retry>3?'，已停止自动重试':''));if(message?.type==='clipper:dev-ready')console.log('Clipper 开发窗口已就绪；资料：'+message.profile);});
+ child.on('message',message=>{if(message?.type==='clipper:dev-restart'){restarting=true;console.log('正在重启 Clipper 开发窗口…');}if(message?.type==='clipper:dev-deferred')console.log('当前有未保存的捕获或图片编辑；保存后继续修改可刷新。');if(message?.type==='clipper:dev-quit-canceled'){quitRequested=false;clearTimeout(quitTimer);console.log('开发窗口取消退出；下次修改主进程时再重试。');}if(message?.type==='clipper:dev-renderer-gone')console.warn('开发窗口渲染进程退出：'+message.reason+'；恢复尝试 '+Math.min(message.retry,3)+'/3'+(message.retry>3?'，已停止自动重试':''));if(message?.type==='clipper:dev-ready')console.log('Clipper 开发窗口已就绪；资料：'+message.profile);});
  child.once('exit',code=>{clearTimeout(quitTimer);child=undefined;if(restarting&&!stopping){restarting=false;launch();}else void finish(stopping?exitCode:code??0);});
 }
 async function pruneReader(result){
@@ -53,7 +53,7 @@ try{
  for(const sourceRoot of ['src','native','assets','scripts'])watchers.push(watch(sourceRoot,{recursive:true},(_event,name)=>{
   if(!name||stopping)return;const source=resolve(sourceRoot,String(name)),file=files.get(source);
   if(!file){if(sourceRoot==='native'||sourceRoot==='scripts')console.log('开发构建配置或原生源码已更新，请重新运行 npm run dev。');return;}
-  clearTimeout(copyTimers.get(source));copyTimers.set(source,setTimeout(async()=>{copyTimers.delete(source);try{const [,target,bom]=file;await mkdir(dirname(target),{recursive:true});if(bom)await writeFile(target,Buffer.concat([Buffer.from([0xef,0xbb,0xbf]),await readFile(source)]));else await copyFile(source,target);changed(target.startsWith('dist/main/')||target==='dist/clipper.png');}catch(error){console.error('复制开发资源失败：'+relative(root,source),error.message);}},60));
+  clearTimeout(copyTimers.get(source));copyTimers.set(source,setTimeout(async()=>{copyTimers.delete(source);try{const [,target,bom]=file;await mkdir(dirname(target),{recursive:true});if(bom)await writeFile(target,Buffer.concat([Buffer.from([0xef,0xbb,0xbf]),await readFile(source)]));else await copyFile(source,target);changed(target.startsWith('dist/main/')||target==='dist/clipper.png'||target.startsWith('dist/clipper-tray-'));}catch(error){console.error('复制开发资源失败：'+relative(root,source),error.message);}},60));
  }));
  launch();console.log('Electron 开发模式：界面自动刷新，主进程/预加载正常重启；原生源码修改后重新启动开发命令。');
 }catch(error){console.error(error);await finish(1);}

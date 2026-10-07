@@ -1,0 +1,99 @@
+/* Settings share one card and field rhythm; utility workspaces retain their own layouts. */
+.settings-page{--settings-control-width:280px;--settings-card-inset:20px;--settings-row-padding:16px}
+.settings-page .section-panel{max-width:920px;min-width:0;padding-bottom:24px}
+.settings-page .section-panel>.section-label,.settings-page .section-panel>.tools-section-heading{margin:0 0 18px;padding:0;min-height:24px}
+.settings-page .section-panel>.tools-section-heading h2,.settings-page .section-panel>.section-label{font-size:calc(15px * var(--text-scale,1));font-weight:600;line-height:1.5}
+.settings-page .settings-card{display:block;min-width:0;margin:0 0 16px;padding:0 var(--settings-card-inset);border:1px solid var(--line);border-radius:var(--panel-radius);background:var(--surface);box-shadow:none}
+.settings-page .settings-card-heading{display:flex;align-items:flex-start;flex-wrap:wrap;gap:6px 16px;margin:0;padding:18px 0 10px;min-width:0}
+.settings-page .settings-card-heading>h3,.settings-page .settings-card-heading>div>h3{margin:0;font-size:calc(14px * var(--text-scale,1));font-weight:600;line-height:1.5;color:var(--fg)}
+.settings-page .settings-card-heading>p,.settings-page .settings-card-heading>div>p{flex-basis:100%;margin:0;font-size:calc(12px * var(--text-scale,1));line-height:1.6;color:var(--muted)}
+.settings-page .settings-card-heading>div:not(.settings-card-actions){min-width:0;flex:1}
+.settings-page .settings-card-heading>button,.settings-page .settings-card-actions{margin-left:auto;align-self:center;flex:none}
+.settings-page .settings-card-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:100%}
+.settings-page .settings-card-heading:has(>.settings-card-actions)>h3{align-self:center}
+.settings-page .settings-card .settings-card-footer{margin:0;padding:12px 0 16px;color:var(--muted);font-size:calc(12px * var(--text-scale,1));line-height:1.6}
+.settings-page .settings-card .settings-item{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,var(--settings-control-width));align-items:center;gap:24px;margin:0;padding:var(--settings-row-padding) 0;min-height:66px;border:0;border-bottom:1px solid var(--line);font-size:calc(13px * var(--text-scale,1));font-weight:400;line-height:1.5}
+.settings-page .settings-card .settings-item-copy{display:block;min-width:0;flex:none}
+.settings-page .settings-card .settings-item-title,.settings-page .settings-card .settings-item-title :is(strong,label,span){font-size:calc(13px * var(--text-scale,1));font-weight:400;color:var(--fg);line-height:1.5}
+.settings-page .settings-card .settings-item-desc{display:block;max-width:none;margin:5px 0 0;font-size:calc(12px * var(--text-scale,1));font-weight:400;color:var(--muted);line-height:1.6;overflow-wrap:anywhere}
+.settings-page .settings-card .settings-item-control{display:flex;justify-content:flex-end;align-items:center;gap:10px;min-width:0;flex-wrap:wrap}
+.settings-page .settings-card .settings-item-control>:is(input:not([type=checkbox]):not([type=range]),textarea,.custom-select-wrap,.shortcut-field,.custom-select,.data-path-row){width:100%;max-width:none;min-width:0;margin:0;flex:none}
+.settings-page .settings-card .settings-item-control .shortcut-field input{width:100%;text-align:left}
+.settings-page .settings-card .shortcut-field>.shortcut-control{width:100%;max-width:none}
+.settings-page .settings-card .settings-item-control>.inline-fields{margin:0;gap:12px;min-width:0}
+.settings-page .settings-card .settings-item-control .inline-fields>label{display:flex;align-items:center;gap:6px;min-width:0}
+.settings-page .settings-card .settings-item-control .inline-fields input{width:78px;min-width:0;text-align:left}
+.settings-page .settings-card .settings-item-control .switch{flex:none;margin:0}
+.settings-page .settings-card .settings-item-control textarea{min-height:92px;resize:vertical}
+.settings-page .settings-card .settings-item.align-top{align-items:flex-start}
+.settings-page .settings-card .settings-item:has(.theme-modes),.settings-page .settings-card .settings-item:has(.swatch-list){grid-template-columns:minmax(90px,.7fr) minmax(0,1.3fr)}
+.settings-page .settings-card .settings-item .theme-modes{justify-content:flex-end;gap:10px;flex:none}
+.settings-page .settings-card .settings-item .theme-mini{width:76px;height:52px}
+.settings-page .settings-card .settings-item .theme-choice{min-width:0}
+.settings-page .theme-choice>span:last-child{position:static;width:auto;height:auto;overflow:visible;clip-path:none;margin-top:8px;font-size:calc(12px * var(--text-scale,1));font-weight:400;color:var(--muted)}
+.settings-page .theme-choice[aria-pressed=true]>span:last-child{color:var(--fg)}
+.settings-page .settings-card .settings-item .swatch-list{display:flex;gap:8px;margin:0;flex:none}
+.settings-page .settings-card .settings-item-control>.color-field{width:112px;min-width:0;flex:none}
+.settings-page .settings-card .settings-item-control>input[type=range]{flex:1;min-width:100px;margin:0}
+.settings-page .settings-card .settings-item-control>output{font-size:calc(12px * var(--text-scale,1));color:var(--muted);min-width:34px;text-align:right}
+.settings-page .settings-card>.settings-item:last-child,.settings-page .settings-card :is(.desktop-fields,.tool-field-grid):last-child>.settings-item:last-child{border-bottom:0}
+.settings-page :is(.desktop-fields,.tool-field-grid){display:block;margin:0;gap:0}
+.settings-page .appearance-page{max-width:none;display:block}
+.settings-page .appearance-actions{display:flex;justify-content:flex-end;margin:0;padding:0}
+.settings-page .inline-settings-card>.field-help{margin:0;padding:0 0 16px;font-size:calc(12px * var(--text-scale,1));line-height:1.6}
+.settings-page .settings-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin:0;padding:16px 0;border-top:1px solid var(--line)}
+.settings-page .settings-actions :is(.field-help,[role=status]){flex:1;color:var(--muted);font-size:calc(12px * var(--text-scale,1));line-height:1.6}
+.settings-page :is(.field-help,.inline-error,.image-host-test-message){font-size:calc(12px * var(--text-scale,1));line-height:1.6}
+.settings-page :is(.settings-card,.settings-item,[hidden])[hidden]{display:none}
+.settings-page #image-host-settings{display:block;gap:0}
+.settings-page .image-host-overview{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0 20px}
+.settings-page .image-host-overview>.settings-card-heading{grid-column:1/-1}
+.settings-page .image-host-overview-copy{padding:18px 0 16px}
+.settings-page .image-host-overview-copy strong{font-weight:400;font-size:calc(13px * var(--text-scale,1))}
+.settings-page .image-host-overview-copy p{margin:5px 0 0;font-size:calc(12px * var(--text-scale,1));line-height:1.6}
+.settings-page .image-host-switch{align-self:center}
+.settings-page .image-host-status{grid-column:1/-1;border-color:var(--line)}
+.settings-page .image-host-card header,.settings-page .image-host-test-card header{grid-column:auto;border:0}
+.settings-page .image-host-card .image-host-wide{grid-column:auto}
+.settings-page .image-host-number{display:flex;align-items:center;gap:8px;width:100%}
+.settings-page .image-host-number input{width:100%;min-width:0}
+.settings-page #image-host-test-result{padding:6px 0 18px;margin:0;border:0}
+.settings-page .image-host-actions{margin:0;padding:0;display:flex;gap:16px;align-items:center;justify-content:flex-end}
+.settings-page #history-vault{margin:0}
+.settings-page #history-vault .vault-card{padding:0 var(--settings-card-inset);margin-bottom:16px;border-radius:var(--panel-radius)}
+.settings-page #history-vault .vault-symbol{display:none}
+.settings-page #history-vault .vault-card p{max-width:none;font-size:calc(12px * var(--text-scale,1))}
+.settings-page #history-vault .settings-card-heading h3{margin:0;font-size:calc(14px * var(--text-scale,1));font-weight:600}
+.settings-page #appearance-font{width:100%;max-width:none}
+.settings-page #history-vault .vault-card .data-controls{margin:0;padding:16px 0;flex-wrap:wrap}
+.settings-page #history-vault .vault-options{display:block;margin:0;padding:0;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent}
+.settings-page #history-vault .vault-options>.settings-item{display:grid;padding:var(--settings-row-padding) 0;gap:24px;border-bottom:1px solid var(--line)}
+.settings-page #history-vault .vault-options>.field-help{margin:0;padding:12px 0;font-size:calc(12px * var(--text-scale,1))}
+.settings-page #history-vault #vault-save{display:block;margin:0 0 16px auto}
+.settings-page .storage-meter{padding:16px 0 8px}
+.settings-page .storage-meter-head strong{font-weight:400;font-size:calc(13px * var(--text-scale,1))}
+.settings-page .storage-meter-head span,.settings-page .storage-meter-note,.settings-page .storage-breakdown-grid small,.settings-page .storage-breakdown-row{font-size:calc(12px * var(--text-scale,1))}
+.settings-page .storage-directory-row{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 0!important;border-top:1px solid var(--line)!important}
+.settings-page .settings-item+.storage-directory-row{border-top:0!important}
+.settings-page .storage-directory-row>div{min-width:0;flex:1}
+.settings-page .storage-directory-row>button{flex:none}
+.settings-page .storage-location-label{font-size:calc(13px * var(--text-scale,1));font-weight:400}
+.settings-page .settings-card .storage-location code,.settings-page .settings-card .storage-location small{font-size:calc(12px * var(--text-scale,1))}
+.settings-page .settings-card .storage-previous{margin:0 calc(-1 * var(--settings-card-inset))}
+.settings-page .settings-card .storage-previous summary,.settings-page .settings-card .storage-previous-body{padding-inline:var(--settings-card-inset)}
+.settings-page .backup-status{padding:16px 0;margin:0;border:0;border-radius:0;background:transparent}
+.settings-page .backup-status span,.settings-page .backup-status strong{font-size:calc(12px * var(--text-scale,1));font-weight:400}
+.settings-page :is(#backup-entries,#checkpoint-list,#program-version-list){border:0;border-radius:0;margin:0;padding:0}
+.settings-page :is(.backup-entry,.checkpoint-entry){padding:16px 0;gap:14px}
+.settings-page .archive-entry-copy strong{font-size:calc(13px * var(--text-scale,1));font-weight:400}
+.settings-page .archive-entry-copy small{font-size:calc(12px * var(--text-scale,1));line-height:1.6}
+.settings-page .checkpoint-workbench>.utility-guide{margin:0;padding:10px 0 16px;background:transparent;border-radius:0}
+.settings-page .checkpoint-workbench{padding:0;margin:0;border:0;border-radius:0;background:transparent}
+.settings-page .settings-panels #updates>.update-current-card,.settings-page .program-versions.settings-card{padding:0 var(--settings-card-inset)!important;margin-bottom:16px}
+.settings-page .update-current-card>.update-summary{padding:16px 0;border-bottom:1px solid var(--line);align-items:center}
+.settings-page .update-current-card .update-summary>div>strong{font-size:calc(13px * var(--text-scale,1));font-weight:400}
+.settings-page .update-release h3{font-size:calc(14px * var(--text-scale,1));font-weight:600}
+.settings-page .program-versions>.settings-card-heading{margin:0}
+html[data-density=compact] .settings-page{--settings-row-padding:12px}
+@media(max-width:1000px){.settings-page{--settings-control-width:240px}.settings-page .settings-card .settings-item{gap:18px}.settings-page .settings-card .settings-item:has(.theme-modes),.settings-page .settings-card .settings-item:has(.swatch-list){grid-template-columns:1fr}.settings-page .settings-card .settings-item:has(.theme-modes) .settings-item-control,.settings-page .settings-card .settings-item:has(.swatch-list) .settings-item-control{justify-content:flex-start}}
+@media(max-width:800px){.settings-page{--settings-card-inset:16px}.settings-page .settings-card .settings-item,.settings-page #history-vault .vault-options>.settings-item{grid-template-columns:minmax(0,1fr);gap:10px}.settings-page .settings-card .settings-item-control{justify-content:flex-start}.settings-page .settings-card .settings-item-control:has(.switch){justify-content:flex-end}.settings-page .settings-card .settings-item:has(.switch){grid-template-columns:minmax(0,1fr) auto}.settings-page .storage-directory-row{align-items:flex-start;flex-wrap:wrap}.settings-page .storage-meter-head{flex-wrap:wrap;gap:6px}.settings-page .settings-card-actions{flex-wrap:wrap}}

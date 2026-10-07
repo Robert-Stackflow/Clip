@@ -1,5 +1,5 @@
 import {t} from '../shared/i18n';
-import {icon} from './ui';
+import {icon,iconButton} from './ui';
 import {bindSearchFields} from './one-search';
 import {openAnchoredPopover,closeAnchoredPopover} from './anchored-popover';
 
@@ -8,8 +8,9 @@ export function collectionLayout(root:HTMLElement){
  bindSearchFields(root);
  const collection=root.querySelector<HTMLElement>('.collection')!,workspace=collection.querySelector<HTMLElement>('.workspace')!,results=collection.querySelector<HTMLElement>('#results')!;
  const rail=document.createElement('section');rail.className='collection-rail';rail.setAttribute('aria-label',t('剪贴板记录'));results.before(rail);rail.append(results);
+ const chips=collection.querySelector<HTMLElement>('#filter-chips');
  const drop=collection.querySelector<HTMLElement>('#shelf-drop');if(drop)workspace.append(drop);
- const toolbar=collection.querySelector<HTMLElement>('.collection-toolbar')!,filter=collection.querySelector<HTMLElement>('.filterbar')!,controls=document.createElement('div');controls.className='collection-controls';toolbar.before(controls);controls.append(toolbar,filter);const source=collection.querySelector<HTMLElement>('#source-filters');if(source)filter.append(source);
+ const toolbar=collection.querySelector<HTMLElement>('.collection-toolbar')!,filter=collection.querySelector<HTMLElement>('.filterbar')!,controls=document.createElement('div');controls.className='collection-controls';toolbar.before(controls);controls.append(toolbar,filter);if(chips)controls.append(chips);const source=collection.querySelector<HTMLElement>('#source-filters');if(source)filter.append(source);
  const filterActions=document.createElement('div');filterActions.id='filter-actions';filterActions.className='collection-filter-actions';filterActions.hidden=true;filter.append(filterActions);
  workspace.classList.add('collection-canvas');collection.querySelectorAll<HTMLElement>('.heading-actions>button:not(.primary)').forEach(button=>button.classList.add('quiet'));
 }
@@ -17,22 +18,44 @@ export function detailLayout(root:HTMLElement,bind=true){
  const identity=root.querySelector<HTMLElement>('.preview-heading>.detail-kind'),application=identity?.querySelector<HTMLElement>(':scope>.source-icon');if(identity&&application){const name=application.nextSibling,group=document.createElement('span');group.className='preview-application';application.before(group);group.append(application);if(name?.nodeType===Node.TEXT_NODE){const label=document.createElement('span');label.textContent=name.textContent;group.append(label);name.remove();}}
  const top=root.querySelector<HTMLElement>('.detail-top'),actions=root.querySelector<HTMLElement>('.detail-actions'),meta=root.querySelector<HTMLElement>('.detail-meta'),more=root.querySelector<HTMLDetailsElement>('.detail-more'),tools=top?.querySelector<HTMLElement>('.detail-tools');
  if(!top||!actions)return;const footer=document.createElement('div');footer.className='preview-commandbar';actions.before(footer);footer.append(actions);
- if(meta&&tools){tools.append(meta);const toggle=meta.querySelector<HTMLButtonElement>('button')!;toggle.className='icon-button quiet';toggle.title=toggle.getAttribute('aria-label')||t('记录信息');toggle.setAttribute('aria-label',t('记录信息'));toggle.innerHTML=icon('lucide:info');}
- if(more&&tools){tools.append(more);more.open=false;const summary=more.querySelector<HTMLElement>('summary')!;summary.setAttribute('aria-expanded','false');summary.setAttribute('aria-label',t('更多操作'));summary.title=t('更多操作');summary.innerHTML=icon('lucide:more');const popup=document.createElement('div');popup.className='preview-menu';popup.setAttribute('role','group');popup.setAttribute('aria-label',t('更多操作'));more.append(popup);for(const group of Array.from(more.children).filter(node=>node!==summary&&node!==popup))popup.append(group);for(const button of popup.querySelectorAll<HTMLButtonElement>('button')){button.classList.remove('icon-button','small');button.classList.add('preview-menu-action');if(!button.querySelector('span')){const label=document.createElement('span');label.textContent=button.getAttribute('aria-label')||button.title;button.append(label);}}}
- root.classList.add('content-stage');if(bind)bindDetailLayout(root);
+ root.classList.toggle('record-detail',!!meta);
+ if(meta){
+  const source=identity?.querySelector('.preview-application');if(source)meta.prepend(source);
+  top.querySelector('.preview-title')?.remove();const kind=identity?.querySelector('.preview-kind');if(kind)identity!.replaceChildren(...kind.childNodes);
+  meta.className='preview-metadata';footer.prepend(meta);
+ }
+ if(more&&tools){tools.append(more);more.open=false;const summary=more.querySelector<HTMLElement>('summary')!;summary.setAttribute('aria-expanded','false');summary.setAttribute('aria-label',t('更多操作'));summary.title=t('更多操作');summary.innerHTML=icon('lucide:more');const popup=document.createElement('div');popup.className='preview-menu';popup.setAttribute('role','menu');popup.setAttribute('aria-label',t('更多操作'));more.append(popup);for(const group of Array.from(more.children).filter(node=>node!==summary&&node!==popup))popup.append(group);for(const button of popup.querySelectorAll<HTMLButtonElement>('button')){button.classList.remove('icon-button','small');button.classList.add('preview-menu-action');button.setAttribute('role','menuitem');if(!button.querySelector('span')){const label=document.createElement('span');label.textContent=button.getAttribute('aria-label')||button.title;button.append(label);}}}
+ root.classList.add('content-stage');groupDetailActions(root);if(bind)bindDetailLayout(root);
 }
-const boundMore=new WeakSet<HTMLDetailsElement>(),boundMoreButtons=new WeakSet<HTMLButtonElement>();
+const boundMore=new WeakSet<HTMLDetailsElement>(),boundMoreButtons=new WeakSet<HTMLButtonElement>(),boundMoreToggles=new WeakSet<HTMLButtonElement>();
+function groupDetailActions(root:HTMLElement){
+ const more=root.querySelector<HTMLDetailsElement>('.detail-more'),container=more?.querySelector<HTMLElement>('.secondary-actions');if(!more||!container)return;
+ const text=more.querySelector('.text-tool-actions');if(text){container.append(...Array.from(text.children));text.remove();}
+ const buttons=Array.from(container.querySelectorAll<HTMLButtonElement>('button'));
+ const groups:[string,string,string[]][]=[
+  ['image',t('图片处理'),['edit-image','ai-image']],
+  ['text',t('文字处理'),['plain','translate','summarize','rewrite','run-command','run-script']],
+  ['hosting',t('图床'),['upload-image','reupload-image']],
+  ['organize',t('整理与收纳'),['enqueue','dequeue','queue-up','queue-down','split','save-reply','shelf-item','organize-manual-categories','sticker-open']],
+  ['share',t('分享与导出'),['share-record','private-record','export-image']],
+  ['record',t('记录管理'),['show-context','content-info','delete']],
+ ];
+ for(const [key,title,ids]of groups){const available=buttons.filter(button=>ids.includes(button.id));if(!available.length)continue;let section=container.querySelector<HTMLElement>(`[data-action-group="${key}"]`);if(!section){section=document.createElement('section');section.className='preview-action-group';section.dataset.actionGroup=key;section.setAttribute('role','group');section.setAttribute('aria-label',title);const heading=document.createElement('h4');heading.textContent=title;const list=document.createElement('div');list.className='preview-action-list';section.append(heading,list);container.append(section);}const list=section.querySelector('.preview-action-list')!;for(const button of available){button.classList.remove('icon-button','small');button.classList.add('preview-menu-action');button.setAttribute('role','menuitem');if(!button.querySelector('span')){const label=document.createElement('span');label.textContent=button.getAttribute('aria-label')||button.title;button.append(label);}list.append(button);}}
+ more.classList.add('grouped-actions');
+ const summary=more.querySelector<HTMLElement>('summary')!;
+ if(!summary.querySelector('button')){summary.removeAttribute('title');summary.removeAttribute('data-tooltip');summary.tabIndex=-1;summary.innerHTML=iconButton('more-actions',t('更多操作'),'lucide:more');const trigger=summary.querySelector('button')!;trigger.setAttribute('aria-haspopup','menu');}
+}
 export function bindDetailLayout(root:HTMLElement){const more=root.querySelector<HTMLDetailsElement>('.detail-more');if(!more)return;
- const sync=()=>{const anchor=more.querySelector<HTMLElement>('summary')!,popup=more.querySelector<HTMLElement>('.preview-menu')!;anchor.setAttribute('aria-expanded',String(more.open));if(more.open)openAnchoredPopover(popup,anchor);else closeAnchoredPopover(popup);};
+ groupDetailActions(root);
+ const trigger=more.querySelector<HTMLButtonElement>('#more-actions')!;if(!boundMoreToggles.has(trigger)){boundMoreToggles.add(trigger);trigger.addEventListener('click',event=>{event.preventDefault();more.open=!more.open;});trigger.addEventListener('keydown',event=>{if(event.key!=='ArrowDown'&&event.key!=='ArrowUp')return;event.preventDefault();event.stopPropagation();more.open=true;sync();const buttons=Array.from(more.querySelectorAll<HTMLButtonElement>('.preview-menu button:not(:disabled)'));(event.key==='ArrowUp'?buttons.at(-1):buttons[0])?.focus({preventScroll:true});});}
+ const sync=()=>{const anchor=more.querySelector<HTMLElement>('#more-actions')!,popup=more.querySelector<HTMLElement>('.preview-menu')!;anchor.setAttribute('aria-expanded',String(more.open));more.querySelector('summary')!.setAttribute('aria-expanded',String(more.open));if(more.open)openAnchoredPopover(popup,anchor,460,620);else closeAnchoredPopover(popup);};
  if(!boundMore.has(more)){boundMore.add(more);more.addEventListener('toggle',sync);}sync();
- const info=root.querySelector<HTMLElement>('#record-info'),anchor=root.querySelector<HTMLElement>('#record-info-toggle');if(info&&anchor&&!info.hidden)openAnchoredPopover(info,anchor,360,340);
- for(const button of more.querySelectorAll('button'))if(!boundMoreButtons.has(button)){boundMoreButtons.add(button);button.addEventListener('click',()=>more.open=false);}
+ for(const button of more.querySelectorAll<HTMLButtonElement>('.preview-menu button'))if(!boundMoreButtons.has(button)){boundMoreButtons.add(button);button.addEventListener('click',()=>more.open=false);}
 }
-export function toggleRecordInfo(info:HTMLElement,anchor:HTMLElement){info.hidden=!info.hidden;anchor.setAttribute('aria-expanded',String(!info.hidden));if(info.hidden)closeAnchoredPopover(info);else openAnchoredPopover(info,anchor,360,340);}
-function closePreviewPopovers(except?:Element){for(const more of document.querySelectorAll<HTMLDetailsElement>('.detail-more[open]'))if(!except?.closest('.detail-more')||except.closest('.detail-more')!==more){more.open=false;const popup=more.querySelector<HTMLElement>('.preview-menu');if(popup)closeAnchoredPopover(popup);}for(const info of document.querySelectorAll<HTMLElement>('.record-info:not([hidden])'))if(except?.closest('.detail-meta')!==info.parentElement){info.hidden=true;closeAnchoredPopover(info);info.parentElement?.querySelector('button')?.setAttribute('aria-expanded','false');}}
+function closePreviewPopovers(except?:Element){for(const more of document.querySelectorAll<HTMLDetailsElement>('.detail-more[open]'))if(except?.closest('.detail-more')!==more){more.open=false;const popup=more.querySelector<HTMLElement>('.preview-menu');if(popup)closeAnchoredPopover(popup);}}
 document.addEventListener('pointerdown',event=>closePreviewPopovers(event.target as Element));
-document.addEventListener('click',event=>{const target=event.target as Element;if(target.closest('.detail-more>summary')||target.closest('#record-info-toggle'))closePreviewPopovers(target);});
-document.addEventListener('keydown',event=>{const target=event.target as HTMLElement,more=target.closest<HTMLDetailsElement>('.detail-more[open]'),info=document.querySelector<HTMLElement>('.record-info:not([hidden])');if(event.key==='Escape'&&(more||info||document.querySelector('.detail-more[open]'))){event.preventDefault();event.stopImmediatePropagation();const button=more?.querySelector<HTMLElement>('summary')||info?.parentElement?.querySelector<HTMLElement>('button')||document.querySelector<HTMLElement>('.detail-more[open]>summary');closePreviewPopovers();button?.focus();return;}if(more&&['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();event.stopPropagation();const buttons=Array.from(more.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')),index=buttons.indexOf(target as HTMLButtonElement),next=event.key==='Home'?0:event.key==='End'?buttons.length-1:(index+(event.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length;buttons[next]?.focus();}},true);
+document.addEventListener('click',event=>{const target=event.target as Element;if(target.closest('.detail-more>summary'))closePreviewPopovers(target);});
+document.addEventListener('keydown',event=>{const target=event.target as HTMLElement,more=target.closest<HTMLDetailsElement>('.detail-more[open]');if(event.key==='Escape'&&(more||document.querySelector('.detail-more[open]'))){event.preventDefault();event.stopImmediatePropagation();const button=more?.querySelector<HTMLElement>('#more-actions')||document.querySelector<HTMLElement>('.detail-more[open] #more-actions');closePreviewPopovers();button?.focus();return;}if(more&&['ArrowDown','ArrowUp','Home','End'].includes(event.key)){event.preventDefault();event.stopPropagation();const buttons=Array.from(more.querySelectorAll<HTMLButtonElement>('.preview-menu button:not(:disabled)')),index=buttons.indexOf(target as HTMLButtonElement),next=event.key==='Home'?0:event.key==='End'?buttons.length-1:index<0?(event.key==='ArrowDown'?0:buttons.length-1):(index+(event.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length;buttons[next]?.focus();}},true);
 document.addEventListener('focusin',event=>{const target=event.target as Element;if(!target.closest('.detail-top'))closePreviewPopovers();});
 function group(nodes:Element[],className='settings-card utility-card'){
  if(!nodes.length)return;const card=document.createElement('section');card.className=className;nodes[0].before(card);nodes.forEach(node=>card.append(node));

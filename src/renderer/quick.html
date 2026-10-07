@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' clipper-font:; img-src 'self' data: clipper:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+  <title>Clipper · 快捷面板</title>
+  <link rel="stylesheet" href="quick.css">
+  <link rel="stylesheet" href="one-ui.css">
+</head>
+<body>
+  <main class="quick-panel">
+    <header class="quick-header">
+      <div id="quick-tabs" class="tabs" role="tablist" aria-label="内容类型"></div>
+      <div id="window-actions" class="window-controls"></div>
+    </header>
+    <div id="quick-toolbar" class="quick-toolbar" data-tab="clipboard">
+      <div id="quick-categories" role="group" aria-label="分类"></div>
+      <div class="filter-field quick-search" role="search">
+        <span id="search-icon"></span>
+        <input id="quick-search" type="search" placeholder="搜索剪贴板" aria-label="搜索内容" maxlength="512" autocomplete="off">
+        <button type="button" class="icon-button quiet search-clear" title="清空" aria-label="清空" hidden></button>
+      </div>
+      <button id="quick-filter" type="button" class="icon-button quiet" title="筛选记录" aria-label="筛选记录"></button>
+      <button id="quick-clear-history" type="button" class="icon-button quiet" title="清空历史" aria-label="清空历史"></button>
+      <button id="quick-new-reply" type="button" class="quick-new-reply" hidden></button>
+    </div>
+    <section id="quick-content" role="tabpanel" aria-labelledby="quick-tab-clipboard" aria-live="polite"></section>
+    <div id="quick-notice" role="status" hidden></div>
+  </main>
+  <script src="quick.js"></script>
+</body>
+</html>

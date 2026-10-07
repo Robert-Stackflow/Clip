@@ -21,7 +21,7 @@ export function inspectDatabase(file:string,key?:Uint8Array){
    clips++;
   }
   for(const row of store.db.prepare('SELECT id,data FROM snippets').iterate() as Iterable<any>){const s=JSON.parse(row.data);validateBackup({...empty,snippets:[s]});if(s.id!==row.id)throw new Error(tr('模板索引无效'));snippets++;}
-  const scripts=store.meta('text-scripts',[]);validateBackup({...empty,categories:store.categories,scripts});
+  const scripts=store.meta('text-scripts',[]);validateBackup({...empty,categories:store.categories,scripts,commands:store.meta('text-commands',[])});
   if(store.bytes()>MAX_TOTAL)throw new Error(tr('历史数据超过容量限制'));
   const profileId=store.meta('profile-id','');if(profileId&&!/^[0-9a-f-]{36}$/.test(profileId))throw new Error(tr('资料编号无效'));
   return {clips,snippets,categories:store.categories.length,scripts:scripts.length,profileId,fingerprint:databaseFingerprint(store.db)};

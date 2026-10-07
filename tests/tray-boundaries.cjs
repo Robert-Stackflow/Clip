@@ -2,7 +2,7 @@ const {fixture,expect}=require('./efficiency-fixture.cjs'),assert=require('node:
 const query={text:'',kind:'all',category:''};
 async function run(){const f=await fixture('tray-boundaries');let panel;try{
  let main=f.page;assert.equal((await main.evaluate(()=>window.clipper.state())).hotkeyError,'');
- const first=await main.evaluate(()=>window.clipper.saveOcr('托盘边界记录'));
+ const first=await main.evaluate(()=>window.clipper.applyText({mode:'save',source:'脚本处理',text:'托盘边界记录'}));
  const open=async(focus=true)=>{if(focus)await f.focus();await f.helper.evaluate(({app},pid)=>{const req=process.getBuiltinModule('node:module').createRequire(process.getBuiltinModule('node:path').join(app.getAppPath(),'package.json'));if(!req('koffi').load('user32.dll').func('bool __stdcall AllowSetForegroundWindow(uint32)')(pid))throw Error('Cannot grant test foreground transition');},f.app.process().pid);const existing=(await f.app.windows()).find(window=>window.url()==='clipper://app/tray.html'),next=existing?Promise.resolve(existing):f.app.waitForEvent('window');await main.evaluate(()=>window.clipper.showTray());panel=await next;await panel.waitForSelector('.tray-row');return panel;};
  const inactive=()=>f.app.evaluate(({BrowserWindow})=>{const window=BrowserWindow.getAllWindows().find(w=>w.webContents.getURL()==='clipper://app/tray.html');return !window||!window.isVisible();});
  const ticket=()=>panel.locator('.tray-row').first().getAttribute('data-token');

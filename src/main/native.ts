@@ -11,15 +11,24 @@ export function initNative(){try{
   api={enumWindows:u.func('bool __stdcall EnumWindows(void*,intptr_t)'),enumFormats:u.func('uint32 __stdcall EnumClipboardFormats(uint32)'),formatName:u.func('int __stdcall GetClipboardFormatNameW(uint32,void*,int)'),ancestor:u.func('uintptr_t __stdcall GetAncestor(uintptr_t,uint32)'),foreground:u.func('uintptr_t __stdcall GetForegroundWindow()'),owner:u.func('uintptr_t __stdcall GetClipboardOwner()'),sequence:u.func('uint32 __stdcall GetClipboardSequenceNumber()'),pid:u.func('uint32 __stdcall GetWindowThreadProcessId(uintptr_t hwnd, _Out_ uint32 *pid)'),openProcess:k.func('uintptr_t __stdcall OpenProcess(uint32 access, bool inherit, uint32 pid)'),image:k.func('bool __stdcall QueryFullProcessImageNameW(uintptr_t handle,uint32 flags,void *buffer,_Inout_ uint32 *size)'),close:k.func('bool __stdcall CloseHandle(uintptr_t handle)'),
     open:u.func('bool __stdcall OpenClipboard(uintptr_t hwnd)'),closeClipboard:u.func('bool __stdcall CloseClipboard()'),get:u.func('uintptr_t __stdcall GetClipboardData(uint32 format)'),has:u.func('bool __stdcall IsClipboardFormatAvailable(uint32 format)'),register:u.func('uint32 __stdcall RegisterClipboardFormatW(str16 name)'),empty:u.func('bool __stdcall EmptyClipboard()'),set:u.func('uintptr_t __stdcall SetClipboardData(uint32 format,uintptr_t handle)'),
     drag:s.func('uint32 __stdcall DragQueryFileW(uintptr_t handle,uint32 index,void *buffer,uint32 count)'),alloc:k.func('uintptr_t __stdcall GlobalAlloc(uint32 flags,uintptr_t bytes)'),lock:k.func('void * __stdcall GlobalLock(uintptr_t handle)'),unlock:k.func('bool __stdcall GlobalUnlock(uintptr_t handle)'),free:k.func('uintptr_t __stdcall GlobalFree(uintptr_t handle)'),globalSize:k.func('uintptr_t __stdcall GlobalSize(uintptr_t handle)'),driveType:k.func('uint32 __stdcall GetDriveTypeW(str16 root)'),move:k.func('void __stdcall RtlMoveMemory(void *target,void *source,uintptr_t bytes)'),
-    setForeground:u.func('bool __stdcall SetForegroundWindow(uintptr_t hwnd)'),isWindow:u.func('bool __stdcall IsWindow(uintptr_t hwnd)'),isIconic:u.func('bool __stdcall IsIconic(uintptr_t hwnd)'),visible:u.func('bool __stdcall IsWindowVisible(uintptr_t hwnd)'),send:u.func('uint32 __stdcall SendInput(uint32 count,void *input,int size)'),key:u.func('int16 __stdcall GetAsyncKeyState(int key)'),rect:u.func('bool __stdcall GetWindowRect(uintptr_t hwnd,void *rect)'),className:u.func('int __stdcall GetClassNameW(uintptr_t hwnd,void *name,int length)')};
+    setForeground:u.func('bool __stdcall SetForegroundWindow(uintptr_t hwnd)'),attachInput:u.func('bool __stdcall AttachThreadInput(uint32,uint32,bool)'),setWindowPosition:u.func('bool __stdcall SetWindowPos(uintptr_t hwnd,uintptr_t after,int x,int y,int width,int height,uint32 flags)'),isWindow:u.func('bool __stdcall IsWindow(uintptr_t hwnd)'),isIconic:u.func('bool __stdcall IsIconic(uintptr_t hwnd)'),visible:u.func('bool __stdcall IsWindowVisible(uintptr_t hwnd)'),send:u.func('uint32 __stdcall SendInput(uint32 count,void *input,int size)'),key:u.func('int16 __stdcall GetAsyncKeyState(int key)'),rect:u.func('bool __stdcall GetWindowRect(uintptr_t hwnd,void *rect)'),className:u.func('int __stdcall GetClassNameW(uintptr_t hwnd,void *name,int length)')};
 }catch(e){nativeError=String(e);}}
 export const nativeAvailable=()=>!!api;
 export const sequence=()=>api?.sequence() as number || 0;
 export function windowInfo(hwnd:number){if(!api||!hwnd)return null;const ids=[0];api.pid(hwnd,ids);if(!ids[0])return null;let name='',executable='';const handle=api.openProcess(0x1000,false,ids[0]);if(handle)try{const buffer=Buffer.alloc(65536),size=[32768];if(api.image(handle,0,buffer,size)){executable=buffer.toString('utf16le',0,size[0]*2);name=executable.split('\\').pop()||'';}}finally{api.close(handle);}return {hwnd,pid:ids[0],name,executable};}
 export const foreground=()=>windowInfo(api?.foreground()||0);
 export function foregroundBelongsTo(hwnd:number){if(!api)return true;const foreground=api.foreground();if(foreground===hwnd)return true;return !!foreground&&api.ancestor(foreground,3)===hwnd;}
+/** A native hook does not carry RegisterHotKey's foreground activation permission. */
+export function activateNativeWindow(hwnd:number){
+ if(!api||!hwnd||!api.isWindow(hwnd))return false;const owner=[0],targetThread=api.pid(hwnd,owner);if(owner[0]!==process.pid)return false;
+ if(foregroundBelongsTo(hwnd)||api.setForeground(hwnd))return true;
+ const current=api.foreground(),foregroundThread=current?api.pid(current,[0]):0;
+ if(!foregroundThread||foregroundThread===targetThread||!api.attachInput(targetThread,foregroundThread,true))return false;
+ try{return !!api.setForeground(hwnd);}finally{api.attachInput(targetThread,foregroundThread,false);}
+}
 export function foregroundTarget(){const hwnd=api?.foreground();if(!hwnd)return null;const name=Buffer.alloc(512),length=api.className(hwnd,name,256),kind=name.toString('utf16le',0,length*2);if(['Progman','WorkerW','Shell_TrayWnd','Shell_SecondaryTrayWnd','NotifyIconOverflowWindow','TopLevelWindowForOverflowXamlIsland','#32768'].includes(kind))return null;return windowInfo(hwnd);}
 export const owner=()=>windowInfo(api?.owner()||0);
+export function moveNativeWindow(hwnd:number,x:number,y:number){return !!api?.setWindowPosition(hwnd,0,x,y,0,0,0x15);}
 export const windowExists=(hwnd:number)=>!!api?.isWindow(hwnd);
 export function privateClipboard(){
   if(!api)return false;
@@ -40,11 +49,14 @@ const delay=(ms:number)=>new Promise(r=>setTimeout(r,ms));
 export async function pasteTo(hwnd:number,valid:()=>boolean=()=>true,dismiss:()=>void=()=>{}){
   if(!valid())throw new Error(tr('粘贴已取消'));
   if(!api||!hwnd||!api.isWindow(hwnd))throw new Error(tr('没有可用的目标窗口，已复制，请切换应用后按 Ctrl+V'));
-  // Request activation while Clipper still owns the foreground window.
-  api.setForeground(hwnd);dismiss();await delay(140);
+  // Restore while Clipper still owns the foreground permission. A transient
+  // menu/activation handoff can require attaching the two input queues.
+  const previous=api.foreground();
+  const restore=()=>{if(api.foreground()===hwnd||api.setForeground(hwnd))return;const targetThread=api.pid(hwnd,[0]),sourceThread=previous?api.pid(previous,[0]):0;if(!targetThread||!sourceThread||targetThread===sourceThread||!api.attachInput(targetThread,sourceThread,true))return;try{api.setForeground(hwnd);}finally{api.attachInput(targetThread,sourceThread,false);}};
+  restore();await delay(40);if(api.foreground()===previous)restore();dismiss();await delay(100);
   for(let i=0;i<30;i++){if(![0x10,0x11,0x12,0x5b,0x5c].some(k=>api.key(k)&0x8000))break;await delay(25);}
   if([0x10,0x11,0x12,0x5b,0x5c].some(k=>api.key(k)&0x8000))throw new Error(tr('请松开修饰键后重新粘贴'));
-  if(api.foreground()!==hwnd)throw new Error(tr('无法恢复目标窗口，已复制，请手动 Ctrl+V'));
+  if(!foregroundBelongsTo(hwnd))throw new Error(tr('无法恢复目标窗口，已复制，请手动 Ctrl+V'));
   if(!valid())throw new Error(tr('粘贴已取消'));
   const keys=[[0x11,0],[0x56,0],[0x56,2],[0x11,2]],buffer=Buffer.alloc(40*4);keys.forEach(([key,flags],i)=>{buffer.writeUInt32LE(1,i*40);buffer.writeUInt16LE(key,i*40+8);buffer.writeUInt32LE(flags,i*40+12);});
   if(api.send(4,buffer,40)!==4){const release=buffer.subarray(80);api.send(2,release,40);throw new Error(tr('目标应用拒绝自动粘贴，已复制，请手动 Ctrl+V'));}

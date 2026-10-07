@@ -1,15 +1,16 @@
 import type {MenuItemConstructorOptions} from 'electron';
 import {t as tr} from '../shared/i18n';
 export interface TrayMenuState {initializing:boolean;secured:boolean;stackActive:boolean;paused:boolean;encrypted:boolean;launchAtLogin:boolean}
-export interface TrayMenuActions {recent():void;open():void;replies():void;shelf():void;record():void;stack():void;pause():void;lock():void;startup():void;quit():void}
+export interface TrayMenuActions {recent():void;open():void;replies():void;shelf():void;record():void;stack():void;pause():void;lock():void;startup():void;restart():void;quit():void}
 export type TrayMenuAction=keyof TrayMenuActions;
 export interface TrayMenuEntry {id:TrayMenuAction;label:string;group:'header'|'primary'|'tools'|'privacy'|'system';icon:string;tone?:'danger';active?:boolean}
 export interface TrayMenuView {entries:TrayMenuEntry[];dark:boolean;initializing:boolean;secured:boolean;paused:boolean;stackActive:boolean}
 export function trayMenuEntries(state:TrayMenuState):TrayMenuEntry[]{
- if(state.initializing)return [{id:'quit',label:tr('退出 Clipper'),group:'system',icon:'power',tone:'danger'}];
+ const system:TrayMenuEntry[]=[{id:'restart',label:tr('重启 Clipper'),group:'system',icon:'rotate-cw'},{id:'quit',label:tr('退出 Clipper'),group:'system',icon:'power',tone:'danger'}];
+ if(state.initializing)return system;
  if(state.secured)return [
   {id:'open',label:tr('解锁历史'),group:'primary',icon:'lock-open'},
-  {id:'quit',label:tr('退出 Clipper'),group:'system',icon:'power',tone:'danger'}
+  ...system
  ];
  return [
   {id:'open',label:tr('打开 Clipper'),group:'primary',icon:'app-window'},
@@ -21,7 +22,7 @@ export function trayMenuEntries(state:TrayMenuState):TrayMenuEntry[]{
   {id:'pause',label:state.paused?tr('恢复记录'):tr('暂停记录'),group:'header',icon:state.paused?'play':'pause',active:state.paused},
   ...(state.encrypted?[{id:'lock' as const,label:tr('锁定历史'),group:'privacy' as const,icon:'lock-keyhole'}]:[]),
   {id:'startup',label:tr('开机自启动'),group:'system',icon:'monitor',active:state.launchAtLogin},
-  {id:'quit',label:tr('退出 Clipper'),group:'system',icon:'power',tone:'danger'}
+  ...system
  ];
 }
 export function trayMenuTemplate(state:TrayMenuState,actions:TrayMenuActions):MenuItemConstructorOptions[]{

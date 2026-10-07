@@ -1,0 +1,9 @@
+:root{font-family:system-ui,"Microsoft YaHei",sans-serif;color-scheme:light dark;--sticker-bg:#fff;--sticker-fg:#202124}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden;background:var(--sticker-bg);user-select:none}
+.sticker{width:100%;height:100%;overflow:hidden;background:var(--sticker-bg);color:var(--sticker-fg);cursor:grab;touch-action:none}
+.sticker:active{cursor:grabbing}
+.content{width:100%;height:100%;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.content img{display:block;width:100%;height:100%;object-fit:fill;pointer-events:none}
+.content pre{align-self:stretch;width:100%;height:100%;margin:0;padding:14px 16px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.65 system-ui,"Microsoft YaHei",sans-serif;pointer-events:none}
+@media(prefers-color-scheme:dark){:root{--sticker-bg:#232426;--sticker-fg:#f1f3f4}}

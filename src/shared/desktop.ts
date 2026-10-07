@@ -1,5 +1,7 @@
+import type {ImageDrops} from './image-drop';
 import {t as tr} from './i18n';
 import type {Clip} from './types';
+import {shortcutKey} from './shortcut';
 export type Edge='left'|'right'|'top'|'bottom';
 export type CardDirection='vertical'|'horizontal'|'grid';
 export type ShelfMode='compact'|'expanded';
@@ -7,22 +9,22 @@ export type ShelfPosition='top-right'|'top-left'|'bottom-right'|'bottom-left';
 export interface Rect{x:number;y:number;width:number;height:number}
 export interface Point{x:number;y:number}
 export interface DisplayInfo{id:number;name:string;bounds:Rect;workArea:Rect}
-export interface DesktopOptions {cardDirection:CardDirection;displayId:number|null;dwellMs:number;shelfTop:boolean;shelfAutoDrag:boolean;shelfOnTop:boolean;shelfPosition:ShelfPosition;shelfShortcut:string}
-export const desktopDefaults:DesktopOptions={cardDirection:'grid',displayId:null,dwellMs:450,shelfTop:false,shelfAutoDrag:false,shelfOnTop:true,shelfPosition:'top-right',shelfShortcut:'Control+Shift+D'};
+export interface DesktopOptions {cardDirection:CardDirection;displayId:number|null;dwellMs:number;shelfTop:boolean;shelfAutoDrag:boolean;shelfAutoHide:boolean;shelfAutoHideSeconds:number;shelfOnTop:boolean;shelfLocked:boolean;shelfPosition:ShelfPosition;shelfShortcut:string}
+export const desktopDefaults:DesktopOptions={cardDirection:'grid',displayId:null,dwellMs:450,shelfTop:false,shelfAutoDrag:false,shelfAutoHide:true,shelfAutoHideSeconds:6,shelfOnTop:true,shelfLocked:false,shelfPosition:'top-right',shelfShortcut:'Control+Shift+D'};
 export interface DesktopState {options:DesktopOptions;displays:DisplayInfo[];shelfVisible:boolean}
-export interface ShelfState {items:Clip[];dark:boolean;onTop:boolean;mode:ShelfMode}
-export interface ShelfAPI {state():Promise<ShelfState>;choose():Promise<void>;dropFiles(files:File[]):Promise<void>;dropText(text:string):Promise<void>;remove(id:string):Promise<void>;copy(id:string,paste:boolean):Promise<void>;drag(id:string):void;hide():Promise<void>;main():Promise<void>;top(value:boolean):Promise<void>;mode(value:ShelfMode,reducedMotion:boolean):Promise<void>;onChange(callback:()=>void):()=>void;onTransition(callback:(active:boolean,mode:ShelfMode,size?:{width:number;height:number})=>void):()=>void;onNotice(callback:(text:string)=>void):()=>void}
+export interface ShelfState {items:Clip[];dark:boolean;locked:boolean;mode:ShelfMode}
+export interface ShelfAPI {state():Promise<ShelfState>;activity(active:boolean):Promise<void>;choose():Promise<void>;dropFiles(files:File[]):Promise<void>;dropText(text:string):Promise<void>;dropImage(value:ImageDrops):Promise<void>;remove(id:string):Promise<void>;copy(id:string,paste:boolean):Promise<void>;drag(id:string):void;hide():Promise<void>;main():Promise<void>;top(value:boolean):Promise<void>;mode(value:ShelfMode,reducedMotion:boolean):Promise<void>;onChange(callback:()=>void):()=>void;onTransition(callback:(active:boolean,mode:ShelfMode,size?:{width:number;height:number})=>void):()=>void;onNotice(callback:(text:string)=>void):()=>void}
 export function validateDesktop(value:unknown):DesktopOptions {const v={...desktopDefaults,...(value as object)} as DesktopOptions;
- if(!value||typeof value!=='object'||!['vertical','horizontal','grid'].includes(v.cardDirection)||!['top-right','top-left','bottom-right','bottom-left'].includes(v.shelfPosition)||[v.shelfTop,v.shelfAutoDrag,v.shelfOnTop].some(x=>typeof x!=='boolean')||v.displayId!==null&&!Number.isSafeInteger(v.displayId)||!Number.isInteger(v.dwellMs)||v.dwellMs<200||v.dwellMs>1500)throw new Error(tr('桌面设置无效'));
- if(typeof v.shelfShortcut!=='string'||! /^(?:(?:Control|Alt|Shift|Super)\+)+(?:[A-Z0-9]|F(?:[1-9]|1[0-9]|2[0-4]))$/.test(v.shelfShortcut)||v.shelfShortcut.split('+').length<3)throw new Error(tr('拖放快捷键需包含至少两个修饰键'));
- const modifiers=v.shelfShortcut.split('+').slice(0,-1);if(new Set(modifiers).size!==modifiers.length)throw new Error(tr('快捷键修饰键不能重复'));
- return {cardDirection:v.cardDirection,displayId:v.displayId,dwellMs:v.dwellMs,shelfTop:v.shelfTop,shelfAutoDrag:v.shelfAutoDrag,shelfOnTop:v.shelfOnTop,shelfPosition:v.shelfPosition,shelfShortcut:v.shelfShortcut};
+ if(!value||typeof value!=='object'||!['vertical','horizontal','grid'].includes(v.cardDirection)||!['top-right','top-left','bottom-right','bottom-left'].includes(v.shelfPosition)||[v.shelfTop,v.shelfAutoDrag,v.shelfAutoHide,v.shelfOnTop,v.shelfLocked].some(x=>typeof x!=='boolean')||v.displayId!==null&&!Number.isSafeInteger(v.displayId)||!Number.isInteger(v.dwellMs)||v.dwellMs<200||v.dwellMs>1500||!Number.isInteger(v.shelfAutoHideSeconds)||v.shelfAutoHideSeconds<3||v.shelfAutoHideSeconds>60)throw new Error(tr('桌面设置无效'));
+ const shelfShortcut=shortcutKey(v.shelfShortcut);
+ return {cardDirection:v.cardDirection,displayId:v.displayId,dwellMs:v.dwellMs,shelfTop:v.shelfTop,shelfAutoDrag:v.shelfAutoDrag,shelfAutoHide:v.shelfAutoHide,shelfAutoHideSeconds:v.shelfAutoHideSeconds,shelfOnTop:v.shelfOnTop,shelfLocked:v.shelfLocked,shelfPosition:v.shelfPosition,shelfShortcut};
 }
 export function dragGestureReady(start:Point,current:Point,elapsedMs:number):boolean {const dx=current.x-start.x,dy=current.y-start.y;return elapsedMs>=180&&dx*dx+dy*dy>=36*36;}
 export const contains=(r:Rect,p:Point,margin=0)=>p.x>=r.x-margin&&p.x<r.x+r.width+margin&&p.y>=r.y-margin&&p.y<r.y+r.height+margin;
 export function clampRect(value:Rect,area:Rect,minWidth=280,minHeight=220):Rect {const width=Math.min(area.width,Math.max(minWidth,Math.round(value.width))),height=Math.min(area.height,Math.max(minHeight,Math.round(value.height)));return {x:Math.round(Math.max(area.x,Math.min(area.x+area.width-width,value.x))),y:Math.round(Math.max(area.y,Math.min(area.y+area.height-height,value.y))),width,height};}
 export function validRect(value:unknown):value is Rect {const v=value as Rect;return !!v&&[v.x,v.y,v.width,v.height].every(n=>Number.isFinite(n)&&Math.abs(n)<100000)&&v.width>0&&v.height>0;}
 export function shelfCompactRect(area:Rect,position:ShelfPosition):Rect {const width=Math.min(300,area.width),height=Math.min(138,area.height),gap=20;return {x:position.endsWith('right')?area.x+area.width-width-Math.min(gap,area.width-width):area.x+Math.min(gap,area.width-width),y:position.startsWith('bottom')?area.y+area.height-height-Math.min(gap,area.height-height):area.y+Math.min(gap,area.height-height),width,height};}
+export function shelfActivationAt(point:Point,area:Rect,position:ShelfPosition):boolean {const shelf=shelfCompactRect(area,position),right=position.endsWith('right'),bottom=position.startsWith('bottom'),x=right?shelf.x:area.x,y=bottom?shelf.y:area.y;return contains({x,y,width:right?area.x+area.width-x:shelf.x+shelf.width-x,height:bottom?area.y+area.height-y:shelf.y+shelf.height-y},point);}
 export function outerEdgeAt(point:Point,display:DisplayInfo,others:DisplayInfo[],edge:Edge,thickness=4):boolean {const a=display.workArea;if(!contains(a,point))return false;const side=edge==='left'||edge==='right',axis=side?point.y-a.y:point.x-a.x,length=side?a.height:a.width,corner=Math.min(64,length/4);if(axis<corner||axis>=length-corner)return false;
  const distance=edge==='left'?point.x-a.x:edge==='right'?a.x+a.width-1-point.x:edge==='top'?point.y-a.y:a.y+a.height-1-point.y;if(distance<0||distance>=thickness)return false;
  const b=display.bounds,outside={x:edge==='left'?b.x-1:edge==='right'?b.x+b.width:point.x,y:edge==='top'?b.y-1:edge==='bottom'?b.y+b.height:point.y};return !others.some(d=>d.id!==display.id&&contains(d.bounds,outside));

@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <dwmapi.h>
 #include <wincodec.h>
+#include <shlobj.h>
 #include <wrl/client.h>
 #include <iostream>
 #include <vector>
@@ -17,7 +18,42 @@ static bool capturable(HWND hwnd){DWORD cloak=0,affinity=0;RECT r{};return IsWin
 static BOOL CALLBACK collect(HWND hwnd,LPARAM state){auto* rows=reinterpret_cast<std::vector<HWND>*>(state);wchar_t title[201]{};if(rows->size()<150&&capturable(hwnd)&&GetWindowTextW(hwnd,title,201)>0)rows->push_back(hwnd);return rows->size()<150;}
 static void windows(){std::vector<HWND> rows;EnumWindows(collect,reinterpret_cast<LPARAM>(&rows));std::cout<<'[';bool first=true;for(HWND hwnd:rows){wchar_t title[201]{};if(!GetWindowTextW(hwnd,title,201))continue;if(!first)std::cout<<',';first=false;DWORD pid=0;GetWindowThreadProcessId(hwnd,&pid);std::cout<<"{\"pid\":"<<pid<<",\"id\":\"window:"<<reinterpret_cast<uintptr_t>(hwnd)<<":0\",\"name\":"<<json(title)<<",\"display_id\":\"\",\"thumbnail\":\"data:image/png;base64,\"}";}std::cout<<']';}
 static void screens(){std::cout<<'[';bool first=true;for(DWORD index=0;index<256;index++){DISPLAY_DEVICEW device{};device.cb=sizeof(device);if(!EnumDisplayDevicesW(nullptr,index,&device,0))break;if(!(device.StateFlags&DISPLAY_DEVICE_ACTIVE))continue;DEVMODEW mode{};mode.dmSize=sizeof(mode);if(!EnumDisplaySettingsW(device.DeviceName,ENUM_CURRENT_SETTINGS,&mode))continue;if(!first)std::cout<<',';first=false;std::cout<<"{\"id\":\"screen:"<<index<<":0\",\"device\":"<<json(device.DeviceName)<<",\"x\":"<<mode.dmPosition.x<<",\"y\":"<<mode.dmPosition.y<<",\"width\":"<<mode.dmPelsWidth<<",\"height\":"<<mode.dmPelsHeight<<'}';}std::cout<<']';}
-static void encode(HBITMAP bitmap){ComPtr<IWICImagingFactory> factory;if(FAILED(CoCreateInstance(CLSID_WICImagingFactory,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&factory))))throw 1;ComPtr<IWICBitmap> image;if(FAILED(factory->CreateBitmapFromHBITMAP(bitmap,nullptr,WICBitmapIgnoreAlpha,&image)))throw 1;ComPtr<IStream> output;if(FAILED(CreateStreamOnHGlobal(nullptr,TRUE,&output)))throw 1;ComPtr<IWICBitmapEncoder> encoder;if(FAILED(factory->CreateEncoder(GUID_ContainerFormatPng,nullptr,&encoder))||FAILED(encoder->Initialize(output.Get(),WICBitmapEncoderNoCache)))throw 1;ComPtr<IWICBitmapFrameEncode> frame;ComPtr<IPropertyBag2> props;if(FAILED(encoder->CreateNewFrame(&frame,&props))||FAILED(frame->Initialize(props.Get()))||FAILED(frame->WriteSource(image.Get(),nullptr))||FAILED(frame->Commit())||FAILED(encoder->Commit()))throw 1;STATSTG info{};if(FAILED(output->Stat(&info,STATFLAG_NONAME))||info.cbSize.QuadPart>256*1024)throw 1;LARGE_INTEGER zero{};output->Seek(zero,STREAM_SEEK_SET,nullptr);std::vector<char> bytes(static_cast<size_t>(info.cbSize.QuadPart));ULONG count=0;if(FAILED(output->Read(bytes.data(),static_cast<ULONG>(bytes.size()),&count))||count!=bytes.size())throw 1;std::cout.write(bytes.data(),bytes.size());SecureZeroMemory(bytes.data(),bytes.size());}
+static void encodeImage(IWICImagingFactory* factory,IWICBitmapSource* image){ComPtr<IStream> output;if(FAILED(CreateStreamOnHGlobal(nullptr,TRUE,&output)))throw 1;ComPtr<IWICBitmapEncoder> encoder;if(FAILED(factory->CreateEncoder(GUID_ContainerFormatPng,nullptr,&encoder))||FAILED(encoder->Initialize(output.Get(),WICBitmapEncoderNoCache)))throw 1;ComPtr<IWICBitmapFrameEncode> frame;ComPtr<IPropertyBag2> props;if(FAILED(encoder->CreateNewFrame(&frame,&props))||FAILED(frame->Initialize(props.Get()))||FAILED(frame->WriteSource(image,nullptr))||FAILED(frame->Commit())||FAILED(encoder->Commit()))throw 1;STATSTG info{};if(FAILED(output->Stat(&info,STATFLAG_NONAME))||info.cbSize.QuadPart>256*1024)throw 1;LARGE_INTEGER zero{};output->Seek(zero,STREAM_SEEK_SET,nullptr);std::vector<char> bytes(static_cast<size_t>(info.cbSize.QuadPart));ULONG count=0;if(FAILED(output->Read(bytes.data(),static_cast<ULONG>(bytes.size()),&count))||count!=bytes.size())throw 1;std::cout.write(bytes.data(),bytes.size());SecureZeroMemory(bytes.data(),bytes.size());}
+static void encode(HBITMAP bitmap){ComPtr<IWICImagingFactory> factory;if(FAILED(CoCreateInstance(CLSID_WICImagingFactory,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&factory))))throw 1;ComPtr<IWICBitmap> image;if(FAILED(factory->CreateBitmapFromHBITMAP(bitmap,nullptr,WICBitmapIgnoreAlpha,&image)))throw 1;encodeImage(factory.Get(),image.Get());}
+static void encodeIcon(IWICImagingFactory* factory,IWICBitmapSource* image){
+ constexpr UINT size=128,content=120,stride=size*4;
+ ComPtr<IWICFormatConverter> converted;
+ if(FAILED(factory->CreateFormatConverter(&converted))||FAILED(converted->Initialize(image,GUID_WICPixelFormat32bppPBGRA,WICBitmapDitherTypeNone,nullptr,0,WICBitmapPaletteTypeCustom)))throw 1;
+ UINT width=0,height=0;if(FAILED(converted->GetSize(&width,&height))||!width||!height||width>256||height>256)throw 1;
+ std::vector<BYTE> pixels(width*height*4);if(FAILED(converted->CopyPixels(nullptr,width*4,static_cast<UINT>(pixels.size()),pixels.data())))throw 1;
+ UINT left=width,top=height,right=0,bottom=0;
+ for(UINT y=0;y<height;y++)for(UINT x=0;x<width;x++)if(pixels[(y*width+x)*4+3]>8){left=std::min(left,x);top=std::min(top,y);right=std::max(right,x+1);bottom=std::max(bottom,y+1);}
+ if(left>=right||top>=bottom)throw 1;
+ // Give every application the same visible extent, without stretching its logo.
+ WICRect rect{static_cast<INT>(left),static_cast<INT>(top),static_cast<INT>(right-left),static_cast<INT>(bottom-top)};
+ ComPtr<IWICBitmapClipper> cropped;if(FAILED(factory->CreateBitmapClipper(&cropped))||FAILED(cropped->Initialize(converted.Get(),&rect)))throw 1;
+ const double scale=static_cast<double>(content)/std::max(rect.Width,rect.Height);
+ const UINT w=std::max(1u,static_cast<UINT>(std::round(rect.Width*scale))),h=std::max(1u,static_cast<UINT>(std::round(rect.Height*scale)));
+ ComPtr<IWICBitmapScaler> scaled;if(FAILED(factory->CreateBitmapScaler(&scaled))||FAILED(scaled->Initialize(cropped.Get(),w,h,WICBitmapInterpolationModeFant)))throw 1;
+ std::vector<BYTE> canvas(size*stride,0);const UINT offset=((size-h)/2)*stride+((size-w)/2)*4;
+ if(FAILED(scaled->CopyPixels(nullptr,stride,static_cast<UINT>(canvas.size())-offset,canvas.data()+offset)))throw 1;
+ ComPtr<IWICBitmap> normalized;if(FAILED(factory->CreateBitmapFromMemory(size,size,GUID_WICPixelFormat32bppPBGRA,stride,static_cast<UINT>(canvas.size()),canvas.data(),&normalized)))throw 1;
+ encodeImage(factory,normalized.Get());
+}
+// Read the actual resource instead of the Shell's potentially stale generic icon.
+static void programIcon(const std::wstring& file){
+ if(file.size()<7||file.size()>=32768||!((file[0]>=L'A'&&file[0]<=L'Z')||(file[0]>=L'a'&&file[0]<=L'z'))||file[1]!=L':'||file[2]!=L'\\'||_wcsicmp(file.c_str()+file.size()-4,L".exe"))throw 1;
+ const auto attributes=GetFileAttributesW(file.c_str());if(attributes==INVALID_FILE_ATTRIBUTES||(attributes&FILE_ATTRIBUTE_DIRECTORY))throw 1;
+ std::vector<std::wstring> sources;wchar_t system[MAX_PATH]{},windows[MAX_PATH]{};GetSystemDirectoryW(system,MAX_PATH);GetWindowsDirectoryW(windows,MAX_PATH);
+ const auto prefix=std::wstring(system)+L"\\";if(file.size()>prefix.size()&&!_wcsnicmp(file.c_str(),prefix.c_str(),prefix.size())){const auto name=file.substr(file.find_last_of(L'\\')+1),mun=std::wstring(windows)+L"\\SystemResources\\"+name+L".mun";if(GetFileAttributesW(mun.c_str())!=INVALID_FILE_ATTRIBUTES)sources.push_back(mun);}sources.push_back(file);
+ for(const auto& source:sources){
+  HICON iconLarge=nullptr,iconSmall=nullptr;const auto result=SHDefExtractIconW(source.c_str(),0,0,&iconLarge,&iconSmall,MAKELONG(128,32));
+  try{if(SUCCEEDED(result)&&iconLarge){ComPtr<IWICImagingFactory> factory;if(FAILED(CoCreateInstance(CLSID_WICImagingFactory,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&factory))))throw 1;ComPtr<IWICBitmap> image;if(FAILED(factory->CreateBitmapFromHICON(iconLarge,&image)))throw 1;encodeIcon(factory.Get(),image.Get());DestroyIcon(iconLarge);if(iconSmall)DestroyIcon(iconSmall);return;}}
+  catch(...){if(iconLarge)DestroyIcon(iconLarge);if(iconSmall)DestroyIcon(iconSmall);throw;}
+  if(iconLarge)DestroyIcon(iconLarge);if(iconSmall)DestroyIcon(iconSmall);
+ }
+ throw 1;
+}
 static bool identity(HWND hwnd,DWORD expected){DWORD pid=0;GetWindowThreadProcessId(hwnd,&pid);return pid==expected&&capturable(hwnd);}
 static void preview(HWND hwnd,const wchar_t* device,DWORD expected=0){
  HDC source=nullptr,original=nullptr,target=nullptr;HBITMAP full=nullptr,previewBitmap=nullptr;HGDIOBJ previous=nullptr,previousTarget=nullptr;
@@ -30,4 +66,4 @@ static void preview(HWND hwnd,const wchar_t* device,DWORD expected=0){
  }catch(...){if(previous&&original)SelectObject(original,previous);if(previousTarget&&target)SelectObject(target,previousTarget);if(full)DeleteObject(full);if(previewBitmap)DeleteObject(previewBitmap);if(original)DeleteDC(original);if(target)DeleteDC(target);if(source){if(hwnd)ReleaseDC(hwnd,source);else DeleteDC(source);}throw;}
  if(previous&&original)SelectObject(original,previous);if(full)DeleteObject(full);if(previewBitmap)DeleteObject(previewBitmap);if(original)DeleteDC(original);if(target)DeleteDC(target);if(source){if(hwnd)ReleaseDC(hwnd,source);else DeleteDC(source);}
 }
-int wmain(int argc,wchar_t** argv){SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);_setmode(_fileno(stdout),_O_BINARY);const HRESULT init=CoInitializeEx(nullptr,COINIT_MULTITHREADED);if(FAILED(init))return 1;int result=0;try{if(argc==2&&wcscmp(argv[1],L"windows")==0)windows();else if(argc==2&&wcscmp(argv[1],L"screens")==0)screens();else if(argc==4&&wcscmp(argv[1],L"window")==0){wchar_t* end=nullptr;const auto handle=wcstoull(argv[2],&end,10);if(!handle||*end)throw 1;wchar_t* pidEnd=nullptr;const auto pid=wcstoul(argv[3],&pidEnd,10);if(!pid||*pidEnd)throw 1;preview(reinterpret_cast<HWND>(handle),nullptr,pid);}else if(argc==3&&wcscmp(argv[1],L"screen")==0){if(wcsncmp(argv[2],L"\\\\.\\DISPLAY",11)!=0||wcslen(argv[2])>32)throw 1;preview(nullptr,argv[2]);}else throw 1;}catch(...){result=1;}std::cout.flush();CoUninitialize();return result;}
+int wmain(int argc,wchar_t** argv){SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);_setmode(_fileno(stdout),_O_BINARY);const HRESULT init=CoInitializeEx(nullptr,COINIT_MULTITHREADED);if(FAILED(init))return 1;int result=0;try{if(argc==3&&wcscmp(argv[1],L"icon")==0)programIcon(argv[2]);else if(argc==2&&wcscmp(argv[1],L"windows")==0)windows();else if(argc==2&&wcscmp(argv[1],L"screens")==0)screens();else if(argc==4&&wcscmp(argv[1],L"window")==0){wchar_t* end=nullptr;const auto handle=wcstoull(argv[2],&end,10);if(!handle||*end)throw 1;wchar_t* pidEnd=nullptr;const auto pid=wcstoul(argv[3],&pidEnd,10);if(!pid||*pidEnd)throw 1;preview(reinterpret_cast<HWND>(handle),nullptr,pid);}else if(argc==3&&wcscmp(argv[1],L"screen")==0){if(wcsncmp(argv[2],L"\\\\.\\DISPLAY",11)!=0||wcslen(argv[2])>32)throw 1;preview(nullptr,argv[2]);}else throw 1;}catch(...){result=1;}std::cout.flush();CoUninitialize();return result;}

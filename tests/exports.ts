@@ -1,6 +1,8 @@
 export * from '../src/shared/core';
 export * from '../src/main/store';
+export * from '../src/main/image-host';
 export * from '../src/shared/advanced';
+export * from '../src/main/history-search';
 export * from '../src/shared/text-tools';
 export * from '../src/main/ai-transport';
 export * from '../src/main/script-engine';
@@ -38,7 +40,7 @@ export * from '../src/shared/recording';
 export * from '../src/main/recording-file';
 
 export * from '../src/shared/region';
-export * from '../src/main/stitch';
+export * from './image-fixture';
 
 export * from '../src/shared/image-edit';
 
@@ -93,8 +95,6 @@ export * from '../src/main/window-state';
 
 export * from '../src/shared/renderer-assets';
 
-export * from '../src/main/scroll-sampler';
-export * from '../src/shared/scroll-placement';
 
 export * from '../src/main/sync-item-reader';
 export * from '../src/shared/image-marks';
@@ -105,3 +105,19 @@ export * from '../src/main/tray-query';
 export * from '../src/main/tray-search';
 
 export * from '../src/main/record-json';
+export * from '../src/main/tasks';
+export * from '../src/shared/tasks';
+export * from '../src/shared/commands';
+export * from '../src/main/commands';
+export * from '../src/main/chat';
+export * from '../src/main/chat-transport';
+export * from '../src/shared/chat';
+export * from '../src/shared/quick-panel';
+export * from '../src/main/quick-replies';
+
+export * from '../src/shared/quick-preview';
+export * from '../src/main/file-actions';
+
+export * from '../src/shared/clip-filters';
+
+export * from '../src/main/panel-focus';

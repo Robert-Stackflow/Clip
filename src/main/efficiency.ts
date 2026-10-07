@@ -11,6 +11,11 @@ export class EfficiencyService {
  save(value:EfficiencyOptions){const next=validateEfficiency(value),s=this.store(),ids=new Set(s.snippetIDs());if(next.bindings.some(b=>!ids.has(b.id)))throw new Error(tr('模板已不存在'));s.setMeta('efficiency',next);if(!next.historyEnabled)s.setMeta('recent-searches',[]);}
  remember(value:unknown){const term=searchTerm(value),state=this.state();if(state.options.historyEnabled)this.store().setMeta('recent-searches',rememberSearch(state.history,term));}
  remove(value:unknown){const term=value===null?null:searchTerm(value),state=this.state();this.store().setMeta('recent-searches',term===null?[]:state.history.filter(t=>t!==term));}
+ removeSnippets(value:unknown){
+  if(!Array.isArray(value)||!value.length||value.length>500||value.some(id=>typeof id!=='string'||! /^[0-9a-f-]{36}$/.test(id)))throw new Error(tr('参数无效'));
+  const ids=new Set<string>(value),store=this.store(),existing=new Set(store.snippetIDs());if([...ids].some(id=>!existing.has(id)))throw new Error(tr('模板已不存在'));
+  const options=this.options();store.removeSnippets([...ids]);this.save({...options,bindings:options.bindings.filter(binding=>!ids.has(binding.id))});
+ }
  private fingerprint(s:Snippet){return createHash('sha256').update(JSON.stringify([s.id,s.title,s.payload,s.updatedAt])).digest('hex');}
  get active(){if(this.intent&&this.intent.expires<Date.now())this.cancel();return !!this.intent;}
  browse(){this.intent={view:{kind:'browse'},delivered:false,target:{hwnd:0,pid:0},fingerprint:'',expires:Date.now()+60000};}

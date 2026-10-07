@@ -1,0 +1,10 @@
+@import './styles.css';
+html,body{margin:0;padding:0!important;width:100%;height:100%;min-width:0!important;overflow:hidden;background:var(--surface)!important}
+#preview{position:relative;width:100%;height:100%;padding:0;box-sizing:border-box;--arrow:50%}
+.hover-card{height:100%;display:flex;flex-direction:column;min-height:0;background:var(--surface);border:0;border-radius:0;box-shadow:none;overflow:hidden}
+#preview-type{display:flex;align-items:center;gap:7px;padding:15px 16px 11px;color:var(--muted);font-size:12px;flex:none}#preview-type .icon{width:16px;height:16px}
+#preview-body{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:4px 16px 16px;scrollbar-gutter:stable}
+#preview-body pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:13px;line-height:1.8;user-select:text}
+#preview-meta{flex:none;padding:11px 16px;border-top:1px solid var(--line);font-size:10px;line-height:1.6;color:var(--muted);overflow-wrap:anywhere}
+.hover-image{min-height:100%;display:flex;align-items:flex-start;justify-content:center}.hover-image img{max-width:100%;height:auto;object-fit:contain;border-radius:7px}
+.hover-files{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}.hover-files li{display:flex;align-items:flex-start;gap:9px;border:1px solid var(--line);border-radius:9px;padding:10px}.hover-files .icon{width:20px;height:20px;color:var(--muted);flex:none}.hover-files div{min-width:0}.hover-files strong{font-size:12px;font-weight:550;overflow-wrap:anywhere}.hover-files small{display:block;font-size:10px;line-height:1.7;margin-top:4px;color:var(--muted);overflow-wrap:anywhere}.hover-truncated{font-size:11px;color:var(--muted)}

@@ -20,7 +20,3 @@ async function workerMessage(file,language,data,adapter=false){const worker=adap
 test('real metadata worker reads its startup language and keeps raw document names and properties',async()=>{
  for(const language of ['zh-CN','en']){const error=await workerMessage('work/test-language-metadata-worker.cjs',language,{source:{name:'broken.png',bytes:Buffer.from('bad')},includeLocation:false},true);assert.deepEqual(error,{ok:false,error:language==='en'?'The image format is damaged or unsupported':'图片格式损坏或暂不支持'});const success=await workerMessage('work/test-language-metadata-worker.cjs',language,{source:{name:raw+'.docx',bytes:fixtures.office('docx')},includeLocation:false},true);assert.equal(success.ok,true);assert.equal(success.result.name,raw+'.docx');assert.equal(fields(success.result).author,'陈小明');}
 });
-test('real stitching worker localizes validation while preserving PNG bytes and dimensions',async()=>{
- const frame={width:3,height:2,data:Buffer.from(Array.from({length:24},(_,i)=>i*9))};let baseline;
- for(const language of ['zh-CN','en']){const error=await workerMessage('work/test-language-scroll-worker.cjs',language,{mode:'png',frame:{...frame,width:0}});assert.equal(error.error,language==='en'?'Invalid capture dimensions or pixels':'截图尺寸或像素无效');const png=Buffer.from(await workerMessage('work/test-language-scroll-worker.cjs',language,{mode:'png',frame}));assert.equal(png.readUInt32BE(16),3);assert.equal(png.readUInt32BE(20),2);if(baseline)assert.deepEqual(png,baseline);else baseline=png;assert.deepEqual(png,core.framePNG(frame));}
-});

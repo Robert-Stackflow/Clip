@@ -2,7 +2,7 @@
 
 Windows 剪贴板工作台，使用 Electron、TypeScript、SQLite 和 Windows 原生组件。功能参考 OneClip，界面组件、页面骨架和开发工作流参考本地 `D:\Repositories\One`。
 
-当前源码版本为 **0.50.14**。本轮整理了托盘右键菜单、最近记录和拖放窗口：独立的快速粘贴入口已移除；拖放窗口提供简洁与展开两种布局，桌面交互可选择拖动时自动显示小窗。设置、侧边栏和记录刷新也完成了对应调整。已生成的 0.50.14 目录包曾完成 265 项构建资源一致性检查，不能据此视为当前所有改动已通过完整目录包验收。当前功能与未完成项见 [当前状态与待办](docs/development/当前状态与待办.md)，本轮记录见 [0.50.14 验收记录](docs/history/验收-0.50.14.md)。历史版本与设计依据见 [文档索引](docs/README.md)。
+当前源码版本为 **0.50.16**。本轮整理快捷面板、分类、快捷回复与设置界面，补齐图片拖放和托盘操作，并移除 OCR。桌面交互与功能状态见 [当前状态与待办](docs/development/当前状态与待办.md)，本轮范围和验证见 [0.50.16 验收记录](docs/history/验收-0.50.16.md)。安装器沿用 [0.50.15 安装器方案](docs/history/验收-0.50.15.md)。历史版本与设计依据见 [文档索引](docs/README.md)。
 
 ## 开发与运行
 
@@ -23,7 +23,7 @@ npm run dev
 | `src/main`、`src/preload`、`src/renderer`、`src/shared`、`src/web` | 应用源码 |
 | `native` | Windows 原生桥接与 Rust 文档读取器 |
 | `assets` | 图标等静态资源 |
-| `build` | 安装器配置和 `installer-ui` 源码 |
+| `build`、`installer` | NSIS 引擎配置与图形安装器源码 |
 | `scripts`、`tests` | 开发、构建和回归验证 |
 | `docs` | 使用说明、开发资料、调研和历史记录 |
 | `licenses` | 第三方许可 |

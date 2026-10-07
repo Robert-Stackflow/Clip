@@ -23,7 +23,7 @@ app.whenReady().then(async()=>{
   const expected=phase==='english'?'en':phase==='system'?resolveLanguage('system',preferred):'zh-CN';
   assert.equal(languageStore.state().current,expected);
   assert.equal(process.env.CLIPPER_UI_LANGUAGE,expected);
-  const bindings=[['index','index'],['tray','tray'],['shelf','shelf'],['capture','capture'],['recorder','recorder'],['scroll','scroll'],['image-editor','image-editor'],['unlock','unlock'],['recovery','recovery']];
+  const bindings=[['index','index'],['tray','tray'],['shelf','shelf'],['capture','capture'],['recorder','recorder'],['image-editor','image-editor'],['unlock','unlock'],['recovery','recovery']];
   const checked=[];
   for(const [page,preload] of bindings){
     const window=new BrowserWindow({show:false,skipTaskbar:true,webPreferences:{additionalArguments:interfaceLanguageArguments(),preload:join(preloadDirectory,preload+'.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false,webSecurity:true}});

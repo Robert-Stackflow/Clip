@@ -4,7 +4,7 @@ type TooltipSide = 'top' | 'right' | 'bottom' | 'left';
 /** One delegated tooltip for dynamic controls, including controls inside modal dialogs. */
 export function setupTooltips() {
  const tip = document.createElement('div');
- tip.id = 'one-tooltip'; tip.className = 'one-tooltip'; tip.role = 'tooltip';
+ tip.id = 'one-tooltip'; tip.className = 'one-tooltip'; tip.role = 'tooltip';tip.popover='manual';
  let target: HTMLElement | null = null, timer: ReturnType<typeof setTimeout>, last = -1000;
  const convert = (el: Element) => {
   if (!el.hasAttribute('title')) return;
@@ -27,7 +27,7 @@ export function setupTooltips() {
    const ids = (target.getAttribute('aria-describedby') || '').split(' ').filter(id => id && id !== tip.id);
    if (ids.length) target.setAttribute('aria-describedby', ids.join(' ')); else target.removeAttribute('aria-describedby');
   }
-  target = null; tip.classList.remove('visible'); last = performance.now();
+  target = null; tip.classList.remove('visible');if(tip.matches(':popover-open'))tip.hidePopover();last = performance.now();
  };
  const position = (el: HTMLElement) => {
   const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect(), margin = 8, gap = 12;
@@ -39,19 +39,31 @@ export function setupTooltips() {
   const opposite: Record<TooltipSide, TooltipSide> = {top: 'bottom', right: 'left', bottom: 'top', left: 'right'};
   const sides: TooltipSide[] = [preferred, opposite[preferred], ...(['top', 'right', 'bottom', 'left'] as TooltipSide[])
    .filter(side => side !== preferred && side !== opposite[preferred]).sort((a, b) => space[b] - space[a])];
-  const side = sides.find(fits) || sides.reduce((best, next) => space[next] > space[best] ? next : best);
   const clamp = (value: number, size: number, available: number) => Math.max(margin, Math.min(available - size - margin, value));
-  let x = r.left + (r.width - t.width) / 2, y = r.top + (r.height - t.height) / 2;
-  if (side === 'right') x = r.right + gap;
-  else if (side === 'left') x = r.left - t.width - gap;
-  else if (side === 'top') y = r.top - t.height - gap;
-  else y = r.bottom + gap;
-  x = Math.round(clamp(x, t.width, innerWidth)); y = Math.round(clamp(y, t.height, innerHeight));
+  // Native child views draw above this document, including its top-layer popovers.
+  const occlusions = Array.from(document.querySelectorAll<HTMLElement>('[data-tooltip-occlusion]'))
+   .filter(node => node.checkVisibility()).map(node => node.getBoundingClientRect());
+  const placement = (side: TooltipSide) => {
+   let x = r.left + (r.width - t.width) / 2, y = r.top + (r.height - t.height) / 2;
+   if (side === 'right') x = r.right + gap;
+   else if (side === 'left') x = r.left - t.width - gap;
+   else if (side === 'top') y = r.top - t.height - gap;
+   else y = r.bottom + gap;
+   return {side, x: Math.round(clamp(x, t.width, innerWidth)), y: Math.round(clamp(y, t.height, innerHeight))};
+  };
+  const clear = ({x, y}: ReturnType<typeof placement>) => !occlusions.some(rect =>
+   rect.width > 0 && rect.height > 0 && x - 5 < rect.right && x + t.width + 5 > rect.left && y - 5 < rect.bottom && y + t.height + 5 > rect.top);
+  const candidates = sides.map(placement);
+  const chosen = candidates.find(candidate => fits(candidate.side) && clear(candidate)) ||
+   [...candidates].sort((a, b) => space[b.side] - space[a.side]).find(clear);
+  if (!chosen) return false;
+  const {side, x, y} = chosen;
   const vertical = side === 'right' || side === 'left';
   const arrow = Math.max(10, Math.min((vertical ? t.height : t.width) - 10,
    vertical ? r.top + r.height / 2 - y : r.left + r.width / 2 - x));
   tip.dataset.side = side; tip.style.left = x + 'px'; tip.style.top = y + 'px';
   tip.style.setProperty('--tooltip-arrow', arrow + 'px');
+  return true;
  };
  const show = (el: HTMLElement) => {
   if (el === target) return;
@@ -62,8 +74,8 @@ export function setupTooltips() {
    if (!label) return;
    const bounds = el.getBoundingClientRect();
    if (!bounds.width || !bounds.height || bounds.bottom <= 0 || bounds.top >= innerHeight || bounds.right <= 0 || bounds.left >= innerWidth) return;
-   tip.textContent = label; (el.closest('dialog[open]') || document.body).append(tip);
-   tip.classList.remove('visible'); tip.style.left = '0px'; tip.style.top = '0px'; position(el);
+   tip.textContent = label; (el.closest('dialog[open]') || document.body).append(tip);if(!tip.matches(':popover-open'))tip.showPopover();
+   tip.classList.remove('visible'); tip.style.left = '0px'; tip.style.top = '0px'; if (!position(el)) {hide(); return;}
    el.setAttribute('aria-describedby', [el.getAttribute('aria-describedby') || '', tip.id].filter(Boolean).join(' '));
    requestAnimationFrame(() => {if (target === el) tip.classList.add('visible');});
   }, fast ? 90 : 380);

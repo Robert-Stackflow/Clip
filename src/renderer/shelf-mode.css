@@ -10,8 +10,8 @@ body.shelf-window .compact-copy{display:flex;min-width:0;flex:1;flex-direction:c
 body.shelf-window .compact-copy strong{font-size:calc(14px * var(--text-scale,1));line-height:1.2;font-weight:600;white-space:nowrap}
 body.shelf-window .compact-copy>span{font-size:calc(11px * var(--text-scale,1));line-height:1.3;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html[data-mode=compact] body.shelf-window>main{display:none}
-html[data-mode=compact] body.shelf-window .shelf-header .toolbar>:not(#mode){display:none}
-html[data-mode=compact] body.shelf-window .shelf-header #mode{margin-left:auto}
+html[data-mode=compact] body.shelf-window .shelf-header .toolbar>:not(#top):not(#mode){display:none}
+html[data-mode=compact] body.shelf-window .shelf-header #top{margin-left:auto}
 html[data-mode=compact] body.shelf-window .compact-view{display:block;pointer-events:auto}
 html[data-mode=compact] body.shelf-window #drop-hint{display:none}
 /* Keep the destination layout mounted and fully laid out behind the mask. */

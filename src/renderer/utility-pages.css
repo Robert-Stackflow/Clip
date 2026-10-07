@@ -19,20 +19,16 @@
 .nav-secondary [data-service=error] .nav-service-status{color:var(--muted);background:var(--hover)}
 .nav-secondary [data-service=busy] .nav-service-status::before{animation:service-breathe 1.6s ease-in-out infinite}
 html[data-theme=dark] .nav-secondary .nav-service-status{color:#91b39c}
-.sidebar-bottom #pause-nav{margin:0 2px 5px;width:calc(100% - 4px);min-height:36px;padding:8px 10px;gap:10px;border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 65%,transparent);color:var(--muted);border-radius:var(--radius);font-size:calc(11px * var(--text-scale,1))}
-.sidebar-bottom #pause-nav:hover{background:var(--hover);color:var(--fg)}
-.recording-indicator{position:relative;display:flex;flex:0 0 16px;width:16px;height:16px;font-style:normal}
-.recording-indicator>.icon{width:16px;height:16px;color:var(--muted)}
-.recording-indicator>b{position:absolute;right:-2px;bottom:-1px;width:5px;height:5px;border-radius:50%;background:#82a18a;box-shadow:0 0 0 2px var(--soft)}
-#pause-nav[data-paused=true] .recording-indicator>b{background:var(--muted)}
-.recording-action{display:grid;place-items:center;width:22px;height:22px;flex:0 0 22px;border-radius:5px;font-style:normal}
-.recording-action>.icon{width:13px;height:13px;color:inherit}
-#pause-nav:hover .recording-action{background:color-mix(in srgb,var(--fg) 5%,transparent)}
+.brand #pause-nav{margin-left:auto;width:30px;min-width:30px;height:30px;min-height:30px;padding:0;border:0;background:transparent;color:var(--muted);border-radius:7px;white-space:nowrap}
+.brand #pause-nav:hover{background:var(--hover);color:var(--fg)}
+.brand #pause-nav .recording-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.recording-action{display:grid;place-items:center;width:100%;height:100%;font-style:normal}
+.recording-action>.icon{width:15px;height:15px;color:inherit}
+#pause-nav[data-paused=true]{color:var(--fg);background:var(--hover)}
+.sidebar-collapsed .brand #pause-nav{display:none}
 .sidebar-collapsed .nav-secondary .nav-item{position:relative}
 .sidebar-collapsed .nav-secondary [data-service]:not([data-service=off])::after{content:'';position:absolute;right:6px;top:6px;width:5px;height:5px;border-radius:50%;background:#82a18a;box-shadow:0 0 0 2px var(--soft)}
 .sidebar-collapsed .nav-secondary [data-service=error]::after{background:var(--muted)}
-.sidebar-collapsed .sidebar-bottom #pause-nav{margin:0 0 5px;width:100%;padding:9px;min-height:36px;justify-content:center}
-.sidebar-collapsed #pause-nav .recording-action{display:none}
 @keyframes service-breathe{50%{opacity:.4}}
 @media(prefers-reduced-motion:reduce){.nav-secondary [data-service=busy] .nav-service-status::before{animation:none}}
 

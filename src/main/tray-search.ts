@@ -9,11 +9,11 @@ export class TraySearch{
  constructor(private workerFile=join(__dirname,'tray-query-worker.cjs'),private timeout=30000){}
  private stop(){this.job?.cancel();return this.job?.stopped||Promise.resolve();}
  cancel(){this.revision++;return this.stop();}
- async run(source:string,query:TrayQuery,key:Uint8Array|undefined,valid:()=>boolean):Promise<TrayRows>{
+ async run(source:string,query:TrayQuery,key:Uint8Array|undefined,valid:()=>boolean,pinnedFirst=false):Promise<TrayRows>{
   const revision=++this.revision;
   try{await this.stop();if(!valid()||revision!==this.revision)throw new Error(t('最近记录查询已取消'));
    return await new Promise<TrayRows>((resolve,reject)=>{
-    const worker=new Worker(this.workerFile,{workerData:{source,query,key,language:interfaceLanguage()},resourceLimits:{maxOldGenerationSizeMb:96}});key?.fill(0);
+    const worker=new Worker(this.workerFile,{workerData:{source,query,key,pinnedFirst,language:interfaceLanguage()},resourceLimits:{maxOldGenerationSizeMb:96}});key?.fill(0);
     let done=false,release!:()=>void;const stopped=new Promise<void>(resolve=>release=resolve);
     const finish=(error?:Error,result?:TrayRows)=>{if(done)return;done=true;clearTimeout(timer);const finished=()=>{
      if(this.job?.stopped===stopped)this.job=undefined;release();

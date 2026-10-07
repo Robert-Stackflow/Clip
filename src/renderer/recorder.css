@@ -5,3 +5,7 @@
 .source-placeholder{height:calc(182px + 16.5px * var(--text-scale,1));border-radius:12px;background:var(--soft);position:relative;overflow:hidden}.source-placeholder::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent,var(--selected),transparent);transform:translateX(-100%);animation:source-preview-shimmer 1.4s ease-in-out infinite}@keyframes source-preview-shimmer{to{transform:translateX(100%)}}@media(prefers-reduced-motion:reduce){.source-placeholder::after{animation:none}}
 
 @media(max-width:800px){.source-placeholder{height:calc(162px + 16.5px * var(--text-scale,1))}}
+
+html[data-recording-embedded=true] body>header{display:none}
+html[data-recording-embedded=true] body[data-view=recorder] main.record-workbench{height:100vh;max-width:none;margin:0;padding:0;overflow:auto}
+html[data-recording-embedded=true] main.record-workbench #setup>.recording-layout{flex:1;min-height:0}

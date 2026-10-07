@@ -1,0 +1,41 @@
+.capture-tools-toolbar{display:flex;align-items:center;margin-bottom:22px;flex-shrink:0}
+.capture-tools-panel{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;padding-right:2px}
+.capture-tools-panel[data-capture-tab=recording]{overflow:hidden;padding:0}
+.capture-tools-page .capture-settings-card{display:flex;flex-direction:column;min-height:0;max-height:100%;max-width:920px;padding:24px;border:1px solid var(--line);border-radius:var(--panel-radius);margin:0}
+.capture-settings-heading,.capture-source-heading,.capture-start-row,#capture-error{flex-shrink:0}
+.capture-source-list{min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable;padding:2px;margin:-2px}
+.capture-settings-heading,.capture-source-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.capture-settings-heading{padding-bottom:22px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.capture-settings-card h2{font-size:calc(14px * var(--text-scale,1));font-weight:600;margin:0}
+.capture-modes button{display:flex;align-items:center;gap:7px;font-size:calc(12px * var(--text-scale,1))}
+.capture-modes .icon{width:15px;height:15px}
+.capture-source-heading{margin-bottom:16px}
+.capture-source-heading>button{font-size:calc(12px * var(--text-scale,1));min-height:32px}
+.capture-settings-card .screen-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0}
+.capture-settings-card .screen-choices button{min-height:120px;padding:20px;gap:9px;font-size:calc(12px * var(--text-scale,1))}
+.capture-settings-card .screen-choices button>.icon{width:26px;height:26px;color:var(--muted)}
+.capture-settings-card .screen-choices button.active{border-color:var(--fg)}
+.capture-window-choices{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
+.capture-settings-card .capture-window-choice{min-width:0;padding:10px;display:flex;flex-direction:column;gap:10px;text-align:left}
+.capture-settings-card .capture-window-choice img{width:100%;height:130px;object-fit:contain;border-radius:8px;background:var(--soft)}
+.capture-settings-card .capture-window-choice span{width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:calc(12px * var(--text-scale,1))}
+.capture-settings-card .capture-window-choice.active{border-color:var(--fg);background:var(--soft)}
+.capture-empty{padding:24px;color:var(--muted);font-size:calc(12px * var(--text-scale,1));grid-column:1/-1}
+.capture-start-row{display:flex;justify-content:flex-end;padding-top:22px;margin-top:22px;border-top:1px solid var(--line)}
+.capture-start-row button{gap:8px}
+#capture-error:empty{display:none}
+.recording-page-host{width:100%;height:100%;min-height:0}
+.recording-page-loading{height:100%;display:flex;flex-direction:column;gap:16px;color:var(--muted);font-size:calc(12px * var(--text-scale,1))}
+.recording-page-loading>.source-placeholder{width:100%;min-height:220px}
+.capture-tools-page .source-placeholder{min-height:140px;background:var(--soft);border-radius:12px;position:relative;overflow:hidden}
+.capture-tools-page .source-placeholder::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent,var(--selected),transparent);transform:translateX(-100%);animation:capture-source-shimmer 1.4s ease-in-out infinite}
+@keyframes capture-source-shimmer{to{transform:translateX(100%)}}
+@media(prefers-reduced-motion:reduce){.capture-tools-page .source-placeholder::after{animation:none}}
+.collection-action-menu{display:flex;align-items:center}
+.collection-more-menu{display:flex;flex-direction:column;gap:3px;padding:6px}
+.collection-more-menu>button{display:flex;align-items:center;justify-content:flex-start;gap:10px;min-height:38px;padding:8px 11px;border:0;background:transparent;white-space:nowrap;border-radius:8px;font-size:calc(12px * var(--text-scale,1))}
+.collection-more-menu>button:hover{background:var(--hover)}
+.collection-more-menu>button>.icon{width:16px;height:16px;color:var(--muted)}
+.collection-more-menu [role=separator]{height:1px;flex-shrink:0;margin:2px -6px;background:var(--line);opacity:.65}
+.collection .heading-actions{gap:10px}
+@media(max-width:800px){.capture-tools-page .capture-settings-card{padding:18px}.capture-settings-heading{align-items:flex-start;flex-direction:column}.capture-settings-card .screen-choices{grid-template-columns:1fr}.collection .heading-actions{gap:7px}}

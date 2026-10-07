@@ -16,6 +16,7 @@
 ## 调研与历史
 
 - [One 组件迁移](research/ONE-UI-MIGRATION.md)
+- [OneClip 功能借鉴与后续优化](research/ONECLIP-FUNCTION-REVIEW-0.50.15.md)
 - [历史验收记录](history/README.md)
 
 `development` 保存功能规格与开发流程，`research` 保存来源证据，`history` 保存既有开发和验收记录。历史路径与验证结果记录当时的环境，不代表当前磁盘上仍有对应文件。当前状态以根目录 README 为准。

@@ -24,19 +24,15 @@ header button{padding:6px}
 .workspace{display:grid;grid-template-columns:minmax(220px,.94fr) minmax(260px,1fr);flex:1;min-height:0;border-top:1px solid var(--line)}
 .list-pane{display:flex;flex-direction:column;min-height:0;overflow:hidden}
 #items{overflow:auto;min-height:0;padding:4px 6px 9px;}
-.tray-row{display:flex;align-items:flex-start;width:100%;min-height:77px;gap:10px;padding:10px 8px;text-align:left;margin-bottom:3px}
+.tray-row{display:flex;align-items:center;width:100%;min-height:58px;gap:10px;padding:8px;text-align:left;margin-bottom:3px}
 .tray-row.selected{background:var(--hover);border-color:var(--line)}
-.type-icon{width:29px;height:30px;flex-shrink:0;display:grid;place-items:center;background:var(--soft);border-radius:var(--radius);color:var(--muted)}
-.type-icon.image{color:var(--muted)}
-.type-icon.files{color:var(--muted)}
-.type-icon.link{color:var(--muted)}
-.type-icon.code{color:var(--muted)}
-.row-body{min-width:0;display:flex;flex-direction:column;gap:5px;flex:1}
+.tray-row .source-icon{width:30px;height:30px;display:grid;place-items:center;flex-shrink:0;border-radius:8px;background:var(--soft);color:var(--muted)}
+.tray-row .source-icon img{width:20px;height:20px;object-fit:contain}
+.row-body{min-width:0;flex:1}
 .row-body strong{font-size:calc(12px * var(--text-scale,1));font-weight:550}
-.row-body>span{font-size:calc(11px * var(--text-scale,1));color:var(--muted)}
-.row-body small{font-size:calc(11px * var(--text-scale,1));color:var(--muted)}
-.row-body>*{white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
-.flags{display:flex;gap:3px}
+.row-body strong{display:block;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.row-end{display:flex;align-items:center;gap:6px;flex-shrink:0;color:var(--muted);font-size:calc(11px * var(--text-scale,1))}
+.flags{display:flex;gap:3px;min-width:0}
 .flags svg{width:11px;height:11px;color:var(--muted)}
 .preview-pane{border-left:1px solid var(--line);display:flex;flex-direction:column;min-height:0;min-width:0}
 #preview{flex:1;overflow:auto;min-height:0;}
@@ -53,8 +49,8 @@ header button{padding:6px}
 .files li span{display:flex;flex-direction:column;gap:5px;min-width:0}
 .files strong{font-size:calc(11px * var(--text-scale,1));overflow-wrap:anywhere;font-weight:500}
 .files small,.preview-note{font-size:calc(11px * var(--text-scale,1));color:var(--muted);line-height:1.6}
-dl{border-top:1px solid var(--line);padding:12px 16px;margin:0;display:grid;grid-template-columns:40px 1fr;gap:6px;font-size:calc(11px * var(--text-scale,1));color:var(--muted)}
-dd{margin:0;overflow-wrap:anywhere}
+.preview-meta{border-top:1px solid var(--line);padding:10px 16px;margin:0;display:flex;align-items:center;gap:10px;font-size:calc(11px * var(--text-scale,1));color:var(--muted)}
+.preview-meta span+span{padding-left:10px;border-left:1px solid var(--line)}
 .preview-actions{display:flex;gap:8px;border-top:1px solid var(--line);padding:12px;flex-shrink:0}
 .preview-actions button{flex:1;border-color:var(--line);font-size:calc(12px * var(--text-scale,1))}
 #copy-selected{background:var(--fg);color:var(--inverse)}
@@ -74,8 +70,7 @@ footer{font-size:calc(11px * var(--text-scale,1));color:var(--muted);padding:9px
 .preview-content{padding:10px 12px}
 .preview-actions{padding:7px 10px}
 .preview-image{max-height:150px}
-.tray-row{min-height:62px}
-.row-body small{display:none}
+.tray-row{min-height:56px}
 footer{padding:7px 10px}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}
@@ -89,4 +84,4 @@ html[data-density=compact] .preview-heading,html[data-density=compact] .preview-
 #notice{overflow-wrap:anywhere;max-height:4.8em;overflow:auto;}
 
 
-main{border:0;border-radius:0}header{padding:16px 20px 12px}.search-row{margin:0 20px 12px}#filters{padding-inline:20px}.tray-row.selected{background:var(--selected);border-color:transparent}.type-icon{background:transparent;width:24px}.preview-actions{padding:12px 16px}#filters button{border-radius:999px}
+main{border:0;border-radius:0}header{padding:16px 20px 12px}.search-row{margin:0 20px 12px}#filters{padding-inline:20px}.tray-row.selected{background:var(--selected);border-color:transparent}.preview-actions{padding:12px 16px}#filters button{border-radius:999px}

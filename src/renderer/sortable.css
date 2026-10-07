@@ -1,0 +1,5 @@
+.sort-list-active{isolation:isolate}
+.sort-drag-source{opacity:.46!important}
+.sort-drag-proxy{position:fixed;left:-100px;top:-100px;width:1px;height:1px;opacity:0;pointer-events:none}
+.sort-list-active>*{transition:border-color .14s ease,background-color .14s ease,opacity .14s ease,box-shadow .14s ease}
+@media(prefers-reduced-motion:reduce){.sort-list-active>*{transition:none}}

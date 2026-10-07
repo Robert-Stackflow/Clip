@@ -56,7 +56,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=r
   setInterfaceLanguage('zh-CN');
   for(const name of ['reference-emoji-worker.js','emoji-atlas/sheet-00.png','emoji-atlas/../app.js','katex-fonts/../../main/index.cjs'])assert.equal(rendererAssetAllowed('main',name),false);
   assert.equal(rendererAssetAllowed('main','reference-flags.ttf'),true);
-  for(const scope of ['recording','scroll','image-editor'])assert.equal(rendererAssetAllowed(scope,'reference-flags.ttf'),false);
+  for(const scope of ['recording','image-editor'])assert.equal(rendererAssetAllowed(scope,'reference-flags.ttf'),false);
   console.log('Pinned complete QuickRef documents, safe JSON rendering and 3,944 Unicode emoji sequences passed.');
  }finally{await work.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

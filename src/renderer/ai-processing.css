@@ -1,0 +1,60 @@
+/* AI processing keeps configuration, editors and actions in distinct areas. */
+/* The same editor and footer layout is shared with scripts. */
+.one-form-dialog.one-dialog:is(.ai-processing,.script-processing){width:900px;max-width:calc(100vw - 48px);max-height:calc(100dvh - 48px)}
+:is(.ai-processing,.script-processing) .one-dialog-heading{padding:20px 24px 12px}
+:is(.ai-processing,.script-processing) .modal-body{display:flex;flex-direction:column;gap:16px;padding:8px 24px 18px;max-height:none;scrollbar-gutter:auto}
+:is(.ai-processing,.script-processing) .ai-configuration{display:flex;flex-direction:column;gap:12px;min-width:0}
+:is(.ai-processing,.script-processing) .tool-three-fields{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr);gap:16px}
+:is(.ai-processing,.script-processing) .field{margin:0;gap:7px;font-size:calc(12px * var(--text-scale,1))}
+:is(.ai-processing,.script-processing) .field>input,:is(.ai-processing,.script-processing) .field>select,:is(.ai-processing,.script-processing) .field>.custom-select-wrap{width:100%;min-width:0}
+:is(.ai-processing,.script-processing) #run-ai-instruction{min-height:72px;height:76px;padding:10px 12px;line-height:1.7}
+:is(.ai-processing,.script-processing) .ai-service-info{min-width:0;font-size:calc(11px * var(--text-scale,1));color:var(--muted)}
+.ai-service-info>summary{display:flex;align-items:center;justify-content:space-between;gap:16px;list-style:none;cursor:pointer;min-height:26px;border-radius:5px}
+.ai-service-info>summary::-webkit-details-marker{display:none}
+.ai-service-info>summary:focus-visible{outline:1px solid var(--focus);outline-offset:3px}
+.ai-service-info #ai-destination{min-width:0;overflow-wrap:anywhere;line-height:1.65}
+.ai-service-toggle{display:inline-flex;align-items:center;gap:8px;flex-shrink:0}
+.ai-service-toggle::after{content:'';width:5px;height:5px;border-right:1.3px solid currentColor;border-bottom:1.3px solid currentColor;transform:rotate(45deg) translateY(-1px)}
+.ai-service-info[open] .ai-service-toggle::after{transform:rotate(225deg) translateY(-1px)}
+.ai-service-info>small{display:block;margin-top:7px;font-size:inherit;line-height:1.75;overflow-wrap:anywhere}
+:is(.ai-processing,.script-processing) .tool-check{margin:0;font-size:calc(11px * var(--text-scale,1));line-height:1.75;padding:9px 12px;border-radius:var(--field-radius);background:var(--soft)}
+:is(.ai-processing,.script-processing) .tool-check input{margin-top:3px}
+:is(.ai-processing,.script-processing) .ai-text-panes{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin:0}
+.ai-text-pane{min-width:0;display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line);border-radius:var(--field-radius);transition:border-color .12s}
+.ai-text-pane:focus-within{border-color:color-mix(in srgb,var(--fg) 30%,var(--surface))}
+.ai-pane-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 12px;min-height:46px;padding:8px 14px;background:var(--soft);border-bottom:1px solid var(--line)}
+.ai-pane-heading>label{font-size:calc(12px * var(--text-scale,1));font-weight:550;color:var(--fg);line-height:1.6}
+.ai-result-actions{margin-left:auto;min-width:0;max-width:100%}
+.ai-result-actions .result-actions{gap:2px;margin:0;flex-wrap:wrap;justify-content:flex-end}
+.ai-result-actions button{min-height:28px;font-size:calc(11px * var(--text-scale,1));padding:3px 6px}
+:is(.ai-processing,.script-processing) .ai-text-pane>textarea{flex:none;width:100%;height:clamp(180px,30vh,320px);min-height:180px;resize:none;border:0;border-radius:0;padding:14px 16px;line-height:1.8;font-size:calc(13px * var(--text-scale,1));background:var(--surface);box-shadow:none}
+:is(.ai-processing,.script-processing) .ai-result-note{margin:0;font-size:calc(11px * var(--text-scale,1));line-height:1.65;color:var(--muted)}
+:is(.ai-processing,.script-processing) .modal-footer{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;padding:14px 24px;background:var(--surface)}
+:is(.ai-processing,.script-processing) .tool-run-bar{min-width:0;gap:8px;padding:0;flex-wrap:wrap}
+:is(.ai-processing,.script-processing) .tool-run-bar>button{min-height:var(--control-height);font-size:var(--control-font);padding:5px 13px;flex-shrink:0}
+:is(.ai-processing,.script-processing) #tool-progress{min-width:0;flex:1 1 140px;font-size:calc(11px * var(--text-scale,1));line-height:1.6;overflow-wrap:anywhere}
+:is(.ai-processing,.script-processing) #tool-progress:empty{display:none}
+@media(max-width:760px){
+ :is(.ai-processing,.script-processing) .tool-three-fields{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ :is(.ai-processing,.script-processing) .tool-three-fields>.field:first-child{grid-column:1/-1}
+ :is(.ai-processing,.script-processing) .modal-footer>.tool-run-bar{grid-column:1/-1}
+ :is(.ai-processing,.script-processing) .modal-footer>#modal-cancel{grid-column:2}
+ :is(.ai-processing,.script-processing) .modal-footer>[type=submit]{grid-column:3}
+}
+.script-processing .script-configuration{display:flex;flex-direction:column;gap:10px}
+.script-selection{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:end}
+.script-selection p{margin:0 0 7px;font-size:calc(11px * var(--text-scale,1));line-height:1.7;color:var(--muted)}
+.script-processing .script-preview{margin:0;padding:10px 12px;background:var(--soft);border:0;border-radius:var(--field-radius)}
+.script-preview summary{font-size:calc(11px * var(--text-scale,1));cursor:pointer}
+.script-processing .script-preview pre{max-height:140px;margin:10px 0;font-size:calc(11px * var(--text-scale,1));line-height:1.7;overflow:auto;white-space:pre-wrap;user-select:text}
+.script-processing .script-preview p{margin:6px 0 0;font-size:calc(10px * var(--text-scale,1));color:var(--muted)}
+@media(max-width:640px){.script-selection{grid-template-columns:1fr;gap:5px}}
+@media(max-width:640px){
+ .one-form-dialog.one-dialog:is(.ai-processing,.script-processing){max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px)}
+ :is(.ai-processing,.script-processing) .one-dialog-heading{padding:16px 18px 10px}
+ :is(.ai-processing,.script-processing) .modal-body{padding:8px 18px 16px;gap:12px}
+ :is(.ai-processing,.script-processing) .ai-text-panes{grid-template-columns:minmax(0,1fr);gap:12px}
+ :is(.ai-processing,.script-processing) .ai-text-pane>textarea{height:160px;min-height:160px}
+ :is(.ai-processing,.script-processing) .modal-footer{padding:12px 18px}
+ .ai-service-info>summary{align-items:flex-start;gap:10px}
+}

@@ -15,7 +15,7 @@ const {setup,measure}=require('./renderer-fixture.cjs');
   await page.screenshot({path:path.join(out,file.split('.')[0]+(file.includes('?')?'-quick':'')+`-${width}x${height}.png`)});
   }
  }
- for(const [file,size,selectors,scrollable] of [['unlock',[480,570],['#unlock-submit','#use-recovery','#recover','#quit'],true],['recovery',[700,600],['#retry','#choose-database','#choose-backup','#quit'],true],['recorder',[680,520],['#start','#refresh','#resolution','#microphone'],true],['scroll',[680,540],['#start','#display'],true],['image-editor',[760,620],['#viewport','#rotate','#flip','#undo','#redo','#copy','#save','#zoom'],false],['capture',[860,600],['#capture-hint'],false]]){
+ for(const [file,size,selectors,scrollable] of [['unlock',[480,570],['#unlock-submit','#use-recovery','#recover','#quit'],true],['recovery',[700,600],['#retry','#choose-database','#choose-backup','#quit'],true],['recorder',[680,520],['#start','#refresh','#resolution','#microphone'],true],['image-editor',[760,620],['#viewport','#rotate','#flip','#undo','#redo','#copy','#save','#zoom'],false],['capture',[860,600],['#capture-hint'],false]]){
   await page.setViewportSize({width:size[0],height:size[1]});await page.goto('https://clipper.test/'+file+'.html');await page.waitForSelector(selectors[0]);
   for(const font of ['system','sans','mono'])for(const scale of [100,110,125,150])for(const density of ['comfortable','compact']){
    await page.evaluate(v=>fixture.appearance(v),{font,scale,density});await page.evaluate(()=>new Promise(requestAnimationFrame));const label=`${file} ${size.join('x')} ${font} ${scale} ${density}`;let metrics={};

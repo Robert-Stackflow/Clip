@@ -1,0 +1,5 @@
+.form-field-heading{display:flex;align-items:center;gap:10px;min-width:0;height:1.6em;flex:none;line-height:1.6;white-space:nowrap}
+.form-field-error{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:.9em;line-height:1.6;color:var(--danger,#b25e54);font-weight:400}
+.field :is(input,textarea,select)[aria-invalid=true]{border-color:color-mix(in srgb,var(--danger,#b25e54) 65%,var(--line))!important}
+.reply-editor .modal-body>.field{display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:0;border:0;border-radius:0;background:transparent;margin:0 0 18px;min-height:0}
+.reply-editor .modal-body>.field>:is(input,textarea,.shortcut-control){width:100%;max-width:none;min-width:0}

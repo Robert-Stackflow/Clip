@@ -30,7 +30,7 @@ for(const theme of ['light','dark']){
  }
  await actual.screenshot({path:out+'/'+theme+'.png'});await context.close();
 }
-const entries=['index','tray','shelf','image-editor','recorder','scroll','selection','unlock','recovery','capture'];
+const entries=['index','tray','shelf','image-editor','recorder','selection','unlock','recovery','capture'];
 for(const name of entries){const html=await fs.readFile('dist/renderer/'+name+'.html','utf8');assert.equal((html.match(/href="one-ui.css"/g)||[]).length,1,name);assert.equal((html.match(/<link rel="stylesheet"/g)||[]).length,2,name);}
 await fs.writeFile(path.join(out,'results.json'),JSON.stringify({passed:true,version:'0.44.0',referenceVersion:JSON.parse(await fs.readFile('tests/fixtures/one-044/package.json')).version,cases:results.length,components:names,desktopEntries:entries,oneSharedStylesheet:true,systemClipboard:false,desktopInput:false,results},null,2));console.log(JSON.stringify({passed:true,cases:results.length,components:names.length,desktopEntries:entries.length}));
 }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

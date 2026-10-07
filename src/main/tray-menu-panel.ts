@@ -4,7 +4,7 @@ import {interfaceLanguageArguments,t as tr} from '../shared/i18n';
 import {trayMenuEntries,type TrayMenuAction,type TrayMenuActions,type TrayMenuState,type TrayMenuView} from './tray-menu';
 
 const width=292;
-const height=(state:TrayMenuState)=>state.initializing?114:state.secured?152:state.encrypted?378:336;
+const height=(state:TrayMenuState)=>state.initializing?152:state.secured?190:state.encrypted?416:374;
 const clamp=(value:number,min:number,max:number)=>Math.max(min,Math.min(max,value));
 export function trayMenuBounds(anchor:Rectangle,area:Rectangle,state:TrayMenuState):Rectangle{
  const menuHeight=Math.min(height(state),area.height),left=area.x,right=area.x+area.width,top=area.y,bottom=area.y+area.height;

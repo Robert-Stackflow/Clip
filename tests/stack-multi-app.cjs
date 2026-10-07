@@ -24,7 +24,7 @@ async function run(){
  try{
   const first='堆栈第一项 '+randomUUID(),second='堆栈第二项 '+randomUUID();
   const ids=await f.page.evaluate(async values=>{
-   const ids=[];for(const value of values){const id=await window.clipper.saveOcr(value);await window.clipper.action(id,'enqueue');ids.push(id);}return ids;
+   const ids=[];for(const value of values){const id=await window.clipper.applyText({mode:'save',source:'脚本处理',text:value});await window.clipper.action(id,'enqueue');ids.push(id);}return ids;
   },[first,second]);
   assert.deepEqual((await state()).queue,ids);
   browser=await chromium.launch({channel:'msedge',headless:false});
@@ -55,7 +55,7 @@ async function run(){
   // The main-window button must return to the last real target application.
   const third='堆栈按钮粘贴 '+randomUUID(),fourth='等待目标 '+randomUUID();
   const remaining=await f.page.evaluate(async values=>{
-   const ids=[];for(const value of values){const id=await window.clipper.saveOcr(value);await window.clipper.action(id,'enqueue');ids.push(id);}return ids;
+   const ids=[];for(const value of values){const id=await window.clipper.applyText({mode:'save',source:'脚本处理',text:value});await window.clipper.action(id,'enqueue');ids.push(id);}return ids;
   },[third,fourth]);
   await edge.locator('#input').fill('');await edge.locator('#input').focus();
   assert.equal(await activate(hwnd),true);await expect.poll(foreground).toBe(hwnd);

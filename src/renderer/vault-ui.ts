@@ -1,5 +1,6 @@
 import {t as tr} from '../shared/i18n';
 import type {VaultState} from '../shared/vault';
+import {normalizeSettingItems} from './settings-layout';
 const api=window.clipper,q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 interface Context {modal(title:string,body:string,save:()=>Promise<void>,label?:string):void;toast(text:unknown):void;refresh():Promise<void>}
@@ -7,6 +8,14 @@ export async function renderVault(ctx:Context){const state=await api.vaultState(
  node.classList.toggle('has-vault-options',state.encrypted);
  node.innerHTML=tr`<div class="tools-section-heading"><h2>历史保护</h2><span class="vault-badge">${state.encrypted?tr('已加密 · 当前已解锁'):tr('尚未加密')}</span></div><div class="vault-card"><div class="vault-symbol" aria-hidden="true">${state.encrypted?'▣':'□'}</div><div><h3>${state.encrypted?tr('已启用历史加密'):tr('历史加密')}</h3><p>${state.encrypted?tr('历史、图片、模板与设置都保存在加密数据库中。锁定期间停止记录和共享。'):tr('使用密码加密本机数据库。解锁后可正常记录、搜索、粘贴；支持恢复密钥找回。')}</p><div class="data-controls">${state.encrypted?tr('<button id="vault-lock" class="primary">锁定历史</button><button id="vault-password">更改密码</button>'):tr('<button id="vault-enable" class="primary">启用历史加密</button>')}</div></div></div>${state.encrypted?tr`<div class="vault-options"><label class="field">离开电脑后自动锁定<select id="vault-idle">${[0,1,5,15,30,60,120].map(n=>`<option value="${n}" ${state.idleMinutes===n?'selected':''}>${n?n+tr(' 分钟'):tr('不按空闲时间锁定')}</option>`).join('')}</select></label><label class="tool-check"><input id="vault-hello" type="checkbox" ${state.hello?'checked':''} ${!state.helloAvailable&&!state.hello?'disabled':''}>Windows Hello 快捷解锁${state.helloAvailable?'':tr('（当前不可用）')}</label><p class="field-help">锁屏或休眠时自动锁定。Hello 通过后，使用当前 Windows 账户保护的本机凭据解锁；换电脑仍需密码或恢复密钥。</p><button id="vault-save">保存锁定设置</button></div>`:''}${state.plaintextDirectory?tr`<div class="vault-warning"><strong>加密已完成，原明文副本仍保留</strong><p id="vault-plaintext-path">${esc(state.plaintextDirectory)}</p><p>确认可以解锁后，请清理原副本。以往导出的备份和源文件仍由你管理。</p><button id="vault-cleanup">清理原明文副本</button></div>`:''}`;
  if(state.encrypted){const button=document.createElement('button');button.id='vault-disable';button.textContent=tr('取消加密');node.querySelector('.vault-card .data-controls')?.append(button);}
+ if(node.closest('.settings-page')){
+  const card=node.querySelector<HTMLElement>('.vault-card')!,copy=card.lastElementChild as HTMLElement,actions=copy.querySelector<HTMLElement>('.data-controls')!,heading=node.querySelector<HTMLElement>('.tools-section-heading')!;
+  heading.className='settings-card-heading';const title=document.createElement('h3');title.textContent=tr('历史保护');heading.querySelector('h2')!.replaceWith(title);card.prepend(heading);
+  const name=copy.querySelector('h3')!,caption=document.createElement('span');caption.textContent=name.textContent;name.replaceWith(caption);
+  const row=document.createElement('div');row.className='setting-row';copy.before(row);row.append(copy,actions);
+  const options=node.querySelector<HTMLElement>('.vault-options');if(options)card.append(options);
+  normalizeSettingItems(node);
+ }
  const on=(id:string,fn:()=>unknown)=>q(id)?.addEventListener('click',()=>void Promise.resolve().then(fn).catch(ctx.toast));
  on('vault-enable',()=>enable(ctx));on('vault-lock',()=>api.lockHistory());on('vault-password',()=>changePassword(ctx));on('vault-disable',()=>disable(ctx));on('vault-cleanup',()=>cleanup(ctx,state));
  on('vault-save',async()=>{await api.configureVault(q<HTMLInputElement>('vault-hello').checked,Number(q<HTMLSelectElement>('vault-idle').value));ctx.toast(tr('锁定设置已保存'));});

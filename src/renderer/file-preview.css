@@ -1,0 +1,16 @@
+.file-preview{min-width:0;width:100%}
+.file-preview-list{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.file-preview-entry{display:flex;align-items:center;gap:12px;min-width:0;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.file-preview-icon{display:grid;place-items:center;flex:0 0 40px;width:40px;height:44px;border-radius:9px;background:color-mix(in srgb,var(--fg) 4%,transparent);color:#547ca7}
+.file-preview-icon .icon{width:24px;height:24px}.file-preview-icon[data-tone=folder],.file-preview-icon[data-tone=archive]{color:#bf9343}.file-preview-icon[data-tone=sheet]{color:#4d9275}.file-preview-icon[data-tone=image]{color:#9071b5}
+.file-preview-info{display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}
+.file-preview-name{font-size:calc(13px * var(--text-scale,1));line-height:1.6;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-preview-path{font-size:calc(11px * var(--text-scale,1));line-height:1.6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
+.file-preview-meta{font-size:calc(10px * var(--text-scale,1));line-height:1.6;color:var(--muted);overflow-wrap:anywhere}.file-unavailable .file-preview-meta{color:var(--danger)}
+.file-preview-entry>[data-file-more]{width:30px;height:30px;min-height:30px;flex:0 0 30px;padding:6px;border:0;border-radius:8px;background:transparent;color:var(--muted)}
+.file-preview-entry>[data-file-more]:hover,.file-preview-entry>[data-file-more][aria-expanded=true]{background:var(--hover);color:var(--fg)}.file-preview-entry>[data-file-more] .icon{width:17px;height:17px}
+.file-entry-menu{display:flex;flex-direction:column;gap:2px;padding:6px}
+.file-entry-menu>button{display:flex;align-items:center;justify-content:flex-start;gap:9px;min-height:34px;padding:7px 10px;border:0;border-radius:8px;background:transparent;text-align:left;font-size:calc(12px * var(--text-scale,1))}
+.file-entry-menu>button:hover,.file-entry-menu>button:focus-visible{background:var(--hover)}.file-entry-menu>button .icon{width:16px;height:16px;flex:none;color:var(--muted)}
+.file-entry-menu>[role=separator]{height:1px;flex:none;background:var(--line);margin:4px}
+@media(max-width:900px){.file-preview-entry{gap:9px;padding:11px}.file-preview-icon{flex-basis:32px;width:32px;height:38px}.file-preview-icon .icon{width:21px;height:21px}}

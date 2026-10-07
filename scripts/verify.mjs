@@ -6,7 +6,11 @@ import {beginCase,repository} from './workspace.mjs';
 
 const execute=promisify(execFile);
 // These checks use isolated browser/Electron fixtures and never operate the daily clipboard.
-const supported=new Set(['foundation-044','options-044','chrome-044','collection-042','auxiliary-043','application-segments-ui','collection-polish-ui','utility-pages-ui','media-controls-ui','recent-scroll-ui']);
+const supported=new Set(['foundation-044','options-044','chrome-044','collection-042','auxiliary-043','application-segments-ui','collection-polish-ui','utility-pages-ui','media-controls-ui','recent-loading-ui','task-center-ui','feedback-motion-ui','commands-ui','codex-ui','category-form-ui','category-counts-electron','file-quick-preview-ui','quick-preview-electron','quick-record-motion-ui','quick-replies-ui','quick-move-electron','browser-image-drop','collection-view-ui']);
+supported.add('settings-shortcuts-ui');
+supported.add('settings-layout-ui');
+supported.add('quick-dismiss-electron');
+supported.add('reply-batch-electron');
 const names=process.argv.slice(2);
 if(!names.length)throw Error('Specify a verification name, for example: npm run verify -- foundation-044');
 for(const name of names) {

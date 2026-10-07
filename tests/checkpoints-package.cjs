@@ -5,7 +5,7 @@ const archive=path.join(root,'resources/app.asar'),version=JSON.parse(fs.readFil
 const buildRoot=path.resolve(process.env.CLIPPER_CHECKPOINT_BUILD||'../delivery-0.25.0');
 const hash=value=>crypto.createHash('sha256').update(value).digest('hex');
 function files(folder,prefix=''){return fs.readdirSync(folder,{withFileTypes:true}).flatMap(item=>item.isDirectory()?files(path.join(folder,item.name),prefix+item.name+'/'):[prefix+item.name]);}
-for(const folder of ['src','build','assets','build/installer-ui','scripts'])for(const file of files(folder))assert(fs.readFileSync(path.join(folder,file)).equals(fs.readFileSync(path.join(buildRoot,folder,file))),folder+'/'+file);
+for(const folder of ['src','build','assets','installer','scripts'])for(const file of files(folder))assert(fs.readFileSync(path.join(folder,file)).equals(fs.readFileSync(path.join(buildRoot,folder,file))),folder+'/'+file);
 const expected=files(path.join(buildRoot,'dist')),normalized=[],nativeRebuilt=[];
 assert.deepEqual(expected,files('dist'));
 for(const file of expected){const built=fs.readFileSync(path.join(buildRoot,'dist',file)),development=fs.readFileSync(path.join('dist',file));

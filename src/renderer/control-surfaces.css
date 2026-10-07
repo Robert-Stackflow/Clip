@@ -1,0 +1,14 @@
+/* Shared dropdown and tooltip surfaces for every desktop window. */
+.custom-select-wrap{position:relative;display:inline-flex;min-width:0;max-width:100%;vertical-align:middle}.custom-select-wrap>.custom-select{width:100%;min-width:0}.custom-select-wrap>.select-backing{position:absolute!important;width:1px!important;height:1px!important;min-height:0!important;opacity:0;pointer-events:none;clip-path:inset(50%);padding:0;border:0}
+.custom-select>span{min-width:0;white-space:nowrap;text-overflow:ellipsis}.select-popup[popover]{margin:0;inset:auto;max-width:calc(100vw - 16px);color:var(--fg);overscroll-behavior:contain}.select-popup [role=option]{font-size:var(--control-font)}
+.one-tooltip{position:fixed;z-index:2147483647;pointer-events:none;max-width:min(340px,calc(100vw - 16px));padding:7px 10px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:#272727;color:#fff;font-size:calc(11px * var(--text-scale,1));font-weight:400;line-height:1.45;box-shadow:0 3px 12px #00000012;opacity:0;--tooltip-x:0px;--tooltip-y:3px;transform:translate(var(--tooltip-x),var(--tooltip-y));transition:opacity 120ms ease,transform 160ms cubic-bezier(.2,.8,.2,1);overflow-wrap:anywhere;user-select:none}
+.one-tooltip::before{content:"";position:absolute;width:8px;height:8px;background:inherit;border:inherit;border-width:0;transform:rotate(45deg)}
+.one-tooltip[data-side=top]::before{left:calc(var(--tooltip-arrow) - 4px);bottom:-5px;border-right-width:1px;border-bottom-width:1px}
+.one-tooltip[data-side=bottom]{--tooltip-y:-3px}
+.one-tooltip[data-side=bottom]::before{left:calc(var(--tooltip-arrow) - 4px);top:-5px;border-top-width:1px;border-left-width:1px}
+.one-tooltip[data-side=right]{--tooltip-x:-3px;--tooltip-y:0px}
+.one-tooltip[data-side=right]::before{top:calc(var(--tooltip-arrow) - 4px);left:-5px;border-left-width:1px;border-bottom-width:1px}
+.one-tooltip[data-side=left]{--tooltip-x:3px;--tooltip-y:0px}
+.one-tooltip[data-side=left]::before{top:calc(var(--tooltip-arrow) - 4px);right:-5px;border-top-width:1px;border-right-width:1px}
+.one-tooltip.visible{transform:translate(0,0);opacity:1}
+@media(prefers-reduced-motion:reduce){.one-tooltip{transition:none;transform:none}}

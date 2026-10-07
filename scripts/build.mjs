@@ -1,17 +1,19 @@
+import './generate-category-icons.mjs';
 import './build-document-info.mjs';
 import './build-fonts.mjs';
 import './build-images.mjs';
 import './build-sources.mjs';
 import './build-attachments.mjs';
 import './build-updater.mjs';
+import './build-shortcut-recorder.mjs';
 import './notices.mjs';
 import {build} from 'esbuild';
 import {mkdir,copyFile,readFile,writeFile,rm,lstat,realpath} from 'node:fs/promises';
 import {resolve,sep,dirname} from 'node:path';
 import {bundles,staticFiles} from './bundle-options.mjs';
 const readerOutput=resolve('dist/renderer/text-preview'),workspace=await realpath('.');
-// Retire outputs from the removed image-based emoji renderer on existing checkouts.
-for(const name of ['dist/renderer/reference-emoji-worker.js','dist/renderer/emoji-atlas','dist/renderer/selection.js','dist/renderer/selection.css','dist/renderer/selection.html','dist/preload/selection.cjs','dist/native/SelectionHost.exe']){
+// Retire outputs from removed features on existing checkouts.
+for(const name of ['dist/main/ocr.ps1','dist/renderer/reference-emoji-worker.js','dist/renderer/emoji-atlas','dist/renderer/selection.js','dist/renderer/selection.css','dist/renderer/selection.html','dist/preload/selection.cjs','dist/native/SelectionHost.exe','dist/main/scroll-worker.cjs','dist/preload/scroll.cjs','dist/renderer/scroll.html','dist/renderer/scroll.js','dist/renderer/scroll.css']){
  const expected=resolve(workspace,name);if(!expected.startsWith(workspace+sep))throw new Error('Unsafe retired output');
  try{const stat=await lstat(expected);if(stat.isSymbolicLink()||await realpath(expected)!==expected)throw new Error('Unsafe retired output link');await rm(expected,{recursive:stat.isDirectory()});}catch(error){if(error.code!=='ENOENT')throw error;}
 }

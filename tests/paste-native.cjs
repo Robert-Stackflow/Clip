@@ -15,7 +15,7 @@ async function run(){
  const f=await fixture('paste-native');let child,hwnd=0;
  try{
   const value='Clipper native target paste check';
-  await f.page.evaluate(text=>window.clipper.saveOcr(text),value);
+  await f.page.evaluate(text=>window.clipper.applyText({mode:'save',source:'脚本处理',text:text}),value);
   child=spawn(exe,[ready,result],{stdio:'ignore',windowsHide:false});
   await expect.poll(async()=>{try{return Number(await fs.readFile(ready,'utf8'));}catch{return 0;}},{timeout:10000}).toBeGreaterThan(0);
   hwnd=Number(await fs.readFile(ready,'utf8'));

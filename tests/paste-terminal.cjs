@@ -28,7 +28,7 @@ async function run(){
  },{action,arg});
  try{
   const value='Clipper Windows Terminal 终端粘贴 😀 '+id;
-  await f.page.evaluate(text=>window.clipper.saveOcr(text),value);
+  await f.page.evaluate(text=>window.clipper.applyText({mode:'save',source:'脚本处理',text:text}),value);
   child=spawn('wt.exe',['-w','new','new-tab','--title',title,'powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',path.resolve('tests/paste-terminal-target.ps1'),'-Ready',ready,'-Result',result],{stdio:'ignore',windowsHide:false});
   await expect.poll(async()=>({ready:await fs.readFile(ready,'utf8').catch(()=>''),window:terminal(title)}),{timeout:20000}).toEqual(expect.objectContaining({ready:'ready',window:expect.objectContaining({MainWindowHandle:expect.any(Number)})}));
   const found=terminal(title);assert.ok(found.MainWindowHandle>0);terminalPid=found.Id;

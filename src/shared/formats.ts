@@ -13,7 +13,11 @@ export const formatDefinitions=[
  {name:'TIFF',label:'TIFF 原图',mime:'image/tiff',extension:'tif'},
  {name:'image/tiff',label:'TIFF 原图',mime:'image/tiff',extension:'tif'},
  {name:'image/bmp',label:'BMP 原图',mime:'image/bmp',extension:'bmp'},
- {name:'image/webp',label:'WebP 原图',mime:'image/webp',extension:'webp'}
+ {name:'image/webp',label:'WebP 原图',mime:'image/webp',extension:'webp'},
+ {name:'image/avif',label:'AVIF 原图',mime:'image/avif',extension:'avif'},
+ {name:'image/svg+xml',label:'SVG 原图',mime:'image/svg+xml',extension:'svg'},
+ {name:'image/heic',label:'HEIC 原图',mime:'image/heic',extension:'heic'},
+ {name:'image/heif',label:'HEIF 原图',mime:'image/heif',extension:'heif'}
 ] as const;
 export type FormatName=string;
 export const MAX_FORMATS=32;
@@ -34,7 +38,7 @@ export function validateDIB(data:Buffer,v5=false){
 }
 export function htmlClipboard(html:string){const before='<html><body><!--StartFragment-->',after='<!--EndFragment--></body></html>';let header='Version:1.0\r\nStartHTML:0000000000\r\nEndHTML:0000000000\r\nStartFragment:0000000000\r\nEndFragment:0000000000\r\n';const start=Buffer.byteLength(header),fragment=start+Buffer.byteLength(before),end=fragment+Buffer.byteLength(html);for(const [key,n]of [['StartHTML',start],['EndHTML',end+Buffer.byteLength(after)],['StartFragment',fragment],['EndFragment',end]] as const)header=header.replace(key+':0000000000',key+':'+String(n).padStart(10,'0'));return Buffer.from(header+before+html+after+'\0','utf8');}
 export function htmlContext(data:Buffer){const lines=data.subarray(0,Math.min(data.length,8192)).toString('utf8').split(/\r?\n/),fields=new Map<string,string>();for(const line of lines){const m=line.match(/^(Version|StartHTML|EndHTML|StartFragment|EndFragment|StartSelection|EndSelection|SourceURL):([^\0]*)$/i);if(!m)break;fields.set(m[1].toLowerCase(),m[2]);}const source=fields.get('sourceurl')?.slice(0,2048),number=(key:string)=>{const v=fields.get(key);return v&&/^-?\d+$/.test(v)?Number(v):-1;},start=number('startfragment'),end=number('endfragment');return {sourceUrl:source||undefined,fragment:start>=0&&end>=start&&end<=data.length?data.subarray(start,end).toString('utf8'):undefined};}
-export interface ContentInfo {formats:{name:string;label:string;bytes:number;exportable:boolean}[];image?:{width:number;height:number};sourceUrl?:string;attachments?:{index:number;name:string;bytes:number;directory?:true;created?:number;modified?:number;accessed?:number;attributes?:number}[];files?:{path:string;name:string;type:string;bytes?:number;modified?:number;status:'available'|'missing'|'unreadable'|'not-read'}[]}
+export interface ContentInfo {formats:{name:string;label:string;bytes:number;exportable:boolean}[];image?:{width:number;height:number};sourceUrl?:string;attachments?:{index:number;name:string;bytes:number;directory?:true;created?:number;modified?:number;accessed?:number;attributes?:number}[];files?:{path:string;name:string;type:string;directory?:true;bytes?:number;modified?:number;status:'available'|'missing'|'unreadable'|'not-read'}[]}
 export function publicPNG(data:Buffer){if(data.length<33||data.subarray(0,8).toString('hex')!=='89504e470d0a1a0a')throw new Error(tr('PNG 格式无效'));const chunks=[data.subarray(0,8)];let at=8,ended=false;while(at+12<=data.length){const size=data.readUInt32BE(at),end=at+size+12;if(end>data.length)throw new Error(tr('PNG 数据不完整'));const type=data.toString('ascii',at+4,at+8);if(['IHDR','PLTE','tRNS','IDAT','IEND'].includes(type))chunks.push(data.subarray(at,end));at=end;if(type==='IEND'){ended=true;break;}}if(!ended)throw new Error(tr('PNG 数据不完整'));return Buffer.concat(chunks);}
 
 export function payloadSyncVersion(p:{attachments?:unknown;formats?:StoredFormat[];omittedFormats?:string[]}){return p.attachments||p.omittedFormats?.length||p.formats?.some(f=>['CF_DIB','CF_DIBV5'].includes(f.name)||!formatDefinitions.some(d=>d.name===f.name))?5:p.formats?.length?4:3;}

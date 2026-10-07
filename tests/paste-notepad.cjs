@@ -39,7 +39,7 @@ async function run(){
  },{action,arg});
  const keys=codes=>native('keys',codes);
  try{
-  const value='Clipper Notepad paste check '+randomUUID();await f.page.evaluate(text=>window.clipper.saveOcr(text),value);
+  const value='Clipper Notepad paste check '+randomUUID();await f.page.evaluate(text=>window.clipper.applyText({mode:'save',source:'脚本处理',text:text}),value);
   child=spawn('notepad.exe',[file],{stdio:'ignore',windowsHide:false});
   await expect.poll(()=>notepads().find(item=>item.MainWindowTitle.includes(path.basename(file))),{timeout:15000}).not.toBeUndefined();
   const found=notepads().find(item=>item.MainWindowTitle.includes(path.basename(file)));hwnd=found.MainWindowHandle;pid=found.Id;

@@ -37,7 +37,7 @@ async function run(){
    await f.app.evaluate(({dialog},file)=>dialog.showOpenDialog=async()=>({canceled:false,filePaths:[file]}),seed);
    await f.page.evaluate(()=>window.clipper.backup('import'));
   }finally{store.close();}
-  await f.page.evaluate(text=>window.clipper.saveOcr(text),value);
+  await f.page.evaluate(text=>window.clipper.applyText({mode:'save',source:'脚本处理',text:text}),value);
   await f.helper.evaluate(async()=>{await global.focusTarget();global.helperWindow.setAlwaysOnTop(false);});
   for(const selector of ['#input','#editor']){
    await page.bringToFront();await page.locator(selector).click();assert.equal(await activate(hwnd),true);await expect.poll(foreground).toBe(hwnd);

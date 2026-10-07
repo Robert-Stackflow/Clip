@@ -1,4 +1,4 @@
-import {createElement,History,AppWindow,MessageSquareText,PanelTop,Clapperboard,Layers2,Pause,Play,LockKeyhole,LockKeyholeOpen,Monitor,Power,Check,type IconNode} from 'lucide';
+import {createElement,History,AppWindow,MessageSquareText,PanelTop,Clapperboard,Layers2,Pause,Play,LockKeyhole,LockKeyholeOpen,Monitor,Power,RotateCw,Check,type IconNode} from 'lucide';
 import {t as tr} from '../shared/i18n';
 import type {TrayMenuAction,TrayMenuEntry,TrayMenuView} from '../main/tray-menu';
 import type {TrayMenuAPI} from '../preload/tray-menu';
@@ -8,7 +8,7 @@ import './tray-menu.css';
 
 declare global {interface Window {clipperTrayMenu:TrayMenuAPI}}
 const api=window.clipperTrayMenu;
-const icons:Record<string,IconNode>={history:History,'app-window':AppWindow,'message-square-text':MessageSquareText,'panel-top':PanelTop,'circle-play':Clapperboard,'layers-2':Layers2,pause:Pause,play:Play,'lock-keyhole':LockKeyhole,'lock-open':LockKeyholeOpen,monitor:Monitor,power:Power};
+const icons:Record<string,IconNode>={history:History,'app-window':AppWindow,'message-square-text':MessageSquareText,'panel-top':PanelTop,'circle-play':Clapperboard,'layers-2':Layers2,pause:Pause,play:Play,'lock-keyhole':LockKeyhole,'lock-open':LockKeyholeOpen,monitor:Monitor,power:Power,'rotate-cw':RotateCw};
 const root=document.getElementById('menu-items')!,status=document.getElementById('menu-status')!,headerActions=document.getElementById('menu-header-actions')!;
 function render(view:TrayMenuView){
  document.documentElement.dataset.theme=view.dark?'dark':'light';

@@ -3,7 +3,7 @@ const root=path.resolve('.'),records=10000;
 if(process.argv[2]==='--host'){
  (async()=>{
   const {Store,framePNG}=require(path.join(process.argv[3],'store.cjs')),mode=process.argv[4],module={exports:{}};
-  vm.runInNewContext(fs.readFileSync(path.join(process.argv[3],mode+'.cjs'),'utf8'),{module,exports:module.exports,Buffer,console,require:name=>name==='electron'?{app:{getFileIcon:async()=>({resize:()=>({toPNG:()=>Buffer.from('private icon')})})}}:name==='./native'?{runningApplications:()=>[]}:require(name)});
+  vm.runInNewContext(fs.readFileSync(path.join(process.argv[3],mode+'.cjs'),'utf8'),{module,exports:module.exports,Buffer,console,process:{platform:'linux'},require:name=>name==='electron'?{app:{getFileIcon:async()=>({toPNG:()=>Buffer.from('private icon'),resize:()=>({toPNG:()=>Buffer.from('private icon')})})}}:name==='./native'?{runningApplications:()=>[]}:require(name)});
   const store=new Store(':memory:',false);try{
    const pixels=createCipheriv('aes-256-ctr',Buffer.alloc(32,37),Buffer.alloc(16)).update(Buffer.alloc(64*64*4)),png=framePNG({width:64,height:64,data:pixels}).toString('base64'),thumbnail='data:image/png;base64,'+png;
    store.db.exec('BEGIN');for(let i=0;i<records;i++)store.add({text:'Record '+i,...(i%2?{png}:{})},'App'+(i%32)+'.exe',i%2?thumbnail:undefined,undefined,false);store.db.exec('COMMIT');

@@ -14,10 +14,12 @@ export async function fetchModels(profile:AIProfile,key:string,signal:AbortSigna
  const values=profile.kind==='ollama'?result.models:result.data;if(!Array.isArray(values))throw new Error(tr('服务模型列表格式不兼容'));
  return [...new Set(values.map((v:any)=>profile.kind==='ollama'?v?.name:v?.id).filter((v:unknown):v is string=>typeof v==='string'&&v.length>0&&v.length<=200))].slice(0,500) as string[];
 }
-export async function generateText(profile:AIProfile,value:AIRequest,key:string,signal:AbortSignal):Promise<AIResult>{
- if(!profile.model)throw new Error(tr('请先填写或选择模型'));const messages=aiMessages(value);
+export async function generateText(profile:AIProfile,value:AIRequest,key:string,signal:AbortSignal,messages=aiMessages(value),png?:string):Promise<AIResult>{
+ if(!profile.model)throw new Error(tr('请先填写或选择模型'));
+ let imageAt=-1;if(png)for(let i=0;i<messages.length;i++)if(messages[i].role==='user')imageAt=i;
+ const outgoing=messages.map((message,index)=>index!==imageAt?message:profile.kind==='ollama'?{...message,images:[png]}:{...message,content:[{type:'text',text:message.content},{type:'image_url',image_url:{url:'data:image/png;base64,'+png}}]});
  const options={...(profile.temperature===null?{}:{temperature:profile.temperature})};
- const body=profile.kind==='ollama'?{model:profile.model,messages,stream:false,options:{...options,num_predict:profile.maxTokens}}:{model:profile.model,messages,stream:false,...options,[profile.tokenField]:profile.maxTokens};
+ const body=profile.kind==='ollama'?{model:profile.model,messages:outgoing,stream:false,options:{...options,num_predict:profile.maxTokens}}:{model:profile.model,messages:outgoing,stream:false,...options,[profile.tokenField]:profile.maxTokens};
  const data=await readJsonResponse(await fetch(aiEndpoint(profile),{method:'POST',headers:headers(key),body:JSON.stringify(body),signal,redirect:'error',credentials:'omit'}));
  const content=profile.kind==='ollama'?data.message?.content:data.choices?.[0]?.message?.content;if(typeof content!=='string'||!content.trim())throw new Error(tr('服务没有返回可用文字；请检查模型是否支持聊天文本接口'));const text=toolText(content,MAX_TOOL_OUTPUT);
  const token=(n:unknown)=>Number.isInteger(n)&&(n as number)>=0&&(n as number)<1e9?n as number:undefined;

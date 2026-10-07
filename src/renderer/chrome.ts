@@ -2,7 +2,8 @@
 import {t as tr} from '../shared/i18n';
 import type {ChromeAPI,WindowState} from '../shared/chrome';
 declare global{interface Window{clipperChrome?:ChromeAPI}}
-export const windowControls=(prefix='window')=>`<div class="window-controls"><button id="${prefix}-minimize" type="button" aria-label="${tr('最小化')}" title="${tr('最小化')}"><svg viewBox="0 0 16 16"><path d="M3 8h10"/></svg></button><button id="${prefix}-maximize" type="button" aria-label="${tr('最大化')}" title="${tr('最大化')}"><svg viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9"/></svg></button><button id="${prefix}-close" type="button" aria-label="${tr('关闭')}" title="${tr('关闭')}"><svg viewBox="0 0 16 16"><path d="m3.5 3.5 9 9m0-9-9 9"/></svg></button></div>`;
+export const windowCloseButton=(prefix='window',label=tr('关闭'))=>`<button id="${prefix}-close" type="button" aria-label="${label}" title="${label}"><svg viewBox="0 0 16 16"><path d="m3.5 3.5 9 9m0-9-9 9"/></svg></button>`;
+export const windowControls=(prefix='window')=>`<div class="window-controls"><button id="${prefix}-minimize" type="button" aria-label="${tr('最小化')}" title="${tr('最小化')}"><svg viewBox="0 0 16 16"><path d="M3 8h10"/></svg></button><button id="${prefix}-maximize" type="button" aria-label="${tr('最大化')}" title="${tr('最大化')}"><svg viewBox="0 0 16 16"><rect x="3.5" y="3.5" width="9" height="9"/></svg></button>${windowCloseButton(prefix)}</div>`;
 export function setupChrome(prefix='window'){
  document.body.classList.add('native-frame','custom-window-frame');const api=window.clipperChrome;if(!api)return;
  for(const kind of ['minimize','maximize','close'] as const)document.getElementById(prefix+'-'+kind)?.addEventListener('click',()=>void api.action(kind));

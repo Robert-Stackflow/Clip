@@ -1,0 +1,18 @@
+.one-form-dialog.one-dialog.search-history-dialog{width:540px}
+.search-history-dialog .modal-body{display:flex;flex-direction:column;gap:14px;padding:6px 24px 20px}
+.search-history-preference{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 16px;border:1px solid var(--line);border-radius:var(--field-radius);font-size:calc(12px * var(--text-scale,1))}
+.search-history-preference>label:first-child{cursor:pointer}
+.search-history-list-heading{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:calc(11px * var(--text-scale,1));padding:2px 4px 0}
+.search-history-dialog .recent-searches{display:flex;flex-direction:column;gap:4px;max-height:min(360px,44vh);overflow:auto;min-height:100px;margin:0}
+.search-history-dialog .recent-search-row{display:flex;align-items:center;gap:4px;border:0;border-radius:var(--field-radius);padding:0;background:var(--soft);min-height:42px;flex-shrink:0}
+.search-history-dialog .recent-search-row>button:first-child{flex:1;min-width:0;display:flex;align-items:center;gap:10px;text-align:left;padding:10px 12px;border:0;background:transparent;min-height:42px;font-size:calc(12px * var(--text-scale,1))}
+.search-history-dialog .recent-search-row>button:first-child>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent-search-row .icon{width:15px;height:15px;color:var(--muted);flex-shrink:0}
+.recent-search-row i{display:flex;opacity:0;transition:opacity .12s}
+.recent-search-row:hover i,.recent-search-row:focus-within i{opacity:1}
+.search-history-dialog .recent-search-row>button[data-delete-search]{display:flex;padding:6px;min-width:28px;min-height:28px;margin-right:8px;border:0}
+.search-history-dialog .recent-search-row:hover{background:var(--selected)}
+.search-history-dialog .search-history-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:150px;color:var(--muted);padding:20px;margin:0}
+.search-history-empty>.icon{width:26px;height:26px}.search-history-empty strong{font-size:calc(12px * var(--text-scale,1));font-weight:400;line-height:1.7}
+.search-history-dialog #clear-searches{margin-right:auto}
+@media(max-width:600px){.search-history-dialog .modal-body{padding:6px 18px 16px}}
