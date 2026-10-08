@@ -1,4 +1,4 @@
-Noto Color Emoji COLRv1 font, subset to the Unicode Flags group used by Clipper
+Noto Color Emoji COLRv1 font, subset to the Unicode Flags group used by Clip
 Source: https://github.com/googlefonts/noto-emoji/blob/e20cbc2bbec1926686be9f9bee7d1d2cfa1fea0e/2D/fonts/Noto-COLRv1.ttf
 Revision: e20cbc2bbec1926686be9f9bee7d1d2cfa1fea0e
 Subset command: pyftsubset Noto-COLRv1.ttf --text-file=flags.txt --output-file=reference-flags.ttf --layout-features='*' --no-hinting
