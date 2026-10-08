@@ -1,4 +1,4 @@
-Clip 0.51.0 — Third-party notices
+Clip 0.51.1 — Third-party notices
 Electron includes Chromium and Node.js. See LICENSE.electron.txt and LICENSES.chromium.html alongside Clip.exe.
 OneClip is a functional reference only; no OneClip source code is included.
 
