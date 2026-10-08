@@ -281,7 +281,7 @@ flowchart LR
     K --> L[另外打开图片编辑器]
 ```
 
-屏幕路径按显示器大小乘缩放因子请求图像，选区以归一化坐标转换到图片像素，并检查显示器配置是否改变。窗口路径则列出来源、保存短期令牌和窗口身份，再请求一个受限尺寸的窗口缩略图。具体实现见 [CaptureService](D:/Repositories/Clipper/src/main/capture.ts:15)、[选区界面](D:/Repositories/Clipper/src/renderer/capture.ts:9)、[页面入口](D:/Repositories/Clipper/src/renderer/capture-tools-ui.ts:53)、[保存记录](D:/Repositories/Clipper/src/main/index.ts:394)。
+屏幕路径按显示器大小乘缩放因子请求图像，选区以归一化坐标转换到图片像素，并检查显示器配置是否改变。窗口路径则列出来源、保存短期令牌和窗口身份，再请求一个受限尺寸的窗口缩略图。具体实现见 [CaptureService](D:/Repositories/Clip/src/main/capture.ts:15)、[选区界面](D:/Repositories/Clip/src/renderer/capture.ts:9)、[页面入口](D:/Repositories/Clip/src/renderer/capture-tools-ui.ts:53)、[保存记录](D:/Repositories/Clip/src/main/index.ts:394)。
 
 当前选区器包含拖框、像素尺寸显示、确认、重试和取消；没有成熟工具常见的选区边缘调整、移动已有选区、像素方向键、元素吸附、放大镜、选区内标注。
 
@@ -306,15 +306,15 @@ flowchart LR
     L --> M[另存为和复制文件]
 ```
 
-来源预览使用原生 `SourceHost`，目的是避免枚举阶段同时保留大量完整位图；**它不是当前视频捕获和编码引擎**。实际视频仍由浏览器媒体流和 `MediaRecorder` 完成。[来源预览](D:/Repositories/Clipper/src/main/recording-sources.ts:11)、[录制来源验证](D:/Repositories/Clipper/src/main/recording.ts:71)、[录制器](D:/Repositories/Clipper/src/renderer/recorder.ts:35)
+来源预览使用原生 `SourceHost`，目的是避免枚举阶段同时保留大量完整位图；**它不是当前视频捕获和编码引擎**。实际视频仍由浏览器媒体流和 `MediaRecorder` 完成。[来源预览](D:/Repositories/Clip/src/main/recording-sources.ts:11)、[录制来源验证](D:/Repositories/Clip/src/main/recording.ts:71)、[录制器](D:/Repositories/Clip/src/renderer/recorder.ts:35)
 
-当前容器支持 MP4、WebM、WAV；音频 MP4 输出为 M4A。帧率选项为 15/30/60，最大宽度选项为 1920/2560。MP4 请求 H.264/AAC，WebM 请求 VP9/Opus；这些是请求配置，**不是已测得实际编码器或实际帧率**。[录制定义](D:/Repositories/Clipper/src/shared/recording.ts:3)
+当前容器支持 MP4、WebM、WAV；音频 MP4 输出为 M4A。帧率选项为 15/30/60，最大宽度选项为 1920/2560。MP4 请求 H.264/AAC，WebM 请求 VP9/Opus；这些是请求配置，**不是已测得实际编码器或实际帧率**。[录制定义](D:/Repositories/Clip/src/shared/recording.ts:3)
 
 ### 5.3 图片编辑并非完全“把笔迹烙死”
 
-现有编辑器已经有矢量操作列表、撤销/重做、对象命中与变换、文字编辑、裁剪/旋转/镜像。历史共享不可变操作，没有为每一步保留整张高分辨率位图；PNG 输出用异步 `toBlob`，预览另有尺寸上限。这部分比简单堆全尺寸快照合理。[操作历史](D:/Repositories/Clipper/src/renderer/image-editor.ts:21)、[图形投影与命中](D:/Repositories/Clipper/src/shared/image-marks.ts)、[PNG 输出](D:/Repositories/Clipper/src/renderer/image-encode.ts:6)、[运动预览](D:/Repositories/Clipper/src/renderer/image-motion-preview.ts)
+现有编辑器已经有矢量操作列表、撤销/重做、对象命中与变换、文字编辑、裁剪/旋转/镜像。历史共享不可变操作，没有为每一步保留整张高分辨率位图；PNG 输出用异步 `toBlob`，预览另有尺寸上限。这部分比简单堆全尺寸快照合理。[操作历史](D:/Repositories/Clip/src/renderer/image-editor.ts:21)、[图形投影与命中](D:/Repositories/Clip/src/shared/image-marks.ts)、[PNG 输出](D:/Repositories/Clip/src/renderer/image-encode.ts:6)、[运动预览](D:/Repositories/Clip/src/renderer/image-motion-preview.ts)
 
-局限在于：编辑器与截图选区分离，工具不完整，最终保存为扁平 PNG，没有持久化可重新打开的标注工程。单次会话里可编辑，不等于保存后还能编辑原来的箭头和文字。[编辑结果保存](D:/Repositories/Clipper/src/main/image-editor.ts:26)
+局限在于：编辑器与截图选区分离，工具不完整，最终保存为扁平 PNG，没有持久化可重新打开的标注工程。单次会话里可编辑，不等于保存后还能编辑原来的箭头和文字。[编辑结果保存](D:/Repositories/Clip/src/main/image-editor.ts:26)
 
 ## 6. 现有实现最不合理的地方：逐项审计
 
@@ -322,7 +322,7 @@ flowchart LR
 
 ### CAP-01 · 把窗口缩略图当最终截图，静默降低质量 · P1
 
-**源码确认：** `takeWindow()` 取最长边 2560 和总计 4,000,000 像素两个条件中更小的缩放比例，再使用 `shot.thumbnail.toPNG()` 返回图片。[capture.ts](D:/Repositories/Clipper/src/main/capture.ts:16)
+**源码确认：** `takeWindow()` 取最长边 2560 和总计 4,000,000 像素两个条件中更小的缩放比例，再使用 `shot.thumbnail.toPNG()` 返回图片。[capture.ts](D:/Repositories/Clip/src/main/capture.ts:16)
 
 **问题：** 列表预览应当小，最终截图应当按用户期望保存原图；现在把两种目的混在一起。高分辨率窗口尤其是大量小字会失去像素信息，后续保存 PNG 也不能找回来。
 
@@ -332,7 +332,7 @@ flowchart LR
 
 ### CAP-02 · 保存再编辑，让用户承担内部组织方式 · P1
 
-**源码确认：** 选区窗口只返回矩形；截图接口马上写历史，页面跳转选中记录，再由另一个入口打开编辑器。[选区器](D:/Repositories/Clipper/src/renderer/capture.ts:9)、[页面完成动作](D:/Repositories/Clipper/src/renderer/capture-tools-ui.ts:53)、[记录写入](D:/Repositories/Clipper/src/main/index.ts:394)
+**源码确认：** 选区窗口只返回矩形；截图接口马上写历史，页面跳转选中记录，再由另一个入口打开编辑器。[选区器](D:/Repositories/Clip/src/renderer/capture.ts:9)、[页面完成动作](D:/Repositories/Clip/src/renderer/capture-tools-ui.ts:53)、[记录写入](D:/Repositories/Clip/src/main/index.ts:394)
 
 **问题：** 用户想“截这段，加箭头，贴到聊天”，却先经过记录页面。取消后续编辑也可能已经留下中间素材。截图成功不等于交付成功。
 
@@ -340,7 +340,7 @@ flowchart LR
 
 ### CAP-03 · 每次新建窗口，加固定等待来避免截到自己 · P1
 
-**源码确认：** 每次区域截图隐藏可见 Clipper 窗口，固定等待 200 ms，然后捕获、创建 BrowserWindow、加载页面、显示；最后逐个 `show()` 恢复。[capture.ts](D:/Repositories/Clipper/src/main/capture.ts:22)
+**源码确认：** 每次区域截图隐藏可见 Clipper 窗口，固定等待 200 ms，然后捕获、创建 BrowserWindow、加载页面、显示；最后逐个 `show()` 恢复。[capture.ts](D:/Repositories/Clip/src/main/capture.ts:22)
 
 **问题：** 固定等待增加至少一个明确的时间成本，却不能证明所有机器都已经完成桌面合成。窗口创建与加载再增加延迟；恢复窗口可见性也不是恢复原应用输入焦点。
 
@@ -350,7 +350,7 @@ flowchart LR
 
 ### CAP-04 · 大图传输与保存路径没有统一复用已有优化 · P1
 
-**源码确认：** 选区背景通过 data URL 传输，最终主进程 `toPNG().toString('base64')`；截图保存直接 `store.add()`。仓库其他大载荷路径已经有 `CaptureWriter` 工作线程。[capture.ts](D:/Repositories/Clipper/src/main/capture.ts:23)、[截图写入](D:/Repositories/Clipper/src/main/index.ts:394)、[CaptureWriter](D:/Repositories/Clipper/src/main/capture-writer.ts:18)
+**源码确认：** 选区背景通过 data URL 传输，最终主进程 `toPNG().toString('base64')`；截图保存直接 `store.add()`。仓库其他大载荷路径已经有 `CaptureWriter` 工作线程。[capture.ts](D:/Repositories/Clip/src/main/capture.ts:23)、[截图写入](D:/Repositories/Clip/src/main/index.ts:394)、[CaptureWriter](D:/Repositories/Clip/src/main/capture-writer.ts:18)
 
 **问题：** Base64 相比原始字节本身约增加三分之一体积，再有字符串与图像解码的瞬时驻留；重复维护重负载路径也会导致某些入口被优化、另一些仍阻塞。主进程同步 PNG/存储处理是否造成明显卡顿，需测量，不能仅凭存在字符串就说一定慢多少倍。
 
@@ -358,7 +358,7 @@ flowchart LR
 
 ### CAP-05 · 把会变化的窗口标题当身份条件 · P1
 
-**源码确认：** 已验证 HWND/PID 后，仍要求 `source.id` 与 `source.name` 都等于列表时的值。[capture.ts](D:/Repositories/Clipper/src/main/capture.ts:16)
+**源码确认：** 已验证 HWND/PID 后，仍要求 `source.id` 与 `source.name` 都等于列表时的值。[capture.ts](D:/Repositories/Clip/src/main/capture.ts:16)
 
 **问题：** 浏览器切换标签、文档改名或出现未保存标记，窗口可能仍然是原来的合法目标，却因标题变化被拒绝。
 
@@ -366,13 +366,13 @@ flowchart LR
 
 ### CAP-06 · 选区能力过少，无法弥补一次拖框不准 · P1
 
-**源码确认：** 再次按下左键重新创建矩形；没有现有矩形的边角调整、移动和像素键盘控制。[capture.ts（界面）](D:/Repositories/Clipper/src/renderer/capture.ts:9)
+**源码确认：** 再次按下左键重新创建矩形；没有现有矩形的边角调整、移动和像素键盘控制。[capture.ts（界面）](D:/Repositories/Clip/src/renderer/capture.ts:9)
 
 **建议：** 补八个调整点、选区内拖动、方向键微调与修饰键尺寸控制，再考虑窗口吸附、放大镜、取色。元素检测失败时继续可手动操作。多显示器跨屏选区是另一层能力，需统一物理坐标与各屏缩放，不能简单扩大一个 DOM 宽度。
 
 ### REC-01 · WAV 分块上限与录制时长不相容 · P0
 
-**源码确认：** Worklet 每 4096 个采样帧发送一次 PCM；固定双声道 PCM16，每次约 16 KiB。`WavRecorder` 逐包发送 `Blob`，忽略传入的时间间隔。文件层最多接受 10,000 个分块，其中第一个是 WAV 头。[wav-worklet.js](D:/Repositories/Clipper/src/renderer/wav-worklet.js:2)、[wav-recorder.ts](D:/Repositories/Clipper/src/renderer/wav-recorder.ts:4)、[recording-file.ts](D:/Repositories/Clipper/src/main/recording-file.ts:14)
+**源码确认：** Worklet 每 4096 个采样帧发送一次 PCM；固定双声道 PCM16，每次约 16 KiB。`WavRecorder` 逐包发送 `Blob`，忽略传入的时间间隔。文件层最多接受 10,000 个分块，其中第一个是 WAV 头。[wav-worklet.js](D:/Repositories/Clip/src/renderer/wav-worklet.js:2)、[wav-recorder.ts](D:/Repositories/Clip/src/renderer/wav-recorder.ts:4)、[recording-file.ts](D:/Repositories/Clip/src/main/recording-file.ts:14)
 
 **工程推导，未实测：**
 
@@ -389,7 +389,7 @@ flowchart LR
 
 ### REC-02 · 负载或编码错误后直接清除已有录制 · P0
 
-**源码确认：** 渲染端待写内容超过 24 MiB，或编码/写入失败时调用 `fail()`，释放流并调用主进程失败接口；状态重置最终 `dispose()` 清空密钥并删除暂存。[recorder.ts](D:/Repositories/Clipper/src/renderer/recorder.ts:29)、[待写阈值](D:/Repositories/Clipper/src/renderer/recorder.ts:41)、[状态重置](D:/Repositories/Clipper/src/main/recording.ts:87)、[文件销毁](D:/Repositories/Clipper/src/main/recording-file.ts:18)
+**源码确认：** 渲染端待写内容超过 24 MiB，或编码/写入失败时调用 `fail()`，释放流并调用主进程失败接口；状态重置最终 `dispose()` 清空密钥并删除暂存。[recorder.ts](D:/Repositories/Clip/src/renderer/recorder.ts:29)、[待写阈值](D:/Repositories/Clip/src/renderer/recorder.ts:41)、[状态重置](D:/Repositories/Clip/src/main/recording.ts:87)、[文件销毁](D:/Repositories/Clip/src/main/recording-file.ts:18)
 
 **问题：** 队列必须受限，但“队列满了”不应自动等于“前面十分钟白录了”。磁盘变慢、空间不足、设备断开、编码器损坏应有不同处理，不能全部复用取消并销毁。
 
@@ -399,7 +399,7 @@ flowchart LR
 
 ### REC-03 · UI 消失就结束会话，暂存不能跨进程恢复 · P1
 
-**源码确认：** 录制媒体、混音、编码在录制渲染页面里；页面进程崩溃或宿主关闭会触发 abort。暂存 AES 密钥和分块索引只存在内存，初始化会清理旧 `.sealed` 文件。[recording.ts](D:/Repositories/Clipper/src/main/recording.ts:60)、[暂存密钥与清理](D:/Repositories/Clipper/src/main/recording-file.ts:9)
+**源码确认：** 录制媒体、混音、编码在录制渲染页面里；页面进程崩溃或宿主关闭会触发 abort。暂存 AES 密钥和分块索引只存在内存，初始化会清理旧 `.sealed` 文件。[recording.ts](D:/Repositories/Clip/src/main/recording.ts:60)、[暂存密钥与清理](D:/Repositories/Clip/src/main/recording-file.ts:9)
 
 **问题：** 控制界面异常与捕获会话丢失绑定。文件虽加密落盘，进程崩溃后密钥和索引没了，不能恢复。加密本身是合理隐私保护，缺的是可配置的恢复策略。
 
@@ -407,7 +407,7 @@ flowchart LR
 
 ### REC-04 · “最多 60 分钟”与 1 GiB 的组合容易误导 · P1
 
-公共上限是 3600 秒和 1 GiB，主进程临近上限时预留约 32 MiB 提前停。当前视频请求码率为 6 或 12 Mbps。[recording.ts（定义）](D:/Repositories/Clipper/src/shared/recording.ts:3)、[码率](D:/Repositories/Clipper/src/renderer/recorder.ts:40)、[主进程监控](D:/Repositories/Clipper/src/main/recording.ts)
+公共上限是 3600 秒和 1 GiB，主进程临近上限时预留约 32 MiB 提前停。当前视频请求码率为 6 或 12 Mbps。[recording.ts（定义）](D:/Repositories/Clip/src/shared/recording.ts:3)、[码率](D:/Repositories/Clip/src/renderer/recorder.ts:40)、[主进程监控](D:/Repositories/Clip/src/main/recording.ts)
 
 **条件估算，不是实测时长：** 若编码器平均视频码率接近请求值，约 992 MiB 可容纳 6 Mbps 视频 23.1 分钟，12 Mbps 视频 11.6 分钟，加入音频与封装还会减少；实际码率可变，不能据此承诺固定停机时间。
 
@@ -415,7 +415,7 @@ flowchart LR
 
 ### REC-05 · 区域裁剪由定时器取帧，缺少源帧同步 · P1
 
-**源码确认：** 先捕获源桌面，再用 `video → canvas → captureStream(0)`，按 `setInterval(1000/fps)` 重绘和 `requestFrame()`。[region-stream.ts](D:/Repositories/Clipper/src/renderer/region-stream.ts:6)
+**源码确认：** 先捕获源桌面，再用 `video → canvas → captureStream(0)`，按 `setInterval(1000/fps)` 重绘和 `requestFrame()`。[region-stream.ts](D:/Repositories/Clip/src/renderer/region-stream.ts:6)
 
 **问题：** 定时器频率不等于新视频帧到达频率，忙时可能延后，闲时可能重复同一源帧。浏览器内部可能有 GPU 加速，不能武断地说每次绘图都纯 CPU；但这条二次采样和合成路径确实存在。
 
@@ -423,7 +423,7 @@ flowchart LR
 
 ### REC-06 · 音频控制只是“都减半再混在一起” · P1
 
-**源码确认：** 双来源时每路增益固定 0.5，单来源 1；麦克风固定请求回声消除；只有混音后的一个电平表和输出音轨。WAV 固定双声道，单声道输入被复制为两声道。[混音](D:/Repositories/Clipper/src/renderer/recorder.ts:38)、[WAV 格式](D:/Repositories/Clipper/src/renderer/wav-recorder.ts:5)、[PCM 声道处理](D:/Repositories/Clipper/src/renderer/wav-worklet.js:4)
+**源码确认：** 双来源时每路增益固定 0.5，单来源 1；麦克风固定请求回声消除；只有混音后的一个电平表和输出音轨。WAV 固定双声道，单声道输入被复制为两声道。[混音](D:/Repositories/Clip/src/renderer/recorder.ts:38)、[WAV 格式](D:/Repositories/Clip/src/renderer/wav-recorder.ts:5)、[PCM 声道处理](D:/Repositories/Clip/src/renderer/wav-worklet.js:4)
 
 **问题：** 同时开启系统声和麦克风时，安静的声源也被降低约 6 dB；用户无法判断是哪一路没有声音、单独静音、调节比例或选适合原声录音的处理策略。两路直接恢复增益 1 又可能削波，不能靠另一组硬编码解决。
 
@@ -431,49 +431,49 @@ flowchart LR
 
 ### REC-07 · 只有格式可用性，没有编码质量与性能可观测性 · P1
 
-`MediaRecorder.isTypeSupported()` 只回答 MIME 支持，不报告实际硬件编码器、持续帧率、掉帧、队列延迟或同步误差。固定码率只按宽度档位区分，没有考虑 FPS、运动或文字场景。[recorder.ts](D:/Repositories/Clipper/src/renderer/recorder.ts:35)
+`MediaRecorder.isTypeSupported()` 只回答 MIME 支持，不报告实际硬件编码器、持续帧率、掉帧、队列延迟或同步误差。固定码率只按宽度档位区分，没有考虑 FPS、运动或文字场景。[recorder.ts](D:/Repositories/Clip/src/renderer/recorder.ts:35)
 
 **建议：** 先收集实际来源尺寸/FPS、输出格式、编码与写入时延、丢帧及文件码率，再比较浏览器方案与原生方案。质量提供“文字演示/普通视频”等少量预设，复杂参数放高级选项。不能仅显示“支持 MP4”就宣传硬件加速或 60 FPS 稳定。
 
 ### REC-08 · 用全局互斥封掉正常并行场景 · P1
 
-截图和窗口截图接口在 `recorder.active` 时直接拒绝。[index.ts](D:/Repositories/Clipper/src/main/index.ts:394)
+截图和窗口截图接口在 `recorder.active` 时直接拒绝。[index.ts](D:/Repositories/Clip/src/main/index.ts:394)
 
 **问题：** 会话之间防竞争是正确目标，但录制音频、持续录屏、截一张静态图片并不都必须互斥。用一个全局 active 解决所有资源关系，功能越多越难扩展。
 
 **建议：** 用资源和行为区分：同一来源可否共享帧、选择遮罩是否会进入录制、是否会改变前景、是否仅抓当前帧。明确允许录制中截帧和普通截图；选区 UI 可选择排除或录入。
 
-**当前边界：** 最新 `panelsBlocked()` 已不直接包含 `recorder.active`，不能把之前“快捷面板完全被录制状态阻止”的旧结论写成现状；独立快捷回复入口仍有录制相关阻止条件，需在后续联动验收中核对。[阻止条件](D:/Repositories/Clipper/src/main/index.ts:211)
+**当前边界：** 最新 `panelsBlocked()` 已不直接包含 `recorder.active`，不能把之前“快捷面板完全被录制状态阻止”的旧结论写成现状；独立快捷回复入口仍有录制相关阻止条件，需在后续联动验收中核对。[阻止条件](D:/Repositories/Clip/src/main/index.ts:211)
 
 ### REC-09 · 隐藏本应用所有窗口不是完整的捕获排除方案 · P1
 
-开始录制时隐藏可见的其他 Clipper 窗口；独立录制窗口被置顶并缩到 480×260，嵌入页面并不等同这个尺寸。[recording.ts](D:/Repositories/Clipper/src/main/recording.ts:83)
+开始录制时隐藏可见的其他 Clipper 窗口；独立录制窗口被置顶并缩到 480×260，嵌入页面并不等同这个尺寸。[recording.ts](D:/Repositories/Clip/src/main/recording.ts:83)
 
-**问题：** 用户可能需要在 Clipper 内展示内容，也可能只希望隐藏控制条；全局隐藏不区分这两个目标。窗口来源还排除本应用进程，因此不能直接选择 Clipper 自身窗口作为录制来源。[来源筛选](D:/Repositories/Clipper/src/main/recording.ts:75)
+**问题：** 用户可能需要在 Clipper 内展示内容，也可能只希望隐藏控制条；全局隐藏不区分这两个目标。窗口来源还排除本应用进程，因此不能直接选择 Clipper 自身窗口作为录制来源。[来源筛选](D:/Repositories/Clip/src/main/recording.ts:75)
 
 **建议：** 控制条默认不录入；主窗口和内容窗口是否录入由来源选择决定。停止/取消不应把不相关窗口都抢到前面。捕获排除能力需在支持的平台检测，回退路径要可解释。
 
 ### EDIT-01 · 标注工具不完整，但现有编辑底座值得保留 · P1/P2
 
-`ImageMark` 已有画笔、形状、箭头、文字和实色 cover。cover 是不透明遮盖，不是像素化马赛克或高斯模糊。当前还有 1,600 万像素、100 步编辑等显式边界。[image-edit.ts](D:/Repositories/Clipper/src/shared/image-edit.ts:2)
+`ImageMark` 已有画笔、形状、箭头、文字和实色 cover。cover 是不透明遮盖，不是像素化马赛克或高斯模糊。当前还有 1,600 万像素、100 步编辑等显式边界。[image-edit.ts](D:/Repositories/Clip/src/shared/image-edit.ts:2)
 
 **建议：** 复用操作模型和命中/变换代码，把编辑工具接入捕获会话；补高亮、序号、真正的马赛克/模糊、颜色与线宽快捷控制。可编辑工程与扁平导出分开；遮挡隐私默认使用实色遮盖，模糊只是视觉效果，不提供无法还原的保证。
 
 ### PIN-01 · 贴图只有窗口，没有参考图工作流 · P2
 
-当前只允许 PNG/文字、最多 20 个；图片可滚轮缩放，窗口可拖动、复制和关闭。未形成透明度、鼠标穿透、旋转/镜像、分组、状态恢复等完整控制。[贴图创建](D:/Repositories/Clipper/src/main/index.ts:166)、[贴图操作](D:/Repositories/Clipper/src/renderer/sticker.ts:6)
+当前只允许 PNG/文字、最多 20 个；图片可滚轮缩放，窗口可拖动、复制和关闭。未形成透明度、鼠标穿透、旋转/镜像、分组、状态恢复等完整控制。[贴图创建](D:/Repositories/Clip/src/main/index.ts:166)、[贴图操作](D:/Repositories/Clip/src/renderer/sticker.ts:6)
 
 **建议：** 独立保存贴图内容引用和窗口变换，支持快速隐藏/恢复、透明度、穿透和分组，再考虑更多类型。缩略图只是显示状态，复制/导出应能得到原始图。不要另写一套记录详情和标注格式。
 
 ### GIF-01 / LONG-01 · 两项目前没有实现的能力 · P2
 
-当前录制格式定义没有 GIF，捕获服务也没有滚动拼接、帧素材项目或时间轴。代码支持显示/导入某些图片格式，不等于有 GIF 创作能力。[录制类型](D:/Repositories/Clipper/src/shared/recording.ts:4)、[捕获服务](D:/Repositories/Clipper/src/main/capture.ts:9)
+当前录制格式定义没有 GIF，捕获服务也没有滚动拼接、帧素材项目或时间轴。代码支持显示/导入某些图片格式，不等于有 GIF 创作能力。[录制类型](D:/Repositories/Clip/src/shared/recording.ts:4)、[捕获服务](D:/Repositories/Clip/src/main/capture.ts:9)
 
 补齐需要各自独立的素材和会话设计，第 7、8 节给出方案。禁止以“支持截图和录屏”笼统掩盖这两项缺口。
 
 ### COLOR-01 · HDR、色彩和多屏只有部分坐标处理 · P2
 
-当前已有显示器签名、缩放换算和区域配置变化检测，但没有明确的 HDR 输入、色彩转换和输出配置管线。**尚未实测，不断言现有图片一定发灰或过曝。** WGC 文档提醒 HDR 场景需要合适的浮点格式与可能的 SDR 映射。[区域与显示器定义](D:/Repositories/Clipper/src/shared/region.ts)、[微软 HDR 捕获说明](https://learn.microsoft.com/en-us/windows/apps/develop/media-authoring-processing/screen-capture)
+当前已有显示器签名、缩放换算和区域配置变化检测，但没有明确的 HDR 输入、色彩转换和输出配置管线。**尚未实测，不断言现有图片一定发灰或过曝。** WGC 文档提醒 HDR 场景需要合适的浮点格式与可能的 SDR 映射。[区域与显示器定义](D:/Repositories/Clip/src/shared/region.ts)、[微软 HDR 捕获说明](https://learn.microsoft.com/en-us/windows/apps/develop/media-authoring-processing/screen-capture)
 
 **建议：** 先规定默认输出 SDR/sRGB，正确检测 HDR 并测试映射；跨屏时明确比例与像素口径。4K 和 150% 缩放不是同一维度，不能只测一种组合。
 
@@ -490,7 +490,7 @@ flowchart LR
 | 操作型编辑历史、异步 PNG 输出 | 比整图快照更有扩展价值 | 接入统一截图会话，继续控制图像驻留 |
 | 来源预览的原生小任务 | 来源列表不是完整桌面帧仓库 | 不能把它误称已有原生录屏能力 |
 
-依据：[录制权限](D:/Repositories/Clipper/src/main/recording.ts:29)、[录制文件](D:/Repositories/Clipper/src/main/recording-file.ts)、[来源预览](D:/Repositories/Clipper/src/main/recording-sources.ts)、[图片编辑](D:/Repositories/Clipper/src/renderer/image-editor.ts:21)。
+依据：[录制权限](D:/Repositories/Clip/src/main/recording.ts:29)、[录制文件](D:/Repositories/Clip/src/main/recording-file.ts)、[来源预览](D:/Repositories/Clip/src/main/recording-sources.ts)、[图片编辑](D:/Repositories/Clip/src/renderer/image-editor.ts:21)。
 
 ## 7. 关键功能应怎样实现
 
@@ -575,7 +575,7 @@ flowchart LR
 
 ### 7.4 纯录音：不需要顺带申请屏幕视频流
 
-当前录系统声时依赖桌面媒体请求，纯系统录音也先获得视频轨道，再停掉它。原生录音服务可以直接用 WASAPI 端点回环获取扬声器输出，麦克风另一路采集，不需要屏幕图像。[当前媒体请求](D:/Repositories/Clipper/src/renderer/recorder.ts:37)、[WASAPI 回环](https://learn.microsoft.com/en-us/windows/win32/coreaudio/loopback-recording)
+当前录系统声时依赖桌面媒体请求，纯系统录音也先获得视频轨道，再停掉它。原生录音服务可以直接用 WASAPI 端点回环获取扬声器输出，麦克风另一路采集，不需要屏幕图像。[当前媒体请求](D:/Repositories/Clip/src/renderer/recorder.ts:37)、[WASAPI 回环](https://learn.microsoft.com/en-us/windows/win32/coreaudio/loopback-recording)
 
 “所有系统声音”与“只录某个应用”必须区分。微软的进程回环示例支持包含/排除进程树，并有最低构建版本要求；不能只把系统回环改个标签就宣称按应用录音。[进程音频示例](https://learn.microsoft.com/en-us/samples/microsoft/windows-classic-samples/applicationloopbackaudio-sample/)
 
@@ -778,7 +778,7 @@ FFmpeg 的 `palettegen` 可以统计整帧、变化部分或单帧颜色，`pale
 
 仓库已有录制核心、来源、声音、权限、区域、边界和驻留测试。源码中也有“源窗口关闭后保留可播放预览”的测试，这说明已有部分受控早停处理，不应笼统声称任何中断都会丢失。
 
-相关文件：[录制核心](D:/Repositories/Clipper/tests/recording-core.cjs)、[音频测试](D:/Repositories/Clipper/tests/recording-audio.cjs)、[来源窗口关闭](D:/Repositories/Clipper/tests/recording-boundaries.cjs:10)、[区域录制](D:/Repositories/Clipper/tests/recording-region.cjs)、[来源预览性能](D:/Repositories/Clipper/tests/recording-sources-performance.cjs)、[视频驻留](D:/Repositories/Clipper/tests/recording-residency.cjs)、[音频驻留](D:/Repositories/Clipper/tests/recording-audio-residency.cjs)、[窗口截图](D:/Repositories/Clipper/tests/window-capture.cjs)。
+相关文件：[录制核心](D:/Repositories/Clip/tests/recording-core.cjs)、[音频测试](D:/Repositories/Clip/tests/recording-audio.cjs)、[来源窗口关闭](D:/Repositories/Clip/tests/recording-boundaries.cjs:10)、[区域录制](D:/Repositories/Clip/tests/recording-region.cjs)、[来源预览性能](D:/Repositories/Clip/tests/recording-sources-performance.cjs)、[视频驻留](D:/Repositories/Clip/tests/recording-residency.cjs)、[音频驻留](D:/Repositories/Clip/tests/recording-audio-residency.cjs)、[窗口截图](D:/Repositories/Clip/tests/window-capture.cjs)。
 
 本次没有重新运行这些测试，也没有由测试名称推断全部验收场景都覆盖。短录制能播放、内存有限或权限拒绝正确，分别只证明对应维度；不足以证明长 WAV、4K 原图、长时音画同步、慢盘保留、崩溃恢复和 GIF 创作已经完成。
 
@@ -827,10 +827,10 @@ FFmpeg 的 `palettegen` 可以统计整帧、变化部分或单帧颜色，`pale
 
 ### Clipper 本地审计范围
 
-核心捕获：[capture.ts](D:/Repositories/Clipper/src/main/capture.ts)、[capture-tools-ui.ts](D:/Repositories/Clipper/src/renderer/capture-tools-ui.ts)、[capture.ts（选区）](D:/Repositories/Clipper/src/renderer/capture.ts)、[region.ts](D:/Repositories/Clipper/src/shared/region.ts)。
+核心捕获：[capture.ts](D:/Repositories/Clip/src/main/capture.ts)、[capture-tools-ui.ts](D:/Repositories/Clip/src/renderer/capture-tools-ui.ts)、[capture.ts（选区）](D:/Repositories/Clip/src/renderer/capture.ts)、[region.ts](D:/Repositories/Clip/src/shared/region.ts)。
 
-录制与音频：[recording.ts（主进程）](D:/Repositories/Clipper/src/main/recording.ts)、[recording-file.ts](D:/Repositories/Clipper/src/main/recording-file.ts)、[recording-sources.ts](D:/Repositories/Clipper/src/main/recording-sources.ts)、[SourceHost.cpp](D:/Repositories/Clipper/native/SourceHost.cpp)、[recording.ts（定义）](D:/Repositories/Clipper/src/shared/recording.ts)、[recorder.ts](D:/Repositories/Clipper/src/renderer/recorder.ts)、[region-stream.ts](D:/Repositories/Clipper/src/renderer/region-stream.ts)、[wav-recorder.ts](D:/Repositories/Clipper/src/renderer/wav-recorder.ts)、[wav-worklet.js](D:/Repositories/Clipper/src/renderer/wav-worklet.js)。
+录制与音频：[recording.ts（主进程）](D:/Repositories/Clip/src/main/recording.ts)、[recording-file.ts](D:/Repositories/Clip/src/main/recording-file.ts)、[recording-sources.ts](D:/Repositories/Clip/src/main/recording-sources.ts)、[SourceHost.cpp](D:/Repositories/Clip/native/SourceHost.cpp)、[recording.ts（定义）](D:/Repositories/Clip/src/shared/recording.ts)、[recorder.ts](D:/Repositories/Clip/src/renderer/recorder.ts)、[region-stream.ts](D:/Repositories/Clip/src/renderer/region-stream.ts)、[wav-recorder.ts](D:/Repositories/Clip/src/renderer/wav-recorder.ts)、[wav-worklet.js](D:/Repositories/Clip/src/renderer/wav-worklet.js)。
 
-编辑与交付：[image-editor.ts（主进程）](D:/Repositories/Clipper/src/main/image-editor.ts)、[image-editor.ts（界面）](D:/Repositories/Clipper/src/renderer/image-editor.ts)、[image-edit.ts](D:/Repositories/Clipper/src/shared/image-edit.ts)、[image-marks.ts](D:/Repositories/Clipper/src/shared/image-marks.ts)、[image-draw.ts](D:/Repositories/Clipper/src/renderer/image-draw.ts)、[image-encode.ts](D:/Repositories/Clipper/src/renderer/image-encode.ts)、[image-motion-preview.ts](D:/Repositories/Clipper/src/renderer/image-motion-preview.ts)、[capture-writer.ts](D:/Repositories/Clipper/src/main/capture-writer.ts)、[capture-writer-worker.ts](D:/Repositories/Clipper/src/main/capture-writer-worker.ts)、[贴图界面](D:/Repositories/Clipper/src/renderer/sticker.ts)、[功能联动入口](D:/Repositories/Clipper/src/main/index.ts)。
+编辑与交付：[image-editor.ts（主进程）](D:/Repositories/Clip/src/main/image-editor.ts)、[image-editor.ts（界面）](D:/Repositories/Clip/src/renderer/image-editor.ts)、[image-edit.ts](D:/Repositories/Clip/src/shared/image-edit.ts)、[image-marks.ts](D:/Repositories/Clip/src/shared/image-marks.ts)、[image-draw.ts](D:/Repositories/Clip/src/renderer/image-draw.ts)、[image-encode.ts](D:/Repositories/Clip/src/renderer/image-encode.ts)、[image-motion-preview.ts](D:/Repositories/Clip/src/renderer/image-motion-preview.ts)、[capture-writer.ts](D:/Repositories/Clip/src/main/capture-writer.ts)、[capture-writer-worker.ts](D:/Repositories/Clip/src/main/capture-writer-worker.ts)、[贴图界面](D:/Repositories/Clip/src/renderer/sticker.ts)、[功能联动入口](D:/Repositories/Clip/src/main/index.ts)。
 
 本次结论的核心依据是功能说明与代码路径。下一轮真正值得做的，是先修复会丢数据和误报限制的路径，再把捕获、编辑、交付连成用户可以顺手完成的操作，最后用可重复测量决定后端与性能优化。
