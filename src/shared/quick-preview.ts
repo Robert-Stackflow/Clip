@@ -15,4 +15,4 @@ export function quickPreviewPlacement(panel:Rect,anchor:Rect,area:Rect,height=44
  return {bounds,side,arrow:Math.max(Math.min(28,length/2),Math.min(center,length-Math.min(28,length/2)))};
 }
 export interface QuickPreviewAPI{onState(callback:(value:QuickPreviewState|null)=>void):()=>void;presence(inside:boolean):void}
-declare global{interface Window{clipperQuickPreview:QuickPreviewAPI}}
+declare global{interface Window{clipQuickPreview:QuickPreviewAPI}}

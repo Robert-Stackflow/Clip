@@ -1,15 +1,15 @@
 const {chromium,expect}=require('@playwright/test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),{setup}=require('./renderer-fixture.cjs');
 function statuses(){
  for(const item of fixture.state.clips){item.favorite=false;item.pinned=false;}
- clipper.settings=async value=>{fixture.state.settings=value;};
- clipper.action=async(id,action)=>{const item=fixture.state.clips.find(row=>row.id===id);if(action==='favorite'){item.favorite=!item.favorite;fixture.state.favoriteOrder=fixture.state.clips.filter(row=>row.favorite).map(row=>row.id);}if(action==='pin')item.pinned=!item.pinned;fixture.refresh();};
- clipper.screens=async()=>[{id:1,name:'Fixture display',width:1920,height:1080}];
+ clip.settings=async value=>{fixture.state.settings=value;};
+ clip.action=async(id,action)=>{const item=fixture.state.clips.find(row=>row.id===id);if(action==='favorite'){item.favorite=!item.favorite;fixture.state.favoriteOrder=fixture.state.clips.filter(row=>row.favorite).map(row=>row.id);}if(action==='pin')item.pinned=!item.pinned;fixture.refresh();};
+ clip.screens=async()=>[{id:1,name:'Fixture display',width:1920,height:1080}];
 }
-(async()=>{const output=path.resolve('work/development/record-status');await fs.mkdir(output,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true}),errors=[];
+(async()=>{const output=path.resolve('work/Clip/development/record-status');await fs.mkdir(output,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true}),errors=[];
  try{for(const [language,dark,width,scale]of [['zh-CN',false,1200,100],['en',true,860,125]]){
   const context=await browser.newContext({viewport:{width,height:820}});await context.addInitScript({content:`(${setup.toString()})(${JSON.stringify(language)});fixture.state.dark=${dark};fixture.appearance({font:'system',scale:${scale},density:'comfortable'});(${statuses.toString()})();`});
-  await context.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
-  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));await page.goto('https://clipper.test/index.html');await page.locator('.clip-row[data-id=text]').click();
+  await context.route('https://clip.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
+  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));await page.goto('https://clip.test/index.html');await page.locator('.clip-row[data-id=text]').click();
   const rowLayout=()=>page.locator('.clip-row[data-id=text]').evaluate(node=>{const title=node.querySelector('.row-title').getBoundingClientRect(),flags=node.querySelector('.row-flags').getBoundingClientRect(),meta=node.querySelector('.row-meta').getBoundingClientRect(),row=node.getBoundingClientRect();return [row.height,title.x-row.x,title.y-row.y,title.width,title.height,flags.width,flags.height,meta.y-row.y];});const initialLayout=await rowLayout();
   const statusTimeGap=()=>page.locator('.clip-row[data-id=text]').evaluate(node=>node.querySelector('.row-time').getBoundingClientRect().left-node.querySelector('.row-flags').getBoundingClientRect().right);assert(Math.abs(await statusTimeGap()-8)<1,'List status and time should be grouped without auto-margin whitespace');
   const gaps=await page.locator('.detail-tools').evaluate(node=>{const rects=Array.from(node.children).map(child=>child.getBoundingClientRect());return rects.slice(1).map((rect,index)=>rect.left-rects[index].right);});assert(gaps.every(gap=>gap>=7.9));

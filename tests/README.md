@@ -10,4 +10,4 @@
 
 默认逻辑回归将随机样本放入 `work/current/core/fixtures`，结束后清理。`npm run test:workflow` 检查开发隔离、版本保留和清理边界；`npm run verify -- foundation-044 options-044 chrome-044 collection-042 auxiliary-043` 检查当前界面与固定的 One 来源样本。
 
-对旧版本进行性能对比时，显式提供 `CLIPPER_OPTIONS_BASELINE_ASAR`、`CLIPPER_CHROME_BASELINE_ASAR` 或 `CLIPPER_COLLECTION_BASELINE_ASAR`。没有基线时只报告当前行为和当前测量，不使用已删除工作区，也不宣称已完成旧版对比。完整程序兼容性、真实设备和安装回退仍需独立验收。
+对旧版本进行性能对比时，显式提供 `CLIP_OPTIONS_BASELINE_ASAR`、`CLIP_CHROME_BASELINE_ASAR` 或 `CLIP_COLLECTION_BASELINE_ASAR`。没有基线时只报告当前行为和当前测量，不使用已删除工作区，也不宣称已完成旧版对比。完整程序兼容性、真实设备和安装回退仍需独立验收。

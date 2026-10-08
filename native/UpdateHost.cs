@@ -7,7 +7,7 @@ using System.Threading;
 using System.Web.Script.Serialization;
 using Microsoft.Win32;
 
-namespace ClipperUpdate
+namespace ClipUpdate
 {
     // Runs from the download cache so replacement can remove every old program file.
     internal static class UpdateHost
@@ -16,14 +16,14 @@ namespace ClipperUpdate
         const string Guid = Verification.Guid;
         const int ExitWait = 1500;
 #else
-        const string Guid = "b6d4d333-0ac3-5509-8b81-d6b57d4a4f1a";
+        const string Guid = "c3cffeb7-343a-5f68-9113-943b5093c7c4";
         const int ExitWait = 60000;
 #endif
         static readonly JavaScriptSerializer Json = new JavaScriptSerializer();
 #if UPDATE_VERIFICATION
         static readonly string Executable = Verification.Executable;
 #else
-        static readonly string Executable = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Clipper", "Clipper.exe");
+        static readonly string Executable = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Clip", "Clip.exe");
 #endif
         public sealed class Ticket { public int pid; public string executable; public string version; public string sha256; public string checkpointId; public string profileId; }
         static bool Same(string a, string b) { return String.Equals(Path.GetFullPath(a), Path.GetFullPath(b), StringComparison.OrdinalIgnoreCase); }
@@ -33,7 +33,7 @@ namespace ClipperUpdate
             using (RegistryKey key = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\" + Guid))
             {
                 string name = key == null ? "" : key.GetValue("DisplayName") as string;
-                return key != null && (name == "Clipper" || (name != null && name.StartsWith("Clipper ", StringComparison.Ordinal)))
+                return key != null && (name == "Clip" || (name != null && name.StartsWith("Clip ", StringComparison.Ordinal)))
                     && File.Exists(Path.Combine(Path.GetDirectoryName(Executable), "resources", "app.asar"));
             }
         }
@@ -81,7 +81,7 @@ namespace ClipperUpdate
                 previousHash = ProgramHash(); previousVersion = InstalledVersion();
                 string updates = Path.GetDirectoryName(folder); dataRoot = Path.GetDirectoryName(updates);
                 if (Path.GetFileName(updates) != "updates" || !Path.GetFileName(folder).StartsWith("download-", StringComparison.Ordinal)) throw new Exception("ROLLBACK_PATH");
-                Log(folder, "Clipper exited. Validating the downloaded installer.");
+                Log(folder, "Clip exited. Validating the downloaded installer.");
                 // Deny writes/deletion from validation until the installer has exited.
                 using (FileStream installer = new FileStream(Path.Combine(folder, "installer.exe"), FileMode.Open, FileAccess.Read, FileShare.Read))
                 {

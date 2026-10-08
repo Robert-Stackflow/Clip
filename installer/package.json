@@ -1,7 +1,7 @@
 {
-  "name": "clipper-setup-ui",
+  "name": "clip-setup-ui",
   "version": "0.0.0",
   "private": true,
-  "productName": "Clipper 安装程序",
+  "productName": "Clip 安装程序",
   "main": "main.cjs"
 }

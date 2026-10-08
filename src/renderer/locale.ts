@@ -1,7 +1,7 @@
 import {setInterfaceLanguage,interfaceLanguage,t} from '../shared/i18n';
 import type {LanguageAPI} from '../shared/language';
-declare global{interface Window{clipperLanguage?:LanguageAPI}}
-setInterfaceLanguage(window.clipperLanguage?.current||'zh-CN');
+declare global{interface Window{clipLanguage?:LanguageAPI}}
+setInterfaceLanguage(window.clipLanguage?.current||'zh-CN');
 document.documentElement.lang=interfaceLanguage();
 // Only the initial product HTML exists at this point. Never observe or rewrite later user content.
 const walker=document.createTreeWalker(document.documentElement,NodeFilter.SHOW_TEXT),nodes:Text[]=[];

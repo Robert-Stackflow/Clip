@@ -10,7 +10,7 @@ export async function decodeBrowserImage(bytes:Buffer,mime:string,valid:()=>bool
  active++;
  let window:BrowserWindow|undefined,monitor:NodeJS.Timeout|undefined;
  try{
-  const partition=session.fromPartition('clipper-image-decoder');
+  const partition=session.fromPartition('clip-image-decoder');
   partition.setPermissionCheckHandler(()=>false);
   partition.setPermissionRequestHandler((_w,_p,callback)=>callback(false));
   partition.webRequest.onBeforeRequest({urls:['http://*/*','https://*/*','file://*/*']},(_request,callback)=>callback({cancel:true}));

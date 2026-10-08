@@ -11,8 +11,8 @@ const assert=require('node:assert/strict');
  store.setMeta('desktop-options',{shelfShortcut:'Control+Alt+F21'});
  store.setMeta('efficiency',{historyEnabled:false,repliesShortcut:'Control+Alt+F23',bindings:[]});
  store.close();
- const env={...process.env,CLIPPER_TEST_MODE:'1',CLIPPER_DATA_DIR:profile};delete env.ELECTRON_RUN_AS_NODE;
- const app=await electron.launch(process.env.CLIPPER_PACKAGED_EXE?{executablePath:process.env.CLIPPER_PACKAGED_EXE,args:[],env}:{args:[path.resolve('.')],env});
+ const env={...process.env,CLIP_TEST_MODE:'1',CLIP_DATA_DIR:profile};delete env.ELECTRON_RUN_AS_NODE;
+ const app=await electron.launch(process.env.CLIP_PACKAGED_EXE?{executablePath:process.env.CLIP_PACKAGED_EXE,args:[],env}:{args:[path.resolve('.')],env});
  try{
   const page=await app.firstWindow(),errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.waitForSelector('[data-page="symbols"]');
@@ -39,7 +39,7 @@ const assert=require('node:assert/strict');
   await page.locator('.reference-item.reference-main').first().click();
   const copied=await page.evaluate(()=>window.referenceCopies.at(-1));
   assert.match(copied,/\//);
-  const rejected=await page.evaluate(()=>window.clipper.openReference('https://example.com').then(()=>false,()=>true));
+  const rejected=await page.evaluate(()=>window.clip.openReference('https://example.com').then(()=>false,()=>true));
   assert.equal(rejected,true);
   await page.locator('[data-page="cheats"]').click();
   await page.waitForSelector('.reference-code-copy',{timeout:20000});
@@ -74,7 +74,7 @@ const assert=require('node:assert/strict');
   await chooseReferenceTab(page,'latex');await page.locator('#reference-search').fill('希腊和希伯来字母');await page.waitForSelector('.katex');
   await page.evaluate(()=>document.fonts.ready);
   assert.ok(await page.evaluate(()=>document.fonts.check('12px KaTeX_Main')));
-  await fs.writeFile(path.join(work.output,'result.json'),JSON.stringify({packaged:!!process.env.CLIPPER_PACKAGED_EXE,unicodeEmoji:true,toneImages,stableGitNavigation:true,syntaxTopics:topics.map(topic=>topic.id),codeFontSize:14,rightGutter:14,mathFonts:true,errors},null,2));
+  await fs.writeFile(path.join(work.output,'result.json'),JSON.stringify({packaged:!!process.env.CLIP_PACKAGED_EXE,unicodeEmoji:true,toneImages,stableGitNavigation:true,syntaxTopics:topics.map(topic=>topic.id),codeFontSize:14,rightGutter:14,mathFonts:true,errors},null,2));
   assert.deepEqual(errors,[]);
   console.log('Native file URL module loading and reference navigation passed.');
  }finally{await app.close();await work.close();}

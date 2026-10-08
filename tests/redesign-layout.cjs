@@ -1,18 +1,18 @@
 // Layout and behavior of shipped renderer bundles. Browser input is isolated and headless.
 const {chromium}=require('@playwright/test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
 const {setup,measure}=require('./renderer-fixture.cjs'),{setupText}=require('./language-text-fixture.cjs'),{setupData}=require('./language-data-fixture.cjs');
-function extra(){const base=window.clipper;fixture.calls=[];fixture.state.categories=[{id:'work',name:'工作',color:'#7893b4'}];fixture.state.clips[0].title='项目需求与开发计划';fixture.state.clips[0].preview='需求确认、界面重构与发布安排';fixture.state.clips[0].source='Notepad.exe';
- const sync={name:'工作电脑',enabled:true,autoNew:false,shared:2,addresses:['192.168.1.2'],peers:[{id:'peer',name:'笔记本',host:'192.168.1.3',port:3344,lastSync:Date.now(),busy:false,error:''}],pending:[],nearby:[],error:''};const web={running:true,addresses:['192.168.1.2'],invitation:'https://192.168.1.2:4433/#clipper-web=synthetic',fingerprint:'a'.repeat(64),inviteExpires:Date.now()+300000,expires:Date.now()+1800000,items:[],clients:[],follow:false,error:''};
- const overrides={syncState:async()=>sync,webState:async()=>web,rememberSearch:async()=>{},search:async()=>fixture.state.clips.map(c=>c.id),settings:async value=>{fixture.state.settings=value;fixture.calls.push(['settings',value]);fixture.refresh();},onChange:base.onChange};window.clipper=new Proxy(overrides,{get:(obj,key)=>key in obj?obj[key]:base[key]});
+function extra(){const base=window.clip;fixture.calls=[];fixture.state.categories=[{id:'work',name:'工作',color:'#7893b4'}];fixture.state.clips[0].title='项目需求与开发计划';fixture.state.clips[0].preview='需求确认、界面重构与发布安排';fixture.state.clips[0].source='Notepad.exe';
+ const sync={name:'工作电脑',enabled:true,autoNew:false,shared:2,addresses:['192.168.1.2'],peers:[{id:'peer',name:'笔记本',host:'192.168.1.3',port:3344,lastSync:Date.now(),busy:false,error:''}],pending:[],nearby:[],error:''};const web={running:true,addresses:['192.168.1.2'],invitation:'https://192.168.1.2:4433/#clip-web=synthetic',fingerprint:'a'.repeat(64),inviteExpires:Date.now()+300000,expires:Date.now()+1800000,items:[],clients:[],follow:false,error:''};
+ const overrides={syncState:async()=>sync,webState:async()=>web,rememberSearch:async()=>{},search:async()=>fixture.state.clips.map(c=>c.id),settings:async value=>{fixture.state.settings=value;fixture.calls.push(['settings',value]);fixture.refresh();},onChange:base.onChange};window.clip=new Proxy(overrides,{get:(obj,key)=>key in obj?obj[key]:base[key]});
 }
-const deviceScaleFactor=Number(process.env.CLIPPER_TEST_DEVICE_SCALE||1);
-if(!Number.isFinite(deviceScaleFactor)||deviceScaleFactor<1||deviceScaleFactor>3)throw Error('CLIPPER_TEST_DEVICE_SCALE must be between 1 and 3');
+const deviceScaleFactor=Number(process.env.CLIP_TEST_DEVICE_SCALE||1);
+if(!Number.isFinite(deviceScaleFactor)||deviceScaleFactor<1||deviceScaleFactor>3)throw Error('CLIP_TEST_DEVICE_SCALE must be between 1 and 3');
 const output=deviceScaleFactor===1?'work/redesign':`work/redesign-dpi-${deviceScaleFactor}`;
 (async()=>{await fs.mkdir(output,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true}),results=[],failures=[],errors=[];try{
  for(const language of ['zh-CN','en'])for(const theme of ['light','dark']){
  const context=await browser.newContext({viewport:{width:1240,height:780},deviceScaleFactor,colorScheme:theme});await context.addInitScript(setup,language);await context.addInitScript(setupText);await context.addInitScript(setupData);await context.addInitScript(extra);await context.addInitScript(theme=>{fixture.state.dark=theme==='dark';},theme);
- await context.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);if(!/^[\w.-]+$/.test(name))return route.abort();try{await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'application/javascript'});}catch{return route.abort();}});
- const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto('https://clipper.test/index.html');await page.waitForSelector('#copy');
+ await context.route('https://clip.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);if(!/^[\w.-]+$/.test(name))return route.abort();try{await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'application/javascript'});}catch{return route.abort();}});
+ const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto('https://clip.test/index.html');await page.waitForSelector('#copy');
  for(const id of ['history','favorites','stack','shelf','replies','ai','scripts','uri','sync','web','settings']){
   await page.locator(`[data-page="${id}"]`).click();await page.waitForFunction(()=>document.querySelector('#content h1'));await page.waitForTimeout(80);
   const nav=page.locator('#content .section-nav button, #content .settings-nav button');const count=await nav.count();const sections=count||1;
@@ -78,7 +78,7 @@ const output=deviceScaleFactor===1?'work/redesign':`work/redesign-dpi-${deviceSc
  assert.equal(await category.getAttribute('aria-current'),'page');
  assert.equal(await page.locator('#content h1').textContent(),'工作');
  for(const [name,size,selectors]of [['tray',[740,560],['#search','#copy-selected']],['shelf',[420,440],['#items','#choose']],['recorder',[960,780],['#sources','#start']],['image-editor',[960,780],['#viewport','#save']],['unlock',[680,760],['#unlock-submit']],['recovery',[840,780],['#retry']],['capture',[1000,700],['#capture-hint']]]){
-  await page.setViewportSize({width:size[0],height:size[1]});await page.goto(`https://clipper.test/${name}.html`);await page.waitForTimeout(150);const geometry=await measure(page,selectors);results.push({language,theme,name,geometry});if(Object.values(geometry).some(v=>v===false||typeof v==='object'&&(v.missing||!v.visible||(name!=='capture'&&!v.reachable))))failures.push({language,theme,name,geometry});if(language==='zh-CN'&&theme==='light')await page.screenshot({path:`${output}/${name}.png`});
+  await page.setViewportSize({width:size[0],height:size[1]});await page.goto(`https://clip.test/${name}.html`);await page.waitForTimeout(150);const geometry=await measure(page,selectors);results.push({language,theme,name,geometry});if(Object.values(geometry).some(v=>v===false||typeof v==='object'&&(v.missing||!v.visible||(name!=='capture'&&!v.reachable))))failures.push({language,theme,name,geometry});if(language==='zh-CN'&&theme==='light')await page.screenshot({path:`${output}/${name}.png`});
  }
  await context.close();
  }

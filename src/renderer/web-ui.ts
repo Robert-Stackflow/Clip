@@ -7,7 +7,7 @@ import type {Clip} from '../shared/types';
 import {t as tr,formatDate,formatNumber} from '../shared/i18n';
 import type {WebState} from '../shared/web-share';
 import './web.css';
-const api=window.clipper,$=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
+const api=window.clip,$=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 interface Context {history?():readonly Clip[];active():boolean;toast(value:unknown):void;modal(title:string,body:string,save:()=>Promise<void>,label?:string):void}
 export function webUI(ctx:Context){
@@ -30,7 +30,7 @@ export function webUI(ctx:Context){
 <textarea id="web-link" rows="2" readonly aria-label="网页邀请链接" spellcheck="false"></textarea><p id="web-invite-expiry" class="field-help"></p>
 <div class="sync-pair-row"><button id="web-copy-link">复制邀请链接</button><button id="web-renew" class="quiet">生成新邀请</button></div>
 <details class="utility-guide"><summary>共享范围</summary><p class="field-help">全部已批准浏览器可见。文件、仅本机内容与邀请凭证不会共享；编辑、删除或改为仅本机会撤回。接收端已复制或另存的副本无法撤回。最多 100 项。</p></details>
-<details class="utility-guide"><summary>连接说明</summary><p class="field-help">在同一局域网打开下面的链接。先在浏览器证书详情中核对 SHA-256，与下方完全一致后再继续访问；页面请求连接后，核对双方验证码并允许。需要允许 Clipper 通过 Windows 专用网络防火墙。</p></details>
+<details class="utility-guide"><summary>连接说明</summary><p class="field-help">在同一局域网打开下面的链接。先在浏览器证书详情中核对 SHA-256，与下方完全一致后再继续访问；页面请求连接后，核对双方验证码并允许。需要允许 Clip 通过 Windows 专用网络防火墙。</p></details>
 <details class="utility-guide"><summary>查看本次证书 SHA-256 指纹</summary><code id="web-fingerprint"></code><p class="field-help">每次开启会话都会更换证书。指纹不一致时不要继续访问。</p></details></section>
 <section class="settings-card web-card"><div class="utility-card-heading"><h2>${createElement(Users,{'class':'icon','aria-hidden':'true'}).outerHTML}浏览器连接</h2></div><div id="web-clients"></div></section></section>
 <section class="settings-card web-content-card"><div class="utility-card-heading"><h2>${createElement(Share2,{'class':'icon','aria-hidden':'true'}).outerHTML}共享内容</h2></div>

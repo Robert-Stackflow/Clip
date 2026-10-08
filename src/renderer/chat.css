@@ -124,15 +124,16 @@
 .chat-reasoning{flex:0 0 auto;max-width:100px}
 .chat-reasoning .custom-select{min-width:80px;max-width:100px;min-height:32px;padding:5px 8px;border:1px solid var(--line);border-radius:8px;font-size:calc(12px * var(--text-scale,1));font-weight:400;color:var(--fg);gap:6px}
 .chat-reasoning .custom-select>.icon{width:13px;height:13px}
-.model-picker{display:grid;grid-template-columns:148px minmax(0,1fr);padding:0;overflow:hidden}
+.model-picker.clip-popover[popover]{display:grid;grid-template-columns:148px minmax(0,1fr);padding:0;overflow:hidden}
 .model-picker>section{display:flex;flex-direction:column;min-width:0;min-height:0;padding:8px}
 .model-picker>section:first-child{border-right:1px solid var(--line);background:var(--soft)}
 .model-picker h2{margin:4px 8px 9px;color:var(--muted);font-size:11px;font-weight:500}
-.model-picker-services,.model-picker-models{overflow:auto;min-height:0;max-height:280px;display:flex;flex-direction:column;gap:3px;overscroll-behavior:contain}
-.model-picker-option{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;width:100%;min-width:0;min-height:36px;padding:8px 10px;border:0;border-radius:7px;text-align:left;font-size:12px;font-weight:400}
+.model-picker-services,.model-picker-models{overflow-y:auto;overflow-x:hidden;min-width:0;min-height:0;max-height:280px;display:flex;flex-direction:column;gap:3px;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--fg) 22%,transparent) transparent;scrollbar-gutter:stable}
+.model-picker-services:hover,.model-picker-models:hover{scrollbar-color:color-mix(in srgb,var(--fg) 36%,transparent) transparent}
+.model-picker-option{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0;width:100%;min-width:0;min-height:36px;padding:8px 10px;border:0;border-radius:7px;text-align:left;font-size:12px;font-weight:400;white-space:normal;overflow-wrap:anywhere;line-height:1.5}
 .model-picker-option:hover,.model-picker-option:focus-visible{background:var(--hover)}
 .model-picker-option[aria-selected=true]{background:var(--hover);color:var(--fg)}
-.model-picker-option>span{min-width:0;display:flex;flex-direction:column;gap:3px}
+.model-picker-option>span{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;white-space:normal}
 .model-picker-option strong{font-weight:450;overflow-wrap:anywhere}.model-picker-option small{color:var(--muted);font-size:10px;overflow-wrap:anywhere}
 .model-picker-option>.icon{width:14px;height:14px;flex-shrink:0;visibility:hidden}
 .model-picker-option[aria-selected=true]>.icon{visibility:visible}

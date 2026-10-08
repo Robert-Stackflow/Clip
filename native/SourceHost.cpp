@@ -3,6 +3,8 @@
 #include <dwmapi.h>
 #include <wincodec.h>
 #include <shlobj.h>
+#include <uiautomation.h>
+#include <oleacc.h>
 #include <wrl/client.h>
 #include <iostream>
 #include <vector>
@@ -18,6 +20,51 @@ static bool capturable(HWND hwnd){DWORD cloak=0,affinity=0;RECT r{};return IsWin
 static BOOL CALLBACK collect(HWND hwnd,LPARAM state){auto* rows=reinterpret_cast<std::vector<HWND>*>(state);wchar_t title[201]{};if(rows->size()<150&&capturable(hwnd)&&GetWindowTextW(hwnd,title,201)>0)rows->push_back(hwnd);return rows->size()<150;}
 static void windows(){std::vector<HWND> rows;EnumWindows(collect,reinterpret_cast<LPARAM>(&rows));std::cout<<'[';bool first=true;for(HWND hwnd:rows){wchar_t title[201]{};if(!GetWindowTextW(hwnd,title,201))continue;if(!first)std::cout<<',';first=false;DWORD pid=0;GetWindowThreadProcessId(hwnd,&pid);std::cout<<"{\"pid\":"<<pid<<",\"id\":\"window:"<<reinterpret_cast<uintptr_t>(hwnd)<<":0\",\"name\":"<<json(title)<<",\"display_id\":\"\",\"thumbnail\":\"data:image/png;base64,\"}";}std::cout<<']';}
 static void screens(){std::cout<<'[';bool first=true;for(DWORD index=0;index<256;index++){DISPLAY_DEVICEW device{};device.cb=sizeof(device);if(!EnumDisplayDevicesW(nullptr,index,&device,0))break;if(!(device.StateFlags&DISPLAY_DEVICE_ACTIVE))continue;DEVMODEW mode{};mode.dmSize=sizeof(mode);if(!EnumDisplaySettingsW(device.DeviceName,ENUM_CURRENT_SETTINGS,&mode))continue;if(!first)std::cout<<',';first=false;std::cout<<"{\"id\":\"screen:"<<index<<":0\",\"device\":"<<json(device.DeviceName)<<",\"x\":"<<mode.dmPosition.x<<",\"y\":"<<mode.dmPosition.y<<",\"width\":"<<mode.dmPelsWidth<<",\"height\":"<<mode.dmPelsHeight<<'}';}std::cout<<']';}
+static bool caretRect(HWND hwnd,double x,double y,double width,double height,const char* source){
+ RECT bounds{};
+ if(!std::isfinite(x)||!std::isfinite(y)||!std::isfinite(width)||!std::isfinite(height)||width<0||height<=0||height>=512||!GetWindowRect(hwnd,&bounds)||x<bounds.left||x>bounds.right||y<bounds.top||y+height>bounds.bottom+2||GetAncestor(GetForegroundWindow(),GA_ROOTOWNER)!=hwnd)return false;
+ std::cout<<"{\"x\":"<<x<<",\"y\":"<<y<<",\"width\":"<<std::max(1.0,width)<<",\"height\":"<<height<<",\"source\":\""<<source<<"\"}";return true;
+}
+// Read geometry only. MSAA covers custom carets, while UIA covers modern text
+// providers. A disposable process bounds an unresponsive provider's lifetime.
+static void caret(HWND hwnd,DWORD expected){
+ DWORD pid=0;GetWindowThreadProcessId(hwnd,&pid);if(pid!=expected||!IsWindow(hwnd)||GetAncestor(GetForegroundWindow(),GA_ROOTOWNER)!=hwnd){std::cout<<"null";return;}
+ GUITHREADINFO info{sizeof(GUITHREADINFO)};
+ if(GetGUIThreadInfo(0,&info)){
+  if(info.hwndCaret&&(info.flags&GUI_CARETBLINKING)){RECT rect=info.rcCaret;MapWindowPoints(info.hwndCaret,nullptr,reinterpret_cast<POINT*>(&rect),2);if(caretRect(hwnd,rect.left,rect.top,rect.right-rect.left,rect.bottom-rect.top,"win32"))return;}
+  if(info.hwndFocus){ComPtr<IAccessible> accessible;long x=0,y=0,width=0,height=0;VARIANT child{};child.vt=VT_I4;child.lVal=CHILDID_SELF;
+   if(SUCCEEDED(AccessibleObjectFromWindow(info.hwndFocus,OBJID_CARET,IID_PPV_ARGS(&accessible)))&&accessible&&accessible->accLocation(&x,&y,&width,&height,child)==S_OK&&caretRect(hwnd,x,y,width,height,"msaa"))return;
+  }
+ }
+ ComPtr<IUIAutomation> automation;ComPtr<IUIAutomationElement> focused;
+ if(FAILED(CoCreateInstance(CLSID_CUIAutomation,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&automation)))||FAILED(automation->GetFocusedElement(&focused))||!focused){std::cout<<"null";return;}
+ BOOL hasFocus=FALSE;focused->get_CurrentHasKeyboardFocus(&hasFocus);
+ ComPtr<IUIAutomationTextPattern2> pattern;ComPtr<IUIAutomationTextRange> range;BOOL active=FALSE;
+ // Modern input controls can be hosted by another process (including Windows
+ // Search and browser renderers). The foreground identity and screen rectangle
+ // are the boundary; requiring the focused provider's PID to match loses them.
+ if(!hasFocus){std::cout<<"null";return;}
+ if(SUCCEEDED(focused->GetCurrentPatternAs(UIA_TextPattern2Id,IID_PPV_ARGS(&pattern)))&&pattern)pattern->GetCaretRange(&active,&range);
+ if(!active||!range){
+  // Some Chromium providers expose TextPattern but not TextPattern2.
+  ComPtr<IUIAutomationTextPattern> text;ComPtr<IUIAutomationTextRangeArray> selection;int count=0;
+  if(SUCCEEDED(focused->GetCurrentPatternAs(UIA_TextPatternId,IID_PPV_ARGS(&text)))&&text&&SUCCEEDED(text->GetSelection(&selection))&&selection&&SUCCEEDED(selection->get_Length(&count))&&count==1&&SUCCEEDED(selection->GetElement(0,&range))&&range){range->MoveEndpointByRange(TextPatternRangeEndpoint_Start,range.Get(),TextPatternRangeEndpoint_End);active=TRUE;}
+ }
+ if(!active||!range){std::cout<<"null";return;}
+ SAFEARRAY* rectangles=nullptr;bool previous=false;range->GetBoundingRectangles(&rectangles);
+ if(!rectangles||SafeArrayGetDim(rectangles)!=1||rectangles->rgsabound[0].cElements<4){
+  if(rectangles)SafeArrayDestroy(rectangles);rectangles=nullptr;int moved=0;
+  range->MoveEndpointByUnit(TextPatternRangeEndpoint_End,TextUnit_Character,1,&moved);
+  if(!moved){range->MoveEndpointByUnit(TextPatternRangeEndpoint_Start,TextUnit_Character,-1,&moved);previous=true;}
+  if(moved)range->GetBoundingRectangles(&rectangles);
+ }
+ double* data=nullptr;bool printed=false;
+ if(rectangles&&SafeArrayGetDim(rectangles)==1&&rectangles->rgsabound[0].cElements>=4&&SUCCEEDED(SafeArrayAccessData(rectangles,reinterpret_cast<void**>(&data)))){
+  const double x=data[0]+(previous?data[2]:0),y=data[1],height=data[3];printed=caretRect(hwnd,x,y,1,height,"uia");
+  SafeArrayUnaccessData(rectangles);
+ }
+ if(rectangles)SafeArrayDestroy(rectangles);if(!printed)std::cout<<"null";
+}
 static void encodeImage(IWICImagingFactory* factory,IWICBitmapSource* image){ComPtr<IStream> output;if(FAILED(CreateStreamOnHGlobal(nullptr,TRUE,&output)))throw 1;ComPtr<IWICBitmapEncoder> encoder;if(FAILED(factory->CreateEncoder(GUID_ContainerFormatPng,nullptr,&encoder))||FAILED(encoder->Initialize(output.Get(),WICBitmapEncoderNoCache)))throw 1;ComPtr<IWICBitmapFrameEncode> frame;ComPtr<IPropertyBag2> props;if(FAILED(encoder->CreateNewFrame(&frame,&props))||FAILED(frame->Initialize(props.Get()))||FAILED(frame->WriteSource(image,nullptr))||FAILED(frame->Commit())||FAILED(encoder->Commit()))throw 1;STATSTG info{};if(FAILED(output->Stat(&info,STATFLAG_NONAME))||info.cbSize.QuadPart>256*1024)throw 1;LARGE_INTEGER zero{};output->Seek(zero,STREAM_SEEK_SET,nullptr);std::vector<char> bytes(static_cast<size_t>(info.cbSize.QuadPart));ULONG count=0;if(FAILED(output->Read(bytes.data(),static_cast<ULONG>(bytes.size()),&count))||count!=bytes.size())throw 1;std::cout.write(bytes.data(),bytes.size());SecureZeroMemory(bytes.data(),bytes.size());}
 static void encode(HBITMAP bitmap){ComPtr<IWICImagingFactory> factory;if(FAILED(CoCreateInstance(CLSID_WICImagingFactory,nullptr,CLSCTX_INPROC_SERVER,IID_PPV_ARGS(&factory))))throw 1;ComPtr<IWICBitmap> image;if(FAILED(factory->CreateBitmapFromHBITMAP(bitmap,nullptr,WICBitmapIgnoreAlpha,&image)))throw 1;encodeImage(factory.Get(),image.Get());}
 static void encodeIcon(IWICImagingFactory* factory,IWICBitmapSource* image){
@@ -66,4 +113,4 @@ static void preview(HWND hwnd,const wchar_t* device,DWORD expected=0){
  }catch(...){if(previous&&original)SelectObject(original,previous);if(previousTarget&&target)SelectObject(target,previousTarget);if(full)DeleteObject(full);if(previewBitmap)DeleteObject(previewBitmap);if(original)DeleteDC(original);if(target)DeleteDC(target);if(source){if(hwnd)ReleaseDC(hwnd,source);else DeleteDC(source);}throw;}
  if(previous&&original)SelectObject(original,previous);if(full)DeleteObject(full);if(previewBitmap)DeleteObject(previewBitmap);if(original)DeleteDC(original);if(target)DeleteDC(target);if(source){if(hwnd)ReleaseDC(hwnd,source);else DeleteDC(source);}
 }
-int wmain(int argc,wchar_t** argv){SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);_setmode(_fileno(stdout),_O_BINARY);const HRESULT init=CoInitializeEx(nullptr,COINIT_MULTITHREADED);if(FAILED(init))return 1;int result=0;try{if(argc==3&&wcscmp(argv[1],L"icon")==0)programIcon(argv[2]);else if(argc==2&&wcscmp(argv[1],L"windows")==0)windows();else if(argc==2&&wcscmp(argv[1],L"screens")==0)screens();else if(argc==4&&wcscmp(argv[1],L"window")==0){wchar_t* end=nullptr;const auto handle=wcstoull(argv[2],&end,10);if(!handle||*end)throw 1;wchar_t* pidEnd=nullptr;const auto pid=wcstoul(argv[3],&pidEnd,10);if(!pid||*pidEnd)throw 1;preview(reinterpret_cast<HWND>(handle),nullptr,pid);}else if(argc==3&&wcscmp(argv[1],L"screen")==0){if(wcsncmp(argv[2],L"\\\\.\\DISPLAY",11)!=0||wcslen(argv[2])>32)throw 1;preview(nullptr,argv[2]);}else throw 1;}catch(...){result=1;}std::cout.flush();CoUninitialize();return result;}
+int wmain(int argc,wchar_t** argv){SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);_setmode(_fileno(stdout),_O_BINARY);const HRESULT init=CoInitializeEx(nullptr,COINIT_MULTITHREADED);if(FAILED(init))return 1;int result=0;try{if(argc==3&&wcscmp(argv[1],L"icon")==0)programIcon(argv[2]);else if(argc==2&&wcscmp(argv[1],L"windows")==0)windows();else if(argc==2&&wcscmp(argv[1],L"screens")==0)screens();else if(argc==4&&wcscmp(argv[1],L"caret")==0){wchar_t* end=nullptr;const auto handle=wcstoull(argv[2],&end,10);wchar_t* pidEnd=nullptr;const auto pid=wcstoul(argv[3],&pidEnd,10);if(!handle||*end||!pid||*pidEnd)throw 1;caret(reinterpret_cast<HWND>(handle),pid);}else if(argc==4&&wcscmp(argv[1],L"window")==0){wchar_t* end=nullptr;const auto handle=wcstoull(argv[2],&end,10);if(!handle||*end)throw 1;wchar_t* pidEnd=nullptr;const auto pid=wcstoul(argv[3],&pidEnd,10);if(!pid||*pidEnd)throw 1;preview(reinterpret_cast<HWND>(handle),nullptr,pid);}else if(argc==3&&wcscmp(argv[1],L"screen")==0){if(wcsncmp(argv[2],L"\\\\.\\DISPLAY",11)!=0||wcslen(argv[2])>32)throw 1;preview(nullptr,argv[2]);}else throw 1;}catch(...){result=1;}std::cout.flush();CoUninitialize();return result;}

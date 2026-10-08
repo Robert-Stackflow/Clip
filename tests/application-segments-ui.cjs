@@ -2,8 +2,8 @@ const {chromium,expect}=require('@playwright/test');
 const {build}=require('esbuild');
 const fs=require('node:fs/promises'),path=require('node:path'),assert=require('node:assert/strict');
 const {setup}=require('./renderer-fixture.cjs'),{extra}=require('./ui-028-fixture.cjs');
-const output=process.env.CLIPPER_TEST_OUTPUT_DIR||'work/current/application-segments-ui';
-const archive=process.env.CLIPPER_COLLECTION_ASAR,asset=name=>archive?require('@electron/asar').extractFile(archive,('dist/renderer/'+name).replaceAll('/','\\')):fs.readFile(path.join('dist/renderer',name));
+const output=process.env.CLIP_TEST_OUTPUT_DIR||'work/current/application-segments-ui';
+const archive=process.env.CLIP_COLLECTION_ASAR,asset=name=>archive?require('@electron/asar').extractFile(archive,('dist/renderer/'+name).replaceAll('/','\\')):fs.readFile(path.join('dist/renderer',name));
 let browser;
 (async()=>{
  await fs.mkdir(output,{recursive:true});
@@ -20,7 +20,7 @@ let browser;
  `},bundle:true,write:false,platform:'browser',target:'chrome130'})).outputFiles[0].text;
  browser=await chromium.launch({channel:'msedge',headless:true});
  const context=await browser.newContext({viewport:{width:1200,height:700}});
- await context.route('https://clipper.test/**',async route=>{
+ await context.route('https://clip.test/**',async route=>{
   const name=new URL(route.request().url()).pathname.slice(1);
   if(name==='segments.html')return route.fulfill({body:'<!doctype html><html><head><link rel="stylesheet" href="one-ui.css"></head><body><div class="filterbar" style="width:720px;margin:60px"><div class="tabs" style="width:140px;flex-shrink:0"><button>类型</button></div><div id="apps" class="source-filterbar tabs" role="tablist"></div></div><script src="probe.js"></script></body></html>',contentType:'text/html'});
   if(name==='probe.js')return route.fulfill({body:script,contentType:'text/javascript'});
@@ -28,7 +28,7 @@ let browser;
  });
  const page=await context.newPage(),errors=[],checks=[];
  page.on('pageerror',e=>errors.push(e.message));
- await page.goto('https://clipper.test/segments.html');
+ await page.goto('https://clip.test/segments.html');
  await page.waitForSelector('#apps.segment-ready [data-source="app1.exe"]');
  await page.locator('.filterbar > .tabs:first-child > button').evaluate(button=>button.hidden=true);
  await page.waitForFunction(()=>!document.querySelector('.filterbar > .tabs:first-child').classList.contains('segment-ready'));
@@ -83,10 +83,10 @@ let browser;
   const model=fixture.state.clips[0],sources=['Snipaste.exe','electron.exe','One.exe','ChatGPT.exe','屏幕截图','msedge.exe','QQ.exe','拖入文件','网页'];
   fixture.state.clips.splice(0,fixture.state.clips.length,...Array.from({length:80},(_,i)=>({...model,id:i?'source-'+i:'text',hash:'private-'+i,source:sources[i%sources.length],favorite:i===0,pinned:false})));
   fixture.state.queue=['text'];fixture.state.shelf=[];
-  const base=window.clipper;window.clipper=new Proxy({appIcons:async names=>Object.fromEntries(names.map(n=>[n,null]))},{get:(object,key)=>key in object?object[key]:base[key]});
+  const base=window.clip;window.clip=new Proxy({appIcons:async names=>Object.fromEntries(names.map(n=>[n,null]))},{get:(object,key)=>key in object?object[key]:base[key]});
  });
- await production.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);return route.fulfill({body:await asset(name),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
- const full=await production.newPage();full.on('pageerror',e=>errors.push(e.message));await full.goto('https://clipper.test/index.html');await full.waitForSelector('#source-filters.segment-ready');
+ await production.route('https://clip.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);return route.fulfill({body:await asset(name),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
+ const full=await production.newPage();full.on('pageerror',e=>errors.push(e.message));await full.goto('https://clip.test/index.html');await full.waitForSelector('#source-filters.segment-ready');
  for(const kind of ['image','files']){await full.locator('#filters [data-kind='+kind+']').click();await expect(full.locator('#filters [aria-selected=true]')).toHaveCount(1);await expect(full.locator('#filters [data-kind='+kind+']')).toHaveAttribute('aria-selected','true');}
  await full.locator('#filters [data-kind=all]').click();await expect(full.locator('.clip-row')).toHaveCount(80);await full.waitForSelector('#source-filters.segment-ready');
  const firstSource=full.locator('#source-filters [data-source]').nth(1);await firstSource.click();await expect(full.locator('#source-filters [aria-selected=true]')).toHaveCount(1);const firstKey=await firstSource.getAttribute('data-source');await firstSource.click();await expect(full.locator('#source-filters [aria-selected=true]')).toHaveAttribute('data-source',firstKey);

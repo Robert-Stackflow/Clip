@@ -27,9 +27,9 @@ async function run(){
  const root=path.resolve('work/paste-explorer');
  const sourceDir=path.join(root,'source-'+randomUUID()),targetDir=path.join(root,'target-'+randomUUID());
  await fs.mkdir(sourceDir,{recursive:true});await fs.mkdir(targetDir,{recursive:true});
- const fileName='Clipper Explorer 文件 '+randomUUID()+'.txt';
+ const fileName='Clip Explorer 文件 '+randomUUID()+'.txt';
  const source=path.join(sourceDir,fileName),destination=path.join(targetDir,fileName);
- const bytes=Buffer.from('Clipper file paste check '+randomUUID()+'\r\n第二行：文件内容必须完全一致。\r\n','utf8');
+ const bytes=Buffer.from('Clip file paste check '+randomUUID()+'\r\n第二行：文件内容必须完全一致。\r\n','utf8');
  await fs.writeFile(source,bytes);
  await build({entryPoints:['src/main/native.ts'],outfile:path.join(root,'native-test.cjs'),bundle:true,platform:'node',external:['koffi']});
  const f=await fixture('paste-explorer');let hwnd=0,ole;
@@ -50,7 +50,7 @@ async function run(){
  },{action,arg});
  const focusExplorer=async()=>{await native('activate',hwnd);await native('click',hwnd);await expect.poll(()=>native('foreground'),{timeout:5000}).toBe(hwnd);};
  const openTray=async()=>{
-  await f.page.evaluate(()=>window.clipper.showTray());
+  await f.page.evaluate(()=>window.clip.showTray());
   for(let attempt=0;attempt<50;attempt++){
    const visible=await f.app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().some(window=>window.isVisible()&&window.webContents.getURL().endsWith('/tray.html')));
    if(visible){const pages=await f.app.windows(),panel=pages.find(page=>!page.isClosed()&&page.url().endsWith('/tray.html'));if(panel){await panel.waitForSelector('.tray-row');return panel;}}
@@ -61,7 +61,7 @@ async function run(){
  try{
   await f.helper.evaluate(({app},nativePath)=>{const req=process.getBuiltinModule('node:module').createRequire(process.getBuiltinModule('node:path').join(app.getAppPath(),'package.json'));global.native=req(nativePath);global.native.initNative();},path.join(root,'native-test.cjs'));
   await f.helper.evaluate((_event,file)=>global.native.writeFiles([file],Number(global.helperWindow.getNativeWindowHandle().readBigUInt64LE())),source);
-  await expect.poll(async()=>(await f.page.evaluate(()=>window.clipper.state())).clips.some(item=>item.kind==='files'),{timeout:10000}).toBe(true);
+  await expect.poll(async()=>(await f.page.evaluate(()=>window.clip.state())).clips.some(item=>item.kind==='files'),{timeout:10000}).toBe(true);
   hwnd=openExplorer(targetDir);
   await f.helper.evaluate(async()=>{await global.focusTarget();global.helperWindow.setAlwaysOnTop(false);});
   await focusExplorer();
@@ -72,9 +72,9 @@ async function run(){
   assert.deepEqual(await fs.readFile(source),bytes);
   assert.equal(await native('foreground'),hwnd,'Explorer should regain foreground after paste');
 
-  const secondName='Clipper Explorer 多文件 '+randomUUID()+'.bin';
+  const secondName='Clip Explorer 多文件 '+randomUUID()+'.bin';
   const secondSource=path.join(sourceDir,secondName),secondDestination=path.join(targetDir,secondName);
-  const folderName='Clipper Explorer 文件夹 '+randomUUID();
+  const folderName='Clip Explorer 文件夹 '+randomUUID();
   const folderSource=path.join(sourceDir,folderName),folderDestination=path.join(targetDir,folderName);
   const nestedName='内层文件.txt',nestedBytes=Buffer.from('Nested file '+randomUUID()+'\r\n','utf8');
   const secondBytes=Buffer.from(Array.from({length:4096},(_,index)=>index%251));
@@ -83,7 +83,7 @@ async function run(){
   await fs.writeFile(path.join(folderSource,'子目录',nestedName),nestedBytes);
   await fs.writeFile(secondSource,secondBytes);
   await f.helper.evaluate((_event,files)=>global.native.writeFiles(files,Number(global.helperWindow.getNativeWindowHandle().readBigUInt64LE())),[secondSource,folderSource]);
-  await expect.poll(async()=>(await f.page.evaluate(()=>window.clipper.state())).clips.some(item=>item.kind==='files'&&item.title.includes(secondName)&&item.title.startsWith('2 ')),{timeout:10000}).toBe(true);
+  await expect.poll(async()=>(await f.page.evaluate(()=>window.clip.state())).clips.some(item=>item.kind==='files'&&item.title.includes(secondName)&&item.title.startsWith('2 ')),{timeout:10000}).toBe(true);
   await focusExplorer();
   panel=await openTray();
   const secondRow=panel.locator('.tray-row').filter({hasText:secondName});
@@ -100,9 +100,9 @@ async function run(){
   const virtualBytes=Buffer.from('OLE attachment '+randomUUID()+'\r\n中文内容\r\n','utf8');
   ole=await virtualFixture();
   await ole.request({action:'set',entries:[{name:virtualName,data:virtualBytes.toString('base64'),type:'stream'}]});
-  await expect.poll(async()=>(await f.page.evaluate(()=>window.clipper.state())).clips.some(item=>item.kind==='files'&&item.title.includes(virtualName)),{timeout:12000}).toBe(true);
-  const virtualId=(await f.page.evaluate(()=>window.clipper.state())).clips.find(item=>item.kind==='files'&&item.title.includes(virtualName)).id;
-  const virtualDetail=await f.page.evaluate(id=>window.clipper.detail(id),virtualId);
+  await expect.poll(async()=>(await f.page.evaluate(()=>window.clip.state())).clips.some(item=>item.kind==='files'&&item.title.includes(virtualName)),{timeout:12000}).toBe(true);
+  const virtualId=(await f.page.evaluate(()=>window.clip.state())).clips.find(item=>item.kind==='files'&&item.title.includes(virtualName)).id;
+  const virtualDetail=await f.page.evaluate(id=>window.clip.detail(id),virtualId);
   assert.deepEqual(Buffer.from(virtualDetail.payload.attachments[0].data,'base64'),virtualBytes);
   await ole.close();ole=undefined;
   await focusExplorer();

@@ -21,14 +21,14 @@ export function bindCommandCards(commands:TextCommand[],ctx:CommandContext,actio
   actions.bind(root.querySelector<HTMLButtonElement>('#command-copy-'+command.id),()=>editCommand(ctx,undefined,command),ctx.toast);
   if(command.builtin)continue;
   actions.bind(root.querySelector<HTMLButtonElement>('#command-edit-'+command.id),()=>editCommand(ctx,command),ctx.toast);
-  actions.bind(root.querySelector<HTMLButtonElement>('#command-delete-'+command.id),()=>ctx.modal(tr('删除指令？'),`<p>${esc(command.title)}</p>`,async()=>{await window.clipper.removeCommand(command.id,command.revision);await ctx.render();},tr('删除')),ctx.toast);
+  actions.bind(root.querySelector<HTMLButtonElement>('#command-delete-'+command.id),()=>ctx.modal(tr('删除指令？'),`<p>${esc(command.title)}</p>`,async()=>{await window.clip.removeCommand(command.id,command.revision);await ctx.render();},tr('删除')),ctx.toast);
  }
 }
 export function editCommand(ctx:CommandContext,command?:TextCommand,copy?:TextCommand){
  const initial=command||copy;let selected:CommandIcon=initial?.icon||'sparkles';const names=iconTitles(),variables=variableTitles();
  ctx.modal(command?tr('编辑指令'):copy?tr('复制指令'):tr('新建指令'),`<div class="command-editor-heading"><span id="command-preview-icon" class="command-card-icon">${commandGlyph(selected)}</span><label class="field">${tr('标题')}<input id="command-title" maxlength="60" required value="${esc(initial?.title||'')}" placeholder="${tr('例如：润色邮件')}"></label></div><div class="command-icon-picker" role="group" aria-label="${tr('指令图标')}">${commandIcons.map(name=>`<button type="button" class="icon-button quiet" data-command-icon="${name}" aria-label="${names[name]}" title="${names[name]}" aria-pressed="${selected===name}">${commandGlyph(name)}</button>`).join('')}</div><label class="field command-prompt-field">${tr('提示词')}<textarea id="command-prompt" rows="7" spellcheck="false" maxlength="16000" required placeholder="${tr('用 {{language}} 润色 {{text}}，让表达更清晰自然。')}">${esc(initial?.prompt||'')}</textarea></label><div class="command-variable-help"><strong>${tr('插入变量')}</strong><div class="command-variable-buttons">${commandVariables.map(name=>`<button type="button" data-insert-variable="${name}"><code>{{${name}}}</code><span>${variables[name]}</span></button>`).join('')}</div><p>${tr('点击插入到光标处。还可写 {{tone}} 等自定义变量，运行前填写。未插入 {{text}} 时会自动附上正文。')}</p><p id="command-validation" role="status" aria-live="polite"></p></div>`,async()=>{
   const value=validateCommand({id:command?.id,revision:command?.revision,title:(document.getElementById('command-title') as HTMLInputElement).value,icon:selected,prompt:(document.getElementById('command-prompt') as HTMLTextAreaElement).value});
-  await window.clipper.saveCommand(value);await ctx.render();ctx.toast(tr('指令已保存'));
+  await window.clip.saveCommand(value);await ctx.render();ctx.toast(tr('指令已保存'));
  });
  const dialog=document.getElementById('dialog') as HTMLDialogElement,prompt=document.getElementById('command-prompt') as HTMLTextAreaElement;
  dialog.classList.add('command-editor');dialog.addEventListener('close',()=>dialog.classList.remove('command-editor'),{once:true});

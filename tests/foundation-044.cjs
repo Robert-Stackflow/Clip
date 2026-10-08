@@ -1,5 +1,5 @@
 const {chromium}=require('@playwright/test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
-const out=process.env.CLIPPER_TEST_OUTPUT_DIR||'work/current/foundation-044';
+const out=process.env.CLIP_TEST_OUTPUT_DIR||'work/current/foundation-044';
 const {setup}=require('./renderer-fixture.cjs'),{extra}=require('./ui-028-fixture.cjs');
 const markup=`<aside id="foundation" style="position:fixed;inset:60px 20px 20px auto;width:420px;overflow:auto;padding:18px;background:var(--surface);z-index:5;display:flex;flex-direction:column;gap:12px">
 <button id="base-button">Action</button><button id="base-primary" class="primary">Save</button><button id="base-quiet" class="quiet">More</button><button id="base-icon" class="icon-button quiet" aria-label="More">+</button>
@@ -19,8 +19,8 @@ const css=(await fs.readFile('tests/fixtures/one-044/src/renderer/styles.css','u
 const controller=(await require('esbuild').build({stdin:{contents:"import {setupSegments} from './tests/fixtures/one-044/src/renderer/segments.ts';setupSegments();",resolveDir:process.cwd()},bundle:true,write:false,platform:'browser'})).outputFiles[0].text;
 for(const theme of ['light','dark']){
  const context=await browser.newContext({viewport:{width:1240,height:800},reducedMotion:'reduce'});for(const fn of [setup,extra])await context.addInitScript(fn);await context.addInitScript(theme=>fixture.state.dark=theme==='dark',theme);
- const requested=[];await context.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);if(name.endsWith('.css'))requested.push(name);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
- const actual=await context.newPage();await actual.goto('https://clipper.test/index.html');await actual.waitForSelector('#copy');await actual.evaluate(markup=>document.body.insertAdjacentHTML('beforeend',markup),markup);
+ const requested=[];await context.route('https://clip.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);if(name.endsWith('.css'))requested.push(name);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
+ const actual=await context.newPage();await actual.goto('https://clip.test/index.html');await actual.waitForSelector('#copy');await actual.evaluate(markup=>document.body.insertAdjacentHTML('beforeend',markup),markup);
  assert.deepEqual(requested.sort(),['app.css','one-ui.css']);assert.equal(await actual.locator('link[href="one-ui.css"]').count(),1);
  const reference=await context.newPage();await reference.setContent(`<html data-theme="${theme}"><head><style>${css}</style><style>:root[data-theme=dark]{--surface:#181818;--fg:#eee;--accent:#e4e4e4;--on-accent:#141414}</style></head><body><div id="app">${markup}</div></body></html>`);await reference.addScriptTag({content:controller});
  for(const [label,page]of [['actual',actual],['reference',reference]]){console.log('Foundation '+theme+' '+label,await page.locator('#base-tab').evaluate(e=>({parent:e.parentElement.className,background:getComputedStyle(e).backgroundColor})));await page.waitForFunction(()=>document.querySelector('#foundation .segment-ready')&&getComputedStyle(document.getElementById('base-tab')).backgroundColor==='rgba(0, 0, 0, 0)',null,{timeout:10000});}

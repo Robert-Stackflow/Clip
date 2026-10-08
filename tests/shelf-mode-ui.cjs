@@ -7,14 +7,14 @@ async function run(){
  const output=path.resolve('work/shelf-mode-ui');
  await fs.mkdir(output,{recursive:true});
  const profile=await fs.mkdtemp(path.join(output,'profile-'));
- const env={...process.env,CLIPPER_TEST_MODE:'1',CLIPPER_DATA_DIR:profile};
+ const env={...process.env,CLIP_TEST_MODE:'1',CLIP_DATA_DIR:profile};
  delete env.ELECTRON_RUN_AS_NODE;
  const app=await electron.launch({args:[path.resolve('.')],env});
  try{
   const main=await app.firstWindow();
   await main.waitForSelector('#search');
   const opened=app.waitForEvent('window');
-  await main.evaluate(()=>window.clipper.showShelf());
+  await main.evaluate(()=>window.clip.showShelf());
   const shelf=await opened;
   await shelf.waitForSelector('#items');
   const bounds=()=>app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(w=>w.webContents.getURL().endsWith('/shelf.html')).getBounds());
@@ -55,7 +55,7 @@ async function run(){
   await shelf.locator('#mode').click();
   await expect(shelf.locator('html')).toHaveAttribute('data-mode','compact');
   await expect(shelf.locator('html')).not.toHaveAttribute('data-transitioning','');
-  await shelf.evaluate(async()=>{const first=window.clipperShelf.mode('expanded',false);await new Promise(resolve=>setTimeout(resolve,60));const second=window.clipperShelf.mode('compact',false);await Promise.all([first,second]);});
+  await shelf.evaluate(async()=>{const first=window.clipShelf.mode('expanded',false);await new Promise(resolve=>setTimeout(resolve,60));const second=window.clipShelf.mode('compact',false);await Promise.all([first,second]);});
   await expect(shelf.locator('html')).toHaveAttribute('data-transitioning','');
   await expect(shelf.locator('html')).toHaveAttribute('data-mode','compact');
   await expect(shelf.locator('html')).not.toHaveAttribute('data-transitioning','');

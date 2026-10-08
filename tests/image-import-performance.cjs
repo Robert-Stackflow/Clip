@@ -2,10 +2,10 @@ const fs=require('node:fs/promises'),path=require('node:path'),assert=require('n
 // Characterize the real import path before deciding whether a native codec is compatible.
 // The WIC full-size conversion is an isolated prototype, never a production fallback.
 (async()=>{
- const production=process.env.CLIPPER_IMAGE_IMPORT_PRODUCTION==='1';
+ const production=process.env.CLIP_IMAGE_IMPORT_PRODUCTION==='1';
  const {beginCase}=await import('../scripts/workspace.mjs'),work=await beginCase(production?'image-import-performance-production':'image-import-performance');try{
   const host=path.join(work.fixtures,'host.cjs');await fs.writeFile(host,"const {app}=require('electron');app.setPath('userData',process.argv.at(-1));app.disableHardwareAcceleration();app.on('window-all-closed',()=>{});setInterval(()=>{},1000);");
-  const env={...process.env,CLIPPER_IMAGE_METRICS:'1'};delete env.ELECTRON_RUN_AS_NODE;
+  const env={...process.env,CLIP_IMAGE_METRICS:'1'};delete env.ELECTRON_RUN_AS_NODE;
   const fixtureProfile=path.join(work.fixtures,'generator');await fs.mkdir(fixtureProfile);const generator=await electron.launch({args:[host,fixtureProfile],env});const images=[];
   try{for(const [name,width,height,noisy]of [['large',8000,4800,false],['noisy',1600,1600,true]]){const file=path.join(work.fixtures,name+'.jpg');await generator.evaluate(({nativeImage},{width,height,noisy,file})=>{const pixels=Buffer.alloc(width*height*4);let seed=123456789;for(let at=0;at<pixels.length;at+=4){for(let c=0;c<3;c++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;pixels[at+c]=noisy?seed>>>24:[80,140,210][c];}pixels[at+3]=255;}const jpg=nativeImage.createFromBitmap(pixels,{width,height}).toJPEG(85);process.getBuiltinModule('node:fs').writeFileSync(file,jpg);pixels.fill(0);},{width,height,noisy,file});images.push({name,width,height,file});}}finally{await generator.close();}
   const baseline='b9c63d1',source=execFileSync('git',['show',baseline+':src/main/transfer.ts'],{encoding:'utf8'});

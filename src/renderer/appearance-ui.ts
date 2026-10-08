@@ -21,12 +21,12 @@ function appearancePage(){return `<div class="appearance-page">
  <div class="appearance-actions"><button type="button" id="appearance-reset">${tr('恢复默认选项')}</button></div>
 </div>`;}
 
-export async function appearanceUI(ctx:Context){const current=await window.clipperAppearance!.state(),q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;let value=validateAppearance(current.value);
- if(ctx.active&&!ctx.active())return;ctx.modal(tr('外观'),appearancePage(),async()=>{await window.clipper.configureAppearance(value);ctx.toast(tr('外观已保存'));});
+export async function appearanceUI(ctx:Context){const current=await window.clipAppearance!.state(),q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;let value=validateAppearance(current.value);
+ if(ctx.active&&!ctx.active())return;ctx.modal(tr('外观'),appearancePage(),async()=>{await window.clip.configureAppearance(value);ctx.toast(tr('外观已保存'));});
  if(!q('appearance-font'))return;setupFontPicker(q<HTMLButtonElement>('appearance-font'));let saveRevision=0;
  const dark=()=>document.documentElement.dataset.theme==='dark';
  const fill=()=>{q<HTMLInputElement>('appearance-accent').value=value.accent;q<HTMLInputElement>('appearance-bg').value=dark()?value.darkBackground:value.lightBackground;q<HTMLInputElement>('appearance-fg').value=dark()?value.darkForeground:value.lightForeground;for(const key of ['font','scale','density','toastPosition','radius'])q<HTMLInputElement>('appearance-'+key).value=String(value[key as keyof UIAppearance]);q('radius-value').textContent=value.radius+' px';for(const key of ['accent','bg','fg']){const input=q<HTMLInputElement>('appearance-'+key);input.parentElement!.style.setProperty('--swatch',input.value);}};
- const persist=()=>{const request=++saveRevision;applyAppearance(value);void window.clipper.configureAppearance(value).catch(async error=>{if(request!==saveRevision)return;value=(await window.clipperAppearance!.state()).value;applyAppearance(value);if(q('appearance-font'))fill();ctx.toast(error);});};
+ const persist=()=>{const request=++saveRevision;applyAppearance(value);void window.clip.configureAppearance(value).catch(async error=>{if(request!==saveRevision)return;value=(await window.clipAppearance!.state()).value;applyAppearance(value);if(q('appearance-font'))fill();ctx.toast(error);});};
  fill();if(current.warning)ctx.toast(current.warning);
  document.querySelectorAll<HTMLElement>('[data-color]').forEach(b=>b.onclick=()=>{value={...value,accent:b.dataset.color!};fill();persist();});
  for(const key of ['accent','bg','fg','font','scale','density','radius','toastPosition'])q('appearance-'+key).addEventListener('change',()=>{const input=q<HTMLInputElement>('appearance-'+key),raw=input.value;if(['accent','bg','fg'].includes(key)&&!/^#[a-f0-9]{6}$/i.test(raw)){ctx.toast(tr('请输入 #RRGGBB 格式颜色'));fill();return;}const property=key==='bg'?(dark()?'darkBackground':'lightBackground'):key==='fg'?(dark()?'darkForeground':'lightForeground'):key;value=validateAppearance({...value,[property]:key==='radius'||key==='scale'?Number(raw):raw});fill();persist();});

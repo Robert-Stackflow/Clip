@@ -10,7 +10,7 @@ interface Context {select(id:string):Promise<void>;toast(value:unknown):void}
 const glyph=(node:IconNode)=>createElement(node,{class:'icon','aria-hidden':'true','stroke-width':1.75}).outerHTML;
 const esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]!));
 
-export function captureToolsUI(ctx:Context,api:API=window.clipper){
+export function captureToolsUI(ctx:Context,api:API=window.clip){
  let tab:'screenshot'|'recording'='screenshot',mode:CaptureMode='region',display=0,request=0,windowToken='';
  let stopLayout:()=>void=()=>{};const actions=new ActionScope();
  function leave(){request++;stopLayout();stopLayout=()=>{};}

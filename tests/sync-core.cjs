@@ -35,18 +35,18 @@ test('revocation and disable stop requests; expired/rejected invitations do not 
  }finally{await a.close();await b.close();}
 });
 test('pair cancellation after approval removes provisional trust; expired codes cannot request access',async()=>{
- const a=await device('A'),b=await device('B');try{const code=a.service.invite('127.0.0.1'),invitation=JSON.parse(Buffer.from(code.slice(13),'base64url'));invitation.expires=Date.now()-1;await assert.rejects(()=>b.service.join('clipper-pair:'+Buffer.from(JSON.stringify(invitation)).toString('base64url')),/过期/);await b.service.join(code);a.service.approve(a.service.state().pending[0].id,true);assert.equal(a.service.state().peers.length,1);await b.service.cancelPairing();assert.equal(a.service.state().peers.length,0);await assert.rejects(async()=>syncRequest(await identity(b),peer(a),'/v1/manifest'),/未配对/);
+ const a=await device('A'),b=await device('B');try{const code=a.service.invite('127.0.0.1'),invitation=JSON.parse(Buffer.from(code.slice('clip-pair:'.length),'base64url'));invitation.expires=Date.now()-1;await assert.rejects(()=>b.service.join('clip-pair:'+Buffer.from(JSON.stringify(invitation)).toString('base64url')),/过期/);await b.service.join(code);a.service.approve(a.service.state().pending[0].id,true);assert.equal(a.service.state().peers.length,1);await b.service.cancelPairing();assert.equal(a.service.state().peers.length,0);await assert.rejects(async()=>syncRequest(await identity(b),peer(a),'/v1/manifest'),/未配对/);
  }finally{await a.close();await b.close();}
 });
 test('actual UDP multicast discovers both isolated device announcements without clipboard content',async()=>{
- const errors=[],first={id:randomUUID(),name:'Clipper discovery test A',host:'127.0.0.1',port:48301,fingerprint:'1'.repeat(64)},second={...first,id:randomUUID(),name:'Clipper discovery test B',port:48302,fingerprint:'2'.repeat(64)},a=new SyncDiscovery(()=>first,()=>{},e=>errors.push(e)),b=new SyncDiscovery(()=>second,()=>{},e=>errors.push(e));
+ const errors=[],first={id:randomUUID(),name:'Clip discovery test A',host:'127.0.0.1',port:48301,fingerprint:'1'.repeat(64)},second={...first,id:randomUUID(),name:'Clip discovery test B',port:48302,fingerprint:'2'.repeat(64)},a=new SyncDiscovery(()=>first,()=>{},e=>errors.push(e)),b=new SyncDiscovery(()=>second,()=>{},e=>errors.push(e));
  try{a.start();b.start();const until=Date.now()+7000;while(Date.now()<until&&(!a.list().some(peer=>peer.id===second.id)||!b.list().some(peer=>peer.id===first.id)))await new Promise(r=>setTimeout(r,100));assert(a.list().some(peer=>peer.id===second.id));assert(b.list().some(peer=>peer.id===first.id));assert.deepEqual(errors,[]);}finally{a.stop();b.stop();}
 });
 
 test('actual LAN discovery addresses support pinned TLS approval and exact attachment transfer between isolated stores',async t=>{
- const a=await device('Clipper isolated discovery A',{});let b;
+ const a=await device('Clip isolated discovery A',{});let b;
  try{
-  const started=performance.now();b=await device('Clipper isolated discovery B',{});
+  const started=performance.now();b=await device('Clip isolated discovery B',{});
   const until=Date.now()+7000;while(Date.now()<until&&(!a.service.state().nearby.some(peer=>peer.id===b.service.state().id)||!b.service.state().nearby.some(peer=>peer.id===a.service.state().id)))await new Promise(resolve=>setTimeout(resolve,50));
   const nearby=b.service.state().nearby.find(peer=>peer.id===a.service.state().id);assert(nearby,'A private interface must be discovered');assert.notEqual(nearby.host,'127.0.0.1');assert(a.service.state().addresses.includes(nearby.host));assert.equal(nearby.fingerprint,a.service.state().fingerprint);
   const discoveredMs=performance.now()-started;await b.service.join(a.service.invite(nearby.host));const pending=a.service.state().pending[0];assert(pending);assert.equal(b.service.state().peers.length,0);a.service.approve(pending.id,true);await b.service.tick();assert.equal(b.service.state().peers.length,1);assert.equal(b.service.state().peers[0].fingerprint,a.service.state().fingerprint);

@@ -18,6 +18,7 @@ export * from '../src/main/program-versions';
 export * from '../src/main/rollback-data';
 export * from '../src/shared/checkpoints';
 export * from '../src/main/database-check';
+export * from '../src/main/login-item';
 export * from '../src/main/backup-jobs';
 export * from '../src/main/backup-preview-job';
 export * from '../src/main/backup-restore-job';

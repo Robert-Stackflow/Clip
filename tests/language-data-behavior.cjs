@@ -8,12 +8,12 @@ const {setup}=require('./renderer-fixture.cjs'),{setupData,openDataView}=require
  try{for(const language of ['zh-CN','en']){
   context=await browser.newContext({viewport:{width:860,height:600}});
   await context.addInitScript(setup,language);await context.addInitScript(setupData);
-  await context.route('https://clipper.test/**',async route=>{
+  await context.route('https://clip.test/**',async route=>{
    const name=new URL(route.request().url()).pathname.slice(1);if(!/^[\w.-]+$/.test(name))return route.abort();
    try{await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'application/javascript'});}catch{return route.abort();}
   });
   const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
-  const start=async name=>{await page.goto('https://clipper.test/index.html');await page.waitForSelector('#copy');await openDataView(page,name);};
+  const start=async name=>{await page.goto('https://clip.test/index.html');await page.waitForSelector('#copy');await openDataView(page,name);};
   const calls=async name=>page.evaluate(name=>fixture.calls.filter(c=>c[0]===name),name);
   const called=async(name,count=1)=>page.waitForFunction(({name,count})=>fixture.calls.filter(c=>c[0]===name).length>=count,{name,count});
   const closed=async()=>page.waitForFunction(()=>!document.querySelector('dialog').open);
@@ -75,11 +75,11 @@ const {setup}=require('./renderer-fixture.cjs'),{setupData,openDataView}=require
   await start('vault-cleanup');assert.ok((await page.locator('.external-preview').textContent()).includes('明文资料'));await cancel();assert.deepEqual(await calls('vault-cleanup'),[]);await openDataView(page,'vault-cleanup');await submit();await called('vault-cleanup');
 
   await start('sync');assert.equal(await page.locator('#sync-name').inputValue(),'保存 设置电脑');assert.equal(await page.locator('#injected-peer').count(),0);
-  assert.equal(await page.locator('#sync-invitation').inputValue(),'clipper-pair:FIXTURE-ONLY-保存');assert.ok((await page.locator('#sync-live').textContent()).includes('外部同步错误：设置'));
+  assert.equal(await page.locator('#sync-invitation').inputValue(),'clip-pair:FIXTURE-ONLY-保存');assert.ok((await page.locator('#sync-live').textContent()).includes('外部同步错误：设置'));
   await page.locator('#sync-name').fill('新 中文电脑');await page.locator('#sync-auto').check();await page.locator('#sync-save').click();await called('sync-save');
   assert.deepEqual((await calls('sync-save'))[0][1],{name:'新 中文电脑',enabled:true,autoNew:true,autoFiles:false});
   await page.locator('.section-nav button').nth(1).click();await page.locator('#sync-address').selectOption('192.168.10.3');await page.locator('#sync-create').click();await called('sync-invite');assert.deepEqual((await calls('sync-invite'))[0],['sync-invite','192.168.10.3']);
-  await page.locator('#sync-join-code').fill('  clipper-pair:保存 原值  ');await page.locator('#sync-join').click();await called('sync-join');assert.deepEqual((await calls('sync-join'))[0],['sync-join','clipper-pair:保存 原值']);await page.waitForFunction(()=>document.getElementById('sync-join-code').value==='');
+  await page.locator('#sync-join-code').fill('  clip-pair:保存 原值  ');await page.locator('#sync-join').click();await called('sync-join');assert.deepEqual((await calls('sync-join'))[0],['sync-join','clip-pair:保存 原值']);await page.waitForFunction(()=>document.getElementById('sync-join-code').value==='');
   await page.locator('.section-nav button').nth(0).click();await page.locator('[data-approve="pair-allow"]').click();await page.locator('[data-deny="pair-deny"]').click();await called('sync-approve',2);assert.deepEqual(await calls('sync-approve'),[['sync-approve','pair-allow',true],['sync-approve','pair-deny',false]]);
   await page.locator('#sync-refresh').click();await called('sync-now');await page.locator('.section-nav button').nth(1).click();await page.locator('#sync-cancel-code').click();await page.locator('.section-nav button').nth(0).click();await called('sync-cancel');
   await page.locator('[data-revoke="peer-known"]').click();await cancel();assert.deepEqual(await calls('sync-revoke'),[]);await page.locator('[data-revoke="peer-known"]').click();await submit();assert.deepEqual((await calls('sync-revoke'))[0],['sync-revoke','peer-known']);
@@ -90,7 +90,7 @@ const {setup}=require('./renderer-fixture.cjs'),{setupData,openDataView}=require
 
   await start('web-off');await page.locator('#web-host').selectOption('192.168.10.3');await page.locator('#web-duration').selectOption('60');await page.locator('#web-start').click();await page.waitForSelector('#web-stop');
   assert.deepEqual((await calls('web-start'))[0][1],{host:'192.168.10.3',minutes:60,follow:false});
-  assert.equal(await page.locator('#web-link').inputValue(),'https://192.168.10.1:43102/#clipper-web=FIXTURE-ONLY-保存');assert.equal(await page.locator('#web-link').getAttribute('readonly'),'');
+  assert.equal(await page.locator('#web-link').inputValue(),'https://192.168.10.1:43102/#clip-web=FIXTURE-ONLY-保存');assert.equal(await page.locator('#web-link').getAttribute('readonly'),'');
   assert.equal(await page.locator('#web-fingerprint').textContent(),Array(32).fill('ab').join(':'));assert.equal(await page.locator('#injected-browser').count(),0);assert.equal(await page.locator('#web-error').textContent(),'外部网页错误：保存');
   await page.locator('[data-web-approve="browser-pending"]').click();assert.equal(await page.locator('#web-allow-send').isChecked(),false);assert.equal(await page.locator('.web-code').textContent(),'123456');await cancel();assert.deepEqual(await calls('web-approve'),[]);
   await page.locator('[data-web-approve="browser-pending"]').click();await submit();assert.deepEqual((await calls('web-approve'))[0],['web-approve','browser-pending',true,false]);

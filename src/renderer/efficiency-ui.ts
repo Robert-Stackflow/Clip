@@ -1,7 +1,7 @@
 import {t as tr} from '../shared/i18n';
 import {setupShortcut} from './shortcut';
 import {createElement,History,Search,X,CornerDownLeft} from 'lucide';
-const api=window.clipper,esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
+const api=window.clip,esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 interface Context {active?():boolean;modal(title:string,body:string,save:()=>Promise<void>,label?:string):void;toast(text:unknown):void;reuse(query:string):void}
 export function efficiencyUI(ctx:Context){
  async function settings(shortcuts=true){

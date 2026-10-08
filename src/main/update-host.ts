@@ -5,7 +5,7 @@ import {join} from 'node:path';
 import type {UpdateRelease} from '../shared/updates';
 const execute=promisify(execFile);
 const host=()=>join(__dirname,'../native/UpdateHost.exe').replace('app.asar','app.asar.unpacked');
-export async function installedClipper(){try{const result=await execute(host(),['--probe',Buffer.from(process.execPath).toString('base64')],{windowsHide:true,timeout:5000});return result.stdout.trim()==='true';}catch{return false;}}
+export async function installedClip(){try{const result=await execute(host(),['--probe',Buffer.from(process.execPath).toString('base64')],{windowsHide:true,timeout:5000});return result.stdout.trim()==='true';}catch{return false;}}
 export async function activeUpdate(folder:string){try{const result=await execute(host(),['--active',Buffer.from(folder).toString('base64')],{windowsHide:true,timeout:5000});return result.stdout.trim()!=='false';}catch{return true;}}
 export async function armUpdate(folder:string,release:UpdateRelease,valid:()=>boolean,checkpoint?:{id:string;profileId:string}){
   if(!checkpoint)throw new Error('UPDATE_CHECKPOINT_REQUIRED');

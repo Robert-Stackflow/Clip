@@ -3,8 +3,8 @@ const {setup}=require('./renderer-fixture.cjs');
 function fixture(){
  window.microphoneRequests=[];window.microphoneGrants=[];
  navigator.mediaDevices.enumerateDevices=()=>new Promise((resolve,reject)=>window.microphoneRequests.push({resolve,reject}));
- window.clipperRecorder.beginMicrophoneList=async()=>{const token=String(microphoneGrants.length);microphoneGrants.push({token,ended:0});return token;};
- window.clipperRecorder.endMicrophoneList=async token=>{microphoneGrants.find(g=>g.token===token).ended++;};
+ window.clipRecorder.beginMicrophoneList=async()=>{const token=String(microphoneGrants.length);microphoneGrants.push({token,ended:0});return token;};
+ window.clipRecorder.endMicrophoneList=async token=>{microphoneGrants.find(g=>g.token===token).ended++;};
  window.resolveMicrophones=()=>microphoneRequests.at(-1).resolve([{kind:'audioinput',deviceId:'default',label:'Default'},{kind:'audioinput',deviceId:'known',label:'Owned microphone'},{kind:'audioinput',deviceId:'anonymous',label:''},{kind:'videoinput',deviceId:'camera',label:'No camera'},{kind:'audiooutput',deviceId:'speaker',label:'No speaker'}]);
 }
 (async()=>{
@@ -13,9 +13,9 @@ function fixture(){
   for(const language of ['zh-CN','en']){
    const context=await browser.newContext({viewport:{width:940,height:760}});
    await context.addInitScript({content:'('+setup.toString()+')('+JSON.stringify(language)+');('+fixture.toString()+')();'});
-   await context.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
+   await context.route('https://clip.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
    const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));
-   const ready=async()=>{await page.goto('https://clipper.test/recorder.html');await page.waitForSelector('#sources button');await page.locator('#record-audio').click();await page.locator('#microphone').check();await expect(page.locator('#microphone-device-trigger')).toBeEnabled();};
+   const ready=async()=>{await page.goto('https://clip.test/recorder.html');await page.waitForSelector('#sources button');await page.locator('#record-audio').click();await page.locator('#microphone').check();await expect(page.locator('#microphone-device-trigger')).toBeEnabled();};
    await ready();const trigger=page.locator('#microphone-device-trigger');
    await page.locator('#system-audio').check();assert.equal(await page.evaluate(()=>microphoneRequests.length),0);assert.equal(await page.locator('#microphone-device').inputValue(),'');
    await trigger.click();await expect(trigger).toHaveAttribute('aria-busy','true');assert.equal(await page.evaluate(()=>microphoneRequests.length),1);

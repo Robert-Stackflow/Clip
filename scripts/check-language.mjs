@@ -29,7 +29,7 @@ scopes.push('src/renderer/dialog-shell.ts','src/main/capture-writer.ts','src/mai
 scopes.push('src/renderer/color-picker.ts','src/renderer/category-ui.ts','src/renderer/category-glyph.ts','src/renderer/category-icon-picker.ts','src/renderer/utility-empty.ts');
 scopes.push('src/main/backup-preview-job.ts','src/main/backup-preview-worker.ts');
 scopes.push('src/shared/commands.ts','src/main/commands.ts','src/renderer/command-ui.ts');
-scopes.push('src/main/codex-provider.ts','src/renderer/codex-ui.ts');
+scopes.push('src/main/codex-provider.ts','src/main/codex-runtime.ts','src/renderer/codex-ui.ts');
 scopes.push(...['src/shared/chat.ts','src/main/chat.ts','src/main/chat-window.ts','src/main/chat-transport.ts','src/renderer/chat.ts','src/renderer/chat.html','src/renderer/chat-markdown.ts','src/renderer/model-editor.ts','src/renderer/model-picker.ts']);
 scopes.push('src/main/file-actions.ts','src/main/quick-preview.ts','src/renderer/file-preview.ts','src/renderer/quick-filters.ts','src/renderer/quick-preview.ts','src/renderer/quick-preview.html','src/shared/quick-panel.ts','src/renderer/quick.ts','src/renderer/quick.html');
 const required=inventory.entries.filter(entry=>(scopes.includes(entry.file)||checkedLabelSources.some(table=>table.file===entry.file&&table.values.includes(entry.value)))&&!entry.property&&!retained(entry)),missing=required.filter(entry=>!catalog.has(entry.value));

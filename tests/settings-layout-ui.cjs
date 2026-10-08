@@ -2,25 +2,25 @@ const {chromium,expect}=require('@playwright/test'),assert=require('node:assert/
 const {setup}=require('./renderer-fixture.cjs'),{extra}=require('./ui-028-fixture.cjs');
 function settingsFixture(encrypted){
  fixture.state.settings.maxHistoryMiB=512;
- fixture.desktop={displayId:null,dwellMs:450,shelfTop:false,shelfAutoDrag:true,shelfAutoHide:true,shelfAutoHideSeconds:6,shelfLocked:false,shelfPosition:'top-right',shelfShortcut:'Control+Shift+D',cardDirection:'grid',shelfOnTop:true};
+ fixture.desktop={quickHoverPreview:true,displayId:null,dwellMs:450,shelfTop:false,shelfAutoDrag:true,shelfAutoHide:true,shelfAutoHideSeconds:6,shelfLocked:false,shelfPosition:'top-right',shelfShortcut:'Control+Shift+D',cardDirection:'grid',shelfOnTop:true};
  fixture.data={directory:'D:\\Fixture\\资料',databaseBytes:1024,previousDirectory:'D:\\Previous',backup:{enabled:true,directory:'D:\\Fixture\\Backups',intervalHours:24,keep:10,encrypted:false,hasPassword:false,lastSuccess:Date.now(),nextAt:Date.now()+86400000},entries:[{name:'backup-fixture.json',createdAt:Date.now(),encrypted:false,bytes:2048}]};
  fixture.host={enabled:false,endpoint:'https://example.test/upload',hasToken:true,bodyMode:'multipart',fieldName:'file',authMode:'bearer',tokenHeader:'X-API-Key',responsePath:'data.url',linkFormat:'url',timeoutSeconds:30};
  fixture.updates={phase:'idle',current:'0.50.15',automatic:false,installed:true,downloaded:0,error:'',checkedAt:0};
- clipper.onShortcutInput=()=>()=>{};
- clipper.desktopState=async()=>({options:{...fixture.desktop},displays:[{id:1,name:'Display 1'}]});clipper.configureDesktop=async value=>fixture.desktop={...value};
- clipper.dataState=async()=>structuredClone(fixture.data);clipper.configureBackup=async value=>{fixture.savedBackup=value;Object.assign(fixture.data.backup,value);};
- clipper.imageHostState=async()=>({...fixture.host});clipper.configureImageHost=async value=>{fixture.savedHost=value;Object.assign(fixture.host,value);};clipper.testImageHost=async()=> 'https://example.test/image.png';
- clipper.vaultState=async()=>({encrypted,unlocked:true,hello:false,helloAvailable:true,idleMinutes:15,plaintextDirectory:''});clipper.configureVault=async(hello,idle)=>fixture.savedVault={hello,idle};
- clipper.updateState=async()=>({...fixture.updates});clipper.configureUpdates=async automatic=>Object.assign(fixture.updates,{automatic});clipper.checkUpdate=async()=>Object.assign(fixture.updates,{phase:'available',release:{version:'0.50.16',bytes:1024,notes:'A fixture release with a concise description.'}});
- clipper.checkpoints=async()=>[{id:'fixture-point',createdAt:Date.now(),reason:'manual',sourceVersion:'0.50.14',targetVersion:'0.50.15',encrypted,compatible:true,bytes:2048}];
- clipper.programVersions=async()=>[{id:'fixture-program',version:'0.50.14',createdAt:Date.now(),bytes:4096}];
+ clip.onShortcutInput=()=>()=>{};
+ clip.desktopState=async()=>({options:{...fixture.desktop},displays:[{id:1,name:'Display 1'}]});clip.configureDesktop=async value=>fixture.desktop={...value};
+ clip.dataState=async()=>structuredClone(fixture.data);clip.configureBackup=async value=>{fixture.savedBackup=value;Object.assign(fixture.data.backup,value);};
+ clip.imageHostState=async()=>({...fixture.host});clip.configureImageHost=async value=>{fixture.savedHost=value;Object.assign(fixture.host,value);};clip.testImageHost=async()=> 'https://example.test/image.png';
+ clip.vaultState=async()=>({encrypted,unlocked:true,hello:false,helloAvailable:true,idleMinutes:15,plaintextDirectory:''});clip.configureVault=async(hello,idle)=>fixture.savedVault={hello,idle};
+ clip.updateState=async()=>({...fixture.updates});clip.configureUpdates=async automatic=>Object.assign(fixture.updates,{automatic});clip.checkUpdate=async()=>Object.assign(fixture.updates,{phase:'available',release:{version:'0.50.16',bytes:1024,notes:'A fixture release with a concise description.'}});
+ clip.checkpoints=async()=>[{id:'fixture-point',createdAt:Date.now(),reason:'manual',sourceVersion:'0.50.14',targetVersion:'0.50.15',encrypted,compatible:true,bytes:2048}];
+ clip.programVersions=async()=>[{id:'fixture-program',version:'0.50.14',createdAt:Date.now(),bytes:4096}];
 }
 (async()=>{
- const output=path.resolve(process.env.CLIPPER_TEST_OUTPUT_DIR||'work/settings-layout-ui');await fs.mkdir(output,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true}),errors=[],results=[];
+ const output=path.resolve(process.env.CLIP_TEST_OUTPUT_DIR||'work/settings-layout-ui');await fs.mkdir(output,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true}),errors=[],results=[];
  try{for(const [language,width,scale,dark,encrypted]of [['zh-CN',1476,100,false,false],['en',860,125,true,true],['zh-CN',700,150,false,true]]){
   const context=await browser.newContext({viewport:{width,height:976}});await context.addInitScript({content:`(${setup.toString()})(${JSON.stringify(language)});(${extra.toString()})();(${settingsFixture.toString()})(${encrypted});fixture.state.dark=${dark};fixture.appearance({...fixture.value(),scale:${scale},density:${JSON.stringify(width===700?'compact':'comfortable')}});`});
-  await context.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
-  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));await page.goto('https://clipper.test/index.html');await page.locator('[data-page=settings]').click();await expect(page.locator('.settings-nav')).toBeVisible();
+  await context.route('https://clip.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
+  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));await page.goto('https://clip.test/index.html');await page.locator('[data-page=settings]').click();await expect(page.locator('.settings-nav')).toBeVisible();
   await expect(page.locator('#tray-click-action')).toHaveValue('open');await expect(page.locator('#tray-click-action option')).toHaveCount(5);const sections=page.locator('.settings-nav button');await expect(sections).toHaveCount(10);
   for(const id of ['interface-language','max-items','retention','history-cap','excluded-apps','backup-interval','backup-keep','backup-password','backup-password-repeat'])await expect(page.locator('#'+id)).toHaveCount(1);
   const inspect=async()=>page.locator('.section-panel:not([hidden])').evaluate(panel=>{
@@ -42,7 +42,7 @@ function settingsFixture(encrypted){
   // Moved language controls retain their original save listener.
   await page.selectOption('#interface-language',language==='en'?'zh-CN':'en');await expect.poll(()=>page.evaluate(()=>fixture.calls.filter(c=>c[0]==='language').length)).toBe(1);
   await nav(1);await page.selectOption('#appearance-density','compact');await expect.poll(()=>page.evaluate(()=>fixture.value().density)).toBe('compact');
-  await nav(3);await page.locator('#desktop-shelfLocked').check();await expect.poll(()=>page.evaluate(()=>fixture.desktop.shelfLocked)).toBe(true);
+  await nav(3);await expect(page.locator('#desktop-quickHoverPreview')).toBeChecked();await page.locator('#desktop-quickHoverPreview').uncheck();await expect.poll(()=>page.evaluate(()=>fixture.desktop.quickHoverPreview)).toBe(false);await nav(0);await nav(3);await expect(page.locator('#desktop-quickHoverPreview')).not.toBeChecked();await page.locator('#desktop-quickHoverPreview').check();await expect.poll(()=>page.evaluate(()=>fixture.desktop.quickHoverPreview)).toBe(true);await page.locator('#desktop-shelfLocked').check();await expect.poll(()=>page.evaluate(()=>fixture.desktop.shelfLocked)).toBe(true);
   await nav(4);await page.selectOption('#image-host-auth-mode','header');await expect(page.locator('#image-host-token-header')).toBeVisible();await page.locator('#image-host-token-header').fill('X-Fixture');await page.locator('#image-host-save').click();await expect.poll(()=>page.evaluate(()=>fixture.savedHost?.tokenHeader)).toBe('X-Fixture');assert.deepEqual((await inspect()).badTitles,[]);
   await nav(2);await page.locator('#update-automatic').check();await expect.poll(()=>page.evaluate(()=>fixture.updates.automatic)).toBe(true);await page.locator('#update-check').click();await expect(page.locator('#update-download')).toBeVisible();assert.deepEqual((await inspect()).badTitles,[]);
   await nav(7);await page.locator('#backup-encrypted').check();await expect(page.locator('#backup-password-fields')).toBeVisible();await page.locator('#backup-interval').fill('48');await page.locator('#backup-password').fill('fixture-backup-password');await page.locator('#backup-password-repeat').fill('fixture-backup-password');await page.locator('#save-backup-settings').click();await expect.poll(()=>page.evaluate(()=>fixture.savedBackup?.intervalHours)).toBe(48);await expect(page.locator('.settings-nav')).toBeVisible();

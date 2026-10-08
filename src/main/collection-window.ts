@@ -9,8 +9,8 @@ export function watchCollectionWindow(window:BrowserWindow,suspend?:()=>void){
 }
 export function flushCollectionWindow(window:BrowserWindow){
  const state=pending.get(window);if(!state?.dirty||window.isDestroyed()||!window.isVisible()||window.isMinimized()||window.webContents.isLoading())return;
- window.webContents.send('clipper:changed');state.dirty=false;
+ window.webContents.send('clip:changed');state.dirty=false;
 }
 export function notifyCollectionWindow(window:BrowserWindow){
- const state=pending.get(window);if(!state){window.webContents.send('clipper:changed');return;}state.dirty=true;flushCollectionWindow(window);
+ const state=pending.get(window);if(!state){window.webContents.send('clip:changed');return;}state.dirty=true;flushCollectionWindow(window);
 }

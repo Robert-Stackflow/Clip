@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),path=require('node:path'),fs=require('node:fs/promises'),{randomBytes,randomUUID}=require('node:crypto'),generated=require('./generated-fixtures.cjs');
-const {Store,SyncLedger,SharePublisher,snapshotSyncFiles}=require('../work/test-exports.cjs'),worker=process.env.CLIPPER_PUBLISH_WORKER||path.resolve('work/share-publisher-worker.cjs'),serial=fn=>Promise.resolve().then(fn);
+const {Store,SyncLedger,SharePublisher,snapshotSyncFiles}=require('../work/test-exports.cjs'),worker=process.env.CLIP_PUBLISH_WORKER||path.resolve('work/share-publisher-worker.cjs'),serial=fn=>Promise.resolve().then(fn);
 async function fixture(key){const root=await generated.mkdtemp('share-publisher-'),source=path.join(root,'history.sqlite'),store=new Store(source,false,false,key),publisher=new SharePublisher(worker),identity=randomUUID();return {root,source,key,store,publisher,identity,close:async()=>{await publisher.stop();store.close();key?.fill(0);}};}
 const publish=(f,item,options={})=>f.publisher.run({source:f.source,key:f.key?Buffer.from(f.key):undefined},item.id,item.hash,f.identity,options.valid||(()=>true),options.enqueue||serial);
 async function wait(fn){for(let i=0;i<200;i++){if(fn())return;await new Promise(r=>setTimeout(r,10));}throw Error('No queued commit');}

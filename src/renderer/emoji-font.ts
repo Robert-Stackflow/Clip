@@ -2,11 +2,11 @@ let sequence=0;
 /** Use the installed Windows emoji face through Chromium's font loader, without shipping font files. */
 export function mountEmojiFont(...hosts:HTMLElement[]){
  let disposed=false,face:FontFace|undefined;
- const source=window.clipperAppearance?.uiFontSource;
+ const source=window.clipAppearance?.uiFontSource;
  if(source)void (async()=>{
   try{
    const value=await source('Segoe UI Emoji');if(disposed||!value?.url)return;
-   const alias='Clipper Emoji '+(++sequence);
+   const alias='Clip Emoji '+(++sequence);
    // DirectWrite and the font-file loader choose different OpenType metric tables.
    // Preserve the installed face's baseline when switching to its file source.
    const context=new OffscreenCanvas(1,1).getContext('2d');
@@ -19,7 +19,7 @@ export function mountEmojiFont(...hosts:HTMLElement[]){
     descriptors.lineGapOverride='0%';
    }
    face=new FontFace(alias,'url('+JSON.stringify(value.url)+')',descriptors);await face.load();
-   if(disposed){window.clipperAppearance?.releaseFontResources?.();return;}document.fonts.add(face);
+   if(disposed){window.clipAppearance?.releaseFontResources?.();return;}document.fonts.add(face);
    for(const host of hosts){host.style.setProperty('--reference-emoji-font',JSON.stringify(alias));host.dataset.emojiFont='loaded';}
   }catch{if(!disposed)for(const host of hosts)host.dataset.emojiFont='fallback';}
  })();

@@ -7,7 +7,7 @@ const {Store}=require('../work/test-exports.cjs');
 (async()=>{
  const version=process.argv[2];
  assert(/^\d+\.\d+\.\d+$/.test(version),'Pass a release version, for example 0.50.2');
- const executable=path.resolve('release',version,'win-unpacked','Clipper.exe');
+ const executable=path.resolve('release',version,'win-unpacked','Clip.exe');
  assert(fs.existsSync(executable),'Packaged executable is missing');
  const {beginCase}=await import('../scripts/workspace.mjs');
  const work=await beginCase('packaged-smoke-'+version.replaceAll('.','-'));
@@ -15,9 +15,9 @@ const {Store}=require('../work/test-exports.cjs');
  fs.mkdirSync(profile,{recursive:true});
  const store=new Store(path.join(profile,'history.sqlite'));
  try{store.saveSettings({...store.settings,paused:true});}finally{store.close();}
- const env={...process.env,CLIPPER_TEST_MODE:'1',CLIPPER_DATA_DIR:profile};
+ const env={...process.env,CLIP_TEST_MODE:'1',CLIP_DATA_DIR:profile};
  delete env.ELECTRON_RUN_AS_NODE;
- delete env.CLIPPER_DEVELOPMENT;
+ delete env.CLIP_DEVELOPMENT;
  let app;
  try{
   app=await _electron.launch({executablePath:executable,args:[],env,timeout:30000});
@@ -25,7 +25,7 @@ const {Store}=require('../work/test-exports.cjs');
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
   await page.waitForSelector('#search',{timeout:30000});
-  await page.waitForFunction(async()=>{const state=await window.clipper.state();return state.native&&state.settings.paused;},undefined,{timeout:30000});
+  await page.waitForFunction(async()=>{const state=await window.clip.state();return state.native&&state.settings.paused;},undefined,{timeout:30000});
   const actual=await app.evaluate(({app,BrowserWindow})=>({version:app.getVersion(),packaged:app.isPackaged,profile:app.getPath('userData'),windows:BrowserWindow.getAllWindows().length}));
   assert.equal(actual.version,version);
   assert.equal(actual.packaged,true);

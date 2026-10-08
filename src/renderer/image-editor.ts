@@ -11,8 +11,8 @@ import {actionFeedback} from './actions';
 import {canvasPng} from './image-encode';
 import {setupColorPicker} from './color-picker';
 import {customControls} from './controls';
-declare global{interface Window{clipperImage:ImageEditorAPI}}
-const api=window.clipperImage,q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T,canvas=q<HTMLCanvasElement>('image'),overlay=q<HTMLCanvasElement>('overlay'),source=new window.Image();
+declare global{interface Window{clipImage:ImageEditorAPI}}
+const api=window.clipImage,q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T,canvas=q<HTMLCanvasElement>('image'),overlay=q<HTMLCanvasElement>('overlay'),source=new window.Image();
 setupColorPicker(q<HTMLInputElement>('color'));
 customControls(document.body);const shapeTrigger=q<HTMLButtonElement>('shape-kind-trigger'),shapeSymbol=document.createElement('span');shapeSymbol.className='shape-symbol';shapeTrigger.dataset.tool='shape';shapeTrigger.classList.add('quiet');shapeTrigger.prepend(shapeSymbol);
 function shapeIcon(){const kind=q<HTMLSelectElement>('shape-kind').value;shapeSymbol.replaceChildren(createElement(kind==='ellipse'?Circle:kind==='triangle'?Triangle:kind==='diamond'?Diamond:kind==='roundrect'?RectangleHorizontal:Square,{'aria-hidden':'true','stroke-width':1.75}));shapeTrigger.title=q<HTMLSelectElement>('shape-kind').selectedOptions[0].text;}

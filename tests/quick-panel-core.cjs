@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict');
-const {quickGlyph,quickRecent,rememberGlyph,quickPanelBounds,quickShortcut,QUICK_SHORTCUT,TrayHistory,QuickReplies,Store,trayQuery,framePNG,fillTemplate}=require('../work/test-exports.cjs');
+const {quickGlyph,quickRecent,rememberGlyph,quickPanelBounds,anchoredQuickPanelBounds,quickShortcut,QUICK_SHORTCUT,TrayHistory,QuickReplies,Store,trayQuery,framePNG,fillTemplate}=require('../work/test-exports.cjs');
 test('Quick panel accepts Unicode glyphs and rejects invalid or unbounded input',()=>{
  for(const value of [{tab:'emoji',text:'👩‍💻'},{tab:'kaomoji',text:'( •̀ ω •́ )✧'},{tab:'symbols',text:'∞'}])assert.deepEqual(quickGlyph({...value,private:'discard'}),value);
  for(const value of [null,{},[],{tab:'clipboard',text:'x'},{tab:'emoji',text:' '},{tab:'symbols',text:'a\n'},{tab:'symbols',text:'\0'},{tab:'emoji',text:'a'.repeat(129)}])assert.throws(()=>quickGlyph(value));
@@ -16,8 +16,8 @@ test('Compact bounds stay inside negative-coordinate, small and bottom-right dis
  assert.throws(()=>quickPanelBounds({x:NaN,y:0},{x:0,y:0,width:500,height:500}));
 });
 test('Compact previews prefer thumbnails without weakening history capabilities',()=>{
- const store=new Store(':memory:'),png=framePNG({width:2,height:2,data:Buffer.alloc(16,255)}).toString('base64'),thumb='data:image/png;base64,'+png,item=store.add({png},'Fixture.exe',thumb);let reads=0;const history=new TrayHistory(()=>store,Date.now,()=>{reads++;return 'clipper://image/original';});
- try{history.open();const token=history.query(trayQuery).items[0].token;assert.equal(history.preview(token,true).image,thumb);assert.equal(reads,0);assert.equal(history.preview(token).image,'clipper://image/original');assert.equal(reads,1);store.delete(item.id);assert.throws(()=>history.preview(token,true));history.close();assert.throws(()=>history.preview(token,true));}finally{store.close();}
+ const store=new Store(':memory:'),png=framePNG({width:2,height:2,data:Buffer.alloc(16,255)}).toString('base64'),thumb='data:image/png;base64,'+png,item=store.add({png},'Fixture.exe',thumb);let reads=0;const history=new TrayHistory(()=>store,Date.now,()=>{reads++;return 'clip://image/original';});
+ try{history.open();const token=history.query(trayQuery).items[0].token;assert.equal(history.preview(token,true).image,thumb);assert.equal(reads,0);assert.equal(history.preview(token).image,'clip://image/original');assert.equal(reads,1);store.delete(item.id);assert.throws(()=>history.preview(token,true));history.close();assert.throws(()=>history.preview(token,true));}finally{store.close();}
 });
 test('Pinned panel queries find older records beyond the recent page and combine text and type filters',()=>{
  const store=new Store(':memory:');try{
@@ -54,4 +54,15 @@ test('Clearing history leaves pinned, favorite and quick replies intact and undo
   const pinned=store.add({text:'Pinned'},'Fixture',undefined,{pinned:true}),favorite=store.add({text:'Favorite'},'Fixture',undefined,{favorite:true}),ordinary=store.add({text:'Ordinary',html:'<b>Ordinary</b>'},'Fixture'),reply=store.saveSnippet({title:'Reply',text:'Reusable'});
   store.clear();assert.deepEqual(new Set(store.list().map(item=>item.id)),new Set([pinned.id,favorite.id]));assert.equal(store.snippet(reply).text,'Reusable');store.undo();assert.deepEqual(store.get(store.db.prepare('SELECT id FROM clips WHERE hash=?').get(ordinary.hash).id).payload,ordinary.payload);assert.equal(store.snippet(reply).text,'Reusable');
  }finally{store.close();}
+});
+
+test('Quick panel follows the caret, flips above it, and falls back to the active window rather than the mouse',()=>{
+ const area={x:0,y:0,width:1920,height:1080},window={x:100,y:80,width:1100,height:800};
+ assert.deepEqual(anchoredQuickPanelBounds(area,window,{x:450,y:130,width:1,height:20}),{x:450,y:158,width:400,height:560});
+ assert.deepEqual(anchoredQuickPanelBounds(area,window,{x:450,y:930,width:1,height:20}),{x:450,y:362,width:400,height:560});
+ assert.deepEqual(anchoredQuickPanelBounds(area,window),{x:792,y:312,width:400,height:560});
+ assert.deepEqual(anchoredQuickPanelBounds(area),{x:1512,y:512,width:400,height:560});
+ for(const screen of [{x:-1920,y:-100,width:1920,height:1080},{x:0,y:0,width:300,height:400}])for(const caret of [undefined,{x:screen.x+screen.width-1,y:screen.y+screen.height-20,width:1,height:20}]){
+  const bounds=anchoredQuickPanelBounds(screen,undefined,caret);assert(bounds.x>=screen.x&&bounds.y>=screen.y&&bounds.x+bounds.width<=screen.x+screen.width&&bounds.y+bounds.height<=screen.y+screen.height);
+ }
 });

@@ -1,23 +1,23 @@
 const {chromium}=require('@playwright/test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
 const {setup}=require('./renderer-fixture.cjs'),{setupText}=require('./language-text-fixture.cjs');
 const {builtinCommands,setInterfaceLanguage}=require('../work/test-exports.cjs');
-const output=process.env.CLIPPER_TEST_OUTPUT_DIR||path.resolve('work/current/commands-ui');
+const output=process.env.CLIP_TEST_OUTPUT_DIR||path.resolve('work/current/commands-ui');
 function commandsFixture(builtins){
  fixture.commands=[...builtins,...JSON.parse(localStorage.getItem('fixture-commands')||'[]')];
  const persist=()=>localStorage.setItem('fixture-commands',JSON.stringify(fixture.commands.filter(command=>!command.builtin)));
- const base=window.clipper,overrides={
+ const base=window.clip,overrides={
   commands:async()=>{if(fixture.delayCommands)await new Promise(resolve=>fixture.releaseCommands=resolve);return fixture.commands;},
   saveCommand:async value=>{fixture.calls.push(['command-save',value]);const command={...value,id:value.id||crypto.randomUUID(),revision:crypto.randomUUID(),builtin:false};fixture.commands=value.id?fixture.commands.map(item=>item.id===value.id?command:item):[...fixture.commands,command];persist();return command.id;},
   removeCommand:async(id,revision)=>{fixture.calls.push(['command-remove',id,revision]);fixture.commands=fixture.commands.filter(command=>command.id!==id);persist();},
- };window.clipper=new Proxy(overrides,{get:(object,key)=>key in object?object[key]:base[key]});
+ };window.clip=new Proxy(overrides,{get:(object,key)=>key in object?object[key]:base[key]});
 }
 (async()=>{
  await fs.mkdir(output,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true}),results=[],errors=[];let context;
  try{for(const language of ['zh-CN','en']){
   setInterfaceLanguage(language);context=await browser.newContext({viewport:{width:1366,height:900}});await context.addInitScript(setup,language);await context.addInitScript(setupText);await context.addInitScript(commandsFixture,builtinCommands());
-  await context.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);if(!/^[\w.-]+$/.test(name))return route.abort();try{await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'application/javascript'});}catch{return route.abort();}});
+  await context.route('https://clip.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);if(!/^[\w.-]+$/.test(name))return route.abort();try{await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'application/javascript'});}catch{return route.abort();}});
   const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
-  const start=async()=>{await page.goto('https://clipper.test/index.html');await page.waitForSelector('#copy');};
+  const start=async()=>{await page.goto('https://clip.test/index.html');await page.waitForSelector('#copy');};
   const close=async()=>{await page.locator('#modal-close').click();await page.waitForFunction(()=>!document.getElementById('dialog').open);};
   const submit=async()=>{await page.locator('dialog [type=submit]').click();await page.waitForFunction(()=>!document.getElementById('dialog').open);};
   const shot=async name=>{await page.evaluate(async()=>{await Promise.allSettled(document.getAnimations().filter(animation=>animation.effect?.getTiming().iterations!==Infinity).map(animation=>animation.finished));await new Promise(requestAnimationFrame);});await page.screenshot({path:path.join(output,language+'-'+name+'.png')});};

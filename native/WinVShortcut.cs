@@ -60,7 +60,7 @@ class WinVShortcut {
  }
  public static int Run(uint pid){
   parent=pid;
-  bool created;using(Mutex mutex=new Mutex(true,"Local\\Clipper.WinVShortcut",out created)){
+  bool created;using(Mutex mutex=new Mutex(true,"Local\\Clip.WinVShortcut",out created)){
    if(!created)return 4;
    try{
     thread=GetCurrentThreadId();Message message;PeekMessage(out message,IntPtr.Zero,0,0,0);

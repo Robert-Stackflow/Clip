@@ -10,7 +10,7 @@ export class HotkeyRegistry {
  constructor(private adapter:Adapter){}
  replace(bindings:HotkeyBinding[],strict=true){
   const next=new Map<string,()=>void>(),errors:string[]=[];
-  for(const [key,callback,mode]of bindings){try{const normalized=mode==='chat'?chatShortcut(key):shortcutKey(key);if(next.has(normalized))throw new Error(tr`快捷键 ${shortcutLabel(normalized)} 不能重复`);next.set(normalized,callback);}catch(e){if(strict)throw e;errors.push((e as Error).message);}}
+  for(const [key,callback,mode]of bindings){try{const normalized=mode==='chat'?chatShortcut(key):shortcutKey(key,true);if(!normalized)continue;if(next.has(normalized))throw new Error(tr`快捷键 ${shortcutLabel(normalized)} 不能重复`);next.set(normalized,callback);}catch(e){if(strict)throw e;errors.push((e as Error).message);}}
   const added=new Map<string,{callback:()=>void;enabled:boolean}>();
   try{for(const [key,callback]of next){if(this.active.has(key))continue;const entry={callback,enabled:false};let ok=false;try{ok=this.adapter.register(key,()=>{if(entry.enabled)entry.callback();});}catch{}if(ok)added.set(key,entry);else{const error=tr`快捷键 ${shortcutLabel(key)} 已被占用，请更换`;if(strict)throw new Error(error);errors.push(error);}}}
   catch(e){for(const key of added.keys())this.adapter.unregister(key);throw e;}

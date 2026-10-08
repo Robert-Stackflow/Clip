@@ -1,6 +1,6 @@
 const fs=require('node:fs/promises'),path=require('node:path');
 function setupWeb(config={}){
- const key='clipper.web.language.v1';
+ const key='clip.web.language.v1';
  if(config.saved&&!localStorage.getItem(key))localStorage.setItem(key,config.saved);
  if(config.denied)Object.defineProperty(window,'localStorage',{get(){throw new DOMException('fixture denied','SecurityError');}});
  let browserLanguage=config.browserLanguage||navigator.language;
@@ -31,8 +31,8 @@ function setupWeb(config={}){
 async function createContext(browser,config={}){
  const context=await browser.newContext({viewport:{width:1000,height:760},locale:config.locale||'en-US',colorScheme:config.colorScheme||'light'});
  await context.addInitScript(setupWeb,config);
- await context.route('https://clipper-web.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1)||'index.html';if(!['index.html','app.js','app.css'].includes(name))return route.abort();await route.fulfill({body:await fs.readFile(path.join('dist/web',name)),contentType:name.endsWith('.html')?'text/html; charset=utf-8':name.endsWith('.css')?'text/css':'text/javascript',headers:{'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src blob:; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"}});});return context;
+ await context.route('https://clip-web.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1)||'index.html';if(!['index.html','app.js','app.css'].includes(name))return route.abort();await route.fulfill({body:await fs.readFile(path.join('dist/web',name)),contentType:name.endsWith('.html')?'text/html; charset=utf-8':name.endsWith('.css')?'text/css':'text/javascript',headers:{'Content-Security-Policy':"default-src 'none'; script-src 'self'; style-src 'self'; img-src blob:; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"}});});return context;
 }
-async function start(page,invite=true){await page.goto('https://clipper-web.test/'+(invite?'#clipper-web=fixture-invitation-only':''));await page.waitForFunction(()=>!!document.getElementById('connect-form').onsubmit);}
+async function start(page,invite=true){await page.goto('https://clip-web.test/'+(invite?'#clip-web=fixture-invitation-only':''));await page.waitForFunction(()=>!!document.getElementById('connect-form').onsubmit);}
 async function join(page){await page.locator('#name').fill('保存 设置 <img id="injected-name">');await page.locator('#verified').check();await page.locator('#connect').click();await page.waitForFunction(()=>!document.getElementById('workspace').hidden||!document.getElementById('waiting').hidden);}
 module.exports={createContext,start,join};

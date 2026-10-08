@@ -33,8 +33,8 @@ async function run(){
  try{
   const png=await f.target.evaluate(()=>{const canvas=document.createElement('canvas');canvas.width=160;canvas.height=96;const context=canvas.getContext('2d');context.fillStyle='#ffffff';context.fillRect(0,0,160,96);context.fillStyle='#d7263d';context.fillRect(0,0,53,96);context.fillStyle='#2266cc';context.fillRect(107,0,53,96);context.fillStyle='#12a05c';context.fillRect(58,24,44,48);return canvas.toDataURL('image/png').split(',')[1];});
   await f.helper.evaluate(async({clipboard,ClipboardItem},value)=>clipboard.write([new ClipboardItem({'image/png':new Blob([Buffer.from(value,'base64')],{type:'image/png'})})]),png);
-  await expect.poll(async()=>(await f.page.evaluate(()=>window.clipper.state())).clips.some(item=>item.kind==='image'),{timeout:10000}).toBe(true);
-  const image=(await f.page.evaluate(()=>window.clipper.state())).clips.find(item=>item.kind==='image');
+  await expect.poll(async()=>(await f.page.evaluate(()=>window.clip.state())).clips.some(item=>item.kind==='image'),{timeout:10000}).toBe(true);
+  const image=(await f.page.evaluate(()=>window.clip.state())).clips.find(item=>item.kind==='image');
   child=spawn('powershell.exe',['-Sta','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.resolve('tests/paste-powerpoint-image-target.ps1'),'-Ready',ready,'-Result',result,'-Stop',stop,'-Failure',failure,'-Presentation',presentation],{stdio:'ignore',windowsHide:true});
   await expect.poll(async()=>{if(await fs.stat(failure).then(()=>true,()=>false))throw Error(await fs.readFile(failure,'utf8'));return fs.readFile(ready,'utf8').catch(()=>'');},{timeout:45000}).toBe('ready');
   const info=execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',"Get-Process -Name POWERPNT | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1 Id,MainWindowHandle | ConvertTo-Json -Compress"],{encoding:'utf8',windowsHide:true}).trim();
@@ -42,7 +42,7 @@ async function run(){
   await f.helper.evaluate(async()=>{await global.focusTarget();global.helperWindow.setAlwaysOnTop(false);});
   await native('activate',hwnd);
   await expect.poll(()=>native('foreground')).toBe(hwnd);
-  const opened=f.app.waitForEvent('window');await f.page.evaluate(()=>window.clipper.showTray());const panel=await opened;
+  const opened=f.app.waitForEvent('window');await f.page.evaluate(()=>window.clip.showTray());const panel=await opened;
   await panel.waitForSelector('.tray-row');await panel.locator('.tray-row').filter({hasText:image.title}).click({button:'right'});
   await expect.poll(async()=>{if(await fs.stat(failure).then(()=>true,()=>false))throw Error(await fs.readFile(failure,'utf8'));return fs.readFile(result,'utf8').catch(()=>'');},{timeout:15000}).toContain('shapes');
   const summary=JSON.parse(await fs.readFile(result,'utf8'));
@@ -52,7 +52,7 @@ async function run(){
   assert(images.length>0,'Saved PowerPoint presentation has no embedded image');
   const decoded=await f.app.evaluate(({nativeImage},{items,source})=>{const expected=nativeImage.createFromBuffer(Buffer.from(source,'base64')).toBitmap();return items.map(item=>{const image=nativeImage.createFromBuffer(Buffer.from(item.data,'base64'));return {name:item.name,size:image.getSize(),samePixels:image.toBitmap().equals(expected)};});},{source:png,items:images.map(item=>({name:item.name,data:item.bytes.toString('base64')}))});
   assert(decoded.some(item=>item.size.width===160&&item.size.height===96&&item.samePixels),JSON.stringify(decoded));
-  console.log(JSON.stringify({result:'PASS',packaged:!!process.env.CLIPPER_PACKAGED_EXE,powerpointImagePaste:true,shapes:summary.shapes,embeddedImageSize:{width:160,height:96},pixelsPreserved:true}));
+  console.log(JSON.stringify({result:'PASS',packaged:!!process.env.CLIP_PACKAGED_EXE,powerpointImagePaste:true,shapes:summary.shapes,embeddedImageSize:{width:160,height:96},pixelsPreserved:true}));
  }finally{
   await fs.writeFile(stop,'stop');
   if(child)await new Promise(resolve=>{if(child.exitCode!==null)return resolve();child.once('exit',resolve);setTimeout(()=>{child.kill();resolve();},5000).unref();});

@@ -7,8 +7,8 @@ import {t as tr} from '../shared/i18n';
 import {writeBase64} from './base64-file';
 import {commitImageFile} from './recording-move';
 
-const image=/^Clipper-[0-9a-f]{64}\.(png|jpg|gif|webp|tif|bmp|dib)$/;
-const temporary=/^\.Clipper-drag-[0-9a-f-]{36}\.part$/;
+const image=/^Clip-[0-9a-f]{64}\.(png|jpg|gif|webp|tif|bmp|dib)$/;
+const temporary=/^\.Clip-drag-[0-9a-f-]{36}\.part$/;
 type Entry={bytes:number;identity?:Stats};
 const same=(a:Stats,b:Stats)=>a.isFile()&&!a.isSymbolicLink()&&a.dev===b.dev&&a.ino===b.ino&&a.size===b.size&&a.mtimeMs===b.mtimeMs;
 
@@ -42,15 +42,15 @@ export class ImageDragFiles {
  }
  private async write(hash:string,extension:string,encoded:string,epoch:number,valid:()=>boolean,prepare:()=>void){
   const live=()=>{if(this.disposed||epoch!==this.generation||!valid())throw new Error(tr('记录已改变、删除或历史已锁定'));this.checked();};live();
-  if(!/^[0-9a-f]{64}$/.test(hash)||!image.test(`Clipper-${hash}.${extension}`)||typeof encoded!=='string')throw new Error(tr('图片缓存文件无效'));
-  const file=join(this.root,`Clipper-${hash}.${extension}`),bytes=Buffer.byteLength(encoded,'base64'),cached=this.entries.get(file);
+  if(!/^[0-9a-f]{64}$/.test(hash)||!image.test(`Clip-${hash}.${extension}`)||typeof encoded!=='string')throw new Error(tr('图片缓存文件无效'));
+  const file=join(this.root,`Clip-${hash}.${extension}`),bytes=Buffer.byteLength(encoded,'base64'),cached=this.entries.get(file);
   if(cached){let current;try{current=lstatSync(file);}catch(e){if((e as NodeJS.ErrnoException).code!=='ENOENT')throw e;}
    if(!this.cleanup.has(file)&&cached.bytes===bytes&&cached.identity&&current&&same(current,cached.identity)){live();return file;}
    this.remove(file);
   }
   if(!bytes||bytes>MAX_ITEM)throw new Error(tr('图片数据无效或过大'));
-  if(this.used+bytes>this.maximum)throw new Error(tr('本次运行的临时图片已达上限，请重启 Clipper 后重试'));
-  prepare();live();const staging=join(this.root,'.Clipper-drag-'+randomUUID()+'.part');let output;let created=false;let committed=false;let success=false;
+  if(this.used+bytes>this.maximum)throw new Error(tr('本次运行的临时图片已达上限，请重启 Clip 后重试'));
+  prepare();live();const staging=join(this.root,'.Clip-drag-'+randomUUID()+'.part');let output;let created=false;let committed=false;let success=false;
   try{output=await open(staging,'wx',0o600);created=true;await writeBase64(output,encoded,live);await output.close();output=undefined;live();await commitImageFile(staging,file);committed=true;live();this.entries.set(file,{bytes,identity:lstatSync(file)});this.used+=bytes;success=true;return file;}
   finally{await output?.close().catch(()=>{});if(created)try{this.remove(staging);}catch{this.defer(staging,bytes);}if(committed&&!success)try{this.remove(file);}catch{this.defer(file,bytes);}}
  }

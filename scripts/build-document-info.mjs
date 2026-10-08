@@ -13,4 +13,4 @@ await writeFile(command,`@echo off\r\ncall "${located.stdout.trim()}\\VC\\Auxili
 const result=spawnSync('cmd.exe',['/d','/c',command],{stdio:'inherit',windowsHide:true,env:{...process.env,CARGO_ENCODED_RUSTFLAGS:['-C','target-feature=+crt-static','-L',`native=${ucrt}`].join('\x1f')}});
 if(result.status!==0)throw new Error('Document information helper build failed');
 await mkdir('dist/native',{recursive:true});
-await copyFile('work/document-info-build/release/clipper-document-info.exe','dist/native/DocumentInfo.exe');
+await copyFile('work/document-info-build/release/clip-document-info.exe','dist/native/DocumentInfo.exe');

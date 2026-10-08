@@ -11,12 +11,12 @@ function setupEntry(value){
  fixture.sync.error=value.syncMessage;fixture.sync.peers[0].name=value.device;
  fixture.sync.peers[0].error=value.external;fixture.sync.nearby[0].name=value.device;
  fixture.sync.pending[0].name=value.device;fixture.entryCalls=[];
- const base=window.clipper,overrides={
+ const base=window.clip,overrides={
   onNotice:fn=>{fixture.entryNotice=fn;return()=>{};},
   syncNow:async()=>{fixture.entryCalls.push(['sync-now']);throw Error(value.syncMessage);},
   copy:async(...args)=>{fixture.entryCalls.push(['copy',...args]);throw Error(value.attachmentMessage);}
  };
- window.clipper=new Proxy(overrides,{get:(object,key)=>key in object?object[key]:base[key]});
+ window.clip=new Proxy(overrides,{get:(object,key)=>key in object?object[key]:base[key]});
 }
 (async()=>{
  await fs.mkdir('work/language-entry',{recursive:true});
@@ -32,13 +32,13 @@ function setupEntry(value){
     context=await browser.newContext({viewport:{width:860,height:600},colorScheme:theme});
     await context.addInitScript(setup,language);await context.addInitScript(setupData);
     await context.addInitScript(setupEntry,{theme,syncMessage,attachmentMessage,device,external});
-    await context.route('https://clipper.test/**',async route=>{
+    await context.route('https://clip.test/**',async route=>{
      const name=new URL(route.request().url()).pathname.slice(1);
      if(!/^[\w.-]+$/.test(name))return route.abort();
      await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});
     });
     const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
-    await page.goto('https://clipper.test/index.html');await page.waitForSelector('#copy');
+    await page.goto('https://clip.test/index.html');await page.waitForSelector('#copy');
     if(surface.startsWith('sync'))await openDataView(page,'sync');
     for(const scale of [100,150]){
      await page.evaluate(scale=>fixture.appearance({font:'mono',scale,density:'compact'}),scale);
@@ -68,7 +68,7 @@ function setupEntry(value){
       assert.equal(await page.locator('.sync-device strong').first().getAttribute('title'),device);
       assert.equal(await page.locator('.sync-nearby strong').getAttribute('title'),device);
       assert.equal(await page.locator('.sync-device .sync-error').textContent(),external);
-      assert.equal(await page.locator('#sync-invitation').inputValue(),'clipper-pair:FIXTURE-ONLY-保存');
+      assert.equal(await page.locator('#sync-invitation').inputValue(),'clip-pair:FIXTURE-ONLY-保存');
      }
      if(scale===150&&theme==='dark'){
       await page.locator(feedback).scrollIntoViewIfNeeded();

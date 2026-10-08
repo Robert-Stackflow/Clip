@@ -12,7 +12,7 @@ function terminal(title){
 }
 async function run(){
  const output=path.resolve('work/paste-terminal');await fs.mkdir(output,{recursive:true});
- const id=randomUUID(),title='ClipperPasteTerminal-'+id,ready=path.join(output,id+'-ready.txt'),result=path.join(output,id+'-result.txt');
+ const id=randomUUID(),title='ClipPasteTerminal-'+id,ready=path.join(output,id+'-ready.txt'),result=path.join(output,id+'-result.txt');
  const f=await fixture('paste-terminal');let child,terminalPid=0;
  const native=(action,arg)=>f.helper.evaluate(({app},{action,arg})=>{
   const req=process.getBuiltinModule('node:module').createRequire(process.getBuiltinModule('node:path').join(app.getAppPath(),'package.json'));
@@ -27,15 +27,15 @@ async function run(){
   }
  },{action,arg});
  try{
-  const value='Clipper Windows Terminal 终端粘贴 😀 '+id;
-  await f.page.evaluate(text=>window.clipper.applyText({mode:'save',source:'脚本处理',text:text}),value);
+  const value='Clip Windows Terminal 终端粘贴 😀 '+id;
+  await f.page.evaluate(text=>window.clip.applyText({mode:'save',source:'脚本处理',text:text}),value);
   child=spawn('wt.exe',['-w','new','new-tab','--title',title,'powershell.exe','-NoProfile','-ExecutionPolicy','Bypass','-File',path.resolve('tests/paste-terminal-target.ps1'),'-Ready',ready,'-Result',result],{stdio:'ignore',windowsHide:false});
   await expect.poll(async()=>({ready:await fs.readFile(ready,'utf8').catch(()=>''),window:terminal(title)}),{timeout:20000}).toEqual(expect.objectContaining({ready:'ready',window:expect.objectContaining({MainWindowHandle:expect.any(Number)})}));
   const found=terminal(title);assert.ok(found.MainWindowHandle>0);terminalPid=found.Id;
   await f.helper.evaluate(async()=>{await global.focusTarget();global.helperWindow.setAlwaysOnTop(false);});
   assert.equal(await native('activate',found.MainWindowHandle),true,'Windows Terminal activation rejected');
   await expect.poll(()=>native('foreground')).toBe(found.MainWindowHandle);
-  const opened=f.app.waitForEvent('window');await f.page.evaluate(()=>window.clipper.showTray());const panel=await opened;
+  const opened=f.app.waitForEvent('window');await f.page.evaluate(()=>window.clip.showTray());const panel=await opened;
   await panel.waitForSelector('.tray-row');await panel.locator('.tray-row').filter({hasText:value}).click({button:'right'});
   await expect.poll(()=>native('foreground')).toBe(found.MainWindowHandle);
   assert.equal(await f.helper.evaluate(({clipboard})=>clipboard.readText()),value,'Clipboard text changed before terminal input');
@@ -43,7 +43,7 @@ async function run(){
   await new Promise(resolve=>setTimeout(resolve,350));
   await native('enter');
   await expect.poll(()=>fs.readFile(result,'utf8').catch(()=>''),{timeout:10000}).toBe(value);
-  console.log(JSON.stringify({result:'PASS',windowsTerminalPaste:true,foregroundRestored:true,packaged:!!process.env.CLIPPER_PACKAGED_EXE}));
+  console.log(JSON.stringify({result:'PASS',windowsTerminalPaste:true,foregroundRestored:true,packaged:!!process.env.CLIP_PACKAGED_EXE}));
  }finally{
   if(terminalPid)try{process.kill(terminalPid);}catch{}
   if(child?.exitCode===null)child.kill();

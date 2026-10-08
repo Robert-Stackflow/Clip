@@ -1,8 +1,8 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),crypto=require('node:crypto'),{execFileSync}=require('node:child_process');
 const asar=require('@electron/asar');
-const root=path.resolve(process.env.CLIPPER_CHECKPOINT_PACKAGE||'../delivery-0.26.0/release/0.26.0/win-unpacked');
+const root=path.resolve(process.env.CLIP_CHECKPOINT_PACKAGE||'../delivery-0.26.0/release/0.26.0/win-unpacked');
 const archive=path.join(root,'resources/app.asar'),version=JSON.parse(fs.readFileSync('package.json')).version;
-const buildRoot=path.resolve(process.env.CLIPPER_CHECKPOINT_BUILD||'../delivery-0.26.0');
+const buildRoot=path.resolve(process.env.CLIP_CHECKPOINT_BUILD||'../delivery-0.26.0');
 const hash=value=>crypto.createHash('sha256').update(value).digest('hex');
 function files(folder,prefix=''){return fs.readdirSync(folder,{withFileTypes:true}).flatMap(item=>item.isDirectory()?files(path.join(folder,item.name),prefix+item.name+'/'):[prefix+item.name]);}
 for(const folder of ['src','build','assets','installer','scripts'])for(const file of files(folder))assert(fs.readFileSync(path.join(folder,file)).equals(fs.readFileSync(path.join(buildRoot,folder,file))),folder+'/'+file);
@@ -32,7 +32,7 @@ assert.equal(fs.readFileSync(path.join(next.directory,'history.sqlite')).include
 const plainRoot=await fsp.mkdtemp(path.join(evidence,'plain-')),plain=new StorageManager(plainRoot);const plainStore=await plain.start();plainStore.add({text:'English 中文'},'fixture');const manual=await plain.checkpoint();assert.equal(manual.encrypted,false);await plain.checkpoints.verify(manual.id,plain.profileId);plainStore.close();const programContext=fixtureModule.exports.programVersionContext(plainRoot,'0.26.0');assert.equal(await programContext.installed(),false);assert.deepEqual(await programContext.list(),[]);await assert.rejects(()=>programContext.inspect(require('node:crypto').randomUUID()),/旧程序归档/);assert.equal(fs.existsSync(path.join(path.dirname(process.execPath),'resources/app.asar.unpacked/dist/native/rollback.log')),false);const koffi=require(path.join(archive,'node_modules/koffi'));assert.equal(typeof koffi.load,'function');
 console.log(JSON.stringify({passed:true,electron:process.versions.electron,sqlite:true,nativeBridge:true,packagedWorkerPath:path.join(archive,'dist/main/recovery-worker.cjs'),plainSnapshot:true,encryptedUpgradeSnapshot:true,originalRecoveryKey:true,encryptedIndependentRestore:true,originalAndPointPreserved:true,clipboardAccess:false,inputAccess:false,coreFixture:'Production core exports compiled with packaged dependency and worker paths; application main/UI startup not exercised'}));
 })().catch(error=>{console.error(error);process.exitCode=1;});`);
-const output=execFileSync(path.join(root,'Clipper.exe'),[helper],{env:{...process.env,ELECTRON_RUN_AS_NODE:'1'},windowsHide:true,encoding:'utf8',timeout:60000});
+const output=execFileSync(path.join(root,'Clip.exe'),[helper],{env:{...process.env,ELECTRON_RUN_AS_NODE:'1'},windowsHide:true,encoding:'utf8',timeout:60000});
 const runtime=JSON.parse(output.trim());
 const result={passed:true,version,builtFilesVerified:expected.length,sourceMatchesBuild:true,developmentEquivalent:true,dependencyPathNormalization:normalized,nativeRebuiltFromIdenticalSource:nativeRebuilt,asarSHA256:hash(fs.readFileSync(archive)),runtime};
 fs.writeFileSync(path.join(evidence,'results.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));

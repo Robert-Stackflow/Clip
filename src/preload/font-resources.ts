@@ -9,7 +9,7 @@ export const fontResources=fontResourceCleanup({
   for(const name of events)document.addEventListener(name,activity,{capture:true,passive:true});
   return ()=>{for(const name of events)document.removeEventListener(name,activity,true);};
  },
- canRelease:()=>!document.querySelector('.reference-page,.reference-loading')&&![...document.fonts].some(face=>face.family.includes('Clipper Emoji ')),
+ canRelease:()=>!document.querySelector('.reference-page,.reference-loading')&&![...document.fonts].some(face=>face.family.includes('Clip Emoji ')),
  fontBytes:()=>webFrame.getResourceUsage().fonts.size,
  release:()=>webFrame.clearCache(),
 });

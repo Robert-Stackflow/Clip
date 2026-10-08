@@ -13,7 +13,7 @@ export function loadUIFont(value: UIFont, apply = false): Promise<string> {
   const pending = (async () => {
     const source = await api.uiFontSource(value.slice(10));
     if (!source) return fontStack(value);
-    const alias = 'Clipper UI ' + (++serial);
+    const alias = 'Clip UI ' + (++serial);
     const candidates = [...(source.url ? ['url(' + quote(source.url) + ')'] : []), ...source.local.map(name => 'local(' + quote(name) + ')')];
     const face = new FontFace(alias, candidates.join(','));
     await face.load(); document.fonts.add(face); faces.set(value,face);

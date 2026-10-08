@@ -1,5 +1,5 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
-const output=path.resolve(process.env.CLIPPER_TEST_OUTPUT_DIR||'work/browser-image-drop');
+const output=path.resolve(process.env.CLIP_TEST_OUTPUT_DIR||'work/browser-image-drop');
 
 if(!process.versions.electron){
  (async()=>{
@@ -10,7 +10,7 @@ if(!process.versions.electron){
   await build({entryPoints:['src/main/heic-decode-worker.ts'],outfile:'dist/main/heic-decode-worker.cjs',bundle:true,platform:'node',external:['heic-decode']});
   await build({entryPoints:['src/main/native.ts'],outfile:path.join(output,'native.cjs'),bundle:true,platform:'node',external:['koffi']});
   await build({stdin:{contents:"import {contextBridge,ipcRenderer} from 'electron';import {importDroppedFiles} from './src/preload/file-drop';contextBridge.exposeInMainWorld('imageFixture',{drop:(files:File[])=>importDroppedFiles(files,value=>ipcRenderer.invoke('fixture-files',value),value=>ipcRenderer.invoke('fixture-image',value))});",resolveDir:process.cwd(),loader:'ts'},outfile:path.join(output,'preload.cjs'),bundle:true,platform:'node',external:['electron']});
-  const env={...process.env,CLIPPER_TEST_OUTPUT_DIR:output};delete env.ELECTRON_RUN_AS_NODE;
+  const env={...process.env,CLIP_TEST_OUTPUT_DIR:output};delete env.ELECTRON_RUN_AS_NODE;
   require('node:child_process').execFileSync(require('electron'),[__filename],{env,windowsHide:true,stdio:'inherit',timeout:60000});
  })().catch(error=>{console.error(error);process.exitCode=1});
 }else{
@@ -69,7 +69,7 @@ if(!process.versions.electron){
     const blob=document.querySelector('#blob');blob.src=URL.createObjectURL(new Blob([Uint8Array.from(atob(${JSON.stringify(webp.toString('base64'))}),c=>c.charCodeAt(0))],{type:'image/webp'}));
     const results=[];for(const id of ['private','original','blob']){const image=document.getElementById(id);if(!image.complete)await new Promise(resolve=>{image.onload=resolve;image.onerror=resolve});image.dispatchEvent(new PointerEvent('pointerover',{bubbles:true}));await new Promise(resolve=>setTimeout(resolve,150));const transfer=new DataTransfer();image.dispatchEvent(new DragEvent('dragstart',{bubbles:true,dataTransfer:transfer}));results.push({payload:dropFixture.droppedImage(transfer),types:transfer.types});}return results;
    })()`);
-   for(const result of extensionPayloads){assert(result.types.includes('application/x-clipper-images'));assert(result.payload[0].data);verify(await api.incomingImage(result.payload[0]));}assert(originalRequests>0);
+   for(const result of extensionPayloads){assert(result.types.includes('application/x-clip-images'));assert(result.payload[0].data);verify(await api.incomingImage(result.payload[0]));}assert(originalRequests>0);
    const extracted=await fixture.webContents.executeJavaScript(`(()=>{const transfer=new DataTransfer();transfer.setData('text/html','<img src="https://share.cloudchewie.com/i/abc/thumbnail"><img src="https://test.example/photo.avif">');return dropFixture.droppedImage(transfer)})()`);assert.equal(extracted.length,2);assert.equal(extracted[0].url,'https://share.cloudchewie.com/i/abc');assert.equal(extracted[0].fallback,'https://share.cloudchewie.com/i/abc/thumbnail');
    for(const [name,format]of [['rainbow.heic','image/heic'],['sample.avif','image/avif']]){const source=path.resolve('work/image-codecs',name);if(fs.existsSync(source)){const bytes=fs.readFileSync(source),payload=await api.incomingImage({data:bytes.toString('base64')});assert.equal(nativeImage.createFromBuffer(Buffer.from(payload.png,'base64')).isEmpty(),false);assert.equal(payload.formats[0].name,format);assert.equal(payload.formats[0].data,bytes.toString('base64'));}}
    await assert.rejects(api.decodeBrowserImage(webp,'image/webp',()=>false),/记录已取消/);

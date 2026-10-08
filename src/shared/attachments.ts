@@ -8,13 +8,13 @@ export function attachmentPath(value:unknown):string {
  if(typeof value!=='string'||value.length>259)throw new Error(tr('附件文件名或路径过长'));
  const parts=value.split('\\');if(parts.length>MAX_ATTACHMENT_DEPTH)throw new Error(tr('附件目录超过 16 层'));parts.forEach(attachmentName);return value;
 }
-export function validateAttachments(value:unknown,legacy=false):Attachment[]{
+export function validateAttachments(value:unknown):Attachment[]{
  if(!Array.isArray(value)||!value.length||value.length>MAX_ATTACHMENT_NODES)throw new Error(tr('附件数量需为 1–256'));
  let bytes=0;const nodes=new Map<string,Attachment>();
  const result:Attachment[]=value.map(v=>{
-  if(!v||typeof v!=='object')throw new Error(tr('附件无效'));const name=legacy?attachmentName(v.name):attachmentPath(v.name),key=name.toUpperCase();
+  if(!v||typeof v!=='object')throw new Error(tr('附件无效'));const name=attachmentPath(v.name),key=name.toUpperCase();
   if(nodes.has(key))throw new Error(tr('附件文件名重复'));
-  if(v.directory!==undefined&&v.directory!==true||legacy&&v.directory!==undefined)throw new Error(tr('附件目录标记无效或备份版本不支持'));
+  if(v.directory!==undefined&&v.directory!==true)throw new Error(tr('附件目录标记无效或备份版本不支持'));
   if(typeof v.data!=='string'||v.data.length>MAX_ATTACHMENT_BYTES*4/3||!canonicalBase64(v.data))throw new Error(tr('附件编码或大小无效'));
   if(v.directory&&v.data!=='')throw new Error(tr('文件夹不能包含文件内容'));bytes+=Buffer.byteLength(v.data,'base64');if(bytes>MAX_ATTACHMENT_BYTES)throw new Error(tr('附件总量超过 12 MiB'));
   const item:Attachment={name,data:v.data};if(v.directory)item.directory=true;

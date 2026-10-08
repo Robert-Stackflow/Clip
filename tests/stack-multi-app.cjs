@@ -11,7 +11,7 @@ function edgeWindow(title){
 
 async function run(){
  const f=await fixture('stack-multi-app');let browser;
- const title='ClipperStack-'+randomUUID();
+ const title='ClipStack-'+randomUUID();
  const foreground=()=>f.helper.evaluate(({app})=>{
   const req=process.getBuiltinModule('node:module').createRequire(process.getBuiltinModule('node:path').join(app.getAppPath(),'package.json'));
   return req('koffi').load('user32.dll').func('uintptr_t __stdcall GetForegroundWindow()')();
@@ -20,11 +20,11 @@ async function run(){
   const req=process.getBuiltinModule('node:module').createRequire(process.getBuiltinModule('node:path').join(app.getAppPath(),'package.json'));
   return req('koffi').load('user32.dll').func('bool __stdcall SetForegroundWindow(uintptr_t)')(hwnd);
  },hwnd);
- const state=()=>f.page.evaluate(()=>window.clipper.state());
+ const state=()=>f.page.evaluate(()=>window.clip.state());
  try{
   const first='堆栈第一项 '+randomUUID(),second='堆栈第二项 '+randomUUID();
   const ids=await f.page.evaluate(async values=>{
-   const ids=[];for(const value of values){const id=await window.clipper.applyText({mode:'save',source:'脚本处理',text:value});await window.clipper.action(id,'enqueue');ids.push(id);}return ids;
+   const ids=[];for(const value of values){const id=await window.clip.applyText({mode:'save',source:'脚本处理',text:value});await window.clip.action(id,'enqueue');ids.push(id);}return ids;
   },[first,second]);
   assert.deepEqual((await state()).queue,ids);
   browser=await chromium.launch({channel:'msedge',headless:false});
@@ -55,7 +55,7 @@ async function run(){
   // The main-window button must return to the last real target application.
   const third='堆栈按钮粘贴 '+randomUUID(),fourth='等待目标 '+randomUUID();
   const remaining=await f.page.evaluate(async values=>{
-   const ids=[];for(const value of values){const id=await window.clipper.applyText({mode:'save',source:'脚本处理',text:value});await window.clipper.action(id,'enqueue');ids.push(id);}return ids;
+   const ids=[];for(const value of values){const id=await window.clip.applyText({mode:'save',source:'脚本处理',text:value});await window.clip.action(id,'enqueue');ids.push(id);}return ids;
   },[third,fourth]);
   await edge.locator('#input').fill('');await edge.locator('#input').focus();
   assert.equal(await activate(hwnd),true);await expect.poll(foreground).toBe(hwnd);
@@ -67,7 +67,7 @@ async function run(){
   // A normal history paste uses the same target check without consuming the queue.
   await edge.locator('#input').fill('');await edge.locator('#input').focus();
   assert.equal(await activate(hwnd),true);await expect.poll(foreground).toBe(hwnd);
-  await f.page.evaluate(id=>window.clipper.copy(id,true),remaining[1]);
+  await f.page.evaluate(id=>window.clip.copy(id,true),remaining[1]);
   await expect(edge.locator('#input')).toHaveValue(fourth);
   assert.deepEqual((await state()).queue,[remaining[1]]);
 
@@ -81,14 +81,14 @@ async function run(){
   await expect.poll(foreground).toBe(mainHandle);
   await browser.close();browser=undefined;
   const failure=await f.page.evaluate(async()=>{
-   try{await window.clipper.next();return '';}catch(error){return String(error.message);}
+   try{await window.clip.next();return '';}catch(error){return String(error.message);}
   });
   assert.match(failure,/请先切换到需要粘贴的应用/);
   assert.deepEqual((await state()).queue,[remaining[1]]);
-  await assert.rejects(f.page.evaluate(id=>window.clipper.copy(id,true),remaining[1]),/请先切换到需要粘贴的应用/);
+  await assert.rejects(f.page.evaluate(id=>window.clip.copy(id,true),remaining[1]),/请先切换到需要粘贴的应用/);
   assert.deepEqual((await state()).queue,[remaining[1]]);
   assert.equal(await f.helper.evaluate(({clipboard})=>clipboard.readText()),fourth);
-  console.log(JSON.stringify({result:'PASS',packaged:!!process.env.CLIPPER_PACKAGED_EXE,firstApp:'Electron helper',secondApp:'Microsoft Edge',normalPastePreservesQueue:true,queueConsumedInOrder:true,mainButtonPastes:true,historyPasteChecksTarget:true,staleTargetRejected:true}));
+  console.log(JSON.stringify({result:'PASS',packaged:!!process.env.CLIP_PACKAGED_EXE,firstApp:'Electron helper',secondApp:'Microsoft Edge',normalPastePreservesQueue:true,queueConsumedInOrder:true,mainButtonPastes:true,historyPasteChecksTarget:true,staleTargetRejected:true}));
  }finally{
   if(browser)await browser.close();
   await f.close();

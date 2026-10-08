@@ -2,11 +2,11 @@ const {chromium}=require('@playwright/test'),assert=require('node:assert/strict'
 const {setup}=require('./renderer-fixture.cjs'),{extra}=require('./ui-028-fixture.cjs'),{setupData}=require('./language-data-fixture.cjs');
 (async()=>{await fs.mkdir('work/search-039',{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true}),results=[];try{
 for(const language of ['zh-CN','en'])for(const theme of ['light','dark']){
- const context=await browser.newContext({viewport:{width:1240,height:800},reducedMotion:'reduce'});for(const fn of [setup,setupData,extra])await context.addInitScript(fn,language);await context.addInitScript(theme=>{fixture.state.dark=theme==='dark';const base=clipper;window.clipper=new Proxy({efficiencyState:async()=>({options:{historyEnabled:true,repliesShortcut:'Control+Shift+R'},history:['One saved']})},{get:(o,k)=>k in o?o[k]:base[k]});},theme);
- await context.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
+ const context=await browser.newContext({viewport:{width:1240,height:800},reducedMotion:'reduce'});for(const fn of [setup,setupData,extra])await context.addInitScript(fn,language);await context.addInitScript(theme=>{fixture.state.dark=theme==='dark';const base=clip;window.clip=new Proxy({efficiencyState:async()=>({options:{historyEnabled:true,repliesShortcut:'Control+Shift+R'},history:['One saved']})},{get:(o,k)=>k in o?o[k]:base[k]});},theme);
+ await context.route('https://clip.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  for(const surface of ['history','tray','web']){
-  await page.goto('https://clipper.test/'+(surface==='tray'?'tray':'index')+'.html');await page.waitForSelector(surface==='tray'?'#copy-selected':'#copy');
+  await page.goto('https://clip.test/'+(surface==='tray'?'tray':'index')+'.html');await page.waitForSelector(surface==='tray'?'#copy-selected':'#copy');
   if(surface==='web'){await page.evaluate(()=>fixture.web.running=true);await page.locator('[data-page=web]').click();await page.waitForSelector('#web-search');}
   const field=page.locator('.filter-field'),input=field.locator('input'),clear=field.locator('.search-clear');assert.equal(await field.count(),1);assert.equal(await field.locator('.filter-field').count(),0);assert.equal(await field.getAttribute('role'),'search');
   if(language==='en')assert(!/[\u3400-\u9fff]/.test(await input.getAttribute('aria-label')));

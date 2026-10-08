@@ -7,7 +7,7 @@ export interface AIProfile {id:string;name:string;kind:AIKind;baseUrl:string;mod
 export interface AIProfileInput extends Omit<AIProfile,'id'|'revision'> {id?:string;apiKey?:string;clearKey?:boolean}
 export interface AIProfileView extends AIProfile {hasKey:boolean;local:boolean}
 export interface AIState {profiles:AIProfileView[];defaultId:string;secureStorage:boolean}
-export interface CodexStatus {available:boolean;loggedIn:boolean;email?:string;planType?:string;login:'idle'|'starting'|'pending'|'complete'|'error';verificationUrl?:string;userCode?:string;error?:string}
+export interface CodexStatus {available:boolean;loggedIn:boolean;email?:string;planType?:string;login:'idle'|'starting'|'pending'|'complete'|'error';verificationUrl?:string;userCode?:string;error?:string;executablePath?:string;customExecutable?:string}
 export interface AIRequest {requestId:string;profileId:string;revision:string;input:string;action:TextAction;language:string;instruction:string;approvedDestination:string;command?:import('./commands').CommandInvocation;image?:{clipId:string;hash:string}}
 export interface AIResult {text:string;model:string;inputTokens?:number;outputTokens?:number;truncated:boolean}
 export interface TextScript {id:string;name:string;description:string;code:string;timeoutMs:number;permission:'selected-text';updatedAt:number}
@@ -53,7 +53,7 @@ export function aiMessages(value:Pick<AIRequest,'input'|'action'|'language'|'ins
 export function validateScript(value:unknown):TextScriptInput {const v=value as TextScriptInput;if(!v||typeof v.name!=='string'||!v.name.trim()||v.name.length>60||typeof v.description!=='string'||v.description.length>240||v.permission!=='selected-text'||!Number.isInteger(v.timeoutMs)||v.timeoutMs<100||v.timeoutMs>5000)throw new Error(tr('脚本名称、说明、权限或时限无效'));toolText(v.code,MAX_SCRIPT_CODE);return {id:v.id,name:v.name.trim(),description:v.description.trim(),code:v.code,timeoutMs:v.timeoutMs,permission:'selected-text'};}
 export function parseExternalUrl(value:unknown):ExternalIntent {
  if(typeof value!=='string'||value.length>MAX_EXTERNAL_URL_LENGTH||/[\r\n\0]/.test(value))throw new Error(tr('外部请求过长或无效'));let u:URL;try{u=new URL(value);}catch{throw new Error(tr('外部请求无效'));}
- if(u.protocol!=='clipper-win:'||u.username||u.password||u.port||u.hash||(u.pathname&&u.pathname!=='/'))throw new Error(tr('不支持的外部请求'));
+ if(u.protocol!=='clip-win:'||u.username||u.password||u.port||u.hash||(u.pathname&&u.pathname!=='/'))throw new Error(tr('不支持的外部请求'));
  const action=u.hostname;if(!['open','search','add','copy'].includes(action))throw new Error(tr('不支持此 URL 动作'));const key=action==='search'?'q':'text';
  if([...u.searchParams.keys()].some(k=>k!==key)||u.searchParams.getAll(key).length>1||(action==='open'&&u.search))throw new Error(tr('外部请求参数无效'));const text=u.searchParams.get(key)||'';
  if(action!=='open')toolText(text,action==='search'?512:4096);return {action:action as ExternalIntent['action'],text};

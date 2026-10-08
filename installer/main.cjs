@@ -12,15 +12,22 @@ const {promisify} = require('node:util');
 
 const execute = promisify(execFile);
 const root = app.isPackaged ? process.resourcesPath : path.resolve(__dirname, '.dev-resources');
-const info = JSON.parse(fs.readFileSync((!app.isPackaged && process.env.CLIPPER_INSTALLER_BUILD_INFO) || path.join(root, 'build-info.json'), 'utf8'));
-const payload = (!app.isPackaged && process.env.CLIPPER_INSTALLER_PAYLOAD) || path.join(root, 'engine', 'Clipper-Setup-Engine.exe');
+const info = JSON.parse(fs.readFileSync((!app.isPackaged && process.env.CLIP_INSTALLER_BUILD_INFO) || path.join(root, 'build-info.json'), 'utf8'));
+const payload = (!app.isPackaged && process.env.CLIP_INSTALLER_PAYLOAD) || path.join(root, 'engine', 'Clip-Setup-Engine.exe');
 if(!/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(info.guid)
-  || !/^(?:Clipper|ClipperVerification-[0-9a-f-]{36})$/.test(info.product)
+  || !/^(?:Clip|ClipVerification-[0-9a-f-]{36})$/.test(info.product)
   || !/^\d+\.\d+\.\d+$/.test(info.version)
   || !/^[0-9a-f]{64}$/i.test(info.engineHash)
   || !/^[0-9a-f]{64}$/i.test(info.asarHash)
   || !Number.isSafeInteger(info.engineBytes) || info.engineBytes<=0
-  || (app.isPackaged && info.product!=='Clipper')) throw Error('Invalid installer build information');
+  || (app.isPackaged && info.product!=='Clip')) throw Error('Invalid installer build information');
+app.setName('Clip Setup');
+const installerData=path.join(app.getPath('appData'),'Clip','installer');
+for(const directory of [installerData,path.join(installerData,'session'),path.join(installerData,'logs'),path.join(installerData,'crash-dumps')])fs.mkdirSync(directory,{recursive:true});
+app.setPath('userData',installerData);
+app.setPath('sessionData',path.join(installerData,'session'));
+app.setAppLogsPath(path.join(installerData,'logs'));
+app.setPath('crashDumps',path.join(installerData,'crash-dumps'));
 const uninstallKey = `HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${info.guid}`;
 const appKey = `HKCU\\Software\\${info.guid}`;
 let window;
@@ -137,7 +144,7 @@ async function install(directory) {
     const existing=await registry();
     if(newerThan(existing?.version,info.version)) throw Object.assign(Error('已有更新版本'),{reason:'newer'});
     const old=registeredDirectory(existing);
-    if(await runningApplication()) throw Object.assign(Error('Clipper 正在运行'),{reason:'running'});
+    if(await runningApplication()) throw Object.assign(Error('Clip 正在运行'),{reason:'running'});
     await safeInstallationDirectory(directory,old);
     targetExisted=fs.existsSync(directory);
     if(old&&!fs.existsSync(path.join(old,`${info.product}.exe`)))throw Object.assign(Error('旧版安装记录存在，但程序文件缺失'),{reason:'engine'});
@@ -152,7 +159,7 @@ async function install(directory) {
     if(Number(stdout.trim())<1024**3) throw Object.assign(Error('磁盘空间不足'),{reason:'space'});
     scratch=path.join(parent,`cs-${crypto.randomBytes(8).toString('hex')}`);
     await fsp.mkdir(scratch);
-    const copied=path.join(scratch,'Clipper-Install-Engine.exe');
+    const copied=path.join(scratch,'Clip-Install-Engine.exe');
     await checkedCopy(payload,copied,info.engineHash,info.engineBytes);
     if(old && fs.existsSync(path.join(old,`${info.product}.exe`))) {
       send({stage:'checking',detail:'正在保留当前安装',caption:'准备升级'});
@@ -161,7 +168,7 @@ async function install(directory) {
     send({stage:'installing',detail:'正在写入程序文件',caption:'安装中',percent:null});
     changed=true;
     if(saved) await removePrevious(saved,scratch);
-    if(saved && !app.isPackaged && process.env.CLIPPER_INSTALLER_TEST_FAIL_AFTER_REMOVE==='1') throw Object.assign(Error('模拟安装核心失败'),{reason:'engine'});
+    if(saved && !app.isPackaged && process.env.CLIP_INSTALLER_TEST_FAIL_AFTER_REMOVE==='1') throw Object.assign(Error('模拟安装核心失败'),{reason:'engine'});
     const code=await run(copied,['/S','/currentuser',`/D=${directory}`],{...process.env,TEMP:scratch,TMP:scratch});
     if(code!==0) throw Object.assign(Error(`安装核心返回 ${code}`),{reason:code===1602?'running':'engine'});
     send({stage:'verifying',detail:'正在确认文件完整性',caption:'即将完成',percent:null});
@@ -170,7 +177,7 @@ async function install(directory) {
     installedDirectory=directory;
     result={stage:'done',directory};
   } catch(error) {
-    console.error('Clipper installer failed:',error);
+    console.error('Clip installer failed:',error);
     if(changed) {
       try {
         if(fs.existsSync(directory)){await safeInstallationDirectory(directory,directory);await fsp.rm(directory,{recursive:true,force:true,maxRetries:5,retryDelay:200});}
@@ -188,17 +195,17 @@ async function install(directory) {
 }
 
 app.whenReady().then(async()=>{
-  app.setAppUserModelId('local.clipper.desktop.setup');
+  app.setAppUserModelId('com.cloudchewie.clip.setup');
   if(process.argv.some(argument=>/^\/S$/i.test(argument))){
     try{
       const existing=await registry();
       const directory=registeredDirectory(existing)||path.join(process.env.LOCALAPPDATA,'Programs',info.product);
       const result=await install(directory);
       app.exit(result?.stage==='done'?0:1);
-    }catch(error){console.error('Clipper silent installer failed:',error);app.exit(1);}
+    }catch(error){console.error('Clip silent installer failed:',error);app.exit(1);}
     return;
   }
-  const hiddenTest=process.env.CLIPPER_INSTALLER_TEST_HEADLESS==='1';
+  const hiddenTest=process.env.CLIP_INSTALLER_TEST_HEADLESS==='1';
   window=new BrowserWindow({width:620,height:420,minWidth:620,minHeight:420,maxWidth:620,maxHeight:420,frame:true,titleBarStyle:'hidden',titleBarOverlay:false,thickFrame:true,hasShadow:true,backgroundColor:'#ffffff',resizable:false,show:false,roundedCorners:true,icon:path.join(__dirname,'icon.png'),webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
   window.on('close',event=>{if(installing)event.preventDefault();});
   const pageURL=pathToFileURL(path.join(__dirname,'index.html')).href;

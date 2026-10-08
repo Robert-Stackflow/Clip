@@ -1,5 +1,5 @@
-Clipper 0.50.16 — Third-party notices
-Electron includes Chromium and Node.js. See LICENSE.electron.txt and LICENSES.chromium.html alongside Clipper.exe.
+Clip 0.51.0 — Third-party notices
+Electron includes Chromium and Node.js. See LICENSE.electron.txt and LICENSES.chromium.html alongside Clip.exe.
 OneClip is a functional reference only; no OneClip source code is included.
 
 electron 44.5.1 (MIT)
@@ -9470,7 +9470,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-Clipper document information helper — Rust dependencies
+Clip document information helper — Rust dependencies
 The following dependency versions are locked in Cargo.lock.
 
 adler2 2.0.1 (0BSD OR MIT OR Apache-2.0)

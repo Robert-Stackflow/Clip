@@ -13,7 +13,7 @@ export function decodeHEIC(bytes:Buffer,valid:()=>boolean):Promise<string>{
   let worker:Electron.UtilityProcess|undefined,release:(()=>void)|undefined,monitor:NodeJS.Timeout|undefined,done=false;
   const finish=(error?:Error,png?:string)=>{if(done)return;done=true;clearInterval(monitor);worker?.kill();release?.();active--;error?reject(error):resolve(png!);};
   try{
-   worker=utilityProcess.fork(join(__dirname,'heic-decode-worker.cjs'),[],{stdio:'ignore',serviceName:'Clipper image decoder'});
+   worker=utilityProcess.fork(join(__dirname,'heic-decode-worker.cjs'),[],{stdio:'ignore',serviceName:'Clip image decoder'});
    const deadline=Date.now()+15000;
    monitor=setInterval(()=>{if(!valid()||Date.now()>deadline)finish(new Error(tr(valid()?'图片无法解码':'记录已取消')));},50);monitor.unref();
    worker.once('spawn',()=>{try{if(!valid())throw new Error(tr('记录已取消'));release=limitChildProcess(worker!.pid!,512);worker!.postMessage({data:bytes.toString('base64')});}catch(error){finish(error as Error);}});

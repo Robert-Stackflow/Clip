@@ -28,7 +28,7 @@ async function send(store:Store,options:Options,png:string,kind:'test'|'upload',
  try{
   control.signal?.throwIfAborted();
   const headers:Record<string,string>={};if(options.authMode==='bearer'&&options.token)headers.authorization='Bearer '+options.token;else if(options.authMode==='header'&&options.token)headers[options.tokenHeader]=options.token;
-  let body:BodyInit;if(options.bodyMode==='multipart'){const form=new FormData();form.append(options.fieldName,new Blob([Buffer.from(png,'base64')],{type:'image/png'}),'clipper.png');body=form;}else{headers['content-type']='image/png';body=Buffer.from(png,'base64');}
+  let body:BodyInit;if(options.bodyMode==='multipart'){const form=new FormData();form.append(options.fieldName,new Blob([Buffer.from(png,'base64')],{type:'image/png'}),'clip.png');body=form;}else{headers['content-type']='image/png';body=Buffer.from(png,'base64');}
   const timeout=AbortSignal.timeout(options.timeoutSeconds*1000),signal=control.signal?AbortSignal.any([timeout,control.signal]):timeout;
   const response=await request(options.endpoint,{method:'POST',headers,body,redirect:'error',signal});if(!response.ok){await response.body?.cancel();throw new Error(tr('图片上传失败')+` (${response.status})`);}
   const length=Number(response.headers.get('content-length')||0);if(length>8192){await response.body?.cancel();throw new Error(tr('图片上传响应过大'));}const reader=response.body?.getReader();if(!reader)throw new Error(tr('图片上传响应为空'));

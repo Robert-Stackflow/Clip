@@ -9,7 +9,7 @@ const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 const q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 export function checkpointDescription(point:CheckpointEntry){const reason=point.reason==='upgrade'?tr('版本变化前'):point.reason==='update'?tr('安装更新前'):tr('手动创建');return [reason,(point.sourceVersion||tr('未知版本'))+' → '+point.targetVersion,point.encrypted?tr('历史加密'):tr('明文数据库'),formatBytes(point.bytes)].join(' · ');}
 export async function renderCheckpoints(root:HTMLElement,ctx:Context,heading?:HTMLElement){
- const api=window.clipper;
+ const api=window.clip;
  root.innerHTML='<details class="utility-guide"><summary>'+esc(tr('恢复点说明'))+'</summary><p class="field-help">'+esc(tr('未关联旧程序的自动恢复点保留最近三份；程序回退所需的恢复点随旧程序保留。手动恢复点需要自行删除。恢复点包含本机数据库配置，不包含引用的源文件。'))+'</p><p class="field-help">'+esc(tr('开启历史加密不会加密此前的明文恢复点。'))+'</p></details><div class="data-controls"><button id="checkpoint-create">'+esc(tr('创建恢复点'))+'</button><span id="checkpoint-status" role="status"></span></div><div id="checkpoint-list"></div>';
  if(heading){heading.append(root.querySelector('#checkpoint-create')!);root.querySelector('.data-controls')!.replaceWith(root.querySelector('#checkpoint-status')!);}
  const list=root.querySelector<HTMLElement>('#checkpoint-list')!;list.classList.add('utility-list');const status=root.querySelector<HTMLElement>('#checkpoint-status')!;

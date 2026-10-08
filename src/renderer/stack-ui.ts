@@ -1,6 +1,6 @@
 import {t as tr} from '../shared/i18n';
 import type {StackOptions,StackPreview} from '../shared/stack';
-const api=window.clipper,esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
+const api=window.clip,esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const input=<T extends HTMLElement=HTMLInputElement>(id:string)=>document.getElementById(id) as T;
 interface Context {modal(title:string,body:string,save:()=>Promise<void>,label?:string):void;toast(text:unknown):void}
 export function stackUI(ctx:Context){

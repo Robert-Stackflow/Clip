@@ -4,7 +4,7 @@ import {clampRect,validRect,type Rect} from './desktop';
 import {normalizeClipFilters,type ClipFilters} from './clip-filters';
 export const TRAY_LIMIT=80,TRAY_TEXT_LIMIT=32768;
 // Stable IPC marker: renderer recovery must not depend on display language.
-export const TRAY_CATEGORY_MISSING='CLIPPER_TRAY_CATEGORY_MISSING';
+export const TRAY_CATEGORY_MISSING='CLIP_TRAY_CATEGORY_MISSING';
 export interface TrayQuery{text:string;kind:'all'|Kind;category:string;filters?:ClipFilters}
 export const trayQuery:TrayQuery={text:'',kind:'all',category:''};
 export interface TrayItem extends Pick<Clip,'id'|'kind'|'title'|'preview'|'source'|'updatedAt'|'favorite'|'pinned'|'bytes'>{token:string;previewKey:string;draggable:boolean}

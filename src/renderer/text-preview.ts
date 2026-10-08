@@ -27,7 +27,7 @@ const highlight=HighlightStyle.define([
  {tag:[tags.typeName,tags.className,tags.tagName],class:'syntax-type'},
  {tag:[tags.function(tags.variableName),tags.definition(tags.variableName)],class:'syntax-function'},
 ]);
-// One code-view.ts theme. Text size and prose font additionally follow Clipper appearance.
+// One code-view.ts theme. Text size and prose font additionally follow Clip appearance.
 const theme=EditorView.theme({
  '&':{height:'100%',backgroundColor:'var(--surface)',color:'var(--fg)',fontSize:'calc(12px * var(--text-scale,1))'},
  '.cm-scroller':{overflow:'auto',fontFamily:'"Cascadia Code",Consolas,"Microsoft YaHei UI",monospace',lineHeight:'1.8'},
@@ -72,6 +72,6 @@ export function renderText(host:HTMLElement,text:string,options:TextPreviewOptio
   const resume=options.resume;if(resume){const length=view.state.doc.length;input.value=resume.searchInput;search.hidden=!resume.searchOpen;view.dispatch({selection:{anchor:Math.min(resume.anchor,length),head:Math.min(resume.head,length)},effects:[resume.scroll,setSearchQuery.of(new SearchQuery({search:resume.search,literal:true})),...resume.folds.filter(r=>r.from>=0&&r.to<=length&&r.from<r.to).map(r=>foldEffect.of(r))]});view.requestMeasure({read:()=>undefined,write:()=>{if(disposed||!view)return;if(resume.focus&&(document.activeElement===document.body||host.contains(document.activeElement))){if(resume.focus==='search')input.focus({preventScroll:true});else view.focus();}}});}
   else if(options.query){view.dispatch({effects:setSearchQuery.of(new SearchQuery({search:options.query,literal:true}))});findNext(view);}
   if(language){const support=await language.load();if(!disposed&&view)view.dispatch({effects:StateEffect.appendConfig.of(support)});}
- }).catch(error=>{if(!disposed&&host.isConnected){loading.textContent=String(error.message);mount.replaceChildren(loading);root.setAttribute('aria-busy','false');document.dispatchEvent(new CustomEvent('clipper:feedback',{detail:error.message}));}});
+ }).catch(error=>{if(!disposed&&host.isConnected){loading.textContent=String(error.message);mount.replaceChildren(loading);root.setAttribute('aria-busy','false');document.dispatchEvent(new CustomEvent('clip:feedback',{detail:error.message}));}});
  return()=>{disposed=true;worker.terminate();appearance.disconnect();view?.destroy();view=undefined;views.delete(host);controls.delete(host);wrapButton.onclick=null;root.remove();};
 }

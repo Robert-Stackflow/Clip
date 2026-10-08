@@ -4,7 +4,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Collections.Generic;
 
-namespace ClipperUpdate
+namespace ClipUpdate
 {
     public sealed class RollbackPointer { public int version; public string profileId; public string directory; public string previousDirectory; public bool encrypted; }
     public sealed class RollbackTicket
@@ -84,13 +84,13 @@ namespace ClipperUpdate
         }
         static void OwnedSibling(string value, string suffix, string action)
         {
-            string expected = Path.Combine(Path.GetDirectoryName(ProgramPaths.Install), ".clipper-rollback-" + action + suffix);
+            string expected = Path.Combine(Path.GetDirectoryName(ProgramPaths.Install), ".clip-rollback-" + action + suffix);
             if (!ProgramPaths.Same(value, expected)) throw new Exception("ROLLBACK_PATH");
             if (Directory.Exists(value)) ProgramPaths.DirectorySafe(value);
         }
         static void ValidateJournal(string root, RollbackJournal journal)
         {
-            if (journal == null || journal.format != "clipper-program-transaction" || journal.version != 1 || !new HashSet<string> { "prepared", "program", "registration", "pointer", "complete", "restored" }.Contains(journal.phase) || journal.current == null || !ProgramPaths.Id(journal.current.id)) throw new Exception("ROLLBACK_JOURNAL");
+            if (journal == null || journal.format != "clip-program-transaction" || journal.version != 1 || !new HashSet<string> { "prepared", "program", "registration", "pointer", "complete", "restored" }.Contains(journal.phase) || journal.current == null || !ProgramPaths.Id(journal.current.id)) throw new Exception("ROLLBACK_JOURNAL");
             TicketShape(journal.ticket); string action = Path.GetFileName(Own).Substring(7); OwnedSibling(journal.stage, "-stage", action); OwnedSibling(journal.previous, "-current", action); ProgramVersions.ValidateRegistry(journal.current.registry); ProgramVersions.ValidateRegistry(journal.target.registry);
             if (!ProgramPaths.Same(journal.currentPending, Path.Combine(root, "program-versions", ".pending-" + journal.current.id)) || journal.current.version != journal.ticket.currentVersion || journal.current.profileId != journal.ticket.profileId || journal.current.checkpointId != journal.ticket.currentCheckpointId) throw new Exception("ROLLBACK_JOURNAL");
             if (HashBytes(Convert.FromBase64String(journal.beforePointer)) != journal.ticket.pointerSha256) throw new Exception("ROLLBACK_POINTER"); var before = Pointer(OriginalPointer(journal)); if (before.profileId != journal.ticket.profileId || !ProgramPaths.Same(before.directory, Pointer(journal.ticket.pointer).previousDirectory)) throw new Exception("ROLLBACK_POINTER");
@@ -149,7 +149,7 @@ namespace ClipperUpdate
         {
             string pending; ProgramArchive current = ProgramVersions.Capture(root, ticket.currentCheckpointId, ticket.profileId, target.version, "rollback", out pending);
             string action = Path.GetFileName(Own).Substring(7);
-            var journal = new RollbackJournal { format = "clipper-program-transaction", version = 1, ticket = ticket, target = target, current = current, currentPending = pending, beforePointer = Convert.ToBase64String(File.ReadAllBytes(PointerFile(root))), stage = Path.Combine(Path.GetDirectoryName(ProgramPaths.Install), ".clipper-rollback-" + action + "-stage"), previous = Path.Combine(Path.GetDirectoryName(ProgramPaths.Install), ".clipper-rollback-" + action + "-current") };
+            var journal = new RollbackJournal { format = "clip-program-transaction", version = 1, ticket = ticket, target = target, current = current, currentPending = pending, beforePointer = Convert.ToBase64String(File.ReadAllBytes(PointerFile(root))), stage = Path.Combine(Path.GetDirectoryName(ProgramPaths.Install), ".clip-rollback-" + action + "-stage"), previous = Path.Combine(Path.GetDirectoryName(ProgramPaths.Install), ".clip-rollback-" + action + "-current") };
             if (Directory.Exists(journal.stage) || Directory.Exists(journal.previous)) throw new Exception("ROLLBACK_PATH");
             DriveInfo drive = new DriveInfo(Path.GetPathRoot(ProgramPaths.Install)); if (drive.AvailableFreeSpace < target.bytes + 128L * 1024 * 1024) throw new Exception("ROLLBACK_SPACE");
             ProgramVersions.CopyTree(ProgramVersions.Program(root, target.id), journal.stage); ProgramVersions.VerifyTree(journal.stage, target.files); Journal(journal, "prepared"); ProgramPaths.RecoveryEntry(Path.Combine(Own, "RollbackHost.exe"), false);

@@ -3,9 +3,9 @@ const {_electron:electron}=require('@playwright/test'),assert=require('node:asse
 const {StorageManager}=require('../work/test-exports.cjs');
 (async()=>{const {beginCase}=await import('../scripts/workspace.mjs'),work=await beginCase('reference-performance');let app;try{
  const profile=path.join(work.fixtures,'profile'),storage=new StorageManager(profile),store=await storage.start();store.saveSettings({...store.settings,paused:true});store.close();
- const env={...process.env,CLIPPER_TEST_MODE:'1',CLIPPER_DATA_DIR:profile};delete env.ELECTRON_RUN_AS_NODE;
- app=await electron.launch(process.env.CLIPPER_PACKAGED_EXE?{executablePath:process.env.CLIPPER_PACKAGED_EXE,args:[],env}:{args:[path.resolve('.')],env});
- const page=await app.firstWindow();await page.waitForSelector('[data-page=symbols]');const report={packaged:!!process.env.CLIPPER_PACKAGED_EXE,samples:[]};
+ const env={...process.env,CLIP_TEST_MODE:'1',CLIP_DATA_DIR:profile};delete env.ELECTRON_RUN_AS_NODE;
+ app=await electron.launch(process.env.CLIP_PACKAGED_EXE?{executablePath:process.env.CLIP_PACKAGED_EXE,args:[],env}:{args:[path.resolve('.')],env});
+ const page=await app.firstWindow();await page.waitForSelector('[data-page=symbols]');const report={packaged:!!process.env.CLIP_PACKAGED_EXE,samples:[]};
  await page.locator('[data-page=symbols]').click();await page.waitForSelector('.reference-item');
  await page.evaluate(()=>document.fonts.ready);
  for(const tab of ['mime','emoji','symbols','entities']){

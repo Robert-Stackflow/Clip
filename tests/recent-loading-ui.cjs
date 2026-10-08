@@ -1,8 +1,8 @@
 const {chromium}=require('@playwright/test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
 const {setup}=require('./renderer-fixture.cjs');
-const output=process.env.CLIPPER_TEST_OUTPUT_DIR||path.resolve('work/current/recent-loading-ui');
+const output=process.env.CLIP_TEST_OUTPUT_DIR||path.resolve('work/current/recent-loading-ui');
 function installRecentFixture(language){
- const tray=window.clipperTray;fixture.open=true;fixture.responses=[];fixture.previewResponses=[];fixture.calls=0;
+ const tray=window.clipTray;fixture.open=true;fixture.responses=[];fixture.previewResponses=[];fixture.calls=0;
  fixture.base=tray.state;tray.state=async()=>{fixture.calls++;return new Promise((resolve,reject)=>fixture.responses.push({resolve,reject}));};
  fixture.basePreview=tray.preview;tray.preview=async token=>new Promise(resolve=>fixture.previewResponses.push({resolve,token}));
  tray.onSession=fn=>{fixture.session=fn;setTimeout(()=>fn(true),0);return()=>{};};tray.onChange=fn=>{fixture.change=fn;return()=>{};};
@@ -11,8 +11,8 @@ function installRecentFixture(language){
 (async()=>{await fs.mkdir(output,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true}),results=[],errors=[];
  try{for(const [language,dark] of [['zh-CN',false],['en',true]]){
   const context=await browser.newContext({viewport:{width:740,height:560},reducedMotion:'reduce'});await context.addInitScript({content:'('+setup.toString()+')('+JSON.stringify(language)+');window.fixture.state.dark='+dark+';('+installRecentFixture.toString()+')('+JSON.stringify(language)+');'});
-  await context.route('https://clipper.test/**',async route=>{const f=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',f)),contentType:f.endsWith('.html')?'text/html':f.endsWith('.css')?'text/css':'text/javascript'});});
-  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));await page.goto('https://clipper.test/tray.html');
+  await context.route('https://clip.test/**',async route=>{const f=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',f)),contentType:f.endsWith('.html')?'text/html':f.endsWith('.css')?'text/css':'text/javascript'});});
+  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));await page.goto('https://clip.test/tray.html');
   await page.waitForFunction(()=>fixture.responses.length===1);assert.equal(await page.locator('#filters button').count(),6);assert.equal(await page.locator('.recent-skeleton').count(),6);assert.equal(await page.locator('#items').getAttribute('aria-busy'),'true');assert(await page.locator('#copy-selected').isDisabled());assert.equal(await page.locator('.recent-preview-skeleton').count(),1);assert.equal(await page.locator('#count').count(),0);await page.screenshot({path:path.join(output,language+'-recent-loading.png')});
   await page.evaluate(()=>fixture.answer());await page.waitForFunction(()=>document.querySelectorAll('.tray-row').length===3);await page.waitForFunction(()=>fixture.previewResponses.length===1);assert.equal(await page.locator('.recent-preview-skeleton').count(),1);assert.equal(await page.locator('#preview').innerText(),'');await page.evaluate(()=>fixture.answerPreview());await page.waitForSelector('.preview-heading');assert.equal(await page.locator('#items').getAttribute('aria-busy'),null);await page.screenshot({path:path.join(output,language+'-recent-ready.png')});
   await page.locator('#search').fill('new query');await page.waitForFunction(()=>fixture.responses.length===1);await page.evaluate(()=>fixture.session(false));assert.equal(await page.locator('.tray-row').count(),0);assert.equal(await page.locator('#preview').innerText(),'');await page.evaluate(()=>fixture.answer());await page.waitForTimeout(30);assert.equal(await page.locator('.tray-row').count(),0,'Late hidden response exposed records');

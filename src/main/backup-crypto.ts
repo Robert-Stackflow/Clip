@@ -2,7 +2,7 @@ import {t as tr} from '../shared/i18n';
 import {randomBytes,scrypt,createCipheriv,createDecipheriv,createHash,type DecipherGCM} from 'node:crypto';
 import {open} from 'node:fs/promises';
 import {MAX_BACKUP_FILE} from './data-files';
-const magic=Buffer.from('CLIPPER-ENC\x01','binary'),headerSize=magic.length+16+12;
+const magic=Buffer.from('CLIP-ENC\x01','binary'),headerSize=magic.length+16+12;
 export function isEncryptedBackup(data:Buffer){return data.subarray(0,magic.length).equals(magic);}
 export function validateBackupPassword(password:unknown){if(typeof password!=='string'||password.length<12||password.length>1024)throw new Error(tr('备份密码需为 12–1024 个字符，请保存好；忘记后无法恢复'));return password;}
 const derive=(password:string,salt:Buffer)=>new Promise<Buffer>((resolve,reject)=>scrypt(password,salt,32,{N:32768,r:8,p:1,maxmem:64*1024*1024},(err,key)=>err?reject(err):resolve(key)));

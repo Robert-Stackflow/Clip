@@ -3,19 +3,19 @@ const {setup}=require('./renderer-fixture.cjs');
 
 function installCaptureFixture(){
  fixture.calls=[];fixture.hidden=0;fixture.state.queue=[];fixture.state.shelf=[];fixture.state.clips[1].favorite=false;fixture.state.clips[2].favorite=false;
- clipper.screens=async()=>[{id:1,name:'Display 1',width:1920,height:1080},{id:2,name:'Display 2',width:2560,height:1440}];
- clipper.captureWindows=async()=>{const thumbnail=(await clipper.preview('image')).imageURL;return Array.from({length:fixture.windowCount||1},(_,index)=>({token:index?'owned-window-'+index:'owned-window',name:'Owned window '+(index+1),thumbnail}));};
- clipper.screenshot=async(mode,display)=>{fixture.calls.push({mode,display});return null;};clipper.screenshotWindow=async token=>{fixture.calls.push({token});return null;};
- clipper.embedRecorder=async bounds=>fixture.calls.push({bounds});clipper.showQuick=async()=>fixture.calls.push({quick:true});clipper.hide=async()=>fixture.hidden++;
- clipper.clear=async()=>{fixture.saved=[...fixture.state.clips];fixture.state.clips=fixture.state.clips.filter(row=>row.favorite||row.pinned);};clipper.undo=async()=>{fixture.state.clips=fixture.saved;};
+ clip.screens=async()=>[{id:1,name:'Display 1',width:1920,height:1080},{id:2,name:'Display 2',width:2560,height:1440}];
+ clip.captureWindows=async()=>{const thumbnail=(await clip.preview('image')).imageURL;return Array.from({length:fixture.windowCount||1},(_,index)=>({token:index?'owned-window-'+index:'owned-window',name:'Owned window '+(index+1),thumbnail}));};
+ clip.screenshot=async(mode,display)=>{fixture.calls.push({mode,display});return null;};clip.screenshotWindow=async token=>{fixture.calls.push({token});return null;};
+ clip.embedRecorder=async bounds=>fixture.calls.push({bounds});clip.showQuick=async()=>fixture.calls.push({quick:true});clip.hide=async()=>fixture.hidden++;
+ clip.clear=async()=>{fixture.saved=[...fixture.state.clips];fixture.state.clips=fixture.state.clips.filter(row=>row.favorite||row.pinned);};clip.undo=async()=>{fixture.state.clips=fixture.saved;};
 }
 
-(async()=>{const output=process.env.CLIPPER_TEST_OUTPUT_DIR||path.resolve('work/development/capture-tools-checks');await fs.mkdir(output,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true});const errors=[];
+(async()=>{const output=process.env.CLIP_TEST_OUTPUT_DIR||path.resolve('work/Clip/development/capture-tools-checks');await fs.mkdir(output,{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true});const errors=[];
  try{for(const [language,dark,scale,width]of [['zh-CN',false,100,1200],['en',true,125,860]]){
   const context=await browser.newContext({viewport:{width,height:820},reducedMotion:'no-preference'});
   await context.addInitScript({content:`(${setup.toString()})(${JSON.stringify(language)});fixture.state.dark=${dark};fixture.appearance({font:'system',scale:${scale},density:'comfortable'});(${installCaptureFixture.toString()})();`});
-  await context.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
-  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto('https://clipper.test/index.html');await expect(page.locator('.clip-row')).toHaveCount(3);
+  await context.route('https://clip.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
+  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto('https://clip.test/index.html');await expect(page.locator('.clip-row')).toHaveCount(3);
   assert.equal(await page.locator('.collection .heading-actions>button').count(),2);assert.equal(await page.locator('#take-screenshot,#open-recorder').count(),0);
   const buttons=await page.locator('#batch-mode,#undo-delete,#collection-more-toggle').evaluateAll(nodes=>nodes.map(node=>{const rect=node.getBoundingClientRect(),icon=node.querySelector('svg').getBoundingClientRect();return [rect.width,rect.height,icon.width,icon.height];}));assert.deepEqual(buttons[0],buttons[1]);assert.deepEqual(buttons[0],buttons[2]);
   await page.locator('#batch-mode').click();await expect(page.locator('#batch-mode')).toHaveAttribute('aria-pressed','true');assert.equal(await page.locator('[data-check]').count(),3);await page.locator('#batch-mode').click();await expect(page.locator('[data-check]')).toHaveCount(0);

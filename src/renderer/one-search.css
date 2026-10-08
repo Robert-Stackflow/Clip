@@ -1,5 +1,5 @@
 /* One/src/renderer/disk.css filter-field and refinement.css focus treatment.
-   Height, scaled text and clear actions adapt its anatomy to Clipper's workspaces. */
+   Height, scaled text and clear actions adapt its anatomy to Clip's workspaces. */
 .filter-field{display:flex;align-items:center;gap:9px;flex:1;padding:0 10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--field-radius);color:var(--muted);min-width:0;height:32px}
 .filter-field input{flex:1;border:0!important;background:transparent!important;font-size:calc(12px * var(--text-scale,1));outline:none!important;padding-inline:0!important;border-radius:0!important;min-width:0;width:0;box-shadow:none!important;appearance:none}
 .filter-field input::-webkit-search-cancel-button,.filter-field input::-webkit-search-decoration{appearance:none}

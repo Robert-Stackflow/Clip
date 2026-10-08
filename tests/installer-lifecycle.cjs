@@ -7,12 +7,12 @@ const sleep=delay=>new Promise(resolve=>setTimeout(resolve,delay));
 const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 (async()=>{
  const delivery=path.resolve('.');
- const reuse=process.env.CLIPPER_INSTALLER_TEST_SESSION;
+ const reuse=process.env.CLIP_INSTALLER_TEST_SESSION;
  if(reuse)assert(/^[0-9a-f-]{36}$/.test(reuse),'Invalid verification session');
- const id=reuse||crypto.randomUUID(),name='ClipperVerification-'+id;
+ const id=reuse||crypto.randomUUID(),name='ClipVerification-'+id;
  const folder=path.resolve('work/installer-lifecycle',id),installed=path.join(folder,'安装目录 with spaces');fs.mkdirSync(folder,{recursive:true});
  const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));
- const config={...pkg.build,appId:'local.clipper.verification.'+id,productName:name,extraMetadata:{name:name.toLowerCase()},directories:{output:path.join(folder,'build')},win:{...pkg.build.win,executableName:name,target:'nsis'},nsis:{...pkg.build.nsis,guid:id,include:path.resolve('build/installer.nsh'),shortcutName:name,artifactName:'verification-setup.exe'},npmRebuild:false,buildDependenciesFromSource:false};
+ const config={...pkg.build,appId:'com.cloudchewie.clip.verification.'+id,productName:name,extraMetadata:{name:name.toLowerCase()},directories:{output:path.join(folder,'build')},win:{...pkg.build.win,executableName:name,target:'nsis'},nsis:{...pkg.build.nsis,guid:id,include:path.resolve('build/installer.nsh'),shortcutName:name,artifactName:'verification-setup.exe'},npmRebuild:false,buildDependenciesFromSource:false};
  const configuration=path.join(folder,'config.json');fs.writeFileSync(configuration,JSON.stringify(config,null,2));
  if(!reuse){
   const log=fs.openSync(path.join(folder,'build.log'),'w');
@@ -27,7 +27,7 @@ const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest
  const key='HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\'+id;
  const track='HKCU\\Software\\'+id;
  const shortcut=path.join(process.env.APPDATA,'Microsoft/Windows/Start Menu/Programs',name+'.lnk');
- const temporary=path.resolve(process.env.CLIPPER_INSTALLER_TEMP||process.env.TEMP);
+ const temporary=path.resolve(process.env.CLIP_INSTALLER_TEMP||process.env.TEMP);
  const installerEnv={...process.env,TEMP:temporary,TMP:temporary};
  assert(fs.existsSync(temporary),'Installer temporary directory must exist');
  let isInstalled=false;
@@ -61,7 +61,7 @@ const sha=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest
   fs.writeFileSync(path.join(folder,'results.json'),JSON.stringify(result,null,2));fs.writeFileSync('work/installer-lifecycle-results.json',JSON.stringify({...result,folder},null,2));console.log(JSON.stringify(result,null,2));
  }finally{
   if(isInstalled){const file=fs.existsSync(installed)&&fs.readdirSync(installed).find(value=>/^Uninstall.*\.exe$/i.test(value));if(file)await run(path.join(installed,file),['/S'],{env:installerEnv});}
-  // Only the exact unique directory created above is removed. Do not touch Clipper.
+  // Only the exact unique directory created above is removed. Do not touch Clip.
   assert.equal(path.dirname(profile).toLowerCase(),path.resolve(process.env.APPDATA).toLowerCase());assert.equal(path.basename(profile),name.toLowerCase());
   assert.equal(fs.lstatSync(profile).isSymbolicLink(),false,'Test profile must not be a link');
   fs.rmSync(profile,{recursive:true,force:true});

@@ -6,10 +6,12 @@ const esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;'
 const q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 
 export async function desktopUI(ctx:Context){
- const api=window.clipper,{options:o,displays}=await api.desktopState();
- const check=(key:'shelfTop'|'shelfAutoDrag'|'shelfAutoHide'|'shelfLocked',label:string,description='')=>`<label class="desktop-check"><input type="checkbox" id="desktop-${key}" ${o[key]?'checked':''}><span>${label}</span>${description?`<small>${description}</small>`:''}</label>`;
+ const api=window.clip,{options:o,displays}=await api.desktopState();
+ const check=(key:'quickHoverPreview'|'shelfTop'|'shelfAutoDrag'|'shelfAutoHide'|'shelfLocked',label:string,description='')=>`<label class="desktop-check"><input type="checkbox" id="desktop-${key}" ${o[key]?'checked':''}><span>${label}</span>${description?`<small>${description}</small>`:''}</label>`;
  if(ctx.active&&!ctx.active())return;
  ctx.modal(tr('桌面交互'),`<div class="desktop-form">
+  <h3>${tr('快捷面板')}</h3>
+  ${check('quickHoverPreview',tr('悬浮时展示预览弹窗'))}
   <h3>${tr('最近记录')}</h3><div class="setting-row"><div><span>${tr('最近记录面板')}</span><p>${tr('浏览最近复制的内容，点击即可粘贴。')}</p></div><button type="button" id="desktop-tray-open">${tr('打开最近记录')}</button></div>
   <h3>${tr('浮动拖放窗口')}</h3>
   <div class="desktop-fields"><label class="field">${tr('小窗位置')}<select id="desktop-shelf-position">${[['top-right',tr('右上角')],['top-left',tr('左上角')],['bottom-right',tr('右下角')],['bottom-left',tr('左下角')]].map(([value,label])=>`<option value="${value}" ${o.shelfPosition===value?'selected':''}>${label}</option>`).join('')}</select></label>
@@ -25,7 +27,7 @@ export async function desktopUI(ctx:Context){
   <div class="desktop-fields desktop-auto-hide-fields"><label class="field">${tr('失焦后隐藏阈值')}<select id="desktop-auto-hide-seconds">${[3,6,10,15,30,60,...([3,6,10,15,30,60].includes(o.shelfAutoHideSeconds)?[]:[o.shelfAutoHideSeconds])].sort((a,b)=>a-b).map(n=>`<option value="${n}" ${o.shelfAutoHideSeconds===n?'selected':''}>${n} ${tr('秒')}</option>`).join('')}</select><small id="desktop-auto-hide-help" class="field-help">${tr('锁定拖放窗口后不会自动隐藏。')}</small></label></div>
  </div>`,async()=>{
   const display=q<HTMLSelectElement>('desktop-display').value;
-  const current=await api.desktopState();await api.configureDesktop({...current.options,dwellMs:Number(q<HTMLSelectElement>('desktop-dwell').value),displayId:display===''?null:Number(display),shelfTop:q<HTMLInputElement>('desktop-shelfTop').checked,shelfAutoDrag:q<HTMLInputElement>('desktop-shelfAutoDrag').checked,shelfAutoHide:q<HTMLInputElement>('desktop-shelfAutoHide').checked,shelfAutoHideSeconds:Number(q<HTMLSelectElement>('desktop-auto-hide-seconds').value),shelfLocked:q<HTMLInputElement>('desktop-shelfLocked').checked,shelfPosition:q<HTMLSelectElement>('desktop-shelf-position').value as DesktopOptions['shelfPosition']});
+  const current=await api.desktopState();await api.configureDesktop({...current.options,quickHoverPreview:q<HTMLInputElement>('desktop-quickHoverPreview').checked,dwellMs:Number(q<HTMLSelectElement>('desktop-dwell').value),displayId:display===''?null:Number(display),shelfTop:q<HTMLInputElement>('desktop-shelfTop').checked,shelfAutoDrag:q<HTMLInputElement>('desktop-shelfAutoDrag').checked,shelfAutoHide:q<HTMLInputElement>('desktop-shelfAutoHide').checked,shelfAutoHideSeconds:Number(q<HTMLSelectElement>('desktop-auto-hide-seconds').value),shelfLocked:q<HTMLInputElement>('desktop-shelfLocked').checked,shelfPosition:q<HTMLSelectElement>('desktop-shelf-position').value as DesktopOptions['shelfPosition']});
   ctx.toast(tr('桌面设置已保存'));
  });
  if(!q('desktop-shelf-position'))return;

@@ -14,4 +14,4 @@ function question(request:Omit<WindowConfirmation,'token'>,answer:(response:numb
  dialog.addEventListener('cancel',event=>{event.preventDefault();void finish(request.cancelId);});dialog.addEventListener('keydown',event=>event.stopPropagation());openOneDialog(dialog,()=>void finish(request.cancelId));actions.querySelector<HTMLButtonElement>(`[data-response="${request.defaultId}"]`)?.focus();return true;
 }
 export function confirmAction(message:string){return new Promise<boolean>(resolve=>{if(!question({message,detail:'',buttons:[t('保留'),t('放弃并关闭')],defaultId:0,cancelId:0},async response=>resolve(response===1)))resolve(false);});}
-export function setupWindowConfirmation(){const api=window.clipperChrome;if(!api?.onConfirm)return;api.onConfirm(request=>{if(!question(request,response=>api.answerConfirm(request.token,response)))void api.answerConfirm(request.token,request.cancelId).catch(()=>{});});}
+export function setupWindowConfirmation(){const api=window.clipChrome;if(!api?.onConfirm)return;api.onConfirm(request=>{if(!question(request,response=>api.answerConfirm(request.token,response)))void api.answerConfirm(request.token,request.cancelId).catch(()=>{});});}

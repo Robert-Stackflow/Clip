@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),{execFile}=require('node:child_process'),{promisify}=require('node:util'),{build}=require('esbuild');
 (async()=>{
- const output=path.resolve(process.env.CLIPPER_TEST_OUTPUT_DIR||'work/quick-move-electron');await fs.mkdir(output,{recursive:true});
+ const output=path.resolve(process.env.CLIP_TEST_OUTPUT_DIR||'work/quick-move-electron');await fs.mkdir(output,{recursive:true});
  await build({entryPoints:['src/main/tray-panel.ts'],outfile:path.join(output,'panel.cjs'),bundle:true,platform:'node',target:'node22',external:['electron','./native','better-sqlite3-multiple-ciphers','koffi']});
  const host=path.join(output,'host.cjs');await fs.writeFile(host,`
  const {app,BrowserWindow,screen}=require('electron'),{Module}=require('node:module'),fs=require('node:fs'),assert=require('node:assert/strict');

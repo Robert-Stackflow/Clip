@@ -1,21 +1,21 @@
 const {chromium}=require('@playwright/test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
 const {setup}=require('./renderer-fixture.cjs'),{extra}=require('./ui-028-fixture.cjs');
-const output=process.env.CLIPPER_TEST_OUTPUT_DIR||'work/current/collection-polish-ui',archive=process.env.CLIPPER_COLLECTION_ASAR;
+const output=process.env.CLIP_TEST_OUTPUT_DIR||'work/current/collection-polish-ui',archive=process.env.CLIP_COLLECTION_ASAR;
 const asset=name=>archive?require('@electron/asar').extractFile(archive,('dist/renderer/'+name).replaceAll('/','\\')):fs.readFile(path.join('dist/renderer',name));
 function prepare(){
- const base=window.clipper,model=fixture.state.clips[0];fixture.previews=0;
+ const base=window.clip,model=fixture.state.clips[0];fixture.previews=0;
  fixture.state.settings.view='grid';fixture.state.desktop.cardDirection='horizontal';
  fixture.state.clips=[{...model,id:'text',title:'Project notes',preview:'A complete, readable preview',source:'Code.exe',tags:[]},{...model,id:'image',title:'Screenshot',kind:'image',source:'Snipaste.exe',favorite:false,tags:[]}];
  fixture.state.queue=['text'];fixture.state.shelf=[];fixture.state.snippets[0].shortcut='Control+1';fixture.state.categories=[{id:'design',name:'Design',color:'#777'}];
- window.clipper=new Proxy({preview:async id=>{fixture.previews++;return base.preview(id);},search:async()=>fixture.state.clips.map(c=>c.id),batch:async(ids,action)=>fixture.calls.push(['batch',ids,action]),clearQueue:async()=>fixture.calls.push(['clearQueue'])},{get:(o,k)=>k in o?o[k]:base[k]});
+ window.clip=new Proxy({preview:async id=>{fixture.previews++;return base.preview(id);},search:async()=>fixture.state.clips.map(c=>c.id),batch:async(ids,action)=>fixture.calls.push(['batch',ids,action]),clearQueue:async()=>fixture.calls.push(['clearQueue'])},{get:(o,k)=>k in o?o[k]:base[k]});
 }
 let browser;
 (async()=>{
  await fs.mkdir(output,{recursive:true});browser=await chromium.launch({channel:'msedge',headless:true});
  const context=await browser.newContext({viewport:{width:1476,height:976}});for(const fn of [setup,extra,prepare])await context.addInitScript(fn);
- await context.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await asset(name),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
+ await context.route('https://clip.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await asset(name),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
  const page=await context.newPage(),errors=[],checks=[],pass=name=>checks.push(name);page.on('pageerror',e=>errors.push(e.message));
- await page.goto('https://clipper.test/index.html');await page.waitForSelector('#detail pre');
+ await page.goto('https://clip.test/index.html');await page.waitForSelector('#detail pre');
  const tooltip=page.locator('#one-tooltip');
  const checkSidebarTip=async selector=>{await page.locator(selector).hover();await page.waitForSelector('#one-tooltip.visible');await page.waitForTimeout(180);const geometry=await page.evaluate(selector=>{const button=document.querySelector(selector),tip=document.getElementById('one-tooltip'),a=button.getBoundingClientRect(),b=tip.getBoundingClientRect(),arrow=getComputedStyle(tip,'::before');return {side:tip.dataset.side,gap:b.left-a.right,center:b.top+parseFloat(tip.style.getPropertyValue('--tooltip-arrow'))-(a.top+a.height/2),label:tip.textContent===button.dataset.tooltip,arrow:arrow.content!=='none'&&arrow.width==='8px'&&arrow.backgroundColor===getComputedStyle(tip).backgroundColor,inside:b.top>=8&&b.bottom<=innerHeight-8};},selector);assert.equal(geometry.side,'right');assert(Math.abs(geometry.gap-12)<1);assert(Math.abs(geometry.center)<1);assert(geometry.label&&geometry.arrow&&geometry.inside,JSON.stringify(geometry));};
  for(const selector of ['[data-page=history]','[data-page=settings]','#pause-nav','#add-category'])await checkSidebarTip(selector);

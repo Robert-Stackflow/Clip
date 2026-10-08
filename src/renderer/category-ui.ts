@@ -18,7 +18,7 @@ const options=(values:readonly [string,string][],selected:string)=>values.map(([
 
 /** A compact category form shares field alignment across metadata and matching rules. */
 export function editCategory(ctx:Context,value?:Category){
- const api=window.clipper,q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
+ const api=window.clip,q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
  const manual=!!value?.manual,color=value?.color||categoryColors[0],period=value?.period||'';
  const kinds:[string,string][]=[['all',tr('不限')],['text',tr('文本')],['link',tr('链接')],['code',tr('代码')],['image',tr('图片')],['files',tr('文件')]];
  const periods:[string,string][]=[['',tr('不限')],['today',tr('今天')],['yesterday',tr('昨天')],['week',tr('本周')],['month',tr('本月')],['custom',tr('自定义')]];

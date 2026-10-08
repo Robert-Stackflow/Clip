@@ -1,15 +1,17 @@
 const {test,after}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),{EventEmitter}=require('node:events'),{PassThrough}=require('node:stream'),os=require('node:os');
-const fixtureRoot=path.resolve(process.env.CLIPPER_TEST_FIXTURE_DIR||os.tmpdir()),fixtureHome=fs.mkdtempSync(path.join(fixtureRoot,'clipper-codex-fixtures-'));
-after(()=>{assert.equal(path.dirname(fixtureHome),fixtureRoot);assert(path.basename(fixtureHome).startsWith('clipper-codex-fixtures-'));fs.rmSync(fixtureHome,{recursive:true,force:true});});
+const fixtureRoot=path.resolve(process.env.CLIP_TEST_FIXTURE_DIR||os.tmpdir()),fixtureHome=fs.mkdtempSync(path.join(fixtureRoot,'clip-codex-fixtures-'));
+after(()=>{assert.equal(path.dirname(fixtureHome),fixtureRoot);assert(path.basename(fixtureHome).startsWith('clip-codex-fixtures-'));fs.rmSync(fixtureHome,{recursive:true,force:true});});
 const exportsFile=path.resolve('work/test-language-services.cjs');
 function fixture(environment={}){
  const state={spawned:[],messages:[],loggedIn:false,mode:'normal',images:[],directories:[],loginStarts:0};
- const spawn=(executable,args,options)=>{const child=new EventEmitter();child.stdin=new PassThrough();child.stdout=new PassThrough();child.stderr=new PassThrough();child.kill=()=>{child.killed=true;queueMicrotask(()=>child.emit('exit',0));};state.spawned.push({executable,args,options,child});let buffer='',threadId='thread-'+state.spawned.length;
+ const spawn=(executable,args,options)=>{const launchVersion=state.version,child=new EventEmitter();child.stdin=new PassThrough();child.stdout=new PassThrough();child.stderr=new PassThrough();child.kill=()=>{child.killed=true;queueMicrotask(()=>child.emit('exit',0));};state.spawned.push({executable,args,options,child});let buffer='',threadId='thread-'+state.spawned.length;
   const send=value=>child.stdout.write(JSON.stringify(value)+'\n');child.event=(method,params)=>send({method,params});child.stdin.on('data',chunk=>{buffer+=chunk;for(;;){const at=buffer.indexOf('\n');if(at<0)break;const value=JSON.parse(buffer.slice(0,at));buffer=buffer.slice(at+1);state.messages.push(value);if(!value.method||value.id===undefined)continue;queueMicrotask(()=>{
-   const {method,params}=value;let result={};if(method==='account/read')result={account:state.loggedIn?{type:'chatgpt',email:'fixture@example.invalid',planType:'plus'}:null};
+   const {method,params}=value;let result={};if(method==='initialize'&&state.mode==='incompatible-first'&&state.spawned[0].child===child){send({id:value.id,error:{code:-32601,message:'Unsupported initialize'}});return;}if(method==='account/read')result={account:state.loggedIn?{type:'chatgpt',email:'fixture@example.invalid',planType:'plus'}:null};
    if(method==='account/login/start'){state.loginStarts++;result={type:'chatgptDeviceCode',loginId:'fixture-login',verificationUrl:'https://auth.openai.com/codex/device',userCode:'ABCD-1234'};}
    if(method==='account/logout')state.loggedIn=false;
    if(method==='model/list')result=params.cursor?{data:[{model:'vision-fixture'},{model:'default-fixture'}],nextCursor:null}:{data:[{model:'default-fixture'}],nextCursor:'second-page'};
+   if(method==='model/list'&&state.mode==='runtime-update')result={data:Array.from({length:launchVersion==='new'?7:3},(_,index)=>({model:'version-model-'+index})),nextCursor:null};
+   if(method==='model/list'&&state.mode==='catalog-pending')return;
    if(method==='thread/start'){if(params.sandbox!=='read-only'||state.mode==='rpc-invalid'){send({id:value.id,error:{code:-32600,message:'Invalid request: unknown variant secret-sdk-error fixture-token'}});return;}state.directories.push(params.cwd);result={thread:{id:threadId},model:params.model||'default-fixture'};}
    if(method==='turn/start'){for(const input of params.input)if(input.type==='localImage')state.images.push({path:input.path,bytes:fs.readFileSync(input.path)});result={turn:{id:'fixture-turn'}};}
    if(state.mode==='rpc-error'&&method==='thread/start'){send({id:value.id,error:{code:-1,message:'secret-sdk-error fixture-token'}});return;}
@@ -25,14 +27,22 @@ function fixture(environment={}){
    }
   });}});return child;
  };
- const app={getPath:()=>path.join(os.tmpdir(),'fixture-app')},safeStorage={isAsyncEncryptionAvailable:async()=>true};
- const module={exports:{}},context={module,exports:module.exports,__dirname:path.dirname(exportsFile),process:{platform:process.platform,arch:process.arch,env:{OPENAI_API_KEY:'fixture-token',CODEX_API_KEY:'fixture-token',...environment}},Buffer,URL,TextEncoder,TextDecoder,AbortController,TypeError,Response,console,setTimeout,clearTimeout,require:name=>name==='node:child_process'?{spawn}:name==='electron'?{app,safeStorage}:require(name)};
+ const app={getPath:()=>path.join(os.tmpdir(),'fixture-app')},safeStorage={isAsyncEncryptionAvailable:async()=>true},session={defaultSession:{resolveProxy:async()=>'DIRECT'}};
+ const module={exports:{}},context={module,exports:module.exports,__dirname:path.dirname(exportsFile),process:{platform:process.platform,arch:process.arch,env:{OPENAI_API_KEY:'fixture-token',CODEX_API_KEY:'fixture-token',...environment}},Buffer,URL,TextEncoder,TextDecoder,AbortController,TypeError,Response,console,setTimeout,clearTimeout,require:name=>name==='node:child_process'?{spawn}:name==='electron'?{app,safeStorage,session}:require(name)};
  vm.runInNewContext(fs.readFileSync(exportsFile,'utf8'),context);return {...module.exports,state};
 }
 const profile={name:'Codex',kind:'codex',baseUrl:'codex://local',model:'',maxTokens:2048,timeoutSeconds:30,temperature:null,tokenField:'max_tokens'};
 const messages=[{role:'system',content:'Translate source text.'},{role:'user',content:'Source text {{literal}}'}];
 const provider=api=>new api.CodexProvider(()=>fixtureHome,()=>path.resolve('fixture-codex.exe'));
 const wait=async predicate=>{for(let i=0;i<100&&!predicate();i++)await new Promise(resolve=>setImmediate(resolve));assert(predicate());};
+
+test('Codex discovers models before saving a service and cancellation cleans up draft requests',async()=>{
+ const api=fixture(),values=new Map(),db={meta:(key,fallback)=>values.get(key)||fallback,setMeta:(key,value)=>values.set(key,value)},codex=provider(api),service=new api.AIService(db,codex);
+ try{assert.deepEqual(Array.from(await service.codexModels('draft-models'),model=>model.id),['default-fixture','vision-fixture']);assert.equal(values.has('ai-profiles'),false);assert.deepEqual((await service.state()).profiles.length,0);await assert.rejects(service.codexModels(null));}
+ finally{service.dispose();}
+ const backend={status:async()=>({available:true,loggedIn:true,login:'idle'}),catalog:signal=>new Promise((resolve,reject)=>signal.addEventListener('abort',()=>reject(Error('aborted')),{once:true})),logout:async()=>{},dispose:()=>{}},pending=new api.AIService(db,backend);
+ const request=pending.codexModels('draft-pending');await assert.rejects(pending.codexModels('draft-pending'),/使用/);await pending.codexLogout();await assert.rejects(request,/取消/);pending.dispose();
+});
 
 test('Codex uses independent credentials, device login and paginated model discovery',async()=>{
  const api=fixture(),codex=provider(api);try{
@@ -67,7 +77,61 @@ test('Codex exposes protocol, authentication and limit errors without returning 
   try{await assert.rejects(codex.generate(profile,messages,new AbortController().signal),error=>{assert.match(error.message,pattern);assert(!error.message.includes('fixture-token'));assert(!error.message.includes('secret-sdk-error'));return true;});}finally{codex.dispose();}
  }
 });
-test('Bundled Codex binary resolves from the platform dependency and is included outside asar',()=>{const {codexExecutable}=require(exportsFile);const executable=codexExecutable();assert(fs.existsSync(executable));const pkg=require('../package.json');assert.equal(pkg.dependencies['@openai/codex'],'0.160.1');assert(pkg.build.asarUnpack.includes('node_modules/@openai/codex-win32-*/vendor/**/*'));});
+test('Codex discovers PATH binaries without invoking wrappers or searching the current directory',()=>{
+ const {codexExecutables}=require(exportsFile),bin=path.join(fixtureHome,'path with spaces'),binary=path.join(bin,'codex.exe');fs.mkdirSync(bin,{recursive:true});fs.writeFileSync(binary,'fixture');fs.writeFileSync(path.join(bin,'codex.cmd'),'fixture');
+ assert.deepEqual(codexExecutables({env:{Path:['.',`"${bin}"`,bin].join(path.delimiter)},platform:'win32',arch:'x64'}),[binary]);
+ assert.deepEqual(codexExecutables({env:{PATH:'.'},platform:'win32',arch:'x64'}),[]);
+});
+test('Codex discovers global npm native binaries and legacy vendor layouts without Node or shell',()=>{
+ const {codexExecutables}=require(exportsFile),roaming=path.join(fixtureHome,'roaming'),modules=path.join(roaming,'npm','node_modules'),cli=path.join(modules,'@openai','codex');
+ const current=path.join(cli,'node_modules','@openai','codex-win32-x64','vendor','x86_64-pc-windows-msvc','bin','codex.exe'),legacy=path.join(cli,'vendor','x86_64-pc-windows-msvc','bin','codex.exe');
+ for(const file of [current,legacy]){fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,'fixture');}
+ assert.deepEqual(codexExecutables({env:{APPDATA:roaming},platform:'win32',arch:'x64'}),[current,legacy]);
+});
+test('Codex discovers desktop versions newest first and resolves the selected architecture',()=>{
+ const {codexExecutables}=require(exportsFile),local=path.join(fixtureHome,'desktop'),bin=path.join(local,'OpenAI','Codex','bin'),old=path.join(bin,'older','codex.exe'),recent=path.join(bin,'newer','codex.exe');
+ for(const [file,time]of [[old,10000],[recent,20000]]){fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,'fixture');fs.utimesSync(path.dirname(file),time,time);}
+ assert.deepEqual(codexExecutables({env:{LOCALAPPDATA:local},platform:'win32',arch:'arm64'}),[recent,old]);
+ const npm=path.join(fixtureHome,'arm64','node_modules','@openai','codex-win32-arm64','vendor','aarch64-pc-windows-msvc','bin','codex.exe');fs.mkdirSync(path.dirname(npm),{recursive:true});fs.writeFileSync(npm,'fixture');
+ assert.deepEqual(codexExecutables({env:{PATH:path.join(fixtureHome,'arm64')},platform:'win32',arch:'arm64'}),[npm]);
+});
+test('Codex explicit selection, missing installs and packaging do not depend on bundled Codex',()=>{
+ const {codexExecutable,codexExecutables}=require(exportsFile),binary=path.join(fixtureHome,'path with spaces','codex.exe');
+ assert.equal(codexExecutable({executable:binary,env:{}}),binary);
+ assert.throws(()=>codexExecutables({executable:path.join(fixtureHome,'missing.exe'),env:{}}),/重新选择/);
+ assert.throws(()=>codexExecutables({executable:path.join(fixtureHome,'path with spaces','codex.cmd'),env:{},platform:'win32'}),/重新选择/);
+ assert.throws(()=>codexExecutable({env:{},platform:'win32'}),/未找到本机 Codex/);
+ const pkg=require('../package.json'),lock=require('../package-lock.json');assert.equal(pkg.dependencies['@openai/codex'],undefined);assert(!pkg.build.asarUnpack.some(value=>value.includes('@openai/codex')));assert(!Object.keys(lock.packages).some(value=>value.includes('@openai/codex')));
+});
+test('selected npm PowerShell, cmd, bat, extensionless and JavaScript entries resolve their own installation',()=>{
+ const {codexExecutables}=require(exportsFile),bin=path.join(fixtureHome,'selected npm & space'),cli=path.join(bin,'node_modules','@openai','codex'),binary=path.join(cli,'node_modules','@openai','codex-win32-x64','vendor','x86_64-pc-windows-msvc','bin','codex.exe');fs.mkdirSync(path.dirname(binary),{recursive:true});fs.writeFileSync(binary,'fixture');
+ const entries=['codex.ps1','codex.cmd','codex.bat','codex','CODEX.PS1'].map(name=>path.join(bin,name));entries.push(path.join(cli,'bin','codex.js'));
+ for(const entry of entries){fs.mkdirSync(path.dirname(entry),{recursive:true});fs.writeFileSync(entry,'npm launcher fixture');assert.deepEqual(codexExecutables({executable:entry,env:{},platform:'win32',arch:'x64'}),[binary]);}
+ const missing=path.join(fixtureHome,'broken launcher','codex.ps1');fs.mkdirSync(path.dirname(missing));fs.writeFileSync(missing,'fixture');assert.throws(()=>codexExecutables({executable:missing,env:{PATH:bin},platform:'win32',arch:'x64'}),/入口对应/);assert.throws(()=>codexExecutables({executable:'codex.ps1',env:{PATH:bin},platform:'win32',arch:'x64'}),/重新选择/);
+});
+test('selected npm entries follow pnpm package links and native sibling packages',()=>{
+ const {codexExecutables}=require(exportsFile),root=path.join(fixtureHome,'pnpm'),bin=path.join(root,'bin'),modules=path.join(root,'.pnpm','cli','node_modules','@openai'),cli=path.join(modules,'codex'),native=path.join(modules,'codex-win32-x64'),binary=path.join(native,'vendor','x86_64-pc-windows-msvc','bin','codex.exe');fs.mkdirSync(path.dirname(binary),{recursive:true});fs.writeFileSync(binary,'fixture');fs.writeFileSync(path.join(native,'package.json'),JSON.stringify({name:'@openai/codex-win32-x64'}));fs.mkdirSync(path.join(cli,'bin'),{recursive:true});fs.writeFileSync(path.join(cli,'package.json'),JSON.stringify({name:'@openai/codex'}));fs.writeFileSync(path.join(cli,'bin','codex.js'),'fixture');fs.mkdirSync(path.join(bin,'node_modules','@openai'),{recursive:true});fs.symlinkSync(cli,path.join(bin,'node_modules','@openai','codex'),process.platform==='win32'?'junction':'dir');const entry=path.join(bin,'codex.cmd');fs.writeFileSync(entry,'fixture');
+ assert.deepEqual(codexExecutables({executable:entry,env:{},platform:'win32',arch:'x64'}),[binary]);assert.deepEqual(codexExecutables({executable:path.join(cli,'bin','codex.js'),env:{},platform:'win32',arch:'x64'}),[binary]);
+});
+test('model discovery uses a fresh installed runtime while keeping the account connection alive',async()=>{
+ const api=fixture(),codex=provider(api);try{await codex.status();api.state.mode='runtime-update';api.state.version='new';const models=await codex.catalog(new AbortController().signal);assert.equal(models.length,7);assert.equal(api.state.spawned.length,2);assert.equal(api.state.spawned[0].child.killed,undefined);assert.equal(api.state.spawned[1].child.killed,true);assert.equal((await codex.catalog(new AbortController().signal)).length,7);assert.equal(api.state.spawned.length,3);assert(api.state.spawned.slice(1).every(value=>value.child.killed));}finally{codex.dispose();}
+});
+test('fresh model discovery closes its runtime on cancellation and disposal',async()=>{
+ for(const mode of ['cancel','dispose']){const api=fixture(),codex=provider(api),controller=new AbortController();try{await codex.status();api.state.mode='catalog-pending';const request=codex.catalog(controller.signal),rejected=assert.rejects(request);await wait(()=>api.state.messages.some(value=>value.method==='model/list'));if(mode==='cancel')controller.abort();else codex.dispose();await rejected;assert.equal(api.state.spawned[1].child.killed,true);}finally{codex.dispose();}}
+});
+test('Codex falls back from an incompatible local binary and reuses the working executable',async()=>{
+ const api=fixture(),first=path.join(fixtureHome,'old.exe'),second=path.join(fixtureHome,'new.exe'),codex=new api.CodexProvider(()=>fixtureHome,()=>[first,second]);api.state.mode='incompatible-first';api.state.loggedIn=true;
+ try{const status=await codex.status();assert.equal(status.available,true);assert.equal(status.executablePath,second);assert(api.state.spawned[0].child.killed);await codex.generate(profile,messages,new AbortController().signal);assert.equal(api.state.spawned[2].executable,second);assert(api.state.spawned.every(value=>value.options.shell===false&&value.options.windowsHide===true));}finally{codex.dispose();}
+});
+test('Missing Codex reports an actionable install hint without spawning or claiming login is available',async()=>{
+ const api=fixture(),codex=new api.CodexProvider(()=>fixtureHome,()=>[]);
+ try{const status=await codex.status();assert.equal(status.available,false);assert.match(status.error,/未找到本机 Codex/);assert.equal((await codex.login()).available,false);assert.equal(api.state.spawned.length,0);}finally{codex.dispose();}
+});
+test('Codex executable selection is persisted, can reset to detection and rejects invalid changes',async()=>{
+ const api=fixture(),values=new Map(),db={meta:(key,fallback)=>values.has(key)?values.get(key):fallback,setMeta:(key,value)=>values.set(key,value)},binary=path.join(fixtureHome,'selected.exe');fs.writeFileSync(binary,'fixture');let disposed=false;
+ const service=new api.AIService(db,{dispose:()=>{disposed=true;}});
+ try{assert.throws(()=>service.codexSetExecutable(path.join(fixtureHome,'absent.exe')),/重新选择/);assert.equal(disposed,false);const status=await service.codexSetExecutable(binary);assert.equal(disposed,true);assert.equal(status.customExecutable,binary);assert.equal(status.executablePath,binary);const reset=await service.codexSetExecutable('');assert.equal(reset.customExecutable,'');assert.equal(values.get('codex-executable'),'');assert.equal(reset.available,false);}finally{service.dispose();}
+});
 
 test('Codex forwards reasoning effort on the selected model turn',async()=>{
  const api=fixture(),codex=provider(api);api.state.loggedIn=true;try{await codex.generate({...profile,model:'vision-fixture',reasoningEffort:'high'},messages,new AbortController().signal);assert.equal(api.state.messages.find(value=>value.method==='thread/start').params.model,'vision-fixture');assert.equal(api.state.messages.find(value=>value.method==='turn/start').params.effort,'high');}finally{codex.dispose();}

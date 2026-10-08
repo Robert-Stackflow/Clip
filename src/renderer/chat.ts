@@ -12,8 +12,8 @@ import {customControls,closeControls} from './controls';
 import {openAnchoredPopover,closeAnchoredPopover} from './anchored-popover';
 import {keyedMarkup,clearMarkup,patchMarkup} from './markup';
 import {windowCloseButton} from './chrome';
-declare global{interface Window{clipperChat:ChatAPI}}
-const api=window.clipperChat,esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
+declare global{interface Window{clipChat:ChatAPI}}
+const api=window.clipChat,esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 registerIcons({sparkles:Sparkles,plus:Plus,close:X,send:ArrowUp,attach:Paperclip,clipboard:Clipboard,sidebar:PanelLeft,copy:Copy,paste:CornerDownLeft,save:Bookmark,down:ChevronDown,trash:Trash2,rename:Pencil,image:Image,text:FileText,retry:RefreshCw,check:Check,pin:Pin,keep:SquareMousePointer});
 const ib=(id:string,label:string,glyph:string)=>iconButton(id,tr(label),'lucide:'+glyph);
 let state:ChatState|undefined,draft:ChatDraft=emptyChatDraft(),profileId='',submitting=false,loading=0,dirty=false,draftTimer:ReturnType<typeof setTimeout>|undefined,saving=Promise.resolve(),popup:HTMLElement|undefined,composing=false,autoScroll=true,smoothScrolling=false;

@@ -3,22 +3,23 @@ import {safeStorage,app,session} from 'electron';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import type {Store} from './store';
-import type {AIProfile,AIRequest,AIState} from '../shared/text-tools';
+import type {AIModel,AIProfile,AIRequest,AIState} from '../shared/text-tools';
 import {validateAIProfile,isLoopback,requestId,aiEndpoint,aiMessages,selectAIModel,type AISelection} from '../shared/text-tools';
 import {fetchModels,generateText} from './ai-transport';
 import {CommandService} from './commands';
 import {commandMessages} from '../shared/commands';
-import {CodexProvider,codexExecutable,type CodexBackend} from './codex-provider';
+import {CodexProvider,codexExecutables,type CodexBackend} from './codex-provider';
 import {streamChat} from './chat-transport';
 import type {ChatWireMessage} from '../shared/chat';
 interface SavedAI {profiles:AIProfile[];defaultId:string;keys:Record<string,string>}
+function localCodex(store:Store){return new CodexProvider(()=>join(app.getPath('userData'),'codex'),()=>codexExecutables({executable:store.meta('codex-executable','')}),()=>session.defaultSession.resolveProxy('https://chatgpt.com/backend-api/codex/responses'));}
 export class AIService {
  private active=new Map<string,{profileId:string;controller:AbortController}>();
  readonly commands:CommandService;
- constructor(private store:Store,private codex:CodexBackend=new CodexProvider(()=>join(app.getPath('userData'),'codex'),codexExecutable,()=>session.defaultSession.resolveProxy('https://chatgpt.com/backend-api/codex/responses'))){this.commands=new CommandService(store);}
+ constructor(private store:Store,private codex:CodexBackend=localCodex(store)){this.commands=new CommandService(store);}
  private saved():SavedAI {return this.store.meta('ai-profiles',{profiles:[],defaultId:'',keys:{}});}
  private profile(id:string){const data=this.saved(),profile=data.profiles.find(p=>p.id===id);if(!profile)throw new Error(tr('AI 服务已不存在'));return {data,profile};}
- async state():Promise<AIState>{const data=this.saved();return {profiles:data.profiles.map(p=>({...p,hasKey:!!data.keys[p.id],local:p.kind==='codex'||isLoopback(new URL(p.baseUrl))})),defaultId:data.defaultId,secureStorage:await safeStorage.isAsyncEncryptionAvailable()};}
+ async state():Promise<AIState>{const data=this.saved();return {profiles:[...data.profiles].sort((a,b)=>Number(b.id===data.defaultId)-Number(a.id===data.defaultId)).map(p=>({...p,hasKey:!!data.keys[p.id],local:p.kind==='codex'||isLoopback(new URL(p.baseUrl))})),defaultId:data.defaultId,secureStorage:await safeStorage.isAsyncEncryptionAvailable()};}
  async save(value:unknown){
   const v=validateAIProfile(value),data=this.saved(),previous=v.id?data.profiles.find(p=>p.id===v.id):undefined;if(v.id&&!previous)throw new Error(tr('AI 服务已不存在'));if(!v.id&&data.profiles.length>=20)throw new Error(tr('最多保存 20 个 AI 服务'));
   const id=v.id||randomUUID();let encrypted:string|undefined=data.keys[id];
@@ -26,10 +27,11 @@ export class AIService {
   if(v.clearKey)encrypted=undefined;
   if(v.apiKey){if(!await safeStorage.isAsyncEncryptionAvailable())throw new Error(tr('Windows 安全存储不可用，密钥未保存'));encrypted=(await safeStorage.encryptStringAsync(v.apiKey)).toString('base64');}
   const {apiKey,clearKey,...fields}=v;const profile:AIProfile={...fields,id,revision:randomUUID()};const keys={...data.keys};if(encrypted)keys[id]=encrypted;else delete keys[id];
-  this.store.setMeta('ai-profiles',{profiles:[...data.profiles.filter(p=>p.id!==id),profile],defaultId:data.defaultId||id,keys});this.cancelProfile(id);return id;
+  this.store.setMeta('ai-profiles',{profiles:previous?data.profiles.map(p=>p.id===id?profile:p):[...data.profiles,profile],defaultId:data.defaultId||id,keys});this.cancelProfile(id);return id;
  }
  remove(id:string){const data=this.saved();const profiles=data.profiles.filter(p=>p.id!==id),keys={...data.keys};delete keys[id];this.store.setMeta('ai-profiles',{profiles,keys,defaultId:data.defaultId===id?profiles[0]?.id||'':data.defaultId});this.cancelProfile(id);}
  setDefault(id:string){const {data}=this.profile(id);this.store.setMeta('ai-profiles',{...data,defaultId:id});}
+ reorder(ids:unknown){const data=this.saved();if(!Array.isArray(ids)||ids.length!==data.profiles.length||new Set(ids).size!==ids.length||ids.some(id=>typeof id!=='string'||!data.profiles.some(profile=>profile.id===id)))throw new Error(tr('AI 服务顺序无效'));const profiles=ids.map(id=>data.profiles.find(profile=>profile.id===id)!);this.store.setMeta('ai-profiles',{...data,profiles});}
  private async secret(id:string){const {data}=this.profile(id);if(!data.keys[id])return '';try{return (await safeStorage.decryptStringAsync(Buffer.from(data.keys[id],'base64'))).result;}catch{throw new Error(tr('无法解密该服务密钥，请重新填写'));}}
  private async execute<T>(id:string,profileId:string,fn:(profile:AIProfile,key:string,signal:AbortSignal)=>Promise<T>){
   requestId(id);if(this.active.has(id))throw new Error(tr('请求编号已在使用'));if(this.active.size>=2)throw new Error(tr('已有两个 AI 请求，请等待或取消'));const {profile}=this.profile(profileId),controller=new AbortController();this.active.set(id,{profileId,controller});const timer=setTimeout(()=>controller.abort('timeout'),profile.timeoutSeconds*1000);
@@ -37,11 +39,21 @@ export class AIService {
  }
  models(profileId:string,id:string){return this.execute(id,profileId,(profile,key,signal)=>profile.kind==='codex'?this.codex.models(signal):fetchModels(profile,key,signal));}
  modelCatalog(profileId:string,id:string){return this.execute(id,profileId,async(profile,key,signal)=>{const discovered=profile.kind==='codex'&&this.codex.catalog?await this.codex.catalog(signal):(await (profile.kind==='codex'?this.codex.models(signal):fetchModels(profile,key,signal))).map(id=>({id,name:id}));const {data,profile:current}=this.profile(profileId);if(current.revision!==profile.revision)throw new Error(tr('服务配置已改变，请重新选择后发送'));const models=new Map((current.models||[]).map(model=>[model.id,model]));if(current.model&&!models.has(current.model))models.set(current.model,{id:current.model,name:current.model});for(const model of discovered.slice(0,100)){const configured=models.get(model.id);models.set(model.id,{...model,name:configured?.name&&configured.name!==configured.id?configured.name:model.name});}const catalog=[...models.values()].slice(0,100);this.store.setMeta('ai-profiles',{...data,profiles:data.profiles.map(item=>item.id===profileId?{...item,models:catalog}:item)});return catalog;});}
- codexStatus(){return this.codex.status();}
- codexLogin(){this.cancelCodex();return this.codex.login();}
+ async codexStatus(){return {...await this.codex.status(),customExecutable:this.store.meta('codex-executable','')};}
+ async codexModels(id:string):Promise<AIModel[]>{
+  requestId(id);if(this.active.has(id))throw new Error(tr('请求编号已在使用'));if(this.active.size>=2)throw new Error(tr('已有两个 AI 请求，请等待或取消'));
+  const controller=new AbortController();this.active.set(id,{profileId:'codex',controller});const timer=setTimeout(()=>controller.abort('timeout'),30000);
+  try{return this.codex.catalog?await this.codex.catalog(controller.signal):(await this.codex.models(controller.signal)).map(id=>({id,name:id}));}
+  catch(error){if(controller.signal.aborted)throw new Error(controller.signal.reason==='timeout'?tr('请求超时，可增加等待时间或更换模型'):tr('请求已取消'));throw error;}
+  finally{clearTimeout(timer);this.active.delete(id);}
+ }
+ async codexLogin(){this.cancelCodex();return {...await this.codex.login(),customExecutable:this.store.meta('codex-executable','')};}
+ codexSetExecutable(file:string){
+  if(file)codexExecutables({executable:file});this.cancelCodex();this.codex.dispose();this.store.setMeta('codex-executable',file);this.codex=localCodex(this.store);return this.codexStatus();
+ }
  codexCancelLogin(){return this.codex.cancelLogin();}
  codexLogout(){this.cancelCodex();return this.codex.logout();}
- private cancelCodex(){const ids=new Set(this.saved().profiles.filter(profile=>profile.kind==='codex').map(profile=>profile.id));for(const task of this.active.values())if(ids.has(task.profileId))task.controller.abort('cancelled');}
+ private cancelCodex(){const ids=new Set(['codex',...this.saved().profiles.filter(profile=>profile.kind==='codex').map(profile=>profile.id)]);for(const task of this.active.values())if(ids.has(task.profileId))task.controller.abort('cancelled');}
  private image(value:AIRequest['image']){
   if(value===undefined)return undefined;
   if(!value||typeof value.clipId!=='string'||typeof value.hash!=='string'||value.clipId.length>80||value.hash.length>128)throw new Error(tr('图片请求无效'));

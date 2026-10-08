@@ -14,14 +14,14 @@ const {setup}=require('./renderer-fixture.cjs');
    ['image',''],
   ]){
    const context=await browser.newContext({viewport:{width:920,height:700},reducedMotion:'reduce'});
-   await context.addInitScript({content:`(${setup.toString()})();clipperTray.onSession=fn=>{setTimeout(()=>fn(true),0);return()=>{}};clipperTray.onChange=()=>()=>{};const original=clipperTray.preview;clipperTray.preview=async token=>({...await original(token),text:${JSON.stringify(text)}});`});
-   await context.route('https://clipper.test/**',async route=>{
+   await context.addInitScript({content:`(${setup.toString()})();clipTray.onSession=fn=>{setTimeout(()=>fn(true),0);return()=>{}};clipTray.onChange=()=>()=>{};const original=clipTray.preview;clipTray.preview=async token=>({...await original(token),text:${JSON.stringify(text)}});`});
+   await context.route('https://clip.test/**',async route=>{
     const file=new URL(route.request().url()).pathname.slice(1);
     await route.fulfill({body:await fs.readFile(path.join('dist/renderer',file)),contentType:file.endsWith('.html')?'text/html':file.endsWith('.css')?'text/css':'text/javascript'});
    });
    const page=await context.newPage();
    page.on('pageerror',error=>errors.push(error.message));
-   await page.goto('https://clipper.test/tray.html');
+   await page.goto('https://clip.test/tray.html');
    await page.waitForSelector('.tray-row');
    if(name==='image')await page.locator('[data-id="image"]').hover();
    await page.waitForSelector(name==='image'?'#preview img.preview-image':'.preview-content pre');

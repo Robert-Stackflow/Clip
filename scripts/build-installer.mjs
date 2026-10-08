@@ -24,24 +24,24 @@ async function sha256(file){
  return hash.digest('hex');
 }
 if(engine===output)throw Error('Installer output cannot overwrite its engine');
-const info={version,product:'Clipper',guid,engineHash:await sha256(engine),engineBytes:(await stat(engine)).size,asarHash:await sha256(asar)};
+const info={version,product:'Clip',guid,engineHash:await sha256(engine),engineBytes:(await stat(engine)).size,asarHash:await sha256(asar)};
 const staging=join(dirname(output),'electron-installer-build');
 await mkdir(staging,{recursive:true});
 const infoFile=join(staging,'build-info.json');
 await writeFile(infoFile,JSON.stringify(info,null,2));
 const config={
- appId:'local.clipper.desktop.setup',productName:'Clipper Setup',extraMetadata:{version},electronVersion:pkg.devDependencies.electron,
+ appId:'com.cloudchewie.clip.setup',productName:'Clip Setup',extraMetadata:{version},electronVersion:pkg.devDependencies.electron,
  electronDist:join(repository,'node_modules/electron/dist'),npmRebuild:false,buildDependenciesFromSource:false,asar:true,
  directories:{output:staging},files:['package.json','main.cjs','preload.cjs','index.html','style.css','renderer.js','icon.png'],
- extraResources:[{from:engine,to:'engine/Clipper-Setup-Engine.exe'},{from:infoFile,to:'build-info.json'}],
- win:{target:'portable',icon:join(repository,'assets/clipper.ico'),executableName:'ClipperSetup',signAndEditExecutable:true,signExecutable:false},
- portable:{artifactName:`Clipper-${version}-Setup-x64.exe`}
+ extraResources:[{from:engine,to:'engine/Clip-Setup-Engine.exe'},{from:infoFile,to:'build-info.json'}],
+ win:{target:'portable',icon:join(repository,'assets/clip.ico'),executableName:'ClipSetup',signAndEditExecutable:true,signExecutable:false},
+ portable:{artifactName:`Clip-${version}-Setup-x64.exe`}
 };
 const configFile=join(staging,'electron-builder.json');
 await writeFile(configFile,JSON.stringify(config,null,2));
-const env={...process.env,ELECTRON_BUILDER_CACHE:join(repository,'work/builder-cache')};
+const env={...process.env,ELECTRON_BUILDER_CACHE:join(repository,'work/Clip/builder-cache')};
 const result=await execute(process.execPath,['node_modules/electron-builder/out/cli/cli.js','--projectDir',join(repository,'installer'),'--config',configFile,'--win','portable','--x64','--publish','never'],{cwd:repository,env,windowsHide:true,maxBuffer:8*1024*1024});
 if(result.stdout)process.stdout.write(result.stdout);
 if(result.stderr)process.stderr.write(result.stderr);
-await copyFile(join(staging,`Clipper-${version}-Setup-x64.exe`),output);
+await copyFile(join(staging,`Clip-${version}-Setup-x64.exe`),output);
 console.log(JSON.stringify({installer:output,engine,info,bytes:(await stat(output)).size}));

@@ -6,8 +6,8 @@ import './locale';
 import './appearance';
 import './tray-menu.css';
 
-declare global {interface Window {clipperTrayMenu:TrayMenuAPI}}
-const api=window.clipperTrayMenu;
+declare global {interface Window {clipTrayMenu:TrayMenuAPI}}
+const api=window.clipTrayMenu;
 const icons:Record<string,IconNode>={history:History,'app-window':AppWindow,'message-square-text':MessageSquareText,'panel-top':PanelTop,'circle-play':Clapperboard,'layers-2':Layers2,pause:Pause,play:Play,'lock-keyhole':LockKeyhole,'lock-open':LockKeyholeOpen,monitor:Monitor,power:Power,'rotate-cw':RotateCw};
 const root=document.getElementById('menu-items')!,status=document.getElementById('menu-status')!,headerActions=document.getElementById('menu-header-actions')!;
 function render(view:TrayMenuView){

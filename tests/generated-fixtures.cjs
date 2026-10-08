@@ -1,8 +1,8 @@
 const fs=require('node:fs'),path=require('node:path'),{after}=require('node:test');
-const work=path.resolve('work'),current=path.join(work,'current');
-const root=path.resolve(process.env.CLIPPER_TEST_FIXTURE_DIR||path.join(current,'direct-unit','fixtures'));
+const work=path.resolve('work','Clip'),current=path.join(work,'current');
+const root=path.resolve(process.env.CLIP_TEST_FIXTURE_DIR||path.join(current,'direct-unit','fixtures'));
 const rel=path.relative(current,root);
-if(!rel||rel==='..'||rel.startsWith('..'+path.sep)||path.isAbsolute(rel))throw Error('Unit fixtures must stay inside work/current');
+if(!rel||rel==='..'||rel.startsWith('..'+path.sep)||path.isAbsolute(rel))throw Error('Unit fixtures must stay inside work/Clip/current');
 fs.mkdirSync(root,{recursive:true});
 for(let item=root;item!==work;item=path.dirname(item))if(fs.lstatSync(item).isSymbolicLink()||fs.realpathSync(item)!==item)throw Error('Linked unit fixture root');
 const allocated=new Set();

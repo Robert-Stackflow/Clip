@@ -8,7 +8,7 @@ export async function localDirectory(value:unknown){
  const path=resolve(value);if(path===parse(path).root)throw new Error(tr('请选择磁盘中的文件夹，而不是磁盘根目录'));
  const info=await lstat(path);if(!info.isDirectory()||info.isSymbolicLink())throw new Error(tr('请选择普通本地文件夹，不支持目录链接'));return realpath(path);
 }
-export async function writeAtomic(file:string,data:Buffer|string,temp=join(dirname(file),`.clipper-${randomUUID()}.tmp`),valid=()=>true){
+export async function writeAtomic(file:string,data:Buffer|string,temp=join(dirname(file),`.clip-${randomUUID()}.tmp`),valid=()=>true){
  let owned=false;
   try{const handle=await open(temp,'wx');owned=true;try{await handle.writeFile(data);await handle.sync();}finally{await handle.close();}if(!valid())throw new Error(tr('资料操作已取消'));await rename(temp,file);owned=false;}
  finally{if(owned)await unlink(temp).catch(()=>{});}

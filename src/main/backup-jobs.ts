@@ -6,7 +6,7 @@ import {unlink} from 'node:fs/promises';
 const cancellations=new Set<()=>void>();
 export function cancelBackupJobs(){for(const cancel of cancellations)cancel();}
 export function exportInWorker(source:string,file:string,password?:string,workerFile=join(__dirname,'backup-worker.cjs'),timeoutMs=180000,databaseKey?:Uint8Array):Promise<void>{
- const temp=join(dirname(file),`.clipper-backup-${randomUUID()}.tmp`);
+ const temp=join(dirname(file),`.clip-backup-${randomUUID()}.tmp`);
  return new Promise<void>((resolve,reject)=>{
   const worker=new Worker(workerFile,{workerData:{source,file,password,temp,databaseKey},resourceLimits:{maxOldGenerationSizeMb:2048}});let response:{ok:boolean;error?:string}|undefined,finished=false;
   let cancelled=false;const cancel=()=>{cancelled=true;void worker.terminate();};cancellations.add(cancel);

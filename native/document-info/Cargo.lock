@@ -213,7 +213,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "clipper-document-info"
+name = "clip-document-info"
 version = "0.27.0"
 dependencies = [
  "cfb 0.15.0",

@@ -1,7 +1,7 @@
 import {t as tr,formatDate,formatNumber} from '../shared/i18n';
 import {metadataUI} from './metadata-ui';
 import {formatDefinition} from '../shared/formats';
-const api=window.clipper,esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
+const api=window.clip,esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 interface Context {modal(title:string,body:string,save:()=>Promise<void>,label?:string):void;toast(text:unknown):void}
 export async function showContentInfo(ctx:Context,id:string){
  ctx.modal(tr('格式与信息'),tr('<div id="content-info-body">正在读取记录信息…</div>'),async()=>{},tr('完成'));

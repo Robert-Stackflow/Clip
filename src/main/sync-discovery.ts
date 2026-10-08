@@ -36,7 +36,7 @@ export class SyncDiscovery {
    if(this.socket!==socket||bytes.length>2048||!privateAddress(info.address))return;
    try{
     const packet=JSON.parse(bytes.toString());
-    if(packet.protocol!=='clipper-lan/1')return;
+    if(packet.protocol!=='clip-lan/1')return;
     // Only the transport's source address is used to connect to the sender.
     const peer=syncPeer({...packet.device,host:info.address});
     if(peer.id===this.self().id)return;
@@ -119,7 +119,7 @@ export class SyncDiscovery {
     if(this.socket!==socket)return;
     try{
      socket.setMulticastInterface(address);
-     const bytes=Buffer.from(JSON.stringify({protocol:'clipper-lan/1',device:{...identity,host:address}}));
+     const bytes=Buffer.from(JSON.stringify({protocol:'clip-lan/1',device:{...identity,host:address}}));
      // The multicast interface belongs to the socket. Finish this send before
      // selecting another interface, including when Node queues the datagram.
      await new Promise<void>((resolve,reject)=>socket.send(bytes,port,group,error=>error?reject(error):resolve()));

@@ -1,4 +1,4 @@
-/* Clipper adaptations of One's shared controls and settings layout. */
+/* Clip adaptations of One's shared controls and settings layout. */
 :root{--field-radius:var(--radius);--panel-radius:calc(var(--radius) + 4px);--focus:color-mix(in srgb,var(--accent) 35%,transparent);--ease:cubic-bezier(.2,.8,.2,1);font-family:var(--ui-font-family);font-size:calc(13px * var(--text-scale,1));--control-font:calc(13px * var(--text-scale,1))}
 html,body{border:0;box-shadow:none}body{user-select:none}input,textarea,pre,code,.detail-content,.preview-content,.row-preview,.storage-location,.shelf-row .row-body{user-select:text}
 input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),textarea{font:inherit;line-height:20px;box-shadow:none}

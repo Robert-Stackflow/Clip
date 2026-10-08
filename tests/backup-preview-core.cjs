@@ -1,9 +1,9 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),{createHash}=require('node:crypto');
 const {Store,BackupManager,encodeBackup,previewBackupJob,cancelBackupPreviews}=require('../work/test-exports.cjs'),{png}=require('./png-fixture.cjs');
-const root=process.env.CLIPPER_TEST_FIXTURE_DIR||path.resolve('work/current/backup-preview/fixtures'),options={workerFile:path.resolve('work/backup-preview-worker.cjs'),imageHost:path.resolve('dist/native/ImageHost.exe')};
+const root=process.env.CLIP_TEST_FIXTURE_DIR||path.resolve('work/current/backup-preview/fixtures'),options={workerFile:path.resolve('work/backup-preview-worker.cjs'),imageHost:path.resolve('dist/native/ImageHost.exe')};
 const vault={available:async()=>true,encrypt:async v=>v,decrypt:async v=>v},sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function fixture(){await fs.mkdir(root,{recursive:true});const directory=await fs.mkdtemp(path.join(root,'preview-')),store=new Store(':memory:'),manager=new BackupManager(()=>store,'id',directory,vault,()=>{},()=>undefined,undefined,options);return {directory,store,manager,close:()=>{manager.dispose();store.close();}};}
-const document=text=>({format:'clipper-backup',version:7,exportedAt:'2026-10-03T00:00:00Z',clips:[],snippets:[{title:'template',payload:{text}}],categories:[],scripts:[]});
+const document=text=>({format:'clip-backup',version:7,exportedAt:'2026-10-03T00:00:00Z',clips:[],snippets:[{title:'template',payload:{text}}],categories:[],scripts:[]});
 
 test('worker rehearses rich plaintext/encrypted backups and commits the inspected snapshot exactly',async()=>{
  for(const encrypted of [false,true]){const f=await fixture(),source=new Store(':memory:');try{
@@ -27,7 +27,7 @@ test('cancel, repeated previews and changed files cannot retain an earlier inspe
 });
 
 test('replacement preview waits for retirement and only the latest result can authorize restore',async()=>{
- const f=await fixture();try{const file=path.join(f.directory,'backup.clipper');await fs.writeFile(file,await encodeBackup(document('replace'), 'preview fixture password'));const choice=await f.manager.chooseRestore(file),first=f.manager.preview(choice.token,'preview fixture password');first.catch(()=>{});const second=f.manager.preview(choice.token,'wrong');second.catch(()=>{});await assert.rejects(first,/取消|过期/);await assert.rejects(second,/密码不正确/);assert.throws(()=>f.manager.restore(choice.token),/先校验/);await f.manager.preview(choice.token,'preview fixture password');f.manager.restore(choice.token);assert.equal(f.store.snippets()[0].payload.text,'replace');
+ const f=await fixture();try{const file=path.join(f.directory,'backup.clip');await fs.writeFile(file,await encodeBackup(document('replace'), 'preview fixture password'));const choice=await f.manager.chooseRestore(file),first=f.manager.preview(choice.token,'preview fixture password');first.catch(()=>{});const second=f.manager.preview(choice.token,'wrong');second.catch(()=>{});await assert.rejects(first,/取消|过期/);await assert.rejects(second,/密码不正确/);assert.throws(()=>f.manager.restore(choice.token),/先校验/);await f.manager.preview(choice.token,'preview fixture password');f.manager.restore(choice.token);assert.equal(f.store.snippets()[0].payload.text,'replace');
  }finally{f.close();}
 });
 

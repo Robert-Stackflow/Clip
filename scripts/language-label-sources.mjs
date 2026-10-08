@@ -15,5 +15,5 @@ export const retainedMessages=[{file:'src/main/content-info.ts',value:'Unicode �
  ...['AI 处理','脚本处理'].map(value=>({file:'src/shared/text-tools.ts',value,reason:'TextApply source union defines existing stored identifiers, independent of interface language.'})),
  {file:'src/renderer/text-tools-ui.ts',value:'简体中文',reason:'Existing default target language sent to the model, independent of interface language; editable by the user.'},
  {file:'src/shared/chat.ts',value:'简体中文',reason:'Default target language sent to the model and stored in the editable conversation draft, independent of interface language.'},
- ...['clipper-win://search?q=关键词','clipper-win://add?text=待保存文字','clipper-win://copy?text=待复制文字'].map(value=>({file:'src/renderer/text-tools-ui.ts',value,reason:'Literal URL example including sample user data; protocol and sample values stay unchanged.'}))
+ ...['clip-win://search?q=关键词','clip-win://add?text=待保存文字','clip-win://copy?text=待复制文字'].map(value=>({file:'src/renderer/text-tools-ui.ts',value,reason:'Literal URL example including sample user data; protocol and sample values stay unchanged.'}))
 ];

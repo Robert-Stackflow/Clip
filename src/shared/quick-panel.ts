@@ -7,10 +7,11 @@ import type {QuickHoverRect} from './quick-preview';
 export const QUICK_SHORTCUT='Control+Alt+V';
 export type GlyphTab='emoji'|'kaomoji'|'symbols';
 export interface QuickGlyph{tab:GlyphTab;text:string}
-export interface QuickState extends TrayState{recent:QuickGlyph[]}
+export interface QuickState extends TrayState{recent:QuickGlyph[];hoverPreview:boolean}
 export interface QuickReplyItem{token:string;title:string;preview:string;kind:Kind;thumbnail?:string;variables:string[]}
 export interface QuickReplyState{items:QuickReplyItem[];dark:boolean;canPaste:boolean}
 export interface QuickAPI extends Omit<TrayAPI,'state'|'drag'>{
+ focus():Promise<void>;
  state(query:Parameters<TrayAPI['state']>[0]):Promise<QuickState>;
  text(value:QuickGlyph,paste:boolean):Promise<void>;
  action(token:string,action:'pin'|'favorite'|'delete'):Promise<void>;
@@ -21,7 +22,7 @@ export interface QuickAPI extends Omit<TrayAPI,'state'|'drag'>{
  createReply(value:{title:string;text:string}):Promise<void>;
  move():Promise<void>;
 }
-export const quickShortcut=(value:unknown)=>shortcutKey(value);
+export const quickShortcut=(value:unknown)=>shortcutKey(value,true);
 export function quickGlyph(value:unknown):QuickGlyph{
  const v=value as QuickGlyph;
  if(!v||!['emoji','kaomoji','symbols'].includes(v.tab)||typeof v.text!=='string'||!v.text.trim()||v.text.length>128||/[\x00-\x1f\x7f]/.test(v.text))throw new Error(tr('表情或符号无效'));
@@ -38,4 +39,16 @@ export function quickPanelBounds(point:{x:number;y:number},area:Rect):Rect{
  const width=Math.min(400,area.width),height=Math.min(560,area.height);
  return clampRect({x:point.x+12,y:point.y+12,width,height},area,1,1);
 }
-declare global{interface Window{clipperQuick:QuickAPI}}
+/** Anchor to the insertion point, otherwise the active window's lower right. */
+export function anchoredQuickPanelBounds(area:Rect,window?:Rect,caret?:Rect):Rect{
+ if(!validRect(area))throw new Error(tr('面板位置无效'));
+ const width=Math.min(400,area.width),height=Math.min(560,area.height),gap=8;
+ if(caret&&validRect(caret)){
+  const below=caret.y+caret.height+gap,above=caret.y-height-gap;
+  const y=below+height<=area.y+area.height?below:above>=area.y?above:below;
+  return clampRect({x:caret.x,y,width,height},area,1,1);
+ }
+ const reference=window&&validRect(window)?window:area;
+ return clampRect({x:reference.x+reference.width-width-gap,y:reference.y+reference.height-height-gap,width,height},area,1,1);
+}
+declare global{interface Window{clipQuick:QuickAPI}}

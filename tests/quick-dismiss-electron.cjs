@@ -1,12 +1,12 @@
 const assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),{execFile}=require('node:child_process'),{promisify}=require('node:util'),{build}=require('esbuild');
 (async()=>{
- const output=path.resolve(process.env.CLIPPER_TEST_OUTPUT_DIR||'work/current/quick-dismiss-electron');await fs.mkdir(output,{recursive:true});
+ const output=path.resolve(process.env.CLIP_TEST_OUTPUT_DIR||'work/current/quick-dismiss-electron');await fs.mkdir(output,{recursive:true});
  await build({entryPoints:['src/main/tray-panel.ts'],outfile:path.join(output,'panel.cjs'),bundle:true,platform:'node',target:'node22',external:['electron','./native','better-sqlite3-multiple-ciphers','koffi']});
  const host=path.join(output,'host.cjs');await fs.writeFile(host,`
  const {app,BrowserWindow,screen}=require('electron'),{Module}=require('node:module'),assert=require('node:assert/strict');
  let pressed=false,focused=true,popup=false,point={x:100,y:100};const visible=new Set(),load=Module._load;
  Module._load=function(name,...args){if(name==='./native')return {mouseButtons:()=>({left:pressed}),foregroundBelongsTo:()=>focused,activateNativeWindow:()=>true};return load.call(this,name,...args);};
- BrowserWindow.prototype.show=function(){visible.add(this.id);};BrowserWindow.prototype.focus=function(){};BrowserWindow.prototype.isFocused=function(){return focused&&!popup;};BrowserWindow.prototype.isVisible=function(){return visible.has(this.id);};BrowserWindow.prototype.hide=function(){visible.delete(this.id);this.emit('hide');};BrowserWindow.prototype.loadURL=function(){setImmediate(()=>this.emit('ready-to-show'));return Promise.resolve();};
+ BrowserWindow.prototype.showInactive=BrowserWindow.prototype.show=function(){visible.add(this.id);};BrowserWindow.prototype.focus=function(){};BrowserWindow.prototype.isFocused=function(){return focused&&!popup;};BrowserWindow.prototype.isVisible=function(){return visible.has(this.id);};BrowserWindow.prototype.hide=function(){visible.delete(this.id);this.emit('hide');};BrowserWindow.prototype.loadURL=function(){setImmediate(()=>this.emit('ready-to-show'));return Promise.resolve();};
  app.whenReady().then(async()=>{
   screen.getCursorScreenPoint=()=>point;const area={x:0,y:0,width:1600,height:1000};screen.getDisplayNearestPoint=()=>({workArea:area});
   const {TrayPanel}=require('./panel.cjs'),panel=new TrayPanel({store:()=>({}),blocked:()=>false,dark:()=>false,target:()=>undefined},'quick');

@@ -7,7 +7,7 @@ import type {ReplyIntent} from '../shared/efficiency';
 import {showContentInfo} from './content-info-ui';
 import type { Category, Snippet } from '../shared/types';
 import { templateVariables, builtins, fillTemplate } from '../shared/advanced';
-const api=window.clipper;
+const api=window.clip;
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 interface Context {categories():Category[];modal(title:string,body:string,save:()=>Promise<void>,label?:string):void;toast(text:unknown,undo?:boolean):void;select(id:string):Promise<void>;refresh():Promise<void>}

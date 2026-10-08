@@ -1,7 +1,7 @@
 import {t as tr,formatNumber,formatDate} from '../shared/i18n';
 import {createElement,ListChecks,LoaderCircle,Check,AlertCircle,Upload,Code2,Bot,Copy,RefreshCw,ArrowUpRight,X} from 'lucide';
 import {taskActive,type TaskItem,type TaskState} from '../shared/tasks';
-const api=window.clipper;
+const api=window.clip;
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const icon=(node:Parameters<typeof createElement>[0])=>createElement(node,{class:'icon','aria-hidden':'true','stroke-width':1.75}).outerHTML;
 interface Context {modal(title:string,body:string,save:()=>Promise<void>,label?:string):void;toast(text:unknown):void;select(id:string):Promise<void>}

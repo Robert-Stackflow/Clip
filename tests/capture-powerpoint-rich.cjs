@@ -12,13 +12,13 @@ function readClipboard(){return JSON.parse(execFileSync('powershell.exe',['-Sta'
 function powerpointCount(){return Number(execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',"@(Get-Process -Name POWERPNT -ErrorAction SilentlyContinue).Count"],{encoding:'utf8',windowsHide:true}).trim());}
 
 async function run(){
- const imageMode=process.env.CLIPPER_CAPTURE_POWERPOINT_IMAGE==='1';
+ const imageMode=process.env.CLIP_CAPTURE_POWERPOINT_IMAGE==='1';
  assert.equal(powerpointCount(),0,'Close existing PowerPoint windows before this isolated test');
  const clipboardGuard=requireEmptyClipboard();
  const name=imageMode?'capture-powerpoint-image':'capture-powerpoint-rich';
  const output=path.resolve('work/'+name);await fs.mkdir(output,{recursive:true});
  const prefix=randomUUID(),ready=path.join(output,prefix+'-ready.txt'),stop=path.join(output,prefix+'-stop.txt'),failure=path.join(output,prefix+'-error.txt'),picture=path.join(output,prefix+'.png');
- const value='Clipper PowerPoint source '+randomUUID();
+ const value='Clip PowerPoint source '+randomUUID();
  if(imageMode)await fs.writeFile(picture,png(160,96,(x,y)=>[x<54?215:34,y<48?38:102,x>106?204:61,255]));
  const f=await fixture(name);let child,powerpointPid=0;
  const native=(action,arg)=>f.helper.evaluate(({app},{action,arg})=>{
@@ -35,7 +35,7 @@ async function run(){
   }
  },{action,arg});
  try{
-  const initial=(await f.page.evaluate(()=>window.clipper.state())).clips.length;
+  const initial=(await f.page.evaluate(()=>window.clip.state())).clips.length;
   child=spawn('powershell.exe',['-Sta','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.resolve('tests/capture-powerpoint-rich-target.ps1'),'-Value',value,'-Ready',ready,'-Stop',stop,'-Failure',failure,...(imageMode?['-Picture',picture]:[])],{stdio:'ignore',windowsHide:true});
   await expect.poll(async()=>{if(await fs.stat(failure).then(()=>true,()=>false))throw Error(await fs.readFile(failure,'utf8'));return fs.readFile(ready,'utf8').catch(()=>'');},{timeout:45000}).toBe('ready');
   const info=execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',"Get-Process -Name POWERPNT | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1 Id,MainWindowHandle | ConvertTo-Json -Compress"],{encoding:'utf8',windowsHide:true}).trim();
@@ -52,15 +52,15 @@ async function run(){
   if(imageMode)await expect.poll(()=>readClipboard().formats.includes('PNG'),{timeout:5000}).toBe(true);
   else await expect.poll(()=>readClipboard().text,{timeout:5000}).toContain(value);
   const source=readClipboard();
-  const richHTML=html=>html.includes('Clipper PowerPoint source')&&html.includes(value.slice(-36))&&/font-weight:bold/i.test(html)&&/#D7263D/i.test(html);
+  const richHTML=html=>html.includes('Clip PowerPoint source')&&html.includes(value.slice(-36))&&/font-weight:bold/i.test(html)&&/#D7263D/i.test(html);
   if(imageMode)assert(source.formats.includes('PNG'),'PowerPoint did not place an image on the clipboard');
   else{
    assert(source.formats.includes('Art::Text ClipFormat'),'PowerPoint did not place a text selection on the clipboard');
    assert(richHTML(source.html)&&source.rtf.includes(value),'PowerPoint did not provide rich text');
   }
-  await expect.poll(async()=>{if(await fs.stat(failure).then(()=>true,()=>false))throw Error(await fs.readFile(failure,'utf8'));return (await f.page.evaluate(()=>window.clipper.state())).clips.length;},{timeout:15000}).toBeGreaterThan(initial);
-  const clip=(await f.page.evaluate(()=>window.clipper.state())).clips[0];
-  const detail=await f.page.evaluate(id=>window.clipper.detail(id),clip.id);
+  await expect.poll(async()=>{if(await fs.stat(failure).then(()=>true,()=>false))throw Error(await fs.readFile(failure,'utf8'));return (await f.page.evaluate(()=>window.clip.state())).clips.length;},{timeout:15000}).toBeGreaterThan(initial);
+  const clip=(await f.page.evaluate(()=>window.clip.state())).clips[0];
+  const detail=await f.page.evaluate(id=>window.clip.detail(id),clip.id);
   if(imageMode){
    assert.equal(clip.kind,'image','PowerPoint selected image was not shown as an image');
    assert(detail.payload.png,'PowerPoint image was not recorded');
@@ -74,7 +74,7 @@ async function run(){
   await fs.writeFile(stop,'stop');
   await new Promise(resolve=>{if(child.exitCode!==null)return resolve();child.once('exit',resolve);setTimeout(()=>{child.kill();resolve();},5000).unref();});
   await expect.poll(powerpointCount,{timeout:5000}).toBe(0);
-  await f.page.evaluate(id=>window.clipper.copy(id,false),clip.id);
+  await f.page.evaluate(id=>window.clip.copy(id,false),clip.id);
   const replay=readClipboard();
   if(imageMode){
    assert(replay.formats.includes('PNG'),'Replayed record lost PowerPoint image');

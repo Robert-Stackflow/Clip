@@ -16,7 +16,7 @@ function harness(addresses=['10.1.0.1','172.18.0.1']){
   setMulticastInterface(address){this.selected=address;}
   send(bytes,port,group,callback){const record={packet:JSON.parse(bytes.toString()),port,group,address:this.selected};this.sent.push(record);const complete=()=>{record.completedAddress=this.selected;callback(failedSends.has(record.address)?Error('Send failed'):undefined);};if(this.automatic)queueMicrotask(complete);else this.pending.push(complete);}
   close(){this.closed=true;}
-  receive(peer,host=peer.host,extra={}){this.emit('message',Buffer.from(JSON.stringify({protocol:'clipper-lan/1',device:peer,...extra})),{address:host});}
+  receive(peer,host=peer.host,extra={}){this.emit('message',Buffer.from(JSON.stringify({protocol:'clip-lan/1',device:peer,...extra})),{address:host});}
  }
  const schedule=(callback,delay,interval=false)=>{const token={id:++sequence,unref(){}};timers.set(token,{callback,at:now+delay,delay,interval});return token;};
  const context={module:{exports:{}},require:name=>name==='node:dgram'?{createSocket:()=>{const socket=new Socket();sockets.push(socket);return socket;}}:name==='node:os'?{networkInterfaces:()=>({fixture:interfaces})}:require(name),Buffer,Date:class extends Date{static now(){return now;}},setTimeout:(fn,delay)=>schedule(fn,delay),setInterval:(fn,delay)=>schedule(fn,delay,true),clearTimeout:token=>timers.delete(token),clearInterval:token=>timers.delete(token)};

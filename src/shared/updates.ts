@@ -1,4 +1,4 @@
-export const UPDATE_REPOSITORY = 'Robert-Stackflow/Clipper';
+export const UPDATE_REPOSITORY = 'Robert-Stackflow/Clip';
 export const UPDATE_RELEASES_URL = `https://github.com/${UPDATE_REPOSITORY}/releases`;
 export const UPDATE_API_URL = `https://api.github.com/repos/${UPDATE_REPOSITORY}/releases/latest`;
 export const MAX_UPDATE_BYTES = 512 * 1024 * 1024;
@@ -21,7 +21,7 @@ export function releaseAsset(value:unknown,current:string):UpdateRelease|null {
   if(!newerVersion(version,current))return null;
   const tag=release.tag_name,base=`${UPDATE_RELEASES_URL}/download/${tag}/`,page=`${UPDATE_RELEASES_URL}/tag/${tag}`;
   if(release.html_url!==page||!Array.isArray(release.assets))throw new Error('UPDATE_RELEASE_INVALID');
-  const name=`Clipper-${version}-Setup-x64.exe`,assets=release.assets.filter((a:any)=>a?.name===name);
+  const name=`Clip-${version}-Setup-x64.exe`,assets=release.assets.filter((a:any)=>a?.name===name);
   if(assets.length!==1)throw new Error('UPDATE_ASSET_MISSING');
   const asset=assets[0];
   if(asset.state!=='uploaded'||asset.browser_download_url!==base+name||!Number.isSafeInteger(asset.size)||asset.size<1||asset.size>MAX_UPDATE_BYTES||!/^sha256:[a-f0-9]{64}$/i.test(asset.digest||''))throw new Error('UPDATE_ASSET_INVALID');

@@ -14,8 +14,8 @@ async function run(){
  await fs.rm(ready,{force:true});await fs.rm(result,{force:true});
  const f=await fixture('paste-native');let child,hwnd=0;
  try{
-  const value='Clipper native target paste check';
-  await f.page.evaluate(text=>window.clipper.applyText({mode:'save',source:'脚本处理',text:text}),value);
+  const value='Clip native target paste check';
+  await f.page.evaluate(text=>window.clip.applyText({mode:'save',source:'脚本处理',text:text}),value);
   child=spawn(exe,[ready,result],{stdio:'ignore',windowsHide:false});
   await expect.poll(async()=>{try{return Number(await fs.readFile(ready,'utf8'));}catch{return 0;}},{timeout:10000}).toBeGreaterThan(0);
   hwnd=Number(await fs.readFile(ready,'utf8'));
@@ -26,7 +26,7 @@ async function run(){
    if(!activate(handle))throw Error('Native target activation rejected');
   },hwnd);
   await expect.poll(()=>f.helper.evaluate(({app})=>{const req=process.getBuiltinModule('node:module').createRequire(process.getBuiltinModule('node:path').join(app.getAppPath(),'package.json'));return req('koffi').load('user32.dll').func('uintptr_t __stdcall GetForegroundWindow()')();})).toBe(hwnd);
-  const opened=f.app.waitForEvent('window');await f.page.evaluate(()=>window.clipper.showTray());const panel=await opened;
+  const opened=f.app.waitForEvent('window');await f.page.evaluate(()=>window.clip.showTray());const panel=await opened;
   await panel.waitForSelector('.tray-row');await panel.locator('.tray-row').filter({hasText:value}).click({button:'right'});
   await expect.poll(async()=>{try{return await fs.readFile(result,'utf8');}catch{return '';}}).toBe(value);
   console.log(JSON.stringify({result:'PASS',nativeTargetPaste:true,foregroundRestored:true}));

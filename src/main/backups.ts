@@ -41,12 +41,12 @@ export class BackupManager {
   const changed=!old.enabled||directory!==old.directory||v.encrypted!==old.encrypted||!!v.password;
   this.store().setMeta('automatic-backup',{...old,...v,password:undefined,directory,secret,hasPassword:!!secret,nextAt:v.enabled?(changed?Date.now():Date.now()+v.intervalHours*3600000):0,lastError:''});this.changed();return this.status();
  }
- private pattern(){return new RegExp('^Clipper-auto-'+this.profileId+'-[0-9]{17}-[0-9a-f-]{36}\\.(json|clipper)$');}
+ private pattern(){return new RegExp('^Clip-auto-'+this.profileId+'-[0-9]{17}-[0-9a-f-]{36}\\.(json|clip)$');}
  async entries():Promise<BackupEntry[]>{
   const state=this.saved();let directory:string;try{directory=await localDirectory(state.directory);}catch{return [];}
   if(directory!==state.directory&&state.directory!==this.defaultFolder)return [];
   const files=await readdir(directory,{withFileTypes:true}),result:BackupEntry[]=[];
-  for(const f of files)if(f.isFile()&&this.pattern().test(f.name)){const info=await lstat(join(directory,f.name));if(info.isFile()&&!info.isSymbolicLink())result.push({name:f.name,bytes:info.size,createdAt:info.mtimeMs,encrypted:f.name.endsWith('.clipper')});}
+  for(const f of files)if(f.isFile()&&this.pattern().test(f.name)){const info=await lstat(join(directory,f.name));if(info.isFile()&&!info.isSymbolicLink())result.push({name:f.name,bytes:info.size,createdAt:info.mtimeMs,encrypted:f.name.endsWith('.clip')});}
   return result.sort((a,b)=>b.createdAt-a.createdAt||b.name.localeCompare(a.name));
  }
  async run(now=Date.now(),force=false){
@@ -56,7 +56,7 @@ export class BackupManager {
   try{
    const directory=await localDirectory(state.directory);if(directory!==state.directory)throw new Error(tr('备份目录已改变，请重新选择'));
    const password=state.encrypted?await this.vault.decrypt(state.secret!):undefined;
-   const file=join(directory,`Clipper-auto-${this.profileId}-${new Date(now).toISOString().replace(/\D/g,'')}-${randomUUID()}.${state.encrypted?'clipper':'json'}`);
+   const file=join(directory,`Clip-auto-${this.profileId}-${new Date(now).toISOString().replace(/\D/g,'')}-${randomUUID()}.${state.encrypted?'clip':'json'}`);
    await this.write(file,password);
    // Only retire this profile's own ordinary files after the new backup validates.
    const entries=await this.entries();let cleanupError='';for(const entry of entries.slice(state.keep)){const path=join(directory,entry.name);try{const info=await lstat(path);if(info.isFile()&&!info.isSymbolicLink())await unlink(path);}catch{cleanupError=tr('备份已完成，但部分旧备份无法清理');}}
@@ -66,7 +66,7 @@ export class BackupManager {
  }
  private rehearse(value:unknown){validateBackup(value);const temporary=new Store(':memory:');try{temporary.import(value,this.thumbnail);}finally{temporary.close();}}
  private async write(file:string,password?:string){if(this.exporter)return this.exporter(file,password);const value=this.store().backup();this.rehearse(value);await writeAtomic(file,await encodeBackup(value,password));this.rehearse(await decodeBackup(await boundedFile(file),password));}
- export(file:string,password?:string){return this.exclusive(async()=>{if(/^Clipper-auto-/i.test(basename(file)))throw new Error(tr('此文件名保留给自动备份，请选择其他名称'));if(password!==undefined)validateBackupPassword(password);await this.write(file,password);return basename(file);});}
+ export(file:string,password?:string){return this.exclusive(async()=>{if(/^Clip-auto-/i.test(basename(file)))throw new Error(tr('此文件名保留给自动备份，请选择其他名称'));if(password!==undefined)validateBackupPassword(password);await this.write(file,password);return basename(file);});}
  async chooseRestore(file:string):Promise<RestoreFile>{this.cancelPendingRestore();const selection=this.selection,valid=()=>!this.disposed&&selection===this.selection;const {encrypted,hash}=await fingerprint(file,valid);if(!valid())throw new Error(tr('恢复预览已过期，请重新选择备份'));const token=randomUUID();this.restoring={token,file,name:basename(file),expires:Date.now()+600000,encrypted,hash};this.expiryTimer=setTimeout(()=>this.cancelRestore(token),600000);this.expiryTimer.unref();return {token,name:basename(file),encrypted};}
  async chooseOwn(name:string){if(typeof name!=='string'||!this.pattern().test(name)||(await this.entries()).every(e=>e.name!==name))throw new Error(tr('此备份不在当前列表中'));return this.chooseRestore(join(this.saved().directory,name));}
  private request(token:unknown){const request=this.restoring;if(!request||token!==request.token||request.expires<Date.now())throw new Error(tr('恢复预览已过期，请重新选择备份'));return request;}

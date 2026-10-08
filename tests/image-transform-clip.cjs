@@ -11,7 +11,7 @@ function fixture() {
   const context = image.getContext('2d');
   context.fillStyle = '#de4747';
   context.fillRect(0, 0, image.width, image.height);
-  window.clipperImage = {
+  window.clipImage = {
     state: async () => ({ url: image.toDataURL(), dark: false }),
     dirty: async () => {},
     onChange: () => () => {},
@@ -25,7 +25,7 @@ const intersects = (a, b) => a.left < b.right && a.right > b.left && a.top < b.b
   try {
     const context = await browser.newContext({ viewport: { width: 900, height: 600 }, reducedMotion: 'no-preference' });
     await context.addInitScript({ content: `(${setup.toString()})();(${fixture.toString()})();` });
-    await context.route('https://clipper.test/**', async route => {
+    await context.route('https://clip.test/**', async route => {
       const name = new URL(route.request().url()).pathname.slice(1);
       await route.fulfill({
         body: await fs.readFile(path.join('dist/renderer', name)),
@@ -35,7 +35,7 @@ const intersects = (a, b) => a.left < b.right && a.right > b.left && a.top < b.b
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
-    await page.goto('https://clipper.test/image-editor.html');
+    await page.goto('https://clip.test/image-editor.html');
     await page.waitForFunction(() => document.querySelector('#image').width === 1200 && !document.querySelector('#rotate').disabled);
 
     for (const id of ['rotate', 'flip']) {

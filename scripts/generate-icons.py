@@ -1,4 +1,4 @@
-"""Export the approved Clipper artwork at native application and tray sizes."""
+"""Export the approved Clip artwork at native application and tray sizes."""
 
 from io import BytesIO
 from pathlib import Path
@@ -9,7 +9,7 @@ from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "assets"
-MASTER = Image.open(ASSETS / "clipper-master.png").convert("RGBA")
+MASTER = Image.open(ASSETS / "clip-master.png").convert("RGBA")
 
 
 def app_icon(size: int) -> Image.Image:
@@ -43,11 +43,11 @@ def ico(images: list[tuple[int, bytes]]) -> bytes:
 
 if __name__ == "__main__":
     for size in (16, 20, 24, 32):
-        (ASSETS / f"clipper-tray-{size}.png").write_bytes(png(app_icon(size)))
-    (ASSETS / "clipper-mark.png").write_bytes(png(app_icon(128)))
-    (ASSETS / "clipper.png").write_bytes(png(app_icon(512)))
+        (ASSETS / f"clip-tray-{size}.png").write_bytes(png(app_icon(size)))
+    (ASSETS / "clip-mark.png").write_bytes(png(app_icon(128)))
+    (ASSETS / "clip.png").write_bytes(png(app_icon(512)))
     (ROOT / "installer" / "icon.png").write_bytes(png(app_icon(256)))
-    (ASSETS / "clipper.ico").write_bytes(
+    (ASSETS / "clip.ico").write_bytes(
         ico([(size, png(app_icon(size)))
              for size in (16, 24, 32, 48, 64, 128, 256)])
     )

@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path'),{randomBytes}=require('node:crypto');
 const {Store,BackupManager,SyncLedger,encodeBackup,restoreBackupJob}=require('../work/test-exports.cjs'),{png}=require('./png-fixture.cjs');
-const root=process.env.CLIPPER_TEST_FIXTURE_DIR||path.resolve('work/current/backup-restore/fixtures'),workerFile=path.resolve('work/backup-restore-worker.cjs'),imageHost=path.resolve('dist/native/ImageHost.exe'),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const root=process.env.CLIP_TEST_FIXTURE_DIR||path.resolve('work/current/backup-restore/fixtures'),workerFile=path.resolve('work/backup-restore-worker.cjs'),imageHost=path.resolve('dist/native/ImageHost.exe'),sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const vault={available:async()=>true,encrypt:async v=>v,decrypt:async v=>v};
 async function until(check){const end=Date.now()+20000;while(!check()&&Date.now()<end)await sleep(1);assert.ok(check(),'Expected worker phase was not reached');}
 async function fixture(encrypted=false){
@@ -10,7 +10,7 @@ async function fixture(encrypted=false){
  const manager=new BackupManager(()=>store,'fixture',directory,vault,()=>notified++,()=>{throw Error('Main-thread thumbnail must not be used');},undefined,{workerFile:path.resolve('work/backup-preview-worker.cjs'),imageHost},(bytes,valid,previous)=>job=restoreBackupJob(bytes,{source:file,workerFile,imageHost,valid:()=>live&&valid(),key:()=>key&&Buffer.from(key),enqueue,committed:r=>{store.categories=r.categories;mutations.push(...r.mutations);}},previous));
  return {directory,file,key,store,manager,enqueue,mutations,get job(){return job;},get notified(){return notified;},invalidate:()=>live=false,close:async()=>{manager.dispose();await job?.promise.catch(()=>{});await serial.catch(()=>{});store.close();key?.fill(0);}};
 }
-const backup=text=>({format:'clipper-backup',version:7,exportedAt:'2026-10-03',clips:[],snippets:[{title:'fixture',payload:{text}}],categories:[],scripts:[]});
+const backup=text=>({format:'clip-backup',version:7,exportedAt:'2026-10-03',clips:[],snippets:[{title:'fixture',payload:{text}}],categories:[],scripts:[]});
 
 test('worker merges the inspected snapshot into plain/encrypted histories without changing local privacy or newer data',async()=>{
  for(const encrypted of [false,true]){const f=await fixture(encrypted),source=new Store(':memory:');try{

@@ -36,7 +36,7 @@
 .settings-page .settings-card .settings-item-control>.color-field{width:112px;min-width:0;flex:none}
 .settings-page .settings-card .settings-item-control>input[type=range]{flex:1;min-width:100px;margin:0}
 .settings-page .settings-card .settings-item-control>output{font-size:calc(12px * var(--text-scale,1));color:var(--muted);min-width:34px;text-align:right}
-.settings-page .settings-card>.settings-item:last-child,.settings-page .settings-card :is(.desktop-fields,.tool-field-grid):last-child>.settings-item:last-child{border-bottom:0}
+.settings-page .settings-card>.settings-item:not(:has(~:not([hidden]))),.settings-page .settings-card :is(.desktop-fields,.tool-field-grid):not(:has(~:not([hidden])))>.settings-item:not(:has(~:not([hidden]))){border-bottom:0}
 .settings-page :is(.desktop-fields,.tool-field-grid){display:block;margin:0;gap:0}
 .settings-page .appearance-page{max-width:none;display:block}
 .settings-page .appearance-actions{display:flex;justify-content:flex-end;margin:0;padding:0}

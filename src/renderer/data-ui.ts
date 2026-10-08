@@ -8,7 +8,7 @@ import {renderVault} from './vault-ui';
 import {renderCheckpoints} from './checkpoint-ui';
 import {lockOneDialogDismiss} from './dialog-shell';
 import type {DataState,RestorePreview} from '../shared/data';
-const api=window.clipper,q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
+const api=window.clip,q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const size=formatBytes;
 const date=(n:number)=>n?formatDate(n,{dateStyle:'medium',timeStyle:'medium',hour12:false}):tr('尚无');

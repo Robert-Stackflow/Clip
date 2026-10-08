@@ -22,7 +22,7 @@ export const formatDefinitions=[
 export type FormatName=string;
 export const MAX_FORMATS=32;
 // These formats describe live COM objects, file transfers, process state or privacy controls.
-const unsafeFormat=/^(?:CF_|Ole|DataObject|Embed Source|Embedded Object|Object Descriptor|Link Source|Link Source Descriptor|FileContents|FileGroupDescriptor|Shell |Shell\.|Preferred DropEffect|Performed DropEffect|Logical Performed DropEffect|Paste Succeeded|InShellDragLoop|DragContext|DragImageBits|DropDescription|AsyncFlag|UsingDefaultDragImage|IsShowingLayered|IsShowingText|CanIncludeInClipboardHistory|CanUploadToCloudClipboard|ExcludeClipboardContentFromMonitorProcessing|Clipboard Viewer Ignore|org\.nspasteboard\.ConcealedType|Clipper\.)/i;
+const unsafeFormat=/^(?:CF_|Ole|DataObject|Embed Source|Embedded Object|Object Descriptor|Link Source|Link Source Descriptor|FileContents|FileGroupDescriptor|Shell |Shell\.|Preferred DropEffect|Performed DropEffect|Logical Performed DropEffect|Paste Succeeded|InShellDragLoop|DragContext|DragImageBits|DropDescription|AsyncFlag|UsingDefaultDragImage|IsShowingLayered|IsShowingText|CanIncludeInClipboardHistory|CanUploadToCloudClipboard|ExcludeClipboardContentFromMonitorProcessing|Clipboard Viewer Ignore|org\.nspasteboard\.ConcealedType|Clip\.)/i;
 export function persistableFormat(name:unknown):name is string{return typeof name==='string'&&name.length>0&&name.length<=128&&!/[\x00-\x1f\x7f]/.test(name)&&name===name.trim()&&(name==='CF_DIB'||name==='CF_DIBV5'||!unsafeFormat.test(name));}
 export function clipboardFormatId(name:string):number|string{return name==='CF_DIB'?8:name==='CF_DIBV5'?17:name;}
 export interface StoredFormat{name:FormatName;data:string}

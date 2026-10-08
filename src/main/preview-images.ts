@@ -8,13 +8,13 @@ interface Lease {readers?:number;owner:number;source:Source;job?:{cancel():void}
 export class PreviewImages {
  private stopping=new Set<Promise<void>>();private leases=new Map<string,Lease>();private owners=new Map<number,string>();
  constructor(private workerFile=join(__dirname,'preview-image-worker.cjs'),private timeout=15000){}
- register(owner:number,source:Source){this.clear(owner);const token=randomUUID();this.leases.set(token,{owner,source});this.owners.set(owner,token);return 'clipper://app/preview-image/'+token;}
+ register(owner:number,source:Source){this.clear(owner);const token=randomUUID();this.leases.set(token,{owner,source});this.owners.set(owner,token);return 'clip://app/preview-image/'+token;}
  release(url:string,owner:number){const token=this.token(url),lease=token?this.leases.get(token):undefined;if(lease?.owner===owner)this.remove(token!);}
  clear(owner?:number){for(const [token,lease] of this.leases)if(owner===undefined||owner===lease.owner)this.remove(token);}
  stats(){return {leases:this.leases.size,bytes:[...this.leases.values()].reduce((n,l)=>n+(l.bytes?.byteLength||0),0),workers:[...this.leases.values()].filter(l=>!!l.job).length,readers:[...this.leases.values()].reduce((n,l)=>n+(l.readers||0),0)};}
  async stop(){this.clear();await Promise.all([...this.stopping]);}
  private remove(token:string){const lease=this.leases.get(token);if(!lease)return;this.leases.delete(token);if(this.owners.get(lease.owner)===token)this.owners.delete(lease.owner);lease.job?.cancel();lease.bytes?.fill(0);lease.bytes=undefined;}
- private token(url:string){try{const u=new URL(url);return u.host==='app'&&u.protocol==='clipper:'&&/^\/preview-image\/[0-9a-f-]{36}$/.test(u.pathname)?u.pathname.slice('/preview-image/'.length):undefined;}catch{return undefined;}}
+ private token(url:string){try{const u=new URL(url);return u.host==='app'&&u.protocol==='clip:'&&/^\/preview-image\/[0-9a-f-]{36}$/.test(u.pathname)?u.pathname.slice('/preview-image/'.length):undefined;}catch{return undefined;}}
  private valid(token:string,lease:Lease){try{return this.leases.get(token)===lease&&lease.source.valid();}catch{return false;}}
  private load(token:string,lease:Lease){return lease.loading??=new Promise<Uint8Array|undefined>((resolve,reject)=>{
   if(!this.valid(token,lease)){resolve(undefined);return;}const key=lease.source.key();let worker:Worker;

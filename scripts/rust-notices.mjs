@@ -3,7 +3,7 @@ import {readFile,writeFile,readdir} from 'node:fs/promises';
 import {dirname,join} from 'node:path';
 const metadata=spawnSync('cargo',['metadata','--manifest-path','native/document-info/Cargo.toml','--locked','--offline','--format-version','1'],{encoding:'utf8',windowsHide:true,maxBuffer:8*1024*1024});
 if(metadata.status!==0)throw new Error(metadata.stderr||'Cargo metadata failed');
-const output=['Clipper document information helper — Rust dependencies','The following dependency versions are locked in Cargo.lock.',''];
+const output=['Clip document information helper — Rust dependencies','The following dependency versions are locked in Cargo.lock.',''];
 const missing=[];
 for(const pkg of JSON.parse(metadata.stdout).packages.filter(p=>p.source).sort((a,b)=>a.name.localeCompare(b.name))){
  const root=dirname(pkg.manifest_path),names=await readdir(root),candidates=names.filter(n=>/^(?:licen[sc]e|copying|notice|unlicense|authors)(?:[._-].*)?$/i.test(n));

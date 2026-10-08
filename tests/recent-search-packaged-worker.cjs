@@ -3,10 +3,10 @@ const {_electron:electron}=require('@playwright/test'),assert=require('node:asse
 const fs=require('node:fs/promises'),path=require('node:path'),crypto=require('node:crypto');
 const {Store,trayQuery}=require('../work/test-exports.cjs'),memory=require('./process-tree-memory.cjs');
 (async()=>{
- const baselineVersion=process.env.CLIPPER_RECENT_PACKAGED_BASELINE||'0.49.6',candidateVersion=process.env.CLIPPER_RECENT_PACKAGED_CURRENT||'0.49.7',large=process.env.CLIPPER_RECENT_PACKAGED_LARGE==='1';
+ const baselineVersion=process.env.CLIP_RECENT_PACKAGED_BASELINE||'0.49.6',candidateVersion=process.env.CLIP_RECENT_PACKAGED_CURRENT||'0.49.7',large=process.env.CLIP_RECENT_PACKAGED_LARGE==='1';
  assert.match(baselineVersion,/^\d+\.\d+\.\d+$/);assert.match(candidateVersion,/^\d+\.\d+\.\d+$/);
  const {beginCase}=await import('../scripts/workspace.mjs'),work=await beginCase('recent-search-packaged-worker-'+candidateVersion.replaceAll('.','')+(large?'-large':''));
- const baseline=path.resolve('release/'+baselineVersion+'/win-unpacked/Clipper.exe'),candidate=path.resolve('release/'+candidateVersion+'/win-unpacked/Clipper.exe');
+ const baseline=path.resolve('release/'+baselineVersion+'/win-unpacked/Clip.exe'),candidate=path.resolve('release/'+candidateVersion+'/win-unpacked/Clip.exe');
  const report={baseline,candidate,baselineVersion,candidateVersion,large,records:large?96:1500,rounds:3,foregroundUI:false,samples:[]};let app;
  try{
   const fixtures={};
@@ -19,7 +19,7 @@ const {Store,trayQuery}=require('../work/test-exports.cjs'),memory=require('./pr
   }
   for(let round=0;round<3;round++)for(const mode of(round%2?['candidate','baseline']:['baseline','candidate'])){
    const profile=path.join(work.fixtures,mode+'-'+round);await fs.mkdir(profile);const writer=new Store(path.join(profile,'history.sqlite'),false);try{writer.saveSettings({...writer.settings,paused:true});}finally{writer.close();}
-   const env={...process.env,CLIPPER_TEST_MODE:'1',CLIPPER_DATA_DIR:profile};delete env.ELECTRON_RUN_AS_NODE;
+   const env={...process.env,CLIP_TEST_MODE:'1',CLIP_DATA_DIR:profile};delete env.ELECTRON_RUN_AS_NODE;
    app=await electron.launch({executablePath:mode==='candidate'?candidate:baseline,args:[],env});
    try{
     const page=await app.firstWindow();await page.waitForSelector('[data-page=history]');

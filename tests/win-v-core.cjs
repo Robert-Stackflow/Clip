@@ -3,7 +3,7 @@ const code=buildSync({entryPoints:['src/main/win-v-shortcut.ts'],bundle:true,pla
 function fixture(){
  const children=[],failures=[];
  const spawn=(file,args)=>{const child=new EventEmitter();Object.assign(child,{file,args,stdout:new PassThrough(),stderr:new PassThrough(),stdin:new PassThrough(),writes:[],kill:()=>{child.killed=true;queueMicrotask(()=>child.emit('close',1));}});child.stdin.on('data',data=>child.writes.push(String(data)));child.stdin.on('finish',()=>queueMicrotask(()=>child.emit('close',0)));children.push(child);return child;};
- const module={exports:{}};vm.runInNewContext(code,{module,exports:module.exports,require:name=>name==='node:child_process'?{spawn}:require(name),__dirname:'D:/Repositories/Clipper/dist/main',process:{pid:123},setTimeout,clearTimeout,console});
+ const module={exports:{}};vm.runInNewContext(code,{module,exports:module.exports,require:name=>name==='node:child_process'?{spawn}:require(name),__dirname:'D:/Repositories/Clip/dist/main',process:{pid:123},setTimeout,clearTimeout,console});
  const host=new module.exports.WinVShortcut(e=>failures.push(e)),line=(child,value)=>child.stdout.write(value+'\n');return {host,children,failures,line};
 }
 test('Win+V stays unavailable until native readiness, and ignores events without an active binding',async()=>{

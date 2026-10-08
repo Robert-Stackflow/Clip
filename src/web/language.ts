@@ -1,6 +1,6 @@
 import {setInterfaceLanguage,t as tr} from '../shared/i18n';
 import {resolveLanguage,type LanguageChoice} from '../shared/language';
-const key='clipper.web.language.v1';
+const key='clip.web.language.v1';
 export function initializeVisitorLanguage(){
  const selector=document.getElementById('language') as HTMLSelectElement;
  let choice:LanguageChoice='system',changed=()=>{};

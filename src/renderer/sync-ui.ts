@@ -6,7 +6,7 @@ import type {Clip} from '../shared/types';
 import {t as tr,formatDate,formatNumber} from '../shared/i18n';
 import type {SyncState} from '../shared/sync';
 import './sync.css';
-const api=window.clipper,$=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
+const api=window.clip,$=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 interface Context {history?():readonly Clip[];active():boolean;toast(value:unknown):void;modal(title:string,body:string,save:()=>Promise<void>,label?:string):void}
 export function syncUI(ctx:Context){
@@ -17,7 +17,7 @@ export function syncUI(ctx:Context){
 ${s.peers.length?s.peers.map(p=>tr`<article class="sync-device"><div><strong>${esc(p.name)}</strong><p>${esc(p.host)}:${p.port} · ${p.busy?tr('正在同步'):p.lastSync?tr('最近同步 ')+formatDate(p.lastSync,{timeStyle:'medium'}):tr('等待同步')}</p>${p.error?`<p class="sync-error">${esc(p.error)}</p>`:''}</div><button class="quiet" data-revoke="${p.id}">撤销信任</button></article>`).join(''):utilityEmpty(tr('尚未配对设备'),Monitor).outerHTML}
 ${s.pending.map(p=>tr`<article class="sync-request"><strong>${esc(p.name)} 请求配对</strong><p>${esc(p.host)} · 指纹 ${esc(p.fingerprint.slice(0,16))}…</p><button data-approve="${p.id}" class="primary">允许配对</button><button data-deny="${p.id}">拒绝</button></article>`).join('')}
 ${s.joining?tr`<p class="field-help">等待 ${esc(s.joining)} 确认配对… <button id="sync-cancel-join">取消</button></p>`:''}</section>
-<section class="settings-card"><div class="utility-card-heading"><h3>${createElement(Radio,{'class':'icon','aria-hidden':'true'}).outerHTML}附近的 Clipper</h3></div>${s.nearby.length?s.nearby.map(p=>`<div class="sync-nearby"><strong>${esc(p.name)}</strong><span>${esc(p.host)}:${p.port}</span></div>`).join(''):utilityEmpty(tr('暂无附近设备'),Radio).outerHTML}</section></div>`;
+<section class="settings-card"><div class="utility-card-heading"><h3>${createElement(Radio,{'class':'icon','aria-hidden':'true'}).outerHTML}附近的 Clip</h3></div>${s.nearby.length?s.nearby.map(p=>`<div class="sync-nearby"><strong>${esc(p.name)}</strong><span>${esc(p.host)}:${p.port}</span></div>`).join(''):utilityEmpty(tr('暂无附近设备'),Radio).outerHTML}</section></div>`;
 
   document.querySelectorAll<HTMLElement>('#sync-live .sync-device strong,#sync-live .sync-nearby strong').forEach(node=>node.title=node.textContent||'');
   $<HTMLButtonElement>('sync-refresh').onclick=()=>void api.syncNow().catch(ctx.toast);on('sync-cancel-join',()=>api.syncCancel());document.querySelectorAll<HTMLButtonElement>('[data-approve]').forEach(b=>b.onclick=()=>void api.syncApprove(b.dataset.approve!,true).catch(ctx.toast));document.querySelectorAll<HTMLButtonElement>('[data-deny]').forEach(b=>b.onclick=()=>void api.syncApprove(b.dataset.deny!,false).catch(ctx.toast));document.querySelectorAll<HTMLButtonElement>('[data-revoke]').forEach(b=>b.onclick=()=>ctx.modal(tr('撤销设备信任'),tr('<p>该设备将不能继续同步。两端已经接收的内容仍保留；重新连接需要再次配对。</p>'),()=>api.syncRevoke(b.dataset.revoke!),tr('撤销信任')));
@@ -36,9 +36,9 @@ ${s.joining?tr`<p class="field-help">等待 ${esc(s.joining)} 确认配对… <b
 <button id="sync-save" class="primary">保存同步设置</button></div></div>
 <div id="sync-live"></div>
 <h2 id="sync-pair-heading" class="section-label">添加设备</h2>
-<p class="sync-note">两台电脑需连接同一局域网。使用一次性配对码连接，并核对设备名称。Windows 防火墙需允许 Clipper 访问专用网络。</p>
+<p class="sync-note">两台电脑需连接同一局域网。使用一次性配对码连接，并核对设备名称。Windows 防火墙需允许 Clip 访问专用网络。</p>
 <div class="sync-pair-grid"><section class="settings-card"><h3>在本机生成配对码</h3><div class="sync-pair-row"><select id="sync-address" aria-label="本机地址">${s.addresses.map(a=>`<option>${esc(a)}</option>`).join('')}</select><button id="sync-create" ${s.enabled&&s.addresses.length?'':'disabled'}>生成配对码</button></div><div id="sync-code-area" hidden><textarea id="sync-invitation" readonly rows="3" aria-label="本机配对码"></textarea><p id="sync-expiry" class="field-help"></p><div class="sync-pair-row"><button id="sync-select-code">选中配对码</button><button id="sync-cancel-code">取消配对码</button></div></div></section>
-<section class="settings-card"><h3>连接另一台设备</h3><label class="field">另一台设备的配对码<textarea id="sync-join-code" rows="3" maxlength="4096" placeholder="clipper-pair:…" spellcheck="false"></textarea></label><button id="sync-join" ${s.enabled?'':'disabled'}>请求配对</button></section></div>
+<section class="settings-card"><h3>连接另一台设备</h3><label class="field">另一台设备的配对码<textarea id="sync-join-code" rows="3" maxlength="4096" placeholder="clip-pair:…" spellcheck="false"></textarea></label><button id="sync-join" ${s.enabled?'':'disabled'}>请求配对</button></section></div>
 <h2 id="sync-content-heading" class="section-label">共享内容</h2>
 <p class="sync-note">选择记录后共享。共享记录不受自动清理影响，手动删除会同步到配对设备；离线编辑产生的不同版本会分别保留。</p>
 <div id="sync-clips"></div></div></section>`;

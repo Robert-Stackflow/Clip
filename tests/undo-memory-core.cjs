@@ -34,7 +34,7 @@ test('asynchronous snapshots keep the event loop responsive, protect retained re
   const items=Array.from({length:12},(_,i)=>store.add({text:'Async '+i+' '+ 'x'.repeat(512*1024)},'Fixture',undefined,undefined,false)),kept=store.add({text:'Kept'},'Fixture',undefined,{pinned:true,favorite:true});let ticks=0;const timer=setInterval(()=>ticks++,1);
   try{await store.clearAsync();}finally{clearInterval(timer);}assert(ticks>0);assert.deepEqual(store.list().map(item=>item.id),[kept.id]);
   store.add=()=>{throw Error('Undo must not revalidate and rehash original payloads');};store.undo();for(const item of items){assert.equal(store.has(item.id),false);const row=store.db.prepare('SELECT id FROM clips WHERE hash=?').get(item.hash);assert.deepEqual(store.get(row.id).payload,item.payload);}
-  assert.equal(store.db.prepare("SELECT count(*) AS n FROM sqlite_temp_master WHERE name='clipper_pending_delete'").get().n,0);
+  assert.equal(store.db.prepare("SELECT count(*) AS n FROM sqlite_temp_master WHERE name='clip_pending_delete'").get().n,0);
  }finally{store.close();}
 });
 test('single deletion and clear undo preserve original timestamps, cached metadata and chronology',async()=>{
@@ -76,8 +76,8 @@ test('encrypted snapshot swaps roll back failed commits and remain compatible wi
  const dir=generated.mkdtempSync(path.resolve('work/undo-swap-')),key=Buffer.alloc(32,39),store=new Store(path.join(dir,'history.sqlite'),false,false,key);
  try{
   const previous=store.add({text:'Previous snapshot'},'Fixture');store.delete(previous.id);const a=store.add(payload(5),'Fixture'),b=store.add(payload(6),'Fixture'),kept=store.add({text:'Pinned'},'Fixture',undefined,{pinned:true});
-  const exec=store.db.exec.bind(store.db);let fail=true;store.db.exec=sql=>{if(fail&&sql.includes('RENAME TO clipper_delete_undo;COMMIT')){fail=false;exec(sql.replace(/;COMMIT$/,''));throw Error('Commit interrupted');}return exec(sql);};
-  await assert.rejects(store.clearAsync(),/Commit interrupted/);assert(store.has(a.id)&&store.has(b.id));assert.equal(store.undoItems[0].id,previous.id);assert.equal(store.db.prepare("SELECT count(*) n FROM sqlite_temp_master WHERE name IN ('clipper_pending_delete','clipper_previous_delete')").get().n,0);
+  const exec=store.db.exec.bind(store.db);let fail=true;store.db.exec=sql=>{if(fail&&sql.includes('RENAME TO clip_delete_undo;COMMIT')){fail=false;exec(sql.replace(/;COMMIT$/,''));throw Error('Commit interrupted');}return exec(sql);};
+  await assert.rejects(store.clearAsync(),/Commit interrupted/);assert(store.has(a.id)&&store.has(b.id));assert.equal(store.undoItems[0].id,previous.id);assert.equal(store.db.prepare("SELECT count(*) n FROM sqlite_temp_master WHERE name IN ('clip_pending_delete','clip_previous_delete')").get().n,0);
   await store.clearAsync();assert.deepEqual(store.list().map(row=>row.id),[kept.id]);await store.undoAsync();assert.equal(store.list().length,3);
   const restored=store.list().find(row=>row.hash===a.hash);store.delete(restored.id);store.undo();assert.deepEqual(store.get(store.list().find(row=>row.hash===a.hash).id).payload,a.payload);
   await store.clearAsync();await store.clearAsync();assert.throws(()=>store.undo(),/可撤销/);assert.equal(store.db.prepare('PRAGMA temp_store').get().temp_store,2);assert.equal(fs.readFileSync(path.join(dir,'history.sqlite')).includes(Buffer.from('Exact 5')),false);

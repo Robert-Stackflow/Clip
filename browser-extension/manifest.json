@@ -1,9 +1,9 @@
 {
  "manifest_version": 3,
- "name": "Clipper 图片拖放",
+ "name": "Clip 图片拖放",
  "version": "1.0.0",
- "description": "点击扩展后，让当前页面的登录图片、Blob 图片和原图可以拖入 Clipper。",
+ "description": "点击扩展后，让当前页面的登录图片、Blob 图片和原图可以拖入 Clip。",
  "permissions": ["activeTab", "scripting"],
- "action": {"default_title": "启用当前页面的 Clipper 图片拖放"},
+ "action": {"default_title": "启用当前页面的 Clip 图片拖放"},
  "background": {"service_worker": "background.js"}
 }

@@ -20,7 +20,7 @@ import {trayQuery,type TrayQuery} from '../shared/tray';
 import type {GlyphTab,QuickState,QuickReplyState,QuickReplyItem} from '../shared/quick-panel';
 
 registerIcons({'file-text':FileText,link:Link,code:Code,filter:SlidersHorizontal,clipboard:Clipboard,smile:Smile,text:Text,hash:Hash,pin:Pin,star:Star,trash:Trash2,copy:Copy,folder:Folder,reply:MessageSquare,image:Image,plus:Plus,enter:CornerDownLeft});
-const api=window.clipperQuick,search=q<HTMLInputElement>('quick-search'),content=q('quick-content'),categories=q('quick-categories'),tabs=q('quick-tabs');
+const api=window.clipQuick,search=q<HTMLInputElement>('quick-search'),content=q('quick-content'),categories=q('quick-categories'),tabs=q('quick-tabs');
 const esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const tabNames=[['clipboard',tr('剪贴板')],['replies',tr('快捷回复')],['emoji','Emoji'],['kaomoji',tr('颜文字')],['symbols',tr('符号')]];
 q('window-actions').innerHTML=windowCloseButton('quick');
@@ -39,7 +39,7 @@ const filters=quickFilters(q<HTMLButtonElement>('quick-filter'),()=>{content.scr
 let hoverTimer:ReturnType<typeof setTimeout>|undefined,hoverRow='';
 function hideHover(immediate=false){clearTimeout(hoverTimer);hoverRow='';void api.hover?.(null,undefined,immediate).catch(()=>{});}
 function hover(article:HTMLElement){
- if(!active||busy||tab!=='clipboard'||hoverRow===article.dataset.id||document.querySelector(':popover-open,dialog[open]'))return;
+ if(!active||busy||state?.hoverPreview===false||tab!=='clipboard'||hoverRow===article.dataset.id||document.querySelector(':popover-open,dialog[open]'))return;
  hideHover();hoverRow=article.dataset.id!;const token=article.dataset.token!,version=revision;
  hoverTimer=setTimeout(()=>{if(!article.isConnected||!article.matches(':hover')||version!==revision||!active||busy)return;const row=article.getBoundingClientRect(),viewport=content.getBoundingClientRect(),left=Math.max(row.left,viewport.left),top=Math.max(row.top,viewport.top),right=Math.min(row.right,viewport.right),bottom=Math.min(row.bottom,viewport.bottom);if(right>left&&bottom>top)void api.hover?.(token,{left,top,width:right-left,height:bottom-top}).catch(()=>{});},180);
 }
@@ -61,18 +61,24 @@ function pumpImages(){
   void api.preview(job.token).then(value=>{if(active&&job.version===revision&&job.image.isConnected&&value.image){previews.set(job.key,value.image);job.image.src=value.image;}}).catch(()=>{}).finally(()=>{jobs--;pumpImages();});
  }
 }
+function cardUse(card:HTMLElement,main:HTMLButtonElement,choose:(paste:boolean)=>void,canPaste:()=>boolean){
+ const body=(target:EventTarget|null)=>{if(!(target instanceof Element))return false;const control=target.closest('button,input,textarea,select,a,[role=button]');return !control||control===main;};
+ card.onclick=event=>{if(!event.defaultPrevented&&body(event.target))choose(canPaste());};
+ card.oncontextmenu=event=>{if(!body(event.target))return;event.preventDefault();choose(false);};
+}
 function renderRecords(animate=false){
  const remaining=new Set(state?.items.map(item=>item.id)),motion=animate?recordRemoval(content,'.quick-record',row=>!remaining.has(row.dataset.id!)):()=>{},restoreScroll=retainListScroll(content,'.quick-record:not(.record-removal-ghost)');
  observer.disconnect();imageQueue.length=0;
  if(!state?.items.length){empty(search.value?tr('没有匹配记录'):tr('暂无剪贴板记录'),search.value?tr('尝试其他关键词'):tr('复制内容后会显示在这里'));motion();return;}
  keyedMarkup(content,state.items.map(item=>({key:item.id,html:`<article class="quick-record" data-pinned="${item.pinned}" data-favorite="${item.favorite}" data-id="${item.id}" data-token="${item.token}"><button type="button" class="quick-record-main" data-use="${item.token}" aria-label="${esc(item.title)}">${item.kind==='image'?`<img data-token="${item.token}" data-key="${item.previewKey}" alt="${tr('剪贴板图片')}"${previews.has(item.previewKey)?` src="${esc(previews.get(item.previewKey))}"`:''}>`:item.kind==='files'?icon('lucide:folder'):''}${item.kind!=='image'?`<span>${esc(item.preview||item.title)}</span>`:''}</button><div class="quick-record-footer"><div class="quick-record-meta">${appIdentity(item.source)}<span>${esc(item.source.replace(/\.exe$/i,''))}</span></div><div class="quick-record-actions" data-motion-appearance>${iconButton('',tr('复制'),'lucide:copy')}${iconButton('',item.pinned?tr('取消置顶'):tr('置顶'),'lucide:pin',item.pinned)}${iconButton('',item.favorite?tr('取消收藏'):tr('收藏'),'lucide:star',item.favorite)}${iconButton('',tr('删除记录'),'lucide:trash')}</div></div></article>`})));restoreScroll();
- for(const article of content.querySelectorAll<HTMLElement>('.quick-record:not(.record-removal-ghost)')){article.onpointerenter=event=>{if(event.pointerType!=='touch')hover(article);};article.onpointermove=event=>{if(event.pointerType!=='touch')hover(article);};article.onpointerleave=()=>hideHover();const token=article.dataset.token!,button=article.querySelector<HTMLButtonElement>('[data-use]')!;button.onclick=()=>run(()=>api.use(token,!!state?.canPaste));button.oncontextmenu=event=>{event.preventDefault();run(()=>api.use(token,false));};const actions=article.querySelectorAll<HTMLButtonElement>('.quick-record-actions button');actions.forEach((node,index)=>node.onclick=()=>run(async()=>{if(index===0)await api.use(token,false);else{await api.action(token,(['pin','favorite','delete'] as const)[index-1]);await load(true);}}));}
+ for(const article of content.querySelectorAll<HTMLElement>('.quick-record:not(.record-removal-ghost)')){article.onpointerenter=event=>{if(event.pointerType!=='touch')hover(article);};article.onpointermove=event=>{if(event.pointerType!=='touch')hover(article);};article.onpointerleave=()=>hideHover();const token=article.dataset.token!,button=article.querySelector<HTMLButtonElement>('[data-use]')!;cardUse(article,button,paste=>run(()=>api.use(token,paste)),()=>!!state?.canPaste);const actions=article.querySelectorAll<HTMLButtonElement>('.quick-record-actions button');actions.forEach((node,index)=>node.onclick=()=>run(async()=>{if(index===0)await api.use(token,false);else{await api.action(token,(['pin','favorite','delete'] as const)[index-1]);await load(true);}}));}
  for(const image of content.querySelectorAll<HTMLImageElement>('.quick-record:not(.record-removal-ghost) img[data-token]')){const cached=previews.get(image.dataset.key!);if(cached){if(image.getAttribute('src')!==cached)image.src=cached;}else{image.removeAttribute('src');observer.observe(image);}}
  motion();void hydrateAppIcons(content,api.appIcons);
 }
 function chooseReply(item:QuickReplyItem,paste:boolean){run(async()=>{
  const signal=session.signal;
  if(!item.variables.length){await api.reply(item.token,paste);return;}
+ await api.focus();
  await quickDialog(tr('填写模板'),item.variables.map((name,index)=>`<label class="field">${esc(name)}<input name="reply-${index}" maxlength="10000" required></label>`).join(''),paste?tr('粘贴'):tr('复制'),async form=>{
   if(signal.aborted)return;const values=Object.fromEntries(item.variables.map((name,index)=>[name,form.querySelector<HTMLInputElement>(`[name="reply-${index}"]`)!.value]));await api.reply(item.token,paste,values);
  },signal);
@@ -81,14 +87,14 @@ function renderReplies(){
  observer.disconnect();imageQueue.length=0;content.scrollTop=0;
  if(!replies?.items.length){empty(search.value?tr('没有匹配内容'):tr('暂无快捷回复'),search.value?tr('尝试其他关键词'):tr('点击“新建回复”添加'));return;}
  setMarkup(content,replies.items.map(item=>`<article class="quick-record quick-reply"><button type="button" class="quick-record-main" data-reply="${item.token}" aria-label="${esc(item.title)}"><span class="quick-reply-body"><strong>${esc(item.title)}</strong>${item.thumbnail?`<img src="${esc(item.thumbnail)}" alt="${esc(item.title)}">`:item.preview?`<span class="quick-reply-preview">${esc(item.preview)}</span>`:''}</span></button><div class="quick-reply-commands"><button type="button" data-reply-paste aria-label="${tr('粘贴')}" title="${tr('粘贴')}" ${replies?.canPaste?'':'disabled'}>${icon('lucide:enter')}</button><button type="button" data-reply-copy aria-label="${tr('复制')}" title="${tr('复制')}">${icon('lucide:copy')}</button></div></article>`).join(''));
- for(const item of replies.items){const button=content.querySelector<HTMLButtonElement>(`[data-reply="${item.token}"]`)!;button.onclick=()=>chooseReply(item,!!replies?.canPaste);button.oncontextmenu=event=>{event.preventDefault();chooseReply(item,false);};const card=button.closest('article')!;card.querySelector<HTMLButtonElement>('[data-reply-copy]')!.onclick=()=>chooseReply(item,false);card.querySelector<HTMLButtonElement>('[data-reply-paste]')!.onclick=()=>chooseReply(item,true);}
+ for(const item of replies.items){const button=content.querySelector<HTMLButtonElement>(`[data-reply="${item.token}"]`)!;const card=button.closest('article')!;cardUse(card,button,paste=>chooseReply(item,paste),()=>!!replies?.canPaste);card.querySelector<HTMLButtonElement>('[data-reply-copy]')!.onclick=()=>chooseReply(item,false);card.querySelector<HTMLButtonElement>('[data-reply-paste]')!.onclick=()=>chooseReply(item,true);}
 }
 async function load(animate=false){
  clearTimeout(timer);
  if(!active)return;hideHover(true);const version=++revision;observer.disconnect();imageQueue.length=0;content.setAttribute('aria-busy','true');
  if((tab==='clipboard'||tab==='replies')&&!content.querySelector('.quick-record')){setMarkup(content,Array.from({length:4},()=>'<div class="quick-skeleton" aria-hidden="true"><i></i><i></i></div>').join(''));}
  try{if(tab==='replies'){const result=await api.replies(search.value);if(!active||version!==revision)return;replies=result;document.documentElement.dataset.theme=result.dark?'dark':'light';renderReplies();}else{const result=await api.state(query());if(!active||version!==revision)return;state=result;renderCategories();filters.update(state);document.documentElement.dataset.theme=state.dark?'dark':'light';if(tab==='clipboard')renderRecords(animate);else renderGlyphs();}}
- catch(error){if(active&&version===revision&&group!=='all'&&String(error).includes('CLIPPER_TRAY_CATEGORY_MISSING')){group='all';void load();return;}if(active&&version===revision){empty(tr('暂时无法加载'),tr('请重试'),true);notice(error);}}
+ catch(error){if(active&&version===revision&&group!=='all'&&String(error).includes('CLIP_TRAY_CATEGORY_MISSING')){group='all';void load();return;}if(active&&version===revision){empty(tr('暂时无法加载'),tr('请重试'),true);notice(error);}}
  finally{if(version===revision)content.removeAttribute('aria-busy');}
 }
 function renderGlyphs(){
@@ -112,11 +118,15 @@ content.onkeydown=event=>{const buttons=Array.from(content.querySelectorAll<HTML
 document.addEventListener('keydown',event=>{if(event.defaultPrevented)return;if(event.key==='Escape'){event.preventDefault();void api.hide();}else if(event.ctrlKey&&event.key.toLowerCase()==='f'){event.preventDefault();search.focus();}});
 q('quick-close').onclick=()=>void api.hide();
 q('quick-new-reply').onclick=()=>run(async()=>{
+ await api.focus();
  const signal=session.signal,saved=await quickDialog(tr('新建回复'),`<label class="field">${tr('标题')}<input name="title" maxlength="120" required data-required-message="${tr('请输入标题')}"></label><label class="field">${tr('回复内容')}<textarea name="text" rows="5" maxlength="1000000" required data-required-message="${tr('请输入回复内容')}" placeholder="${tr('输入回复内容，可使用 {{变量}}')}"></textarea></label>`,tr('保存'),async form=>{if(!signal.aborted)await api.createReply({title:form.querySelector<HTMLInputElement>('[name=title]')!.value,text:form.querySelector<HTMLTextAreaElement>('[name=text]')!.value});},signal);
  if(saved&&active&&!signal.aborted){setSearchFieldValue(search,'');await load();notice(tr('快捷回复已添加'));}
 });
 document.addEventListener('pointerdown',event=>{
- if(event.button!==0||!active||busy||document.querySelector('dialog[open],:popover-open'))return;const target=event.target as Element;if(target.closest('button,input,textarea,select,a,[role=combobox]'))return;
+ if(event.button===0&&active&&(event.target as Element).closest('input,textarea,select,[contenteditable=true],[role=combobox]'))void api.focus().catch(notice);
+},{capture:true});
+document.addEventListener('pointerdown',event=>{
+ if(event.button!==0||!active||busy||document.querySelector('dialog[open],:popover-open'))return;const target=event.target as Element;if(target.closest('.quick-record,button,input,textarea,select,a,[role=combobox]'))return;
  const bounds=content.getBoundingClientRect();if(target===content&&event.clientX>=bounds.left+content.clientWidth)return;
  event.preventDefault();hideHover(true);void api.move?.().catch(notice);
 });
@@ -125,5 +135,6 @@ q('quick-clear-history').onclick=()=>run(async()=>{
  if(saved&&active&&!signal.aborted){await load(true);notice(tr('历史已清空，置顶和收藏已保留'));}
 });
 api.onNotice(text=>notice(text));api.onChange(()=>{clearTimeout(timer);timer=setTimeout(()=>{if(active&&!busy)void load(true);},100);});
-api.onSession?.(open=>{hideHover(true);filters.reset();session.abort();session=new AbortController();active=open;revision++;clearTimeout(timer);observer.disconnect();imageQueue.length=0;previews.clear();state=undefined;replies=undefined;busy=false;clearMarkup(content);content.replaceChildren();q('quick-notice').textContent='';if(open){switchTab('clipboard');search.focus();}else setSearchFieldValue(search,'');});
+let entrance:Animation|undefined;
+api.onSession?.(open=>{entrance?.cancel();if(open&&!matchMedia('(prefers-reduced-motion: reduce)').matches)entrance=document.querySelector('.quick-panel')?.animate([{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'translateY(0)'}],{duration:150,easing:'cubic-bezier(.2,.8,.2,1)'});hideHover(true);filters.reset();session.abort();session=new AbortController();active=open;revision++;clearTimeout(timer);observer.disconnect();imageQueue.length=0;previews.clear();state=undefined;replies=undefined;busy=false;clearMarkup(content);content.replaceChildren();q('quick-notice').textContent='';if(open){(document.activeElement as HTMLElement)?.blur();switchTab('clipboard');}else setSearchFieldValue(search,'');});
 renderCategories();if(active)void load();else setMarkup(content,Array.from({length:4},()=>'<div class="quick-skeleton" aria-hidden="true"><i></i><i></i></div>').join(''));

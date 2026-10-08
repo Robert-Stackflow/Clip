@@ -10,7 +10,7 @@ internal sealed class PasteTarget : Form {
   internal PasteTarget(string ready, string result) {
     this.ready = ready;
     this.result = result;
-    Text = "Clipper native paste target";
+    Text = "Clip native paste target";
     Width = 600;
     Height = 300;
     Controls.Add(input);

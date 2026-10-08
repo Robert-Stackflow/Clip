@@ -6,14 +6,14 @@ export type TrayMenuAction=keyof TrayMenuActions;
 export interface TrayMenuEntry {id:TrayMenuAction;label:string;group:'header'|'primary'|'tools'|'privacy'|'system';icon:string;tone?:'danger';active?:boolean}
 export interface TrayMenuView {entries:TrayMenuEntry[];dark:boolean;initializing:boolean;secured:boolean;paused:boolean;stackActive:boolean}
 export function trayMenuEntries(state:TrayMenuState):TrayMenuEntry[]{
- const system:TrayMenuEntry[]=[{id:'restart',label:tr('重启 Clipper'),group:'system',icon:'rotate-cw'},{id:'quit',label:tr('退出 Clipper'),group:'system',icon:'power',tone:'danger'}];
+ const system:TrayMenuEntry[]=[{id:'restart',label:tr('重启 Clip'),group:'system',icon:'rotate-cw'},{id:'quit',label:tr('退出 Clip'),group:'system',icon:'power',tone:'danger'}];
  if(state.initializing)return system;
  if(state.secured)return [
   {id:'open',label:tr('解锁历史'),group:'primary',icon:'lock-open'},
   ...system
  ];
  return [
-  {id:'open',label:tr('打开 Clipper'),group:'primary',icon:'app-window'},
+  {id:'open',label:tr('打开 Clip'),group:'primary',icon:'app-window'},
   {id:'recent',label:tr('最近记录'),group:'primary',icon:'history'},
   {id:'replies',label:tr('快捷回复'),group:'tools',icon:'message-square-text'},
   {id:'shelf',label:tr('浮动拖放窗口'),group:'tools',icon:'panel-top'},

@@ -9,11 +9,11 @@ if(process.argv[2]==='--read'){
   let querySql;const watched={prepare(sql){if(sql.includes(' AS summary'))querySql=sql;return store.db.prepare(sql);}};
   const before=process.resourceUsage().maxRSS,start=performance.now(),rows=readTrayRows(watched,[],{...trayQuery,text:queryName==='metadata'?'editor 标签':'café 标签'}),milliseconds=performance.now()-start,peakKiB=process.resourceUsage().maxRSS;
   const expected=store.db.prepare('SELECT id FROM clips ORDER BY updated DESC,id ASC LIMIT 80').all().map(row=>row.id);
-  assert.equal(rows.total,process.env.CLIPPER_RECENT_SCAN_LARGE==='1'?96:1500);assert.deepEqual(rows.items.map(row=>row.id),expected);assert.ok(rows.items.every(row=>!('payload'in row)&&!('thumbnail'in row)));
+  assert.equal(rows.total,process.env.CLIP_RECENT_SCAN_LARGE==='1'?96:1500);assert.deepEqual(rows.items.map(row=>row.id),expected);assert.ok(rows.items.every(row=>!('payload'in row)&&!('thumbnail'in row)));
   console.log(JSON.stringify({milliseconds,peakMiB:peakKiB/1024,queryPeakIncrementMiB:(peakKiB-before)/1024,plan:store.db.prepare('EXPLAIN QUERY PLAN '+querySql).all().map(row=>row.detail)}));
  }finally{store.close();key?.fill(0);}
 }else (async()=>{
- const implementation=process.env.CLIPPER_RECENT_SCAN_IMPLEMENTATION==='1',tableScan=process.env.CLIPPER_RECENT_SCAN_TABLE==='1',fieldwise=process.env.CLIPPER_RECENT_SCAN_FIELDS==='1',large=process.env.CLIPPER_RECENT_SCAN_LARGE==='1',lazy=implementation||fieldwise||process.env.CLIPPER_RECENT_SCAN_LAZY==='1';
+ const implementation=process.env.CLIP_RECENT_SCAN_IMPLEMENTATION==='1',tableScan=process.env.CLIP_RECENT_SCAN_TABLE==='1',fieldwise=process.env.CLIP_RECENT_SCAN_FIELDS==='1',large=process.env.CLIP_RECENT_SCAN_LARGE==='1',lazy=implementation||fieldwise||process.env.CLIP_RECENT_SCAN_LAZY==='1';
  const {beginCase}=await import('../scripts/workspace.mjs'),work=await beginCase('recent-search-scan-profile'+(fieldwise?'-fields':implementation?'-implementation':lazy?'-lazy':tableScan?'-table':'')+(large?'-large':''));
  const baselineRevision=fieldwise?'c21af65':'4c3644f';const report={prototype:!implementation,baselineRevision,tableScan,lazy,fieldwise,large,records:large?96:1500,rounds:3,samples:[]};
  try{

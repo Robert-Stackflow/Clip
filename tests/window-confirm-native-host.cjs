@@ -1,6 +1,6 @@
 const {app,BrowserWindow,protocol,nativeImage,dialog}=require('electron'),path=require('node:path');
 app.setPath('userData',path.resolve('work/confirm-029/private-profile'));
-protocol.registerSchemesAsPrivileged([{scheme:'clipper',privileges:{standard:true,secure:true}},{scheme:'clipper-font',privileges:{standard:true,secure:true,supportFetchAPI:true}}]);
+protocol.registerSchemesAsPrivileged([{scheme:'clip',privileges:{standard:true,secure:true}},{scheme:'clip-font',privileges:{standard:true,secure:true,supportFetchAPI:true}}]);
 // Keep every test surface hidden and suppress native activation by production services.
 app.on('browser-window-created',(_event,w)=>{w.show=()=>{};w.focus=()=>{};});
 app.on('window-all-closed',()=>app.quit());

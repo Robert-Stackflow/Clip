@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict'),{execFileSync}=require('node:child_process');
 (async()=>{fs.mkdirSync('work/clipboard-033',{recursive:true});const esbuild=require('esbuild');
- for(const [name,root]of [['before',path.resolve(process.env.CLIPPER_CLIPBOARD_BASELINE||'D:/Repositories/Clipper/work/delivery-0.32.0')],['after',process.cwd()]]){
+ for(const [name,root]of [['before',path.resolve(process.env.CLIP_CLIPBOARD_BASELINE||'D:/Repositories/Clip/work/delivery-0.32.0')],['after',process.cwd()]]){
   await esbuild.build({entryPoints:[path.join(root,'src/main/clipboard.ts')],outfile:'work/clipboard-033/'+name+'.cjs',bundle:true,platform:'node',external:['electron','./native','./attachment-runtime']});
   await esbuild.build({entryPoints:[path.join(root,'src/main/native.ts')],outfile:'work/clipboard-033/'+name+'-native.cjs',bundle:true,platform:'node',external:['koffi']});
  }

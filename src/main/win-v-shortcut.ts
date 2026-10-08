@@ -21,7 +21,7 @@ export class WinVShortcut {
     if(finished)return;finished=true;clearTimeout(timer);
     const current=this.child===child;if(current){this.child=undefined;this.available=false;}
     const active=current&&!!this.callback;if(current)this.callback=undefined;
-    child.kill();const error=new Error(tr('Win+V 拦截启动失败，请关闭其他 Clipper 实例后重试'));
+    child.kill();const error=new Error(tr('Win+V 拦截启动失败，请关闭其他 Clip 实例后重试'));
     if(!ready)reject(error);else if(active)this.failed(error);
    };
    const timer=setTimeout(fail,3000);

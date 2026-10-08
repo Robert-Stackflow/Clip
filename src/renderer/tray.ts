@@ -8,8 +8,8 @@ import './tray.css';
 import {createElement,ArrowUpRight,X,FileText,Image,Folder,Link,Code,Star,Pin,type IconNode} from 'lucide';
 import {TRAY_CATEGORY_MISSING,trayQuery,type TrayAPI,type TrayQuery,type TrayState,type TrayPreview} from '../shared/tray';
 import {appIdentity,hydrateAppIcons} from './source-apps';
-declare global{interface Window{clipperTray:TrayAPI}}
-const api=window.clipperTray,q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
+declare global{interface Window{clipTray:TrayAPI}}
+const api=window.clipTray,q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const previewMeta=document.createElement('div');previewMeta.id='preview-meta';previewMeta.hidden=true;q('preview').after(previewMeta);
 function clearPreviewMeta(){previewMeta.replaceChildren();previewMeta.hidden=true;}
 const esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
@@ -69,6 +69,6 @@ filters();categories();loading();
 api.onSession?.(open=>{active=open;querySerial++;previewSerial++;clearTimeout(hover);clearTimeout(debounce);clearTimeout(refreshTimer);refreshTimer=undefined;state=undefined;busy=false;searching=true;appliedQuery='';q('notice').replaceChildren();query={...trayQuery};q<HTMLInputElement>('search').value='';q('items').scrollTop=0;clearPreview();filters();categories();if(open){loading();if(document.hasFocus())q<HTMLInputElement>('search').focus({preventScroll:true});run(refresh);}else{setMarkup(q('items'),'');setMarkup(q('preview'),'');}});
 api.onChange(scheduleRefresh);api.onNotice(message=>{busy=false;buttons();notice(message);});
 
-document.addEventListener('clipper:feedback',e=>notice((e as CustomEvent).detail));
+document.addEventListener('clip:feedback',e=>notice((e as CustomEvent).detail));
 
 q('notice').classList.add('feedback-toast');document.body.append(q('notice'));

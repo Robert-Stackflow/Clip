@@ -52,11 +52,11 @@ export interface API {
   configureBackup(value:BackupSettingsInput):Promise<void>; backupNow():Promise<string|null>; exportProtected(password?:string):Promise<string|null>;
   chooseRestore(name?:string):Promise<RestoreFile|null>; previewRestore(token:string,password?:string):Promise<RestorePreview>; restoreBackup(token:string):Promise<number>; cancelRestore(token:string):Promise<void>;
   openChat(id?:string):Promise<void>;configureChatShortcut(value:string):Promise<void>;onChatSettings?(callback:()=>void):()=>void;
-  aiState():Promise<AIState>; aiProfile(value:AIProfileInput):Promise<string>; removeAIProfile(id:string):Promise<void>; defaultAIProfile(id:string):Promise<void>;
+  aiState():Promise<AIState>; aiProfile(value:AIProfileInput):Promise<string>; removeAIProfile(id:string):Promise<void>; defaultAIProfile(id:string):Promise<void>; reorderAIProfiles(ids:string[]):Promise<void>;
   commands():Promise<import('./commands').TextCommand[]>;saveCommand(value:import('./commands').TextCommandInput):Promise<string>;removeCommand(id:string,revision:string):Promise<void>;
   aiModels(profileId:string,requestId:string):Promise<string[]>; aiModelCatalog(profileId:string,requestId:string):Promise<AIModel[]>; aiRun(value:AIRequest):Promise<AIResult>; aiCancel(requestId:string):Promise<void>;
   codexStatus():Promise<import('./text-tools').CodexStatus>;codexLogin():Promise<import('./text-tools').CodexStatus>;codexCancelLogin():Promise<void>;codexLogout():Promise<void>;
-  codexOpenLogin():Promise<void>;
+  codexOpenLogin():Promise<void>;codexCopyCode():Promise<void>;codexModels(requestId:string):Promise<AIModel[]>;codexChooseExecutable():Promise<import('./text-tools').CodexStatus|null>;codexAutoExecutable():Promise<import('./text-tools').CodexStatus>;
   scripts():Promise<TextScript[]>; saveScript(value:TextScriptInput):Promise<string>; removeScript(id:string):Promise<void>; runScript(value:ScriptRequest):Promise<string>; cancelScript(requestId:string):Promise<void>;
   scriptBackup(mode:'import'|'export'):Promise<string|null>; applyText(value:TextApply):Promise<string|null>;
   integrations():Promise<IntegrationState>; registerIntegration(enabled:boolean):Promise<void>; resolveExternal(id:string,accept:boolean):Promise<(ExternalIntent&{clipId?:string})|null>;
@@ -87,4 +87,4 @@ export interface API {
   onShortcutInput?(callback:(input:import('./shortcut').ShortcutInput)=>void):()=>void;
   onNotice(callback:(text:string)=>void):()=>void;
 }
-declare global { interface Window { clipper: API } }
+declare global { interface Window { clip: API } }

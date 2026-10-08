@@ -1,6 +1,6 @@
 (()=>{
- if(window.__clipperImageDrop)return;window.__clipperImageDrop=true;
- const TYPE='application/x-clipper-images',LIMIT=16*1024*1024,TOTAL=48*1024*1024;
+ if(window.__clipImageDrop)return;window.__clipImageDrop=true;
+ const TYPE='application/x-clip-images',LIMIT=16*1024*1024,TOTAL=48*1024*1024;
  const cache=new Map(),pending=new Map();let retained=0;
  const href=value=>{try{return new URL(value,document.baseURI).href;}catch{return '';}};
  const original=image=>{

@@ -3,18 +3,18 @@ const {setup}=require('./renderer-fixture.cjs'),{extra}=require('./ui-028-fixtur
 function prepare(){
  fixture.state.settings.maxHistoryMiB=1024;
  fixture.state.clips[0].pinned=true;fixture.state.clips[1].favorite=false;fixture.state.clips[2].favorite=false;
- localStorage.setItem('clipper-sidebar-layout-v1',JSON.stringify({order:{clipboard:['favorites','history','replies']},hidden:[],categoriesVisible:true}));
- clipper.imageHostState=async()=>({enabled:false,endpoint:'',hasToken:false,bodyMode:'binary',fieldName:'file',authMode:'bearer',tokenHeader:'X-API-Key',responsePath:'url',linkFormat:'url',timeoutSeconds:30});
- const save=clipper.settings;clipper.settings=async value=>{if(fixture.failSettings){fixture.failSettings=false;throw Error('Fixture save failed');}await save(value);};
+ localStorage.setItem('clip-sidebar-layout-v1',JSON.stringify({order:{clipboard:['favorites','history','replies']},hidden:[],categoriesVisible:true}));
+ clip.imageHostState=async()=>({enabled:false,endpoint:'',hasToken:false,bodyMode:'binary',fieldName:'file',authMode:'bearer',tokenHeader:'X-API-Key',responsePath:'url',linkFormat:'url',timeoutSeconds:30});
+ const save=clip.settings;clip.settings=async value=>{if(fixture.failSettings){fixture.failSettings=false;throw Error('Fixture save failed');}await save(value);};
 }
 (async()=>{
- const output=path.resolve('work/development/settings-collection');await fs.mkdir(output,{recursive:true});
+ const output=path.resolve('work/Clip/development/settings-collection');await fs.mkdir(output,{recursive:true});
  const browser=await chromium.launch({channel:'msedge',headless:true}),errors=[];
  try{for(const [language,width,scale,dark]of [['zh-CN',1476,100,false],['en',860,125,true]]){
   const context=await browser.newContext({viewport:{width,height:900}});
   await context.addInitScript({content:`(${setup.toString()})(${JSON.stringify(language)});(${extra.toString()})();(${prepare.toString()})();fixture.state.dark=${dark};fixture.state.settings.theme=${JSON.stringify(dark?'dark':'light')};fixture.appearance({...fixture.value(),scale:${scale}});`});
-  await context.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
-  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));await page.goto('https://clipper.test/index.html');await expect(page.locator('.clip-row')).toHaveCount(3);
+  await context.route('https://clip.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1);await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
+  const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));await page.goto('https://clip.test/index.html');await expect(page.locator('.clip-row')).toHaveCount(3);
   await expect(page.locator('[data-page=favorites],#count-favorites')).toHaveCount(0);
   for(const entry of ['history','stack','shelf','replies']){
    await page.locator('[data-page='+entry+']').click();

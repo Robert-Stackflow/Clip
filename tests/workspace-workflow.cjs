@@ -1,6 +1,6 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
 const api=import('../scripts/workspace.mjs');
-const marker='Clipper generated verification case\n';
+const marker='Clip generated verification case\n';
 async function fixture(run){
  const root=await fs.mkdtemp(path.resolve('work/workspace-unit-'));
  try{await run(root);}finally{await fs.rm(root,{recursive:true,force:true});}
@@ -19,10 +19,10 @@ test('verification workspace refuses unmarked output and a concurrent active cas
  }
 });
 test('record retention excludes unmarked and active cases and enforces a count and byte limit',async()=>fixture(async root=>{
- const work=await api;await fs.writeFile(path.join(root,'.clipper-generated-workspace'),'Clipper generated verification workspace\n');
+ const work=await api;await fs.writeFile(path.join(root,'.clip-generated-workspace'),'Clip generated verification workspace\n');
  for(const name of ['older','newer','active','unmarked']){
   const dir=path.join(root,name);await fs.mkdir(dir);await fs.writeFile(path.join(dir,'report.txt'),'record');
-  if(name!=='unmarked')await fs.writeFile(path.join(dir,'.clipper-generated-case'),marker);
+  if(name!=='unmarked')await fs.writeFile(path.join(dir,'.clip-generated-case'),marker);
   if(name==='active')await fs.writeFile(path.join(dir,'.active'),String(process.pid));
   await fs.utimes(dir,Date.now()/1000,name==='older'?1:Date.now()/1000);
  }

@@ -5,7 +5,7 @@ export const sidebarGroups={
 } as const;
 export type SidebarGroup=keyof typeof sidebarGroups;
 export interface SidebarLayout{order:Record<SidebarGroup,string[]>;hidden:string[];categoriesVisible:boolean}
-const storageKey='clipper-sidebar-layout-v1';
+const storageKey='clip-sidebar-layout-v1';
 const groups=Object.keys(sidebarGroups) as SidebarGroup[];
 const known=new Set<string>(groups.flatMap(group=>[...sidebarGroups[group]]));
 

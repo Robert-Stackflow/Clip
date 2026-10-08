@@ -1,9 +1,9 @@
 {
-  "name": "clipper-desktop",
-  "version": "0.50.16",
+  "name": "clip-desktop",
+  "version": "0.51.0",
   "private": true,
   "description": "Windows 本地剪贴板工作台",
-  "author": "Clipper",
+  "author": "Clip",
   "main": "dist/main/index.cjs",
   "scripts": {
     "build": "node scripts/build.mjs",
@@ -69,7 +69,6 @@
     "@codemirror/state": "6.7.6",
     "@codemirror/view": "6.43.13",
     "@lezer/highlight": "1.2.5",
-    "@openai/codex": "0.160.1",
     "@peculiar/x509": "2.1.0",
     "@xmldom/xmldom": "0.9.12",
     "better-sqlite3-multiple-ciphers": "13.0.3",
@@ -97,11 +96,11 @@
     "typescript": "5.9.3"
   },
   "build": {
-    "appId": "local.clipper.desktop",
-    "productName": "Clipper",
+    "appId": "com.cloudchewie.clip",
+    "productName": "Clip",
     "electronDist": "node_modules/electron/dist",
     "directories": {
-      "output": "release/0.50.16"
+      "output": "release/0.51.0"
     },
     "files": [
       "dist/**/*",
@@ -122,7 +121,6 @@
       "!node_modules/crelt/**/*"
     ],
     "asarUnpack": [
-      "node_modules/@openai/codex-win32-*/vendor/**/*",
       "node_modules/koffi/**/*",
       "node_modules/better-sqlite3-multiple-ciphers/prebuilds/win32-x64.node",
       "dist/native/AttachmentHost.exe",
@@ -142,7 +140,7 @@
     ],
     "win": {
       "target": "dir",
-      "icon": "assets/clipper.ico"
+      "icon": "assets/clip.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -159,7 +157,7 @@
       ],
       "displayLanguageSelector": true,
       "include": "build/installer.nsh",
-      "artifactName": "Clipper-${version}-Setup-Engine-x64.${ext}"
+      "artifactName": "Clip-${version}-Setup-Engine-x64.${ext}"
     }
   }
 }

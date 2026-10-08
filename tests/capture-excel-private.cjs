@@ -14,10 +14,10 @@ async function run(){
  assert.equal(excelCount(),0,'Close existing Excel windows before this isolated test');
  const clipboardGuard=requireEmptyClipboard();
  const output=path.resolve('work/capture-excel-private');await fs.mkdir(output,{recursive:true});
- const prefix=randomUUID(),ready=path.join(output,prefix+'-ready.txt'),stop=path.join(output,prefix+'-stop.txt'),failure=path.join(output,prefix+'-error.txt'),value='Clipper Excel source '+prefix;
+ const prefix=randomUUID(),ready=path.join(output,prefix+'-ready.txt'),stop=path.join(output,prefix+'-stop.txt'),failure=path.join(output,prefix+'-error.txt'),value='Clip Excel source '+prefix;
  const f=await fixture('capture-excel-private');let child;
  try{
-  const initial=(await f.page.evaluate(()=>window.clipper.state())).clips.length;
+  const initial=(await f.page.evaluate(()=>window.clip.state())).clips.length;
   clipboardGuard.assertUnchanged();
   child=spawn('powershell.exe',['-Sta','-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.resolve('tests/capture-excel-private-target.ps1'),'-Value',value,'-Ready',ready,'-Stop',stop,'-Failure',failure,'-ExpectedSequence',String(clipboardGuard.sequence)],{stdio:'ignore',windowsHide:true});
   await expect.poll(async()=>{if(await fs.stat(failure).then(()=>true,()=>false))throw Error(await fs.readFile(failure,'utf8'));return fs.readFile(ready,'utf8').catch(()=>'');},{timeout:45000}).toBe('ready');
@@ -26,7 +26,7 @@ async function run(){
   assert(source.formats.includes('Biff8')&&source.formats.includes('HTML Format'),'Excel cell clipboard formats missing');
   assert(source.formats.includes('ExcludeClipboardContentFromMonitorProcessing'),'Excel did not request private clipboard handling');
   await new Promise(resolve=>setTimeout(resolve,1500));
-  const state=await f.page.evaluate(()=>window.clipper.state());
+  const state=await f.page.evaluate(()=>window.clip.state());
   assert.equal(state.clips.length,initial,'Private Excel cell was added to history');
   await fs.writeFile(stop,'stop');
   await new Promise(resolve=>{if(child.exitCode!==null)return resolve();child.once('exit',resolve);setTimeout(()=>{child.kill();resolve();},5000).unref();});

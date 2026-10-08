@@ -1,7 +1,7 @@
 import {t as tr} from '../shared/i18n';
 import type {VaultState} from '../shared/vault';
 import {normalizeSettingItems} from './settings-layout';
-const api=window.clipper,q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
+const api=window.clip,q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 interface Context {modal(title:string,body:string,save:()=>Promise<void>,label?:string):void;toast(text:unknown):void;refresh():Promise<void>}
 export async function renderVault(ctx:Context){const state=await api.vaultState(),node=q('history-vault');if(!node)return;

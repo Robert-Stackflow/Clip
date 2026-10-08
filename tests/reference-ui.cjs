@@ -12,13 +12,13 @@ const {setup}=require('./renderer-fixture.cjs');
   context=await browser.newContext({viewport:{width:1280,height:820}});
   await context.addInitScript(setup);
   await context.addInitScript(()=>{let copied='';Object.defineProperty(navigator,'clipboard',{configurable:true,value:{writeText:async value=>{copied=String(value);},readText:async()=>copied}});});
-  await context.route('https://clipper.test/**',async route=>{
+  await context.route('https://clip.test/**',async route=>{
    const name=new URL(route.request().url()).pathname.slice(1);
    if(!/^(?:[\w.-]+|(?:katex-fonts|emoji-atlas)\/[\w.-]+)$/.test(name))return route.abort();
    try{await route.fulfill({body:await fs.readFile(path.join('dist/renderer',name)),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':name.endsWith('.png')?'image/png':name.endsWith('.woff2')?'font/woff2':name.endsWith('.ttf')?'font/ttf':'application/javascript'});}catch{return route.abort();}
   });
   const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
-  await page.goto('https://clipper.test/index.html');await page.waitForSelector('.clip-row');
+  await page.goto('https://clip.test/index.html');await page.waitForSelector('.clip-row');
   assert.equal(await page.locator('.sidebar').evaluate(node=>Math.round(node.getBoundingClientRect().width)),208);
   assert.equal(await page.locator('.sidebar-group').count(),3);
   assert.equal(await page.locator('#main').evaluate(node=>getComputedStyle(node).borderLeftWidth),'1px');
@@ -117,7 +117,7 @@ const {setup}=require('./renderer-fixture.cjs');
   assert.equal(await page.locator('[data-detail-tone="5"]').getAttribute('aria-pressed'),'true');
   assert.equal(await page.locator('.reference-item[aria-label="thumbs up"] .reference-emoji-glyph').textContent(),'👍🏿');
   await page.screenshot({path:'work/reference-ui/skin-details.png'});
-  await page.evaluate(()=>{fixture.hideCalls=0;window.clipper.hide=async()=>{fixture.hideCalls++;};});
+  await page.evaluate(()=>{fixture.hideCalls=0;window.clip.hide=async()=>{fixture.hideCalls++;};});
   await page.keyboard.press('Escape');await page.waitForSelector('.reference-popover[hidden]',{state:'attached'});
   assert.equal(await page.evaluate(()=>fixture.hideCalls),0,'The first Escape closes only the detail popup');
   await page.keyboard.press('Escape');assert.equal(await page.evaluate(()=>fixture.hideCalls),1,'The next Escape may close the main window');

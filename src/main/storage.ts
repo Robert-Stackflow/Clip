@@ -7,7 +7,7 @@ import {randomUUID,createHash,createHmac} from 'node:crypto';
 import {Store} from './store';
 import {localDirectory,writeAtomic} from './data-files';
 import type {StoragePlan} from '../shared/data';
-import {inspectDatabase} from './database-check';
+import {inspectDatabase,startupDatabaseInfo} from './database-check';
 import {HistoryVault,readVault,type VaultRecord} from './history-vault';
 import {copyDatabase} from './database-copy';
 import {CheckpointManager} from './checkpoints';
@@ -17,7 +17,7 @@ import {stableVersion} from '../shared/updates';
 import type {CheckpointEntry} from '../shared/checkpoints';
 export class HistoryLockedError extends Error {constructor(){super(tr('历史已加密，请先解锁'));}}
 function fingerprint(db:DatabaseConnection){const hash=createHash('sha256');for(const table of ['clips','snippets','meta']){hash.update(table);for(const row of db.prepare(`SELECT * FROM ${table} ORDER BY ${table==='meta'?'key':'id'}`).iterate())hash.update(JSON.stringify(row)+'\n');}return hash.digest('hex');}
-function checkDatabase(file:string,profileId:string,expected?:string,key?:Uint8Array){const db=openDatabase(file,true,key);try{const result=db.prepare('PRAGMA quick_check').get() as any;if(result.quick_check!=='ok')throw new Error(tr('数据完整性检查失败'));const id=db.prepare("SELECT value FROM meta WHERE key='profile-id'").get() as any;if(!id||JSON.parse(id.value)!==profileId)throw new Error(tr('此目录不属于当前 Clipper 数据'));if(expected&&fingerprint(db)!==expected)throw new Error(tr('迁移副本与当前数据不一致'));}finally{db.close();}}
+function checkDatabase(file:string,profileId:string,expected?:string,key?:Uint8Array){const db=openDatabase(file,true,key);try{const result=db.prepare('PRAGMA quick_check').get() as any;if(result.quick_check!=='ok')throw new Error(tr('数据完整性检查失败'));const id=db.prepare("SELECT value FROM meta WHERE key='profile-id'").get() as any;if(!id||JSON.parse(id.value)!==profileId)throw new Error(tr('此目录不属于当前 Clip 数据'));if(expected&&fingerprint(db)!==expected)throw new Error(tr('迁移副本与当前数据不一致'));}finally{db.close();}}
 export class StorageManager {
  store!:Store;directory='';profileId='';previousDirectory='';private plan:{token:string;directory:string;expires:number}|undefined;
  private encryptionPlan?:{token:string;key:Buffer;record:VaultRecord;recoveryKey:string;directory:string;expires:number};
@@ -37,7 +37,9 @@ export class StorageManager {
   this.protectionExpected=saved?.encrypted===true||await stat(join(this.directory,'history-vault.json')).then(()=>true,()=>false);
   const protection=await this.vault.load(this.directory);if(this.protectionExpected&&!protection.encrypted)throw new Error(tr('加密资料的 history-vault.json 缺失或损坏，请使用完整目录副本或备份恢复'));if(protection.encrypted){if(!credential)throw new HistoryLockedError();await this.vault.unlock(credential.value,credential.mode);}const key=this.vault.copyKey();
   const permitted=()=>!protection.encrypted||this.vault.unlocked;
-  const file=join(this.directory,'history.sqlite');let candidate:Store|undefined;try{const exists=await stat(file).then(()=>true,e=>{if(e.code==='ENOENT')return false;throw e;});if((protection.encrypted||hasPointer)&&!exists)throw new Error(tr('历史数据库缺失，未创建空历史'));if(exists){const info=await recoveryJob<any>({operation:'inspect',source:file,sourceKey:key,profileId:hasPointer?this.profileId:undefined});if(!permitted())throw new HistoryLockedError();this.profileId=info.profileId||randomUUID();const previous=stableVersion(info.applicationVersion)||'';if(previous!==this.applicationVersion)await this.checkpoints.create(this.directory,this.profileId,previous,this.applicationVersion,'upgrade',key,permitted);}if(!permitted())throw new HistoryLockedError();
+  const file=join(this.directory,'history.sqlite');let candidate:Store|undefined;try{const exists=await stat(file).then(()=>true,e=>{if(e.code==='ENOENT')return false;throw e;});if((protection.encrypted||hasPointer)&&!exists)throw new Error(tr('历史数据库缺失，未创建空历史'));if(exists){let info=startupDatabaseInfo(file,key,hasPointer?this.profileId:undefined);const previous=stableVersion(info.applicationVersion)||'';
+   if(!hasPointer||info.schema!==7||previous!==this.applicationVersion)info=await recoveryJob<any>({operation:'inspect',source:file,sourceKey:key,profileId:hasPointer?this.profileId:undefined});
+   if(!permitted())throw new HistoryLockedError();this.profileId=info.profileId||randomUUID();if(previous!==this.applicationVersion)await this.checkpoints.create(this.directory,this.profileId,previous,this.applicationVersion,'upgrade',key,permitted);}if(!permitted())throw new HistoryLockedError();
    candidate=new Store(file,true,false,key);this.profileId=candidate.meta('profile-id','')||this.profileId||randomUUID();candidate.setMeta('profile-id',this.profileId);candidate.setMeta('application-version',this.applicationVersion);
    if(!saved)await this.savePointer(this.directory,'');this.store=candidate;return candidate;
   }catch(e){candidate?.close();this.vault.lock();throw e;}finally{key?.fill(0);}
@@ -60,7 +62,7 @@ export class StorageManager {
  async migrate(token:string){
   const plan=this.plan;if(!plan||plan.token!==token||plan.expires<Date.now())throw new Error(tr('迁移预览已过期，请重新选择目录'));this.plan=undefined;
   const target=await localDirectory(plan.directory);if(target!==plan.directory||(await readdir(target)).length)throw new Error(tr('目标文件夹已改变，请重新选择'));
-  const temp=join(target,`.clipper-migration-${randomUUID()}.sqlite`),destination=join(target,'history.sqlite'),previous=this.directory,key=this.vault.copyKey(),record=await readVault(previous);let created=false,next:Store|undefined,committed=false,envelopeCreated=false,predecessorCreated=false;
+  const temp=join(target,`.clip-migration-${randomUUID()}.sqlite`),destination=join(target,'history.sqlite'),previous=this.directory,key=this.vault.copyKey(),record=await readVault(previous);let created=false,next:Store|undefined,committed=false,envelopeCreated=false,predecessorCreated=false;
   try{
    this.store.db.prepare('VACUUM INTO ?').run(temp);checkDatabase(temp,this.profileId,fingerprint(this.store.db),key);
    await copyFile(temp,destination,constants.COPYFILE_EXCL);created=true;const handle=await open(destination,'r+');try{await handle.sync();}finally{await handle.close();}

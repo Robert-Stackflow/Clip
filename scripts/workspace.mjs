@@ -4,8 +4,8 @@ import {fileURLToPath} from 'node:url';
 
 export const repository=resolve(fileURLToPath(new URL('..',import.meta.url)));
 export const storageLimits={cases:20,records:128*1024**2};
-const workspaceMarker='Clipper generated verification workspace\n';
-const caseMarker='Clipper generated verification case\n';
+const workspaceMarker='Clip generated verification workspace\n';
+const caseMarker='Clip generated verification case\n';
 
 async function directory(file) {
  await mkdir(file,{recursive:true});
@@ -38,8 +38,8 @@ async function active(folder) {
  try{process.kill(pid,0);return true;}catch(error){if(error.code==='ESRCH')return false;throw error;}
 }
 export async function workspace() {
- const root=join(repository,'work'),temp=join(root,'temp'),current=join(root,'current');
- await directory(root);await directory(temp);await marked(current,'.clipper-generated-workspace',workspaceMarker);
+ const root=join(repository,'work','Clip'),temp=join(root,'temp'),current=join(root,'current');
+ await directory(root);await directory(temp);await marked(current,'.clip-generated-workspace',workspaceMarker);
  return{root,temp,current};
 }
 export async function removeGenerated(root,file,{unlinkLinks=false}={}) {
@@ -51,12 +51,12 @@ export async function removeGenerated(root,file,{unlinkLinks=false}={}) {
  await rm(folder,{recursive:true,force:true,maxRetries:3,retryDelay:100});
 }
 export async function pruneWorkspace(current,limits=storageLimits) {
- if(await readFile(join(current,'.clipper-generated-workspace'),'utf8')!==workspaceMarker)throw Error('Missing workspace marker');
+ if(await readFile(join(current,'.clip-generated-workspace'),'utf8')!==workspaceMarker)throw Error('Missing workspace marker');
  const cases=[];
  for(const item of await readdir(current,{withFileTypes:true})) {
   if(!item.isDirectory())continue;
   const folder=join(current,item.name);
-  if(await readFile(join(folder,'.clipper-generated-case'),'utf8').catch(()=>'')!==caseMarker||await active(folder))continue;
+  if(await readFile(join(folder,'.clip-generated-case'),'utf8').catch(()=>'')!==caseMarker||await active(folder))continue;
   cases.push({folder,time:(await stat(folder)).mtimeMs,size:await bytes(folder)});
  }
  cases.sort((a,b)=>b.time-a.time);let count=0,total=0;
@@ -69,7 +69,7 @@ export async function pruneWorkspace(current,limits=storageLimits) {
 export async function beginCase(name) {
  if(!/^[a-z0-9-]+$/.test(name))throw Error('Invalid verification name');
  const work=await workspace(),output=join(work.current,name),fixtures=join(output,'fixtures');
- await marked(output,'.clipper-generated-case',caseMarker);
+ await marked(output,'.clip-generated-case',caseMarker);
  try{await writeFile(join(output,'.active'),String(process.pid),{flag:'wx'});}
  catch(error){
   if(error.code!=='EEXIST')throw error;

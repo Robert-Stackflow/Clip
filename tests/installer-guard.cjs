@@ -12,7 +12,7 @@ function run(file,args=[]){return new Promise((resolve,reject)=>{const child=spa
   const compiler=find(path.join(cache,nsis),'makensis.exe');
   assert(compiler&&resources,'NSIS build tools must be available');
   const folder=path.resolve('work/installer-guard');fs.mkdirSync(folder,{recursive:true});
-  const name='Clipper-guard-'+randomUUID()+'.exe';
+  const name='Clip-guard-'+randomUUID()+'.exe';
   const helper=path.join(folder,name);fs.copyFileSync(process.execPath,helper);
   const template=path.resolve('node_modules/app-builder-lib/templates/nsis/include');
   const production=path.resolve('build/installer.nsh');
@@ -20,7 +20,7 @@ function run(file,args=[]){return new Promise((resolve,reject)=>{const child=spa
   const content=String.raw`Unicode true
 RequestExecutionLevel user
 SilentInstall silent
-Name "Clipper guard verification"
+Name "Clip guard verification"
 OutFile "${output}"
 !include "LogicLib.nsh"
 !include "MUI2.nsh"

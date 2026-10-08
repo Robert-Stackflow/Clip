@@ -23,8 +23,8 @@ export const bundles=[
 export const staticFiles=[
  ...['quick','quick-preview','index','capture','recovery','unlock','shelf','sticker','chat','recorder','image-editor','tray','tray-menu'].map(name=>['src/renderer/'+name+'.html','dist/renderer/'+name+'.html']),
  ['src/web/index.html','dist/web/index.html'],
- ['assets/clipper.png','dist/clipper.png'],['assets/clipper-mark.png','dist/renderer/clipper-mark.png'],
- ...[16,20,24,32].map(size=>[`assets/clipper-tray-${size}.png`,`dist/clipper-tray-${size}.png`]),
+ ['assets/clip.png','dist/clip.png'],['assets/clip-mark.png','dist/renderer/clip-mark.png'],
+ ...[16,20,24,32].map(size=>[`assets/clip-tray-${size}.png`,`dist/clip-tray-${size}.png`]),
  ['src/renderer/wav-worklet.js','dist/renderer/wav-worklet.js'],['src/renderer/reference-flags.ttf','dist/renderer/reference-flags.ttf'],
  ...['one-components','control-surfaces','redesign-028','recent-shelf','redesign-029','one-dialog','sticker'].map(name=>['src/renderer/'+name+'.css','dist/renderer/'+name+'.css'])
 ];

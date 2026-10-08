@@ -5,7 +5,7 @@ import {icon} from './ui';
 
 // Focus can move between fields before an IPC response arrives. Keep pause/resume ordered.
 let operations=Promise.resolve();
-function record(active:boolean){operations=operations.catch(()=>{}).then(()=>window.clipper.recordShortcut(active));return operations;}
+function record(active:boolean){operations=operations.catch(()=>{}).then(()=>window.clip.recordShortcut(active));return operations;}
 const feedback=new WeakMap<HTMLInputElement,(error?:unknown,retry?:()=>void|Promise<void>)=>void>();
 /** Keep save and registration failures next to the field that caused them. */
 export function shortcutFeedback(input:HTMLInputElement,error?:unknown,retry?:()=>void|Promise<void>){const show=feedback.get(input);if(!show)return false;show(error,retry);return true;}
@@ -65,7 +65,7 @@ export function setupShortcut(input:HTMLInputElement,report:(error:unknown)=>voi
   if(!recording||pending===undefined||event.code!==pendingCode)return;
   event.preventDefault();event.stopPropagation();finish(true);input.blur();
  },listen);
- const disposeNative=window.clipper.onShortcutInput?.(value=>{
+ const disposeNative=window.clip.onShortcutInput?.(value=>{
   if(!recording||document.activeElement!==input)return;
   ready=true;input.dataset.shortcutReady='true';
   input.dispatchEvent(new KeyboardEvent(value.type==='keyDown'?'keydown':'keyup',{key:value.key,code:value.code,ctrlKey:value.control,altKey:value.alt,shiftKey:value.shift,metaKey:value.meta,bubbles:true,cancelable:true}));

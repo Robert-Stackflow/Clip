@@ -9,5 +9,5 @@ export function icon(name:string){let value=cache.get(name);if(!value){value=cre
 export function iconButton(id:string,label:string,glyph:string,active=false){const button=document.createElement('button');button.id=id;button.type='button';button.className='icon-button quiet'+(active?' active':'');button.title=label;button.setAttribute('aria-label',label);if(active)button.setAttribute('aria-pressed','true');button.innerHTML=icon(glyph);return button.outerHTML;}
 
 document.documentElement.style.setProperty('--check-icon',`url("data:image/svg+xml,${encodeURIComponent(icon('check'))}")`);
-export const api={installedFonts:(refresh=false)=>window.clipperAppearance!.installedFonts(refresh),uiFontSource:(family:string)=>window.clipperAppearance!.uiFontSource(family)};
-export function toast(value:unknown){document.dispatchEvent(new CustomEvent('clipper:feedback',{detail:value}));}
+export const api={installedFonts:(refresh=false)=>window.clipAppearance!.installedFonts(refresh),uiFontSource:(family:string)=>window.clipAppearance!.uiFontSource(family)};
+export function toast(value:unknown){document.dispatchEvent(new CustomEvent('clip:feedback',{detail:value}));}

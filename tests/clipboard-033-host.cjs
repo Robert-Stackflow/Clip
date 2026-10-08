@@ -1,5 +1,5 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict'),{randomBytes,createHash}=require('node:crypto'),electron=require('electron');
-const archive=process.env.CLIPPER_CLIPBOARD_ASAR,koffi=archive?require('node:module').createRequire(path.join(archive,'package.json'))('koffi'):require('koffi');
+const archive=process.env.CLIP_CLIPBOARD_ASAR,koffi=archive?require('node:module').createRequire(path.join(archive,'package.json'))('koffi'):require('koffi');
 const variant=process.argv[2],root=path.resolve('work/clipboard-033'),profile=path.join(root,variant+'-profile');fs.mkdirSync(profile,{recursive:true});electron.app.setPath('userData',profile);
 const kernel=koffi.load('kernel32.dll'),lock=kernel.func('void * __stdcall GlobalLock(uintptr_t)'),unlock=kernel.func('bool __stdcall GlobalUnlock(uintptr_t)'),size=kernel.func('uintptr_t __stdcall GlobalSize(uintptr_t)'),free=kernel.func('uintptr_t __stdcall GlobalFree(uintptr_t)');
 let stats,formats=[],owned=[],opened=0,closed=0,live=true,onMove;

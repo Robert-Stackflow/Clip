@@ -4,7 +4,7 @@ import './quick-preview.css';
 import {Clipboard,FileText,Image,Folder,Link,Code,createElement} from 'lucide';
 import {t as tr,formatBytes,formatDate} from '../shared/i18n';
 import type {QuickPreviewState} from '../shared/quick-preview';
-const api=window.clipperQuickPreview,root=document.querySelector<HTMLElement>('#preview')!,body=document.querySelector<HTMLElement>('#preview-body')!,type=document.querySelector<HTMLElement>('#preview-type')!,meta=document.querySelector<HTMLElement>('#preview-meta')!;
+const api=window.clipQuickPreview,root=document.querySelector<HTMLElement>('#preview')!,body=document.querySelector<HTMLElement>('#preview-body')!,type=document.querySelector<HTMLElement>('#preview-type')!,meta=document.querySelector<HTMLElement>('#preview-meta')!;
 let token='';
 const esc=(value:string)=>value.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 function render(value:QuickPreviewState|null){

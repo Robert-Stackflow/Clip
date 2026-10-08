@@ -2,7 +2,7 @@
 export type RendererAssetScope='main'|'recording'|'image-editor';
 const styles=new Set(['one-ui.css','recent-shelf.css','one-components.css','control-surfaces.css','redesign-028.css','redesign-029.css']);
 const assets:Record<RendererAssetScope,ReadonlySet<string>>={
- main:new Set(['index.html','app.js','app.css','clipper-mark.png','reference-pages.js','category-icon-catalog.js','reference-flags.ttf',...['quick','quick-preview','capture','recovery','unlock','tray','tray-menu','shelf','sticker','chat'].flatMap(name=>[name+'.html',name+'.js',name+'.css'])]),
+ main:new Set(['index.html','app.js','app.css','clip-mark.png','reference-pages.js','category-icon-catalog.js','reference-flags.ttf',...['quick','quick-preview','capture','recovery','unlock','tray','tray-menu','shelf','sticker','chat'].flatMap(name=>[name+'.html',name+'.js',name+'.css'])]),
  recording:new Set(['recorder.html','recorder.js','recorder.css','wav-worklet.js']),
  'image-editor':new Set(['image-editor.html','image-editor.js','image-editor.css'])
 };

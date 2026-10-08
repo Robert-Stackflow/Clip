@@ -23,7 +23,7 @@ export interface ChatAPI {
 }
 export const emptyChatDraft=():ChatDraft=>({text:'',images:[],commandId:'',language:'简体中文',values:{}});
 export function chatShortcut(value:unknown):string {
- return shortcutKey(value);
+ return shortcutKey(value,true);
 }
 export function chatOptions(value:unknown):ChatOptions {
  const v=value as Partial<ChatOptions>;if(!v||typeof v!=='object'||Array.isArray(v)||['onTop','keepOpen'].some(key=>v[key as keyof ChatOptions]!==undefined&&typeof v[key as keyof ChatOptions]!=='boolean'))throw new Error(tr('对话窗口设置无效'));

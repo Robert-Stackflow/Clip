@@ -11,6 +11,7 @@ export function initNative(){try{
   api={enumWindows:u.func('bool __stdcall EnumWindows(void*,intptr_t)'),enumFormats:u.func('uint32 __stdcall EnumClipboardFormats(uint32)'),formatName:u.func('int __stdcall GetClipboardFormatNameW(uint32,void*,int)'),ancestor:u.func('uintptr_t __stdcall GetAncestor(uintptr_t,uint32)'),foreground:u.func('uintptr_t __stdcall GetForegroundWindow()'),owner:u.func('uintptr_t __stdcall GetClipboardOwner()'),sequence:u.func('uint32 __stdcall GetClipboardSequenceNumber()'),pid:u.func('uint32 __stdcall GetWindowThreadProcessId(uintptr_t hwnd, _Out_ uint32 *pid)'),openProcess:k.func('uintptr_t __stdcall OpenProcess(uint32 access, bool inherit, uint32 pid)'),image:k.func('bool __stdcall QueryFullProcessImageNameW(uintptr_t handle,uint32 flags,void *buffer,_Inout_ uint32 *size)'),close:k.func('bool __stdcall CloseHandle(uintptr_t handle)'),
     open:u.func('bool __stdcall OpenClipboard(uintptr_t hwnd)'),closeClipboard:u.func('bool __stdcall CloseClipboard()'),get:u.func('uintptr_t __stdcall GetClipboardData(uint32 format)'),has:u.func('bool __stdcall IsClipboardFormatAvailable(uint32 format)'),register:u.func('uint32 __stdcall RegisterClipboardFormatW(str16 name)'),empty:u.func('bool __stdcall EmptyClipboard()'),set:u.func('uintptr_t __stdcall SetClipboardData(uint32 format,uintptr_t handle)'),
     drag:s.func('uint32 __stdcall DragQueryFileW(uintptr_t handle,uint32 index,void *buffer,uint32 count)'),alloc:k.func('uintptr_t __stdcall GlobalAlloc(uint32 flags,uintptr_t bytes)'),lock:k.func('void * __stdcall GlobalLock(uintptr_t handle)'),unlock:k.func('bool __stdcall GlobalUnlock(uintptr_t handle)'),free:k.func('uintptr_t __stdcall GlobalFree(uintptr_t handle)'),globalSize:k.func('uintptr_t __stdcall GlobalSize(uintptr_t handle)'),driveType:k.func('uint32 __stdcall GetDriveTypeW(str16 root)'),move:k.func('void __stdcall RtlMoveMemory(void *target,void *source,uintptr_t bytes)'),
+    gui:u.func('bool __stdcall GetGUIThreadInfo(uint32,void*)'),clientPoint:u.func('bool __stdcall ClientToScreen(uintptr_t,void*)'),setFocus:u.func('uintptr_t __stdcall SetFocus(uintptr_t)'),thread:k.func('uint32 __stdcall GetCurrentThreadId()'),
     setForeground:u.func('bool __stdcall SetForegroundWindow(uintptr_t hwnd)'),attachInput:u.func('bool __stdcall AttachThreadInput(uint32,uint32,bool)'),setWindowPosition:u.func('bool __stdcall SetWindowPos(uintptr_t hwnd,uintptr_t after,int x,int y,int width,int height,uint32 flags)'),isWindow:u.func('bool __stdcall IsWindow(uintptr_t hwnd)'),isIconic:u.func('bool __stdcall IsIconic(uintptr_t hwnd)'),visible:u.func('bool __stdcall IsWindowVisible(uintptr_t hwnd)'),send:u.func('uint32 __stdcall SendInput(uint32 count,void *input,int size)'),key:u.func('int16 __stdcall GetAsyncKeyState(int key)'),rect:u.func('bool __stdcall GetWindowRect(uintptr_t hwnd,void *rect)'),className:u.func('int __stdcall GetClassNameW(uintptr_t hwnd,void *name,int length)')};
 }catch(e){nativeError=String(e);}}
 export const nativeAvailable=()=>!!api;
@@ -21,12 +22,24 @@ export function foregroundBelongsTo(hwnd:number){if(!api)return true;const foreg
 /** A native hook does not carry RegisterHotKey's foreground activation permission. */
 export function activateNativeWindow(hwnd:number){
  if(!api||!hwnd||!api.isWindow(hwnd))return false;const owner=[0],targetThread=api.pid(hwnd,owner);if(owner[0]!==process.pid)return false;
- if(foregroundBelongsTo(hwnd)||api.setForeground(hwnd))return true;
+ if(foregroundBelongsTo(hwnd)||api.setForeground(hwnd)&&foregroundBelongsTo(hwnd))return true;
  const current=api.foreground(),foregroundThread=current?api.pid(current,[0]):0;
- if(!foregroundThread||foregroundThread===targetThread||!api.attachInput(targetThread,foregroundThread,true))return false;
- try{return !!api.setForeground(hwnd);}finally{api.attachInput(targetThread,foregroundThread,false);}
+ if(foregroundThread&&foregroundThread!==targetThread&&api.attachInput(targetThread,foregroundThread,true))try{api.setForeground(hwnd);}finally{api.attachInput(targetThread,foregroundThread,false);}
+ if(foregroundBelongsTo(hwnd))return true;
+ return false;
 }
 export function foregroundTarget(){const hwnd=api?.foreground();if(!hwnd)return null;const name=Buffer.alloc(512),length=api.className(hwnd,name,256),kind=name.toString('utf16le',0,length*2);if(['Progman','WorkerW','Shell_TrayWnd','Shell_SecondaryTrayWnd','NotifyIconOverflowWindow','TopLevelWindowForOverflowXamlIsland','#32768'].includes(kind))return null;return windowInfo(hwnd);}
+export interface PasteTarget{hwnd:number;pid:number;focus?:number}
+function guiThread(hwnd:number){if(!api||!api.isWindow(hwnd))return undefined;const thread=foregroundBelongsTo(hwnd)?0:api.pid(hwnd,[0]),info=Buffer.alloc(72);info.writeUInt32LE(72);return api.gui(thread,info)?info:undefined;}
+export function capturePasteTarget(hwnd:number):PasteTarget|undefined{const target=windowInfo(hwnd);if(!target||!api.isWindow(hwnd))return undefined;const info=guiThread(hwnd),focus=info?Number(info.readBigUInt64LE(16)):0;return {...target,...(focus&&api.isWindow(focus)&&api.ancestor(focus,3)===hwnd?{focus}:{})};}
+export function windowBounds(hwnd:number){if(!api||!hwnd||!api.isWindow(hwnd)||api.isIconic(hwnd))return undefined;const b=Buffer.alloc(16);if(!api.rect(hwnd,b))return undefined;const width=b.readInt32LE(8)-b.readInt32LE(0),height=b.readInt32LE(12)-b.readInt32LE(4);return width>0&&height>0?{x:b.readInt32LE(0),y:b.readInt32LE(4),width,height}:undefined;}
+/** Native edit controls expose a caret without an accessibility round trip. */
+export function nativeCaretBounds(hwnd:number){
+ if(!foregroundBelongsTo(hwnd))return undefined;const info=guiThread(hwnd),bounds=windowBounds(hwnd);if(!info||!bounds||!(info.readUInt32LE(4)&1))return undefined;
+ const caret=Number(info.readBigUInt64LE(48));if(!caret||!api.isWindow(caret))return undefined;const point=Buffer.from(info.subarray(56,64)),width=info.readInt32LE(64)-info.readInt32LE(56),height=info.readInt32LE(68)-info.readInt32LE(60);
+ if(height<=0||height>=512||!api.clientPoint(caret,point))return undefined;const x=point.readInt32LE(0),y=point.readInt32LE(4);
+ return x>=bounds.x&&x<=bounds.x+bounds.width&&y>=bounds.y&&y+height<=bounds.y+bounds.height+2?{x,y,width:Math.max(1,width),height}:undefined;
+}
 export const owner=()=>windowInfo(api?.owner()||0);
 export function moveNativeWindow(hwnd:number,x:number,y:number){return !!api?.setWindowPosition(hwnd,0,x,y,0,0,0x15);}
 export const windowExists=(hwnd:number)=>!!api?.isWindow(hwnd);
@@ -46,13 +59,20 @@ export function writeFiles(files:string[],hwnd:number){
   try{const p=api.lock(h);if(!p)throw new Error(tr('剪贴板内存访问失败'));try{api.move(p,b,b.length);}finally{api.unlock(h);}if(!api.open(hwnd))throw new Error(tr('剪贴板正被其他应用使用'));try{if(!api.empty()||!api.set(15,h))throw new Error(tr('写入文件剪贴板失败'));transferred=true;}finally{api.closeClipboard();}}finally{if(!transferred)api.free(h);}
 }
 const delay=(ms:number)=>new Promise(r=>setTimeout(r,ms));
-export async function pasteTo(hwnd:number,valid:()=>boolean=()=>true,dismiss:()=>void=()=>{}){
+export async function pasteTo(hwnd:number,valid:()=>boolean=()=>true,dismiss:()=>void=()=>{},focus?:number){
   if(!valid())throw new Error(tr('粘贴已取消'));
   if(!api||!hwnd||!api.isWindow(hwnd))throw new Error(tr('没有可用的目标窗口，已复制，请切换应用后按 Ctrl+V'));
-  // Restore while Clipper still owns the foreground permission. A transient
+  // Restore while Clip still owns the foreground permission. A transient
   // menu/activation handoff can require attaching the two input queues.
   const previous=api.foreground();
-  const restore=()=>{if(api.foreground()===hwnd||api.setForeground(hwnd))return;const targetThread=api.pid(hwnd,[0]),sourceThread=previous?api.pid(previous,[0]):0;if(!targetThread||!sourceThread||targetThread===sourceThread||!api.attachInput(targetThread,sourceThread,true))return;try{api.setForeground(hwnd);}finally{api.attachInput(targetThread,sourceThread,false);}};
+  const restore=()=>{
+    const focusValid=focus&&api.isWindow(focus)&&api.ancestor(focus,3)===hwnd;
+    if(!foregroundBelongsTo(hwnd))api.setForeground(hwnd);
+    if(foregroundBelongsTo(hwnd)&&(!focusValid||Number(guiThread(hwnd)?.readBigUInt64LE(16)||0)===focus))return;
+    const targetThread=api.pid(hwnd,[0]),currentThread=api.thread(),attached=targetThread&&targetThread!==currentThread&&api.attachInput(currentThread,targetThread,true);
+    try{if(!foregroundBelongsTo(hwnd))api.setForeground(hwnd);if(foregroundBelongsTo(hwnd)&&focusValid)api.setFocus(focus);}
+    finally{if(attached)api.attachInput(currentThread,targetThread,false);}
+  };
   restore();await delay(40);if(api.foreground()===previous)restore();dismiss();await delay(100);
   for(let i=0;i<30;i++){if(![0x10,0x11,0x12,0x5b,0x5c].some(k=>api.key(k)&0x8000))break;await delay(25);}
   if([0x10,0x11,0x12,0x5b,0x5c].some(k=>api.key(k)&0x8000))throw new Error(tr('请松开修饰键后重新粘贴'));
@@ -86,4 +106,4 @@ export function hasVirtualFiles(){return !!api&&['FileGroupDescriptorW','FileGro
 export const limitAttachmentProcess=(pid:number)=>limitChildProcess(pid,256);
 export function limitChildProcess(pid:number,memoryMiB:number){const k=koffi.load('kernel32.dll'),create=k.func('uintptr_t __stdcall CreateJobObjectW(void*,str16)'),configure=k.func('bool __stdcall SetInformationJobObject(uintptr_t,int,void*,uint32)'),assign=k.func('bool __stdcall AssignProcessToJobObject(uintptr_t,uintptr_t)'),open=k.func('uintptr_t __stdcall OpenProcess(uint32,bool,uint32)'),close=k.func('bool __stdcall CloseHandle(uintptr_t)');const job=create(null,null),process=open(0x101,false,pid);try{if(!job||!process)throw new Error(tr('无法限制内容解析进程'));const limits=Buffer.alloc(144);limits.writeUInt32LE(0x2100,16);limits.writeBigUInt64LE(BigInt(memoryMiB)*1024n*1024n,112);if(!configure(job,9,limits,144)||!assign(job,process))throw new Error(tr('无法限制内容解析进程'));return ()=>close(job);}catch(e){if(job)close(job);throw e;}finally{if(process)close(process);}}
 
-export function runningApplications(){if(!api)return [];const seen=new Set<number>(),items:NonNullable<ReturnType<typeof windowInfo>>[]=[];const callback=koffi.register((hwnd:number)=>{if(items.length>=256)return false;if(seen.size>=512)return false;const ids=[0];api.pid(hwnd,ids);if(seen.has(ids[0]))return true;seen.add(ids[0]);const info=windowInfo(hwnd);if(info?.executable)items.push(info);return true;},appWindowCallback??=koffi.pointer(koffi.proto('bool __stdcall ClipperAppWindow(uintptr_t,intptr_t)')));try{api.enumWindows(callback,0);}finally{koffi.unregister(callback);}return items;}
+export function runningApplications(){if(!api)return [];const seen=new Set<number>(),items:NonNullable<ReturnType<typeof windowInfo>>[]=[];const callback=koffi.register((hwnd:number)=>{if(items.length>=256)return false;if(seen.size>=512)return false;const ids=[0];api.pid(hwnd,ids);if(seen.has(ids[0]))return true;seen.add(ids[0]);const info=windowInfo(hwnd);if(info?.executable)items.push(info);return true;},appWindowCallback??=koffi.pointer(koffi.proto('bool __stdcall ClipAppWindow(uintptr_t,intptr_t)')));try{api.enumWindows(callback,0);}finally{koffi.unregister(callback);}return items;}

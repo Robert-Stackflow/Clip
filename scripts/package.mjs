@@ -16,7 +16,7 @@ try{await lstat(destination);throw Error('This version already exists. Update th
 catch(error){if(error.code!=='ENOENT')throw error;}
 
 async function activePrograms(){
- const result=await execute('powershell.exe',['-NoProfile','-Command',"Get-CimInstance Win32_Process | Where-Object { $_.Name -match '^(Clipper|electron)\\.exe$' } | Select-Object -ExpandProperty ExecutablePath"],{windowsHide:true});
+ const result=await execute('powershell.exe',['-NoProfile','-Command',"Get-CimInstance Win32_Process | Where-Object { $_.Name -match '^(Clip|electron)\\.exe$' } | Select-Object -ExpandProperty ExecutablePath"],{windowsHide:true});
  return result.stdout.split(/\r?\n/).filter(Boolean);
 }
 const existing=await releasePlan(root),versions=[...existing.retained,...existing.remove],keep=newestVersions([...versions,version]).slice(0,2);
@@ -27,13 +27,13 @@ for(const old of versions.filter(value=>!keep.includes(value)))if(active.some(fi
 
 const candidate=await staging(root,version);
 const env={...process.env,TEMP:work.temp,TMP:work.temp,ELECTRON_BUILDER_CACHE:join(work.root,'builder-cache')};
-delete env.CLIPPER_DEVELOPMENT;delete env.CLIPPER_DEV_DATA_DIR;
+delete env.CLIP_DEVELOPMENT;delete env.CLIP_DEV_DATA_DIR;
 let failure;
 try{
  const built=await execute(process.execPath,['scripts/build.mjs'],{cwd:source,env,windowsHide:true,maxBuffer:8*1024*1024});process.stdout.write(built.stdout);
  const packed=await execute(process.execPath,['node_modules/electron-builder/out/cli/cli.js','--win',installer?'nsis':'dir','--x64','--config.directories.output='+candidate,'--publish','never'],{cwd:source,env,windowsHide:true,maxBuffer:8*1024*1024});process.stdout.write(packed.stdout);
  if(graphical){
-  const wrapped=await execute(process.execPath,['scripts/build-installer.mjs','--engine',join(candidate,'Clipper-'+version+'-Setup-Engine-x64.exe'),'--asar',join(candidate,'win-unpacked/resources/app.asar'),'--output',join(candidate,'Clipper-'+version+'-Setup-x64.exe')],{cwd:source,env,windowsHide:true,maxBuffer:8*1024*1024});process.stdout.write(wrapped.stdout);
+  const wrapped=await execute(process.execPath,['scripts/build-installer.mjs','--engine',join(candidate,'Clip-'+version+'-Setup-Engine-x64.exe'),'--asar',join(candidate,'win-unpacked/resources/app.asar'),'--output',join(candidate,'Clip-'+version+'-Setup-x64.exe')],{cwd:source,env,windowsHide:true,maxBuffer:8*1024*1024});process.stdout.write(wrapped.stdout);
  }
  const verified=await validateRelease(candidate,source,version);
  await writeFile(join(candidate,'verified-build.json'),JSON.stringify({...verified,createdAt:new Date().toISOString()},null,2));

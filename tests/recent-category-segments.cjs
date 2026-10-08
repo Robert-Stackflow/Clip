@@ -5,10 +5,10 @@ const path=require('node:path');
 const {setup}=require('./renderer-fixture.cjs');
 
 function categoriesFixture(){
- const original=window.clipperTray.state;
+ const original=window.clipTray.state;
  const categories=Array.from({length:12},(_,index)=>({id:`00000000-0000-0000-0000-${String(index+1).padStart(12,'0')}`,name:`分类 ${index+1} 长名称`}));
  window.categoryQueries=[];
- window.clipperTray.state=async query=>{
+ window.clipTray.state=async query=>{
   window.categoryQueries.push({...query});
   const result=await original(query);
   return {...result,categories,items:query.category&&query.category!=='favorites'?result.items.slice(0,1):result.items};
@@ -20,12 +20,12 @@ function categoriesFixture(){
  try{
   const context=await browser.newContext({viewport:{width:740,height:560},reducedMotion:'reduce'});
   await context.addInitScript({content:`(${setup.toString()})();(${categoriesFixture.toString()})();`});
-  await context.route('https://clipper.test/**',async route=>{
+  await context.route('https://clip.test/**',async route=>{
    const file=new URL(route.request().url()).pathname.slice(1);
    await route.fulfill({body:await fs.readFile(path.join('dist/renderer',file)),contentType:file.endsWith('.html')?'text/html':file.endsWith('.css')?'text/css':'text/javascript'});
   });
   const page=await context.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
-  await page.goto('https://clipper.test/tray.html');
+  await page.goto('https://clip.test/tray.html');
   await expect(page.locator('#categories button')).toHaveCount(14);
   await expect(page.locator('#filters [data-kind="all"] small')).toHaveText('3');
   await expect(page.locator('#count')).toHaveCount(0);

@@ -9,7 +9,7 @@ test('the category catalog exposes every canonical icon in the installed Lucide 
 });
 test('category counts match full search rules, include subcategories once and follow mutations for plaintext and encrypted history',async()=>{
  for(const encrypted of[false,true]){
-  await fs.mkdir('work/development',{recursive:true});const dir=await fs.mkdtemp(path.resolve('work/development/category-counts-')),key=encrypted?Buffer.alloc(32,53):undefined,store=new Store(path.join(dir,'history.sqlite'),false,false,key),search=new HistorySearch(path.resolve('work/test-search-worker.cjs')),counter=new HistorySearch(path.resolve('work/test-search-worker.cjs'));
+  await fs.mkdir('work/Clip/development',{recursive:true});const dir=await fs.mkdtemp(path.resolve('work/Clip/development/category-counts-')),key=encrypted?Buffer.alloc(32,53):undefined,store=new Store(path.join(dir,'history.sqlite'),false,false,key),search=new HistorySearch(path.resolve('work/test-search-worker.cjs')),counter=new HistorySearch(path.resolve('work/test-search-worker.cjs'));
   try{
    const rule={color:'#123abc',kind:'text',contains:'',source:'',tag:''};
    const parent=store.saveCategory({...rule,name:'Parent',icon:'alarm-clock-check',contains:'TAIL',allowChildren:true}),child=store.saveCategory({...rule,name:'Child',contains:'child',parentId:parent}),favorite=store.saveCategory({...rule,name:'Favorites',favorite:true}),pinned=store.saveCategory({...rule,name:'Pinned',pinned:true}),manual=store.saveCategory({...rule,name:'Manual',manual:true});

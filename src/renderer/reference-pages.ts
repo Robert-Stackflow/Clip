@@ -23,7 +23,7 @@ type Section={group:string;top:number;count:number};
 
 /** A bounded row window over one continuous catalog, including off-screen category anchors. */
 export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(text:string)=>void){
- window.clipperAppearance?.retainFontResources?.();
+ window.clipAppearance?.retainFontResources?.();
  setInterfaceLanguage(document.documentElement.lang==='en'?'en':'zh-CN');
  const catalog=referenceCatalog();let active=kind==='symbols'?'emoji':'git',tone=0,disposed=false;
  const toneOverrides=new WeakMap<Entry,number>(),variantOverrides=new WeakMap<Entry,string>(),selectedGlyph=(entry:Entry)=>variantOverrides.get(entry)||toneGlyph(entry,toneOverrides.get(entry)??tone);
@@ -160,7 +160,7 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  scroll.addEventListener('scrollend',finishSymbolNavigation);
  const navigationKey=(event:KeyboardEvent)=>{if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))cancelNavigation();};
  scroll.addEventListener('keydown',navigationKey);
- root.onclick=event=>{const link=(event.target as HTMLElement).closest<HTMLAnchorElement>('a[href]');if(!link)return;event.preventDefault();if(link.getAttribute('href')?.startsWith('#')){const anchor=decodeURIComponent(link.hash.slice(1)).toLocaleLowerCase();const topic=cheatTopics.find(topic=>topic.id===active);const section=topic?.sections.find(section=>anchorKey(section.name)===anchor||anchorKey(section.group)===anchor);if(section){if(input.value){input.value='';scroll.scrollTo({top:0,behavior:'instant'});rebuild();}nav.querySelector<HTMLButtonElement>(`[data-category="${section.id}"]`)?.click();}return;}void window.clipper.openReference(link.href).catch(error=>notify(String(error)));};
+ root.onclick=event=>{const link=(event.target as HTMLElement).closest<HTMLAnchorElement>('a[href]');if(!link)return;event.preventDefault();if(link.getAttribute('href')?.startsWith('#')){const anchor=decodeURIComponent(link.hash.slice(1)).toLocaleLowerCase();const topic=cheatTopics.find(topic=>topic.id===active);const section=topic?.sections.find(section=>anchorKey(section.name)===anchor||anchorKey(section.group)===anchor);if(section){if(input.value){input.value='';scroll.scrollTo({top:0,behavior:'instant'});rebuild();}nav.querySelector<HTMLButtonElement>(`[data-category="${section.id}"]`)?.click();}return;}void window.clip.openReference(link.href).catch(error=>notify(String(error)));};
  results.onclick=event=>{const code=(event.target as HTMLElement).closest<HTMLElement>('[data-code]');if(code){performCopy(code.dataset.code!);return;}const button=(event.target as HTMLElement).closest<HTMLElement>('[data-entry],[data-copy]');if(!button)return;const entry=entries[Number(button.dataset.entry??button.dataset.copy)];performCopy(active==='emoji'&&kind==='symbols'?selectedGlyph(entry):entry.copy);};
  results.onkeydown=event=>{
   if(kind!=='symbols'||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key)||event.altKey||event.ctrlKey||event.metaKey)return;
@@ -193,5 +193,5 @@ export function mountReference(root:HTMLElement,kind:'symbols'|'cheats',notify:(
  const disposeEmojiFont=kind==='symbols'?mountEmojiFont(root,tip):()=>{};
  const disposeSegments=referenceSegments(root.querySelector<HTMLElement>('.reference-tabs')!);
  rebuild();
- return ()=>{disposed=true;disposeEmojiFont();disposeSegments();cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);scroll.removeEventListener('scrollend',finishSymbolNavigation);scroll.removeEventListener('keydown',navigationKey);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();appearance.disconnect();tipResize.disconnect();cheatDocument?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();window.clipperAppearance?.releaseFontResources?.();};
+ return ()=>{disposed=true;disposeEmojiFont();disposeSegments();cancelNavigation();scroll.removeEventListener('wheel',cancelNavigation);scroll.removeEventListener('touchstart',cancelNavigation);scroll.removeEventListener('pointerdown',cancelNavigation);scroll.removeEventListener('scrollend',finishSymbolNavigation);scroll.removeEventListener('keydown',navigationKey);clearTimeout(queryTimer);clearTimeout(tooltipTimer);clearTimeout(scrollTipTimer);clearTimeout(resizeTimer);cancelAnimationFrame(frame);resize.disconnect();appearance.disconnect();tipResize.disconnect();cheatDocument?.dispose();hideTip();tip.remove();document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);mounted.clear();window.clipAppearance?.releaseFontResources?.();};
 }

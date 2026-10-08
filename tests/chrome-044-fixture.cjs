@@ -1,10 +1,10 @@
 function prepare(){
- const base=window.clipper,model=fixture.state.clips[0],kinds=['text','image','files','link','code'];
+ const base=window.clip,model=fixture.state.clips[0],kinds=['text','image','files','link','code'];
  fixture.state.clips=Array.from({length:90},(_,i)=>({...model,id:'row-'+i,hash:'hash-'+i,kind:kinds[i%kinds.length],title:'Record '+i,preview:'Preview '+i,source:'Fixture.exe',favorite:true,tags:[]}));
  fixture.state.categories=[{id:'work',name:'Work',color:'#7893b4'},{id:'personal',name:'Personal',color:'#bd8367'}];
  fixture.state.queue=['row-0','row-1','row-0'];fixture.state.shelf=fixture.state.clips.map(c=>c.id);
  window.chromeProbe={pending:[],batches:[],clear:0,blocking:false};
- window.clipper=new Proxy({
+ window.clip=new Proxy({
   preview:async id=>({...fixture.state.clips.find(c=>c.id===id),payload:{text:'Complete '+id,files:['E:\\PrivateFixture\\file.txt']}}),
   snippetPreview:async id=>({...fixture.state.snippets.find(c=>c.id===id),revision:1,text:'Complete quick reply',payload:{text:'Complete quick reply'}}),
   batch:async(ids,action,tags)=>{chromeProbe.batches.push({ids,action,tags});if(chromeProbe.blocking)await new Promise(resolve=>chromeProbe.pending.push(resolve));},

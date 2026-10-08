@@ -14,7 +14,7 @@ async function run(){
  const existing=execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',"@(Get-Process -Name notepad -ErrorAction SilentlyContinue).Count"],{encoding:'utf8',windowsHide:true}).trim();
  assert.equal(Number(existing),0,'Close existing Notepad windows before this isolated test');
  const output=path.resolve('work/notepad-paste');await fs.mkdir(output,{recursive:true});
- const file=path.join(output,'clipper-focus-'+randomUUID()+'.txt');await fs.writeFile(file,'');
+ const file=path.join(output,'clip-focus-'+randomUUID()+'.txt');await fs.writeFile(file,'');
  const f=await fixture('notepad-paste');let child,hwnd=0,pid=0;
  const native=(action,arg)=>f.helper.evaluate(({app},{action,arg})=>{
   const req=process.getBuiltinModule('node:module').createRequire(process.getBuiltinModule('node:path').join(app.getAppPath(),'package.json'));
@@ -39,15 +39,15 @@ async function run(){
  },{action,arg});
  const keys=codes=>native('keys',codes);
  try{
-  const value='Clipper Notepad paste check '+randomUUID();await f.page.evaluate(text=>window.clipper.applyText({mode:'save',source:'脚本处理',text:text}),value);
+  const value='Clip Notepad paste check '+randomUUID();await f.page.evaluate(text=>window.clip.applyText({mode:'save',source:'脚本处理',text:text}),value);
   child=spawn('notepad.exe',[file],{stdio:'ignore',windowsHide:false});
   await expect.poll(()=>notepads().find(item=>item.MainWindowTitle.includes(path.basename(file))),{timeout:15000}).not.toBeUndefined();
   const found=notepads().find(item=>item.MainWindowTitle.includes(path.basename(file)));hwnd=found.MainWindowHandle;pid=found.Id;
   await f.helper.evaluate(async()=>{await global.focusTarget();global.helperWindow.setAlwaysOnTop(false);});
-  assert.equal(await native('activate',hwnd),true,'Notepad activation rejected before the Clipper test');
+  assert.equal(await native('activate',hwnd),true,'Notepad activation rejected before the Clip test');
   await native('click',hwnd);
   await expect.poll(()=>native('foreground')).toBe(hwnd);
-  const opened=f.app.waitForEvent('window');await f.page.evaluate(()=>window.clipper.showTray());const panel=await opened;
+  const opened=f.app.waitForEvent('window');await f.page.evaluate(()=>window.clip.showTray());const panel=await opened;
   await panel.waitForSelector('.tray-row');await panel.locator('.tray-row').filter({hasText:value}).click({button:'right'});
   await expect.poll(()=>native('foreground')).toBe(hwnd);
   await keys([[17,0],[65,0],[65,2],[17,2],[17,0],[67,0],[67,2],[17,2]]);

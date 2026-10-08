@@ -1,4 +1,4 @@
-/** Migrated from actual One 0.16.6 segments.ts; auxiliary windows use body, Clipper active state is accepted. */
+/** Migrated from actual One 0.16.6 segments.ts; auxiliary windows use body, Clip active state is accepted. */
 /** A shared sliding indicator and roving keyboard focus for segmented controls. */
 export function setupSegments(){
  const root=document.body;

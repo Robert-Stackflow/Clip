@@ -1,9 +1,9 @@
 import {english} from './locales/en';
 import {type InterfaceLanguage} from './language';
-let language:InterfaceLanguage=typeof process!=='undefined'&&process.env?.CLIPPER_UI_LANGUAGE==='en'?'en':'zh-CN';
+let language:InterfaceLanguage=typeof process!=='undefined'&&process.env?.CLIP_UI_LANGUAGE==='en'?'en':'zh-CN';
 export function setInterfaceLanguage(value:InterfaceLanguage){if(value!=='zh-CN'&&value!=='en')throw new Error('Invalid interface language');language=value;}
 export const interfaceLanguage=()=>language;
-export const interfaceLanguageArguments=()=>['--clipper-ui-language='+language];
+export const interfaceLanguageArguments=()=>['--clip-ui-language='+language];
 export const formatLocale=() => language==='zh-CN'?'zh-CN':'en-US';
 const slots=(value:string)=>Array.from(value.matchAll(/⟦(\d+)⟧/g),match=>Number(match[1])).sort((a,b)=>a-b);
 export function validateMessage(source:string,translation:string){if(!translation.trim()||JSON.stringify(slots(source))!==JSON.stringify(slots(translation)))throw new Error('Invalid translation placeholders');}

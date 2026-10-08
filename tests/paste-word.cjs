@@ -8,7 +8,7 @@ const {fixture}=require('./efficiency-fixture.cjs');
 const {Store}=require('../work/test-exports.cjs');
 
 async function run(){
- const rich=process.env.CLIPPER_PASTE_WORD_RICH==='1';
+ const rich=process.env.CLIP_PASTE_WORD_RICH==='1';
  const existing=execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',"@(Get-Process -Name WINWORD -ErrorAction SilentlyContinue).Count"],{encoding:'utf8',windowsHide:true}).trim();
  assert.equal(Number(existing),0,'Close existing Word windows before this isolated test');
  const output=path.resolve('work/paste-word');await fs.mkdir(output,{recursive:true});
@@ -28,7 +28,7 @@ async function run(){
   }
  },{action,arg});
  try{
-  const value='Clipper Word paste check '+randomUUID();
+  const value='Clip Word paste check '+randomUUID();
   if(rich){
    const store=new Store(':memory:');
    try{
@@ -37,9 +37,9 @@ async function run(){
     store.add({text:value,html,rtf},'Word rich paste test');
     const seed=path.join(output,prefix+'-seed.json');await fs.writeFile(seed,JSON.stringify(store.backup()));
     await f.app.evaluate(({dialog},file)=>dialog.showOpenDialog=async()=>({canceled:false,filePaths:[file]}),seed);
-    await f.page.evaluate(()=>window.clipper.backup('import'));
+    await f.page.evaluate(()=>window.clip.backup('import'));
    }finally{store.close();}
-  }else await f.page.evaluate(text=>window.clipper.applyText({mode:'save',source:'脚本处理',text:text}),value);
+  }else await f.page.evaluate(text=>window.clip.applyText({mode:'save',source:'脚本处理',text:text}),value);
   child=spawn('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.resolve('tests/paste-word-target.ps1'),'-Ready',ready,'-Result',result,'-Stop',stop,'-Failure',failure,...(rich?['-Details']:[])],{stdio:'ignore',windowsHide:true});
   await expect.poll(async()=>{if(await fs.stat(failure).then(()=>true,()=>false))throw Error(await fs.readFile(failure,'utf8'));return fs.readFile(ready,'utf8').catch(()=>'');},{timeout:45000}).toBe('ready');
   const source=execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-Command',"Get-Process -Name WINWORD | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1 Id,MainWindowHandle | ConvertTo-Json -Compress"],{encoding:'utf8',windowsHide:true}).trim();
@@ -47,7 +47,7 @@ async function run(){
   await f.helper.evaluate(async()=>{await global.focusTarget();global.helperWindow.setAlwaysOnTop(false);});
   await native('activate',hwnd);await native('click',hwnd);
   await expect.poll(()=>native('foreground')).toBe(hwnd);
-  const opened=f.app.waitForEvent('window');await f.page.evaluate(()=>window.clipper.showTray());const panel=await opened;
+  const opened=f.app.waitForEvent('window');await f.page.evaluate(()=>window.clip.showTray());const panel=await opened;
   await panel.waitForSelector('.tray-row');await panel.locator('.tray-row').filter({hasText:value}).click({button:'right'});
   await expect.poll(async()=>{if(await fs.stat(failure).then(()=>true,()=>false))throw Error(await fs.readFile(failure,'utf8'));return fs.readFile(result,'utf8').catch(()=>'');},{timeout:10000}).toContain(value);
   const details=rich?JSON.parse(await fs.readFile(result,'utf8')):undefined;

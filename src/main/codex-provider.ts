@@ -4,6 +4,8 @@ import {dirname,join,resolve} from 'node:path';
 import {tmpdir} from 'node:os';
 import {t as tr} from '../shared/i18n';
 import {MAX_TOOL_OUTPUT,toolText,reasoningEffort,type AIModel,type AIProfile,type AIResult,type CodexStatus} from '../shared/text-tools';
+import {codexExecutables,CodexRuntimeError,codexUnavailable} from './codex-runtime';
+export {codexExecutable,codexExecutables} from './codex-runtime';
 
 type Message={role:string;content:string;images?:{png:string;name:string}[]};
 type GenerationOptions={chat?:boolean;delta?:(text:string)=>void};
@@ -12,7 +14,7 @@ export interface CodexBackend {
  status():Promise<CodexStatus>;login():Promise<CodexStatus>;cancelLogin():Promise<void>;logout():Promise<void>;
  models(signal:AbortSignal):Promise<string[]>;catalog?(signal:AbortSignal):Promise<AIModel[]>;generate(profile:AIProfile,messages:Message[],signal:AbortSignal,png?:string,options?:GenerationOptions):Promise<AIResult>;dispose():void;
 }
-const unavailable=()=>new Error(tr('Codex 无法启动，请检查运行时是否完整'));
+const unavailable=codexUnavailable;
 const failed=(error?:any,method?:string)=>{
  const info=error?.codexErrorInfo||error?.data?.codexErrorInfo,kind=typeof info==='string'?info:info&&typeof info==='object'?Object.keys(info)[0]:undefined;
  const http=kind&&typeof info==='object'?info[kind]?.httpStatusCode:undefined,code=Number.isSafeInteger(error?.code)?error.code:undefined;
@@ -36,11 +38,6 @@ function environment(home:string,proxy:string){
  const first=proxy.split(';').map(value=>value.trim()).find(Boolean)||'DIRECT',match=/^(PROXY|HTTP|HTTPS|SOCKS|SOCKS5)\s+([^\s/?#@]+:\d{1,5})$/.exec(first);
  if(match){const scheme=match[1]==='HTTPS'?'https':match[1].startsWith('SOCKS')?'socks5h':'http';try{const url=new URL(`${scheme}://${match[2]}`);if(url.hostname&&+match[2].slice(match[2].lastIndexOf(':')+1)>0){const value=url.href.replace(/\/$/,'');if(!env.HTTPS_PROXY&&!env.https_proxy&&!env.ALL_PROXY&&!env.all_proxy)env.HTTPS_PROXY=value;if(!env.HTTP_PROXY&&!env.http_proxy&&!env.ALL_PROXY&&!env.all_proxy)env.HTTP_PROXY=value;}}catch{}}
  return env;
-}
-export function codexExecutable(){
- const platform=process.platform,arch=process.arch,target=platform==='win32'?(arch==='arm64'?'aarch64':'x86_64')+'-pc-windows-msvc':platform==='darwin'?(arch==='arm64'?'aarch64':'x86_64')+'-apple-darwin':(arch==='arm64'?'aarch64':'x86_64')+'-unknown-linux-musl';
- const root=dirname(require.resolve(`@openai/codex-${platform==='win32'?'win32':platform}-${arch}/package.json`));
- return join(root,'vendor',target,'bin',platform==='win32'?'codex.exe':'codex').replace(/app\.asar([\\/])/,'app.asar.unpacked$1');
 }
 /** The same local app-server protocol used by Pixal's Python SDK, without a Python dependency. */
 export class CodexConnection {
@@ -74,36 +71,54 @@ export class CodexConnection {
    this.pending.set(id,{method,resolve,reject,clean});signal?.addEventListener('abort',cancel,{once:true});try{this.send({id,method,params});}catch(error){this.pending.delete(id);clean();reject(error);}
   });
  }
- async initialize(signal?:AbortSignal){await this.request('initialize',{clientInfo:{name:'clipper',title:'Clipper',version:'0.50.15'}},signal);this.send({method:'initialized',params:{}});}
+ async initialize(signal?:AbortSignal){await this.request('initialize',{clientInfo:{name:'clip',title:'Clip',version:'0.50.15'}},signal);this.send({method:'initialized',params:{}});}
  close(){this.fail(aborted());this.listeners.clear();this.failures.clear();this.child.kill();}
 }
 export class CodexProvider implements CodexBackend {
  private connection?:Promise<CodexConnection>;private loginState:CodexStatus={available:false,loggedIn:false,login:'idle'};private loginId='';private loginTimer?:ReturnType<typeof setTimeout>;private starting?:Promise<CodexStatus>;private disposed=false;
- constructor(private home:()=>string,private executable:()=>string=codexExecutable,private proxy:()=>Promise<string>=async()=>'DIRECT'){}
- private async connect(home:string,cwd:string,signal?:AbortSignal){let proxy:string;try{proxy=await this.proxy();}catch{throw new Error(tr('无法读取系统代理，请检查网络设置后重试'));}if(this.disposed)throw unavailable();if(signal?.aborted)throw aborted();return new CodexConnection(this.executable(),home,cwd,proxy);}
+ private resolvedExecutable='';
+ private catalogs=new Set<CodexConnection>();
+ constructor(private home:()=>string,private executable:()=>string|string[]=codexExecutables,private proxy:()=>Promise<string>=async()=>'DIRECT'){}
+ private async connect(home:string,cwd:string,signal?:AbortSignal){
+  let proxy:string;try{proxy=await this.proxy();}catch{throw new Error(tr('无法读取系统代理，请检查网络设置后重试'));}if(this.disposed)throw unavailable();if(signal?.aborted)throw aborted();
+  const found=this.executable(),candidates=typeof found==='string'?[found]:found;
+  if(!candidates.length)throw new CodexRuntimeError(tr('未找到本机 Codex，请先安装 Codex 或选择已安装的程序'));
+  const ordered=this.resolvedExecutable&&candidates.includes(this.resolvedExecutable)?[this.resolvedExecutable,...candidates.filter(file=>file!==this.resolvedExecutable)]:candidates;
+  for(const file of ordered){
+   const connection=new CodexConnection(file,home,cwd,proxy),controller=new AbortController(),cancel=()=>controller.abort(),timer=setTimeout(cancel,5000);signal?.addEventListener('abort',cancel,{once:true});
+   try{await connection.initialize(controller.signal);await connection.request('account/read',{refreshToken:false},controller.signal);if(this.disposed)throw unavailable();if(signal?.aborted)throw aborted();this.resolvedExecutable=file;return connection;}
+   catch{connection.close();if(this.disposed)throw unavailable();if(signal?.aborted)throw aborted();}
+   finally{clearTimeout(timer);signal?.removeEventListener('abort',cancel);}
+  }
+  this.resolvedExecutable='';throw unavailable();
+ }
  private async control(){
   if(this.disposed)throw unavailable();
-  if(!this.connection)this.connection=(async()=>{const home=resolve(this.home());await mkdir(home,{recursive:true,mode:0o700});const connection=await this.connect(home,home);try{await connection.initialize();}catch(error){connection.close();throw error;}
+  if(!this.connection)this.connection=(async()=>{const home=resolve(this.home());await mkdir(home,{recursive:true,mode:0o700});const connection=await this.connect(home,home);
    connection.on(event=>{if(event.method==='account/login/completed'&&event.params.loginId===this.loginId){clearTimeout(this.loginTimer);this.loginId='';this.loginState={available:true,loggedIn:!!event.params.success,login:event.params.success?'complete':'error',...(!event.params.success?{error:tr('Codex 登录未完成，请重试')}: {})};}});
    connection.onFailure(()=>{this.connection=undefined;clearTimeout(this.loginTimer);this.loginId='';this.loginState={available:false,loggedIn:false,login:'error',error:unavailable().message};});return connection;
   })().catch(error=>{this.connection=undefined;throw error;});
   return this.connection;
  }
- async status():Promise<CodexStatus>{try{const result=await(await this.control()).request('account/read',{refreshToken:false});const account=result.account;return {...this.loginState,available:true,loggedIn:!!account,email:typeof account?.email==='string'?account.email:undefined,planType:typeof account?.planType==='string'?account.planType:undefined};}catch{return {available:false,loggedIn:false,login:'error',error:unavailable().message};}}
+ async status():Promise<CodexStatus>{try{const result=await(await this.control()).request('account/read',{refreshToken:false});const account=result.account;return {...this.loginState,available:true,loggedIn:!!account,executablePath:this.resolvedExecutable,email:typeof account?.email==='string'?account.email:undefined,planType:typeof account?.planType==='string'?account.planType:undefined};}catch(error){return {available:false,loggedIn:false,login:'error',error:error instanceof CodexRuntimeError?error.message:unavailable().message};}}
  login():Promise<CodexStatus>{
   if(this.starting)return this.starting;if(this.loginId)return this.status();this.loginState={available:true,loggedIn:false,login:'starting'};
   this.starting=(async()=>{try{const result=await(await this.control()).request('account/login/start',{type:'chatgptDeviceCode'});const url=new URL(result.verificationUrl);if(url.protocol!=='https:'||url.hostname!=='auth.openai.com'||typeof result.userCode!=='string'||!/^[A-Z0-9-]{4,32}$/.test(result.userCode)||typeof result.loginId!=='string')throw failed();
    this.loginId=result.loginId;this.loginState={available:true,loggedIn:false,login:'pending',verificationUrl:url.href,userCode:result.userCode};this.loginTimer=setTimeout(()=>void this.cancelLogin().then(()=>{this.loginState={available:true,loggedIn:false,login:'error',error:tr('Codex 登录超时，请重试')};}).catch(()=>{}),600000);return {...this.loginState};
-  }catch{this.loginState={available:true,loggedIn:false,login:'error',error:tr('Codex 登录未完成，请重试')};return {...this.loginState};}finally{this.starting=undefined;}})();return this.starting;
+  }catch(error){this.loginState={available:!(error instanceof CodexRuntimeError),loggedIn:false,login:'error',error:error instanceof CodexRuntimeError?error.message:tr('Codex 登录未完成，请重试')};return {...this.loginState};}finally{this.starting=undefined;}})();return this.starting;
  }
  async cancelLogin(){clearTimeout(this.loginTimer);if(this.starting)await this.starting;const id=this.loginId;this.loginId='';this.loginState={available:true,loggedIn:false,login:'idle'};if(id)await(await this.control()).request('account/login/cancel',{loginId:id});}
  async logout(){await this.cancelLogin();await(await this.control()).request('account/logout');this.loginState={available:true,loggedIn:false,login:'idle'};}
  async models(signal:AbortSignal){return (await this.catalog(signal)).map(model=>model.id);}
- async catalog(signal:AbortSignal){const connection=await this.control();let cursor:string|undefined;const models=new Map<string,AIModel>();for(let page=0;page<5;page++){const result=await connection.request('model/list',{limit:100,includeHidden:false,...(cursor?{cursor}:{})},signal);if(!Array.isArray(result.data))throw failed();for(const item of result.data){const id=item.model||item.id;if(typeof id!=='string'||!id.length||id.length>200||/[\r\n]/.test(id))continue;const name=typeof item.displayName==='string'&&item.displayName.trim()?item.displayName.trim().slice(0,120):id;const efforts=Array.isArray(item.supportedReasoningEfforts)?item.supportedReasoningEfforts.flatMap((option:any)=>{try{const effort=reasoningEffort(option.reasoningEffort);return effort?[effort]:[];}catch{return [];}}):undefined;models.set(id,{id,name,...(efforts?{reasoningEfforts:[...new Set<string>(efforts)].slice(0,16)}:{})});}if(typeof result.nextCursor!=='string'||!result.nextCursor||result.nextCursor===cursor)break;cursor=result.nextCursor;}return [...models.values()].slice(0,100);}
+ async catalog(signal:AbortSignal){
+  // A fresh process reads the currently installed binary and refreshes version-specific model data.
+  const home=resolve(this.home());await mkdir(home,{recursive:true,mode:0o700});const connection=await this.connect(home,home,signal);this.catalogs.add(connection);
+  try{let cursor:string|undefined;const models=new Map<string,AIModel>();for(let page=0;page<5;page++){const result=await connection.request('model/list',{limit:100,includeHidden:false,...(cursor?{cursor}:{})},signal);if(!Array.isArray(result.data))throw failed();for(const item of result.data){const id=item.model||item.id;if(typeof id!=='string'||!id.length||id.length>200||/[\r\n]/.test(id))continue;const name=typeof item.displayName==='string'&&item.displayName.trim()?item.displayName.trim().slice(0,120):id;const efforts=Array.isArray(item.supportedReasoningEfforts)?item.supportedReasoningEfforts.flatMap((option:any)=>{try{const effort=reasoningEffort(option.reasoningEffort);return effort?[effort]:[];}catch{return [];}}):undefined;models.set(id,{id,name,...(efforts?{reasoningEfforts:[...new Set<string>(efforts)].slice(0,16)}:{})});}if(typeof result.nextCursor!=='string'||!result.nextCursor||result.nextCursor===cursor)break;cursor=result.nextCursor;}return [...models.values()].slice(0,100);}finally{this.catalogs.delete(connection);connection.close();}
+ }
  async generate(profile:AIProfile,messages:Message[],signal:AbortSignal,png?:string,options:GenerationOptions={}):Promise<AIResult>{
-  if(signal.aborted)throw aborted();if(this.loginId||this.starting)throw new Error(tr('请先完成 Codex 账户授权'));const home=resolve(this.home());await mkdir(home,{recursive:true,mode:0o700});const directory=await mkdtemp(join(tmpdir(),'clipper-codex-'));let connection:CodexConnection|undefined;
+  if(signal.aborted)throw aborted();if(this.loginId||this.starting)throw new Error(tr('请先完成 Codex 账户授权'));const home=resolve(this.home());await mkdir(home,{recursive:true,mode:0o700});const directory=await mkdtemp(join(tmpdir(),'clip-codex-'));let connection:CodexConnection|undefined;
   try{
-   connection=await this.connect(home,directory,signal);await connection.initialize(signal);if(signal.aborted)throw aborted();const account=await connection.request('account/read',{refreshToken:false},signal);if(!account.account)throw new Error(tr('请先在 AI 服务中登录 Codex'));
+   connection=await this.connect(home,directory,signal);if(signal.aborted)throw aborted();const account=await connection.request('account/read',{refreshToken:false},signal);if(!account.account)throw new Error(tr('请先在 AI 服务中登录 Codex'));
    const instructions=messages.filter(message=>message.role==='system').map(message=>message.content).join('\n')+(options.chat?'\nContinue the conversation encoded as JSON messages in the user input. Preserve the user and assistant roles. Answer the final user message. Images are labelled by their message and attachment index.':'\nOnly transform the provided text or image.')+' Do not execute commands, browse, access other files, or use tools.';
    const thread=await connection.request('thread/start',{model:profile.model||null,cwd:directory,ephemeral:true,sandbox:'read-only',approvalPolicy:'never',baseInstructions:instructions},signal),threadId=thread.thread?.id;if(typeof threadId!=='string')throw failed();
    const conversation=messages.filter(message=>message.role!=='system'),input:any[]=[{type:'text',text:options.chat?JSON.stringify(conversation.map(({role,content,images},index)=>({role,content,...(images?.length?{images:images.map((_image,attachment)=>`message-${index}-image-${attachment}.png`)}:{})}))):conversation.map(message=>message.content).join('\n'),text_elements:[]}];if(png){const image=join(directory,'input.png');await writeFile(image,Buffer.from(png,'base64'),{mode:0o600});input.push({type:'localImage',path:image});}
@@ -121,7 +136,7 @@ export class CodexProvider implements CodexBackend {
      if(event.method==='turn/completed'){if(turnId&&p.turn?.id!==turnId)return;if(p.turn?.status!=='completed'){finish(p.turn?.status==='interrupted'?aborted():failed(p.turn?.error));return;}try{const completed=p.turn.items?.filter((item:any)=>item.type==='agentMessage'&&item.phase!=='commentary').map((item:any)=>item.text).filter((value:any)=>typeof value==='string');const result=completed?.length?completed.join('\n\n'):finals.size?[...finals.values()].join('\n\n'):text;finish(undefined,{text:toolText(result,MAX_TOOL_OUTPUT),model:thread.model||profile.model||'Codex',inputTokens,outputTokens,truncated:false});}catch(error){finish(error as Error);}}
     });signal.addEventListener('abort',cancel,{once:true});if(signal.aborted){cancel();return;}void client.request('turn/start',{threadId,input,...(profile.reasoningEffort?{effort:profile.reasoningEffort}:{})},signal).then(result=>{turnId=result.turn?.id||'';if(!turnId)finish(failed());},error=>finish(error));
    });
-  }finally{connection?.close();if(dirname(resolve(directory))===resolve(tmpdir())&&directory.startsWith(join(resolve(tmpdir()),'clipper-codex-')))await rm(directory,{recursive:true,force:true,maxRetries:3,retryDelay:100});}
+  }finally{connection?.close();if(dirname(resolve(directory))===resolve(tmpdir())&&directory.startsWith(join(resolve(tmpdir()),'clip-codex-')))await rm(directory,{recursive:true,force:true,maxRetries:3,retryDelay:100});}
  }
- dispose(){this.disposed=true;clearTimeout(this.loginTimer);void this.connection?.then(connection=>connection.close()).catch(()=>{});this.connection=undefined;}
+ dispose(){this.disposed=true;clearTimeout(this.loginTimer);for(const connection of this.catalogs)connection.close();this.catalogs.clear();void this.connection?.then(connection=>connection.close()).catch(()=>{});this.connection=undefined;}
 }

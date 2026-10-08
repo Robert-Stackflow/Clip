@@ -9,8 +9,8 @@ import './appearance';
 import './shelf.css';
 import {createElement,Lock,Unlock,Plus,ArrowUpRight,Copy,X,FileText,Image,Folder,Minimize2,Maximize2,type IconNode} from 'lucide';
 import type {ShelfAPI,ShelfState} from '../shared/desktop';
-declare global {interface Window{clipperShelf:ShelfAPI}}
-const api=window.clipperShelf;
+declare global {interface Window{clipShelf:ShelfAPI}}
+const api=window.clipShelf;
 const q=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById(id) as T;
 const esc=(value:unknown)=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const icon=(node:IconNode)=>createElement(node,{'aria-hidden':'true','stroke-width':1.75}).outerHTML;
@@ -35,7 +35,7 @@ function bindRows(){
  box.addEventListener('dragstart',event=>{event.preventDefault();const row=event.target instanceof Element?event.target.closest('.shelf-row'):null;if(!(row instanceof HTMLElement)||!isWindowVisible()||!state?.items.some(i=>i.id===row.dataset.id&&(i.kind==='image'||i.kind==='files')))return;api.drag(row.dataset.id!);});
 }
 bindRows();
-document.addEventListener('clipper:feedback',e=>notice((e as CustomEvent).detail));
+document.addEventListener('clip:feedback',e=>notice((e as CustomEvent).detail));
 let transitionRevision=0;
 const changeMode=async(mode:'compact'|'expanded')=>{const previous=document.documentElement.dataset.mode;transitionMode=mode;transitionRevision++;document.documentElement.dataset.transitioning='';document.documentElement.dataset.mode=mode;try{await api.mode(mode,matchMedia('(prefers-reduced-motion: reduce)').matches);}catch(error){transitionMode=undefined;if(previous)document.documentElement.dataset.mode=previous;else delete document.documentElement.dataset.mode;delete document.documentElement.dataset.transitioning;throw error;}};
 q('top').innerHTML=icon(Unlock);q('choose').innerHTML=icon(Plus);q('main').innerHTML=icon(ArrowUpRight);q('compact-icon').innerHTML=icon(Folder);q('transition-icon').innerHTML=icon(Folder);actions.bind(q<HTMLButtonElement>('top'),()=>state&&isWindowVisible()?api.top(!state.locked):undefined,notice);actions.bind(q<HTMLButtonElement>('choose'),()=>api.choose(),notice);actions.bind(q<HTMLButtonElement>('main'),()=>api.main(),notice);actions.bind(q<HTMLButtonElement>('mode'),()=>changeMode(state?.mode==='compact'?'expanded':'compact'),notice,'shelf-mode');actions.bind(q<HTMLButtonElement>('compact-open'),()=>changeMode('expanded'),notice,'shelf-mode');

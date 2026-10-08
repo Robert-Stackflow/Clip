@@ -6,7 +6,7 @@ using System.Text;
 using System.Web.Script.Serialization;
 using Microsoft.Win32;
 
-namespace ClipperUpdate
+namespace ClipUpdate
 {
     internal static class ProgramPaths
     {
@@ -14,13 +14,13 @@ namespace ClipperUpdate
         internal const string Identity = Verification.Guid;
         internal static readonly string Executable = Verification.Executable;
         internal const int ExitWait = 1500;
-        internal static readonly string Product = "ClipperVerification-" + Identity;
-        internal static readonly string RecoveryRunKey = "Software\\ClipperVerification\\" + Identity + "\\RunOnce";
+        internal static readonly string Product = "ClipVerification-" + Identity;
+        internal static readonly string RecoveryRunKey = "Software\\ClipVerification\\" + Identity + "\\RunOnce";
 #else
-        internal const string Identity = "b6d4d333-0ac3-5509-8b81-d6b57d4a4f1a";
-        internal static readonly string Executable = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Clipper", "Clipper.exe");
+        internal const string Identity = "c3cffeb7-343a-5f68-9113-943b5093c7c4";
+        internal static readonly string Executable = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Clip", "Clip.exe");
         internal const int ExitWait = 60000;
-        internal const string Product = "Clipper";
+        internal const string Product = "Clip";
         internal const string RecoveryRunKey = "Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce";
 #endif
         internal static readonly string Install = Path.GetDirectoryName(Executable);
@@ -67,7 +67,7 @@ namespace ClipperUpdate
         }
         internal static void RecoveryEntry(string executable, bool remove)
         {
-            string name = "ClipperRecovery-" + Identity, command = "\"" + Path.GetFullPath(executable) + "\" --recover";
+            string name = "ClipRecovery-" + Identity, command = "\"" + Path.GetFullPath(executable) + "\" --recover";
             using (RegistryKey key = Registry.CurrentUser.CreateSubKey(RecoveryRunKey))
             {
                 string old = key.GetValue(name) as string;
@@ -193,14 +193,14 @@ namespace ClipperUpdate
         {
             if (!ProgramPaths.Same(executable, ProgramPaths.Executable) || !File.Exists(ProgramPaths.Executable)) return false;
             using (RegistryKey key = Registry.CurrentUser.OpenSubKey(ProgramPaths.Keys[1]))
-            { string name = key == null ? "" : key.GetValue("DisplayName") as string; return key != null && (name == "Clipper" || name != null && name.StartsWith("Clipper ", StringComparison.Ordinal)) && File.Exists(Path.Combine(ProgramPaths.Install, "resources", "app.asar")); }
+            { string name = key == null ? "" : key.GetValue("DisplayName") as string; return key != null && (name == "Clip" || name != null && name.StartsWith("Clip ", StringComparison.Ordinal)) && File.Exists(Path.Combine(ProgramPaths.Install, "resources", "app.asar")); }
         }
         internal static ArchiveCheckpoint Checkpoint(string dataRoot, string checkpointId, string profileId, string version)
         {
             if (!ProgramPaths.Id(checkpointId) || !ProgramPaths.Id(profileId)) throw new Exception("ROLLBACK_CHECKPOINT");
             string dir = Path.Combine(dataRoot, "history-checkpoints", checkpointId); ProgramPaths.DirectorySafe(dir);
             var point = ProgramPaths.Read<ArchiveCheckpoint>(Path.Combine(dir, "checkpoint.json"), 16384);
-            if (point == null || point.format != "clipper-history-checkpoint" || point.version != 1 || point.id != checkpointId || point.profileId != profileId || point.sourceVersion != version || point.schema < 0 || point.files == null || !point.files.ContainsKey("history.sqlite") || point.encrypted != point.files.ContainsKey("history-vault.json")) throw new Exception("ROLLBACK_CHECKPOINT");
+            if (point == null || point.format != "clip-history-checkpoint" || point.version != 1 || point.id != checkpointId || point.profileId != profileId || point.sourceVersion != version || point.schema < 0 || point.files == null || !point.files.ContainsKey("history.sqlite") || point.encrypted != point.files.ContainsKey("history-vault.json")) throw new Exception("ROLLBACK_CHECKPOINT");
             if (Directory.GetDirectories(dir).Length != 0 || Directory.GetFiles(dir).Length != point.files.Count + 1) throw new Exception("ROLLBACK_CHECKPOINT");
             foreach (var file in point.files)
             { if (file.Key != "history.sqlite" && file.Key != "history-vault.json") throw new Exception("ROLLBACK_CHECKPOINT"); var value = file.Value; string full = Path.Combine(dir, file.Key); if (value == null || value.bytes < 1 || value.bytes > 512L * 1024 * 1024 || !ProgramPaths.Digest(value.sha256) || new FileInfo(full).Length != value.bytes || ProgramPaths.Hash(full) != value.sha256) throw new Exception("ROLLBACK_CHECKPOINT"); }
@@ -214,7 +214,7 @@ namespace ClipperUpdate
             string id = Guid.NewGuid().ToString("D"); pending = Path.Combine(Root(dataRoot), ".pending-" + id); Directory.CreateDirectory(pending);
             CopyTree(ProgramPaths.Install, Path.Combine(pending, "program")); VerifyTree(Path.Combine(pending, "program"), original);
             bool shortcut = File.Exists(ProgramPaths.Shortcut); if (shortcut) { ProgramPaths.FileSafe(ProgramPaths.Shortcut); File.Copy(ProgramPaths.Shortcut, Path.Combine(pending, "shortcut.lnk")); }
-            var archive = new ProgramArchive { format = "clipper-program-version", formatVersion = 1, id = id, version = version, installedTo = installedTo, createdAt = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds, bytes = bytes, checkpointId = checkpointId, profileId = profileId, checkpointSha256 = ProgramPaths.Hash(Path.Combine(dataRoot, "history-checkpoints", checkpointId, "checkpoint.json")), reason = reason, files = original, registry = CaptureRegistry(), shortcut = shortcut, shortcutFile = shortcut ? new VersionFile { bytes = new FileInfo(Path.Combine(pending, "shortcut.lnk")).Length, sha256 = ProgramPaths.Hash(Path.Combine(pending, "shortcut.lnk")) } : null };
+            var archive = new ProgramArchive { format = "clip-program-version", formatVersion = 1, id = id, version = version, installedTo = installedTo, createdAt = (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds, bytes = bytes, checkpointId = checkpointId, profileId = profileId, checkpointSha256 = ProgramPaths.Hash(Path.Combine(dataRoot, "history-checkpoints", checkpointId, "checkpoint.json")), reason = reason, files = original, registry = CaptureRegistry(), shortcut = shortcut, shortcutFile = shortcut ? new VersionFile { bytes = new FileInfo(Path.Combine(pending, "shortcut.lnk")).Length, sha256 = ProgramPaths.Hash(Path.Combine(pending, "shortcut.lnk")) } : null };
             ProgramPaths.Atomic(Path.Combine(pending, "archive.json"), ProgramPaths.Json.Serialize(archive)); return archive;
         }
         internal static void Publish(string dataRoot, ProgramArchive archive, string pending)
@@ -222,7 +222,7 @@ namespace ClipperUpdate
         internal static ProgramArchive Read(string dataRoot, string id, bool verify)
         {
             string leaf = Leaf(dataRoot, id); ProgramArchive value = ProgramPaths.Read<ProgramArchive>(Path.Combine(leaf, "archive.json"), 4 * 1024 * 1024);
-            if (value == null || value.format != "clipper-program-version" || value.formatVersion != 1 || value.id != id || !ProgramPaths.Version(value.version) || !ProgramPaths.Version(value.installedTo) || value.createdAt <= 0 || value.bytes < 1 || value.bytes > 2L * 1024 * 1024 * 1024 || !ProgramPaths.Id(value.checkpointId) || !ProgramPaths.Id(value.profileId) || !ProgramPaths.Digest(value.checkpointSha256) || value.reason != "update" && value.reason != "rollback") throw new Exception("ROLLBACK_MANIFEST");
+            if (value == null || value.format != "clip-program-version" || value.formatVersion != 1 || value.id != id || !ProgramPaths.Version(value.version) || !ProgramPaths.Version(value.installedTo) || value.createdAt <= 0 || value.bytes < 1 || value.bytes > 2L * 1024 * 1024 * 1024 || !ProgramPaths.Id(value.checkpointId) || !ProgramPaths.Id(value.profileId) || !ProgramPaths.Digest(value.checkpointSha256) || value.reason != "update" && value.reason != "rollback") throw new Exception("ROLLBACK_MANIFEST");
             ValidateRegistry(value.registry); RegistryValue registeredVersion; if (!value.registry[1].nodes[""].TryGetValue("DisplayVersion", out registeredVersion) || registeredVersion.value != value.version) throw new Exception("ROLLBACK_REGISTRATION"); long total = 0; if (value.files == null || value.files.Count > 4096) throw new Exception("ROLLBACK_MANIFEST"); foreach (var file in value.files) { Relative(file.Key); if (file.Value == null || file.Value.bytes < 0 || !ProgramPaths.Digest(file.Value.sha256)) throw new Exception("ROLLBACK_MANIFEST"); total += file.Value.bytes; } if (total != value.bytes || !value.files.ContainsKey(Path.GetFileName(ProgramPaths.Executable)) || !value.files.ContainsKey("resources\\app.asar")) throw new Exception("ROLLBACK_MANIFEST");
             if (Directory.GetDirectories(leaf).Length != 1 || !Directory.Exists(Path.Combine(leaf, "program")) || Directory.GetFiles(leaf).Length != (value.shortcut ? 2 : 1) || value.shortcut && !File.Exists(Path.Combine(leaf, "shortcut.lnk"))) throw new Exception("ROLLBACK_CHANGED");
             if (value.shortcut) { string shortcut = Path.Combine(leaf, "shortcut.lnk"); ProgramPaths.FileSafe(shortcut); if (value.shortcutFile == null || value.shortcutFile.bytes < 1 || value.shortcutFile.bytes > 1024 * 1024 || !ProgramPaths.Digest(value.shortcutFile.sha256) || new FileInfo(shortcut).Length != value.shortcutFile.bytes || ProgramPaths.Hash(shortcut) != value.shortcutFile.sha256) throw new Exception("ROLLBACK_CHANGED"); }

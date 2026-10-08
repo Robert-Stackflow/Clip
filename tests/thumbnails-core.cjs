@@ -1,5 +1,5 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),path=require('node:path'),{png,decode}=require('./png-fixture.cjs');
-const {Thumbnails}=require('../work/test-thumbnails.cjs'),host=process.env.CLIPPER_IMAGE_HOST||path.resolve('dist/native/ImageHost.exe');
+const {Thumbnails}=require('../work/test-thumbnails.cjs'),host=process.env.CLIP_IMAGE_HOST||path.resolve('dist/native/ImageHost.exe');
 
 test('JPEG conversion and PNG thumbnails share one bounded decoder without changing original bytes',async()=>{
  const thumbnails=new Thumbnails(host),jpeg=require('./jpeg-fixture.cjs')(),original=Buffer.from(jpeg);

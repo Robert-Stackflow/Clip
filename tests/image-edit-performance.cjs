@@ -2,7 +2,7 @@ const {chromium}=require('@playwright/test'),assert=require('node:assert/strict'
 const baseline='dba3485',execute=promisify(execFile),onlyBaseline=process.argv.includes('--baseline');
 function imageFixture({width,height}){
  const c=document.createElement('canvas');c.width=width;c.height=height;const g=c.getContext('2d'),gradient=g.createLinearGradient(0,0,width,height);gradient.addColorStop(0,'#315e84');gradient.addColorStop(1,'#e7ae61');g.fillStyle=gradient;g.fillRect(0,0,width,height);g.fillStyle='#fff';g.fillRect(80,90,width/3,height/4);g.fillStyle='#263f52';g.font='90px sans-serif';g.fillText('Large image · 中文',100,height/2);const url=c.toDataURL();c.width=c.height=0;
- window.clipperImage.state=async()=>({url,dark:false});window.clipperImage.save=async data=>{fixture.exported=data;return 'fixture.png';};
+ window.clipImage.state=async()=>({url,dark:false});window.clipImage.save=async data=>{fixture.exported=data;return 'fixture.png';};
  const canvases=new Set(),stats={peakPixels:0,draws:0,serializations:0};window.imageStats=stats;
  const stringify=JSON.stringify;JSON.stringify=function(value,...args){if(Array.isArray(value)&&value.some(op=>op?.kind))stats.serializations++;return stringify.call(this,value,...args);};
  for(const property of ['width','height']){const descriptor=Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype,property);Object.defineProperty(HTMLCanvasElement.prototype,property,{...descriptor,set(value){descriptor.set.call(this,value);canvases.add(this);stats.peakPixels=Math.max(stats.peakPixels,Array.from(canvases).reduce((n,c)=>n+c.width*c.height,0));}});}
@@ -16,8 +16,8 @@ async function memory(browser){
 async function trial(mode,round,work){
  const browser=await chromium.launch({channel:'msedge',headless:true}),errors=[];
  try{const context=await browser.newContext({viewport:{width:1350,height:900},deviceScaleFactor:1.25}),page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await context.addInitScript(setup);await context.addInitScript(imageFixture,{width:4000,height:3000});
-  await context.route('https://clipper.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1),file=['drawing-test.js','reference-test.js'].includes(name)?path.join(work.fixtures,name):mode==='before'&&name==='image-editor.js'?path.join(work.fixtures,'before.js'):path.join('dist/renderer',name);await route.fulfill({body:await fs.readFile(file),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
-  await page.goto('https://clipper.test/image-editor.html');await page.waitForFunction(()=>document.getElementById('image').width===4000&&!document.getElementById('rotate').disabled);await page.waitForTimeout(150);const idle=await memory(browser),timings=[];
+  await context.route('https://clip.test/**',async route=>{const name=new URL(route.request().url()).pathname.slice(1),file=['drawing-test.js','reference-test.js'].includes(name)?path.join(work.fixtures,name):mode==='before'&&name==='image-editor.js'?path.join(work.fixtures,'before.js'):path.join('dist/renderer',name);await route.fulfill({body:await fs.readFile(file),contentType:name.endsWith('.html')?'text/html':name.endsWith('.css')?'text/css':'text/javascript'});});
+  await page.goto('https://clip.test/image-editor.html');await page.waitForFunction(()=>document.getElementById('image').width===4000&&!document.getElementById('rotate').disabled);await page.waitForTimeout(150);const idle=await memory(browser),timings=[];
   await page.evaluate(()=>{imageStats.peakPixels=0;imageStats.draws=0;imageStats.serializations=0;});
   for(let step=0;step<20;step++){
    const result=await page.evaluate(async step=>{const start=performance.now(),button=document.getElementById(step%3===2?'flip':'rotate');button.click();const handlerMs=performance.now()-start,ghost=document.querySelector('.image-transform-preview'),animation=ghost?.getAnimations()[0];if(animation)animation.pause();await new Promise(requestAnimationFrame);return {handlerMs,firstFrameMs:performance.now()-start,previewPixels:ghost?ghost.width*ghost.height:0,previewSize:ghost?[ghost.width,ghost.height]:[],draws:imageStats.draws,serializations:imageStats.serializations,peakPixels:imageStats.peakPixels};},step);timings.push(result);
@@ -28,7 +28,7 @@ async function trial(mode,round,work){
   for(let step=0;step<20;step++)await page.locator('#undo').click();const original=await page.locator('#image').evaluate(c=>c.toDataURL());assert.deepEqual(await page.locator('#image').evaluate(c=>[c.width,c.height]),[4000,3000]);assert.equal(await page.locator('#dirty').innerText(),'尚未保存');
   for(let step=0;step<20;step++)await page.locator('#redo').click();assert.equal(await page.locator('#image').evaluate(c=>c.toDataURL()),final);assert.equal(await page.locator('#dirty').innerText(),'已保存');
   let pixelChecks=0;if(mode==='after'&&round===0){
-   await page.addScriptTag({url:'https://clipper.test/reference-test.js'});await page.addScriptTag({url:'https://clipper.test/drawing-test.js'});
+   await page.addScriptTag({url:'https://clip.test/reference-test.js'});await page.addScriptTag({url:'https://clip.test/drawing-test.js'});
    pixelChecks=await page.evaluate(async()=>{
     const sourceCanvas=document.createElement('canvas');sourceCanvas.width=64;sourceCanvas.height=41;const g=sourceCanvas.getContext('2d');g.fillStyle='#315b87';g.fillRect(3,4,25,29);g.fillStyle='rgba(222,71,71,.45)';g.fillRect(18,12,38,24);const source=new Image();source.src=sourceCanvas.toDataURL();await source.decode();sourceCanvas.width=sourceCanvas.height=0;
     const current=document.createElement('canvas'),expected=document.createElement('canvas'),ops=[];

@@ -12,7 +12,7 @@ const assert=require('node:assert/strict');
   const results=[];
   for(const phase of ['default','english','chinese','system']){
     const report=path.join(profile,phase+'.json');
-    const env={...process.env,CLIPPER_TEST_MODE:'1',CLIPPER_DATA_DIR:profile,CLIPPER_LANGUAGE_PHASE:phase,CLIPPER_LANGUAGE_REPORT:report,CLIPPER_LANGUAGE_PRELOADS:path.resolve('dist/preload')};
+    const env={...process.env,CLIP_TEST_MODE:'1',CLIP_DATA_DIR:profile,CLIP_LANGUAGE_PHASE:phase,CLIP_LANGUAGE_REPORT:report,CLIP_LANGUAGE_PRELOADS:path.resolve('dist/preload')};
     delete env.ELECTRON_RUN_AS_NODE;
     const status=await new Promise((resolve,reject)=>{
       const process=spawn(require('electron'),[entry],{env,windowsHide:true,stdio:['ignore','ignore','pipe']});

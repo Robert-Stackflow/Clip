@@ -20,7 +20,7 @@ for(const name of names) {
  try{
   const result=await execute(process.execPath,['tests/'+name+'.cjs'],{
    cwd:repository,windowsHide:true,timeout:600000,maxBuffer:4*1024*1024,
-   env:{...process.env,TEMP:work.temp,TMP:work.temp,CLIPPER_TEST_OUTPUT_DIR:work.output,CLIPPER_TEST_FIXTURE_DIR:work.fixtures}
+   env:{...process.env,TEMP:work.temp,TMP:work.temp,CLIP_TEST_OUTPUT_DIR:work.output,CLIP_TEST_FIXTURE_DIR:work.fixtures}
   });
   await writeFile(join(work.output,'run.log'),result.stdout+result.stderr);
   console.log(JSON.stringify({test:name,result:'PASS',elapsedMs:Date.now()-started,output:work.output}));

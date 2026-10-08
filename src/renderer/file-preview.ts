@@ -23,7 +23,7 @@ export function filesPreviewMarkup(item:ClipPreview){
 }
 export function mountFilesPreview(root:HTMLElement,item:ClipPreview,api:API,toast:(value:unknown)=>void){
  const host=root.querySelector<HTMLElement>('.file-preview');if(!host)return ()=>{};
- const panel=document.createElement('nav');panel.className='file-entry-menu clipper-popover';panel.popover='manual';panel.setAttribute('role','menu');panel.setAttribute('aria-label',tr('文件操作'));host.append(panel);
+ const panel=document.createElement('nav');panel.className='file-entry-menu clip-popover';panel.popover='manual';panel.setAttribute('role','menu');panel.setAttribute('aria-label',tr('文件操作'));host.append(panel);
  const scope=new ActionScope();let alive=true,anchor:HTMLButtonElement|undefined,index=-1,opened=false;
  const close=(focus=false)=>{opened=false;anchor?.setAttribute('aria-expanded','false');closeAnchoredPopover(panel);panel.style.pointerEvents='none';document.removeEventListener('pointerdown',outside,true);document.removeEventListener('keydown',keyboard,true);if(focus&&anchor?.isConnected)anchor.focus({preventScroll:true});};
  const outside=(event:PointerEvent)=>{if(!panel.contains(event.target as Node)&&!anchor?.contains(event.target as Node))close();};

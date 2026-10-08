@@ -15,7 +15,7 @@ const run = (file,args,env=process.env) => new Promise((resolve,reject)=>{const 
   const result=JSON.parse(fs.readFileSync('work/installer-lifecycle-results.json','utf8'));
   const id=path.basename(result.folder);
   assert(/^[0-9a-f-]{36}$/.test(id));
-  const product=`ClipperVerification-${id}`;
+  const product=`ClipVerification-${id}`;
   const payload=path.join(result.folder,'build','verification-setup.exe');
   const asar=path.join(result.folder,'build','win-unpacked','resources','app.asar');
   const testRoot=path.join(result.folder,`electron-${crypto.randomBytes(4).toString('hex')}`);
@@ -23,14 +23,14 @@ const run = (file,args,env=process.env) => new Promise((resolve,reject)=>{const 
   const infoFile=path.join(testRoot,'build-info.json');
   fs.writeFileSync(infoFile,JSON.stringify({version:require('../package.json').version,product,guid:id,engineHash:sha(payload),engineBytes:fs.statSync(payload).size,asarHash:sha(asar)}));
   const parents=[path.join(testRoot,'初次安装 with spaces'),path.join(testRoot,'新安装位置')];
-  const folders=parents.map(folder=>path.join(folder,'Clipper'));
+  const folders=parents.map(folder=>path.join(folder,'Clip'));
   const key=`HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${id}`;
   assert.notEqual(spawnSync('reg.exe',['query',key],{windowsHide:true,stdio:'ignore'}).status,0,'Fixture must start uninstalled');
   let installed='';
   try {
     for(const [index,directory] of folders.entries()){
       if(index===1){
-        const failing=await electron.launch({executablePath:path.join(root,'node_modules/electron/dist/electron.exe'),args:[path.join(root,'installer')],cwd:root,env:{...process.env,CLIPPER_INSTALLER_BUILD_INFO:infoFile,CLIPPER_INSTALLER_PAYLOAD:payload,CLIPPER_INSTALLER_TEST_FAIL_AFTER_REMOVE:'1',CLIPPER_INSTALLER_TEST_HEADLESS:'1'}});
+        const failing=await electron.launch({executablePath:path.join(root,'node_modules/electron/dist/electron.exe'),args:[path.join(root,'installer')],cwd:root,env:{...process.env,CLIP_INSTALLER_BUILD_INFO:infoFile,CLIP_INSTALLER_PAYLOAD:payload,CLIP_INSTALLER_TEST_FAIL_AFTER_REMOVE:'1',CLIP_INSTALLER_TEST_HEADLESS:'1'}});
         try{
           const page=await failing.firstWindow();
           await page.waitForFunction(()=>document.querySelector('#directory').value.length>0);
@@ -43,7 +43,7 @@ const run = (file,args,env=process.env) => new Promise((resolve,reject)=>{const 
           assert(!fs.existsSync(path.join(folders[1],`${product}.exe`)));
         }finally{await failing.close();}
       }
-      const app=await electron.launch({executablePath:path.join(root,'node_modules/electron/dist/electron.exe'),args:[path.join(root,'installer')],cwd:root,env:{...process.env,CLIPPER_INSTALLER_BUILD_INFO:infoFile,CLIPPER_INSTALLER_PAYLOAD:payload,CLIPPER_INSTALLER_TEST_HEADLESS:'1'}});
+      const app=await electron.launch({executablePath:path.join(root,'node_modules/electron/dist/electron.exe'),args:[path.join(root,'installer')],cwd:root,env:{...process.env,CLIP_INSTALLER_BUILD_INFO:infoFile,CLIP_INSTALLER_PAYLOAD:payload,CLIP_INSTALLER_TEST_HEADLESS:'1'}});
       app.process().stderr?.on('data',chunk=>process.stderr.write(chunk));
       try {
         const page=await app.firstWindow();
@@ -73,7 +73,7 @@ const run = (file,args,env=process.env) => new Promise((resolve,reject)=>{const 
     const silentRoot=path.join(testRoot,'silent-profile');
     fs.mkdirSync(silentRoot,{recursive:true});
     const silentDirectory=path.join(silentRoot,'Programs',product);
-    const silentCode=await run(path.join(root,'node_modules/electron/dist/electron.exe'),[path.join(root,'installer'),'/S'],{...process.env,LOCALAPPDATA:silentRoot,CLIPPER_INSTALLER_BUILD_INFO:infoFile,CLIPPER_INSTALLER_PAYLOAD:payload,CLIPPER_INSTALLER_TEST_HEADLESS:'1'});
+    const silentCode=await run(path.join(root,'node_modules/electron/dist/electron.exe'),[path.join(root,'installer'),'/S'],{...process.env,LOCALAPPDATA:silentRoot,CLIP_INSTALLER_BUILD_INFO:infoFile,CLIP_INSTALLER_PAYLOAD:payload,CLIP_INSTALLER_TEST_HEADLESS:'1'});
     assert.equal(silentCode,0,'Silent install must report success');
     installed=silentDirectory;
     assert(fs.existsSync(path.join(silentDirectory,`${product}.exe`)));

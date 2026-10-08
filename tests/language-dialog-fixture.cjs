@@ -1,5 +1,5 @@
 function setupDialogs(){
- const api=window.clipper,language=window.clipperLanguage.current,english=language==='en',calls=[];
+ const api=window.clip,language=window.clipLanguage.current,english=language==='en',calls=[];
  const options={historyEnabled:true,repliesShortcut:'Control+Alt+R',bindings:[]},history=['设置 保存','<img id="injected-search">'];
  fixture.calls=calls;fixture.efficiency={options,history};fixture.state.snippets[0].title='保存 {{姓名}}';fixture.state.snippets[0].text='你好 {{姓名}} · {{日期}} {{时间}}';fixture.state.snippets[0].payload={text:fixture.state.snippets[0].text};
  fixture.desktop={dwellMs:450,displayId:null,shelfTop:true,shelfAutoDrag:false,shelfOnTop:true,shelfPosition:'top-right',shelfShortcut:'Control+Alt+D',cardDirection:'grid'};
@@ -12,7 +12,7 @@ function setupDialogs(){
   screens:async()=>[{id:7,name:'显示器 保存',width:1920,height:1080}],captureWindows:async()=>[{token:'window-token',name:'窗口 保存 {{日期}}',thumbnail:'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a4J8AAAAASUVORK5CYII='}],screenshot:record('screenshot','image'),screenshotWindow:record('window-capture','image'),
   contentInfo:record('content-info',(_id,read)=>({...data,files:data.files.map(file=>({...file,status:read?'available':'not-read'}))})),exportFormat:record('export-format','保存.rtf'),exportAttachment:record('export-attachment','保存.txt'),metadata:record('metadata',request=>({category:'office',name:'保存文档.docx',size:12345,fields:[{key:'author',value:'保存 设置'},{key:'subject',value:'主题 原文'},{key:'title',value:'<img id="injected-metadata">'},...(request.includeLocation?[{key:'latitude',value:'12.34'}]:[])]})),cancelMetadata:record('metadata-cancel')
  };
- window.clipper=new Proxy(overrides,{get:(object,key)=>key in object?object[key]:api[key]});
+ window.clip=new Proxy(overrides,{get:(object,key)=>key in object?object[key]:api[key]});
 }
 async function openDialog(page,name){
  if(name==='category')await page.locator('#add-category').click();
