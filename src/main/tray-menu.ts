@@ -1,7 +1,7 @@
 import type {MenuItemConstructorOptions} from 'electron';
 import {t as tr} from '../shared/i18n';
 export interface TrayMenuState {initializing:boolean;secured:boolean;stackActive:boolean;paused:boolean;encrypted:boolean;launchAtLogin:boolean}
-export interface TrayMenuActions {recent():void;open():void;replies():void;shelf():void;stack():void;pause():void;lock():void;startup():void;restart():void;quit():void}
+export interface TrayMenuActions {recent():void;open():void;replies():void;chat():void;shelf():void;stack():void;pause():void;lock():void;startup():void;restart():void;quit():void}
 export type TrayMenuAction=keyof TrayMenuActions;
 export interface TrayMenuEntry {id:TrayMenuAction;label:string;group:'header'|'primary'|'tools'|'privacy'|'system';icon:string;tone?:'danger';active?:boolean}
 export interface TrayMenuView {entries:TrayMenuEntry[];dark:boolean;initializing:boolean;secured:boolean;paused:boolean;stackActive:boolean}
@@ -16,6 +16,7 @@ export function trayMenuEntries(state:TrayMenuState):TrayMenuEntry[]{
   {id:'open',label:tr('打开 Clip'),group:'primary',icon:'app-window'},
   {id:'recent',label:tr('最近记录'),group:'primary',icon:'history'},
   {id:'replies',label:tr('快捷回复'),group:'tools',icon:'message-square-text'},
+  {id:'chat',label:tr('AI 对话'),group:'tools',icon:'messages-square'},
   {id:'shelf',label:tr('浮动拖放窗口'),group:'tools',icon:'panel-top'},
   {id:'stack',label:state.stackActive?tr('停止自动加入堆栈'):tr('开始自动加入堆栈'),group:'header',icon:'layers-2',active:state.stackActive},
   {id:'pause',label:state.paused?tr('恢复记录'):tr('暂停记录'),group:'header',icon:state.paused?'play':'pause',active:state.paused},

@@ -16,6 +16,17 @@ const {_electron:electron,expect}=require('@playwright/test'),assert=require('no
   assert(await application.evaluate(({ipcMain})=>['image-open','sticker-open','record-open','record-embed','capture-windows','screens','screenshot','screenshot-window'].every(name=>!ipcMain._invokeHandlers.has('clip:'+name))));
   cases.push('Migrated media navigation, preload APIs and IPC handlers are absent after normal startup');
   const opened=application.waitForEvent('window');await application.evaluate(()=>globalThis.restartTestTray.emit('right-click'));const menu=await opened;menu.on('pageerror',e=>errors.push(e.message));await menu.waitForSelector('[data-action=restart]');const order=await menu.locator('.menu-item').evaluateAll(nodes=>nodes.map(node=>node.dataset.action));assert.deepEqual(order.slice(-2),['restart','quit']);await menu.screenshot({path:path.join(work.output,'tray-menu.png')});
+  await expect(menu.locator('[data-action=chat]')).toHaveText('AI 对话');
+  const compact=()=>menu.evaluate(()=>({height:innerHeight,last:document.querySelector('[data-action=quit]').getBoundingClientRect().bottom,overflow:document.querySelector('#menu-items').scrollHeight>document.querySelector('#menu-items').clientHeight}));
+  await expect.poll(async()=>{const g=await compact();return g.height-g.last;}).toBeLessThanOrEqual(8);let geometry=await compact();assert(geometry.height>=geometry.last);assert.equal(geometry.overflow,false);
+  const chatOpened=application.waitForEvent('window');await menu.locator('[data-action=chat]').click();const chat=await chatOpened;chat.on('pageerror',e=>errors.push(e.message));await chat.waitForSelector('textarea');
+  await expect.poll(()=>application.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().some(w=>w.webContents.getURL()==='clip://app/chat.html'&&w.isVisible()))).toBe(true);
+  assert(await application.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().filter(w=>w.webContents.getURL()==='clip://app/tray-menu.html').every(w=>!w.isVisible())));
+  await chat.evaluate(()=>clipChat.hide());await application.evaluate(()=>globalThis.restartTestTray.emit('right-click'));await expect(menu.locator('[data-action=chat]')).toBeEnabled();
+  await expect.poll(()=>application.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().some(w=>w.webContents.getURL()==='clip://app/tray-menu.html'&&w.isVisible()))).toBe(true);
+  geometry=await compact();assert(geometry.height>=geometry.last&&geometry.height-geometry.last<=8);
+  await assert.rejects(menu.evaluate(()=>clipTrayMenu.ready(Number.NaN)),/菜单操作不可用/);
+  cases.push('Tray AI conversation opens the existing chat window, hides the menu and preserves compact sizing when reopening');
   saved=await restart(()=>menu.locator('[data-action=restart]').click());assert(saved.clips.some(clip=>clip.id===id));cases.push('Actual tray event opens the production menu and Restart directly above Quit dispatches the same restart path');
   page=await launch();assert.equal(await application.evaluate(({ipcMain})=>ipcMain._invokeHandlers.has('clip:scroll-open')),false);
   assert.deepEqual(errors,[]);await application.close();exited=true;const result={passed:true,cases,output:work.output,scope:'Real sandboxed application with isolated profile and hidden native windows. Relaunch is intercepted and verified, then the test reopens the profile. No physical input or system clipboard writes.'};await fs.writeFile(path.join(work.output,'result.json'),JSON.stringify(result,null,2));console.log(JSON.stringify(result));
