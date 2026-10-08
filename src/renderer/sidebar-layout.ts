@@ -1,6 +1,6 @@
 export const sidebarGroups={
  clipboard:['history','stack','shelf','replies'],
- tools:['text-tools','capture-tools','symbols','cheats'],
+ tools:['text-tools','symbols','cheats'],
  connections:['sync','web','uri']
 } as const;
 export type SidebarGroup=keyof typeof sidebarGroups;

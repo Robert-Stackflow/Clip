@@ -48,9 +48,3 @@ export function fillTemplate(payload:Payload,values:unknown={},now=new Date()):P
   const text=payload.text.replace(/\{\{\s*([^{}\r\n]{1,32}?)\s*\}\}/g,(_match,name:string)=>{const key=name.trim();return Object.hasOwn(built,key)?built[key]:String(fields[key]);});
   if(new TextEncoder().encode(text).length>1024*1024)throw new Error(tr('替换后的文字超过 1 MiB'));return {text};
 }
-export function cropRectangle(rect:{x:number;y:number;width:number;height:number},viewport:{width:number;height:number},pixels:{width:number;height:number}){
-  if(!rect||[rect.x,rect.y,rect.width,rect.height,viewport.width,viewport.height,pixels.width,pixels.height].some(x=>!Number.isFinite(x))||viewport.width<=0||viewport.height<=0||rect.width<2||rect.height<2||rect.x<0||rect.y<0||rect.x+rect.width>viewport.width+1||rect.y+rect.height>viewport.height+1)throw new Error(tr('截图选区无效'));
-  const x=Math.floor(rect.x*pixels.width/viewport.width),y=Math.floor(rect.y*pixels.height/viewport.height);
-  const right=Math.min(pixels.width,Math.ceil((rect.x+rect.width)*pixels.width/viewport.width)),bottom=Math.min(pixels.height,Math.ceil((rect.y+rect.height)*pixels.height/viewport.height));
-  return {x,y,width:right-x,height:bottom-y};
-}

@@ -1,3 +1,0 @@
-const {test}=require('node:test'),assert=require('node:assert/strict'),{editSize,editBox}=require('../work/test-exports.cjs');
-test('Image editor enforces integer dimensions and decoded pixel budget',()=>{assert.deepEqual(editSize(4000,4000),{width:4000,height:4000});for(const [w,h]of [[0,100],[1.5,100],[17000,1],[4001,4000],[NaN,100],[Infinity,100]])assert.throws(()=>editSize(w,h));});
-test('Crop retains selected pixels with noninteger preview scaling and reverse drags',()=>{assert.deepEqual(editBox({x:90.8,y:70.2},{x:10.2,y:20.8},100,100),{x:10,y:20,width:81,height:51});assert.deepEqual(editBox({x:-20,y:-10},{x:200,y:400},100,80),{x:0,y:0,width:100,height:80});assert.deepEqual(editBox({x:100,y:80},{x:100,y:80},100,80),{x:99,y:79,width:1,height:1});});

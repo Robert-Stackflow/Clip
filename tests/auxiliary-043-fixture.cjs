@@ -16,15 +16,14 @@ function prepare({initialHidden=false,theme='light'}={}){
   onChange:fn=>{subscribe(changes.tray,fn);queueMicrotask(fn);return()=>changes.tray.delete(fn);},onNotice:fn=>subscribe(notices.tray,fn)
  };
  window.clipShelf={
-  state:async()=>{probe.shelfReads++;const value={items:structuredClone(probe.records),onTop:true,dark:theme==='dark'};if(probe.blockShelf)return new Promise(resolve=>probe.pending.push(()=>resolve(value)));return value;},
+  state:async()=>{probe.shelfReads++;const value={items:structuredClone(probe.records),onTop:true,locked:true,mode:'expanded',dark:theme==='dark'};if(probe.blockShelf)return new Promise(resolve=>probe.pending.push(()=>resolve(value)));return value;},
   copy:async(id,paste)=>{probe.copies.push({id,paste});if(probe.blockCopy)await new Promise(resolve=>probe.copyResolve=resolve);},
   remove:async id=>{probe.removals.push(id);probe.records=probe.records.filter(i=>i.id!==id);fixture.auxRefresh('shelf');},drag:id=>probe.drags.push({id}),hide:async()=>probe.hides++,main:async()=>{},top:async()=>{},
-  choose:async()=>probe.chooses++,dropFiles:async()=>{},dropText:async()=>{},
-  onChange:fn=>subscribe(changes.shelf,fn),onNotice:fn=>subscribe(notices.shelf,fn)
+  choose:async()=>probe.chooses++,dropFiles:async()=>{},dropText:async()=>{},mode:async()=>{},
+  onChange:fn=>subscribe(changes.shelf,fn),onTransition:()=>()=>{},onNotice:fn=>subscribe(notices.shelf,fn)
  };
  const main=window.clip;window.clip=new Proxy({hide:async()=>probe.hides++,copy:async(id,paste)=>probe.copies.push({id,paste})},{get:(object,key)=>key in object?object[key]:main[key]});
- window.clipImage={...window.clipImage,save:async()=>{probe.copies.push({image:true});return null;}};
- window.capture={...window.capture,complete:async()=>probe.hides++};
+
  if(initialHidden)fixture.windowVisible(false);
 }
 module.exports={prepare};

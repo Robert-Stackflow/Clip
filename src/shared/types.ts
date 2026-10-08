@@ -18,7 +18,6 @@ export type ImageHostLinkFormat='url'|'markdown'|'html';
 export interface ImageHostResult {at:number;ok:boolean;kind:'test'|'upload';message:string;link?:string}
 export interface ImageHostState {enabled:boolean;endpoint:string;hasToken:boolean;bodyMode:ImageHostBodyMode;fieldName:string;authMode:ImageHostAuthMode;tokenHeader:string;responsePath:string;linkFormat:ImageHostLinkFormat;timeoutSeconds:number;lastResult?:ImageHostResult;lastTest?:ImageHostResult}
 export interface ImageHostInput {enabled:boolean;endpoint:string;token?:string;bodyMode:ImageHostBodyMode;fieldName:string;authMode:ImageHostAuthMode;tokenHeader:string;responsePath:string;linkFormat:ImageHostLinkFormat;timeoutSeconds:number}
-export interface CaptureScreen { id:number; name:string; width:number; height:number }
 export type TrayClickAction='open'|'recent'|'quick'|'replies'|'shelf';
 export interface Settings { theme: 'system'|'light'|'dark'; view: 'list'|'grid'; cardDirection?:'grid'|'vertical'|'horizontal'; trayClickAction?:TrayClickAction; paused: boolean; maxItems: number; retentionDays: number; maxHistoryMiB:number; excludedApps: string[]; shortcut: string; nextShortcut: string; launchAtLogin: boolean }
 export interface State { interceptWinV?:boolean;quickShortcut?:string;chatShortcut?:string;services?:{sync:'off'|'ready'|'busy'|'error';web:boolean}; stack:import('./stack').StackState; clips: Clip[]; snippets: import('./preview').SnippetSummary[]; favoriteOrder:string[]; queue: string[]; shelf:string[]; categories:Category[]; settings: Settings; desktop:DesktopOptions; dark: boolean; native: boolean; status: string; bytes: number; hotkeyError: string }
@@ -41,7 +40,6 @@ export interface API {
   efficiencyState():Promise<import('./efficiency').EfficiencyState>; configureEfficiency(value:{historyEnabled:boolean;repliesShortcut:string}):Promise<void>;
   rememberSearch(query:string):Promise<void>;removeSearch(query:string|null):Promise<void>;
   replyIntent():Promise<import('./efficiency').ReplyIntent|null>;resolveReply(token:string,values:Record<string,string>|null):Promise<void>;
-  openRecorder():Promise<void>;embedRecorder(bounds:import('./recording-embed').RecordingBounds|null):Promise<void>;onOpenRecording?(callback:()=>void):()=>void;
   showQuick():Promise<void>;configureQuickShortcut(value:string):Promise<void>;configureWinVInterception(value:boolean):Promise<void>;showTray():Promise<void>;desktopState():Promise<DesktopState>;configureDesktop(value:DesktopOptions):Promise<void>;showShelf():Promise<void>;
   vaultState():Promise<VaultState>; prepareEncryption(password:string):Promise<{token:string;recoveryKey:string}>; cancelEncryption():Promise<void>; encryptHistory(token:string,proof:string):Promise<void>; decryptHistory():Promise<void>; cleanupPlaintext():Promise<void>; changeHistoryPassword(password:string):Promise<void>; configureVault(hello:boolean,idleMinutes:number):Promise<void>; lockHistory():Promise<void>;
   webState():Promise<WebState>;webStart(value:WebOptions):Promise<void>;webStop():Promise<void>;webInvite():Promise<string>;webCopyInvite():Promise<void>;webApprove(id:string,accept:boolean,allowSend:boolean):Promise<void>;webRevoke(id:string):Promise<void>;webPublish(id:string):Promise<void>;webRemove(id:string):Promise<void>;webFollow(value:boolean):Promise<void>;
@@ -77,9 +75,8 @@ export interface API {
   metadata(value:import('./metadata').MetadataRequest):Promise<import('./metadata').MetadataResult>;cancelMetadata(requestId:string):Promise<void>;
   exportAttachment(id:string,index:number):Promise<string|null>;contentInfo(id:string,readFiles?:boolean):Promise<import('./formats').ContentInfo>;exportFormat(id:string,name:string):Promise<string|null>;
   fileAction(id:string,index:number,action:import('./file-actions').FileAction):Promise<void>;
-  editImage(id:string):Promise<void>;pinToDesktop(id:string):Promise<void>;imageHostState():Promise<ImageHostState>;configureImageHost(value:ImageHostInput):Promise<void>;testImageHost(value:ImageHostInput):Promise<string>;uploadImage(id:string):Promise<string>;captureWindows():Promise<{token:string;name:string;thumbnail:string}[]>;screenshotWindow(token:string):Promise<string|null>;
+  imageHostState():Promise<ImageHostState>;configureImageHost(value:ImageHostInput):Promise<void>;testImageHost(value:ImageHostInput):Promise<string>;uploadImage(id:string):Promise<string>;
   exportImage(id:string):Promise<string|null>;
-  screens():Promise<CaptureScreen[]>; screenshot(mode:'region'|'screen',displayId:number):Promise<string|null>;
   restart():Promise<void>;
   settings(value:Settings):Promise<void>; backup(mode:'import'|'export'):Promise<string|null>;
   clear():Promise<void>; hide():Promise<void>; quit():Promise<void>;

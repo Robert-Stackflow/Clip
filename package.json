@@ -17,16 +17,12 @@
     "package": "node scripts/package.mjs",
     "test:integration": "npm run build && node tests/integration.cjs",
     "test:advanced": "npm run build && node tests/advanced-ui.cjs",
-    "test:capture": "npm run build && node tests/capture.cjs",
     "test:drag": "npm run build && node tests/drag.cjs",
     "test:text-tools": "npm run build && node tests/text-tools-ui.cjs && node tests/text-tools-boundaries.cjs && node tests/integration-queue.cjs",
     "test:data": "npm run build && node tests/data-ui.cjs",
     "test:backup-preview": "npm test && npm run build && node tests/backup-preview-performance.cjs && node tests/backup-preview-native.cjs",
     "test:vault": "npm run build && node tests/vault-ui.cjs && node tests/vault-boundaries.cjs",
     "test:desktop": "npm run build && node tests/desktop-ui.cjs && node tests/desktop-drag.cjs",
-    "test:recording": "npm run build && node tests/recording-ui.cjs && node tests/recording-audio.cjs && node tests/recording-boundaries.cjs && node tests/recording-microphones-ui.cjs && node tests/recording-microphone-electron.cjs && node tests/select-loading-ui.cjs && node tests/recording-active-ui.cjs",
-    "test:region": "npm run build && node tests/recording-region.cjs",
-    "test:image": "npm run build && node tests/window-capture.cjs && node tests/image-pointer-electron.cjs && node tests/image-pointer-ui.cjs && node tests/image-transform-clip.cjs && node tests/image-editor-boundaries.cjs",
     "test:formats": "npm run build && node tests/formats-ui.cjs && node tests/formats-boundaries.cjs",
     "test:attachments": "npm run build && node tests/attachments-ui.cjs && node tests/attachments-boundaries.cjs",
     "test:metadata": "npm run build && node scripts/test.mjs && node tests/metadata-ui.cjs && node tests/metadata-boundaries.cjs",
@@ -56,8 +52,7 @@
     "test:ui-028": "npm run build && node tests/ui-028.cjs && node scripts/build-native-ui-test.mjs && node tests/native-ui-028.cjs",
     "verify": "node scripts/verify.mjs",
     "test:workflow": "node --test tests/development-policy.cjs tests/release-workflow.cjs tests/workspace-workflow.cjs",
-    "test:collection-settings": "npm run build && node scripts/verify.mjs application-segments-ui && node tests/collection-settings-ui.cjs && node tests/state-refresh-ui.cjs && node tests/settings-live.cjs && node tests/app-icons-runtime.cjs",
-    "test:recording:memory": "npm run build && node tests/recording-residency.cjs && node tests/recording-audio-residency.cjs"
+    "test:collection-settings": "npm run build && node scripts/verify.mjs application-segments-ui && node tests/collection-settings-ui.cjs && node tests/state-refresh-ui.cjs && node tests/settings-live.cjs && node tests/app-icons-runtime.cjs"
   },
   "dependencies": {
     "@codemirror/commands": "6.11.1",

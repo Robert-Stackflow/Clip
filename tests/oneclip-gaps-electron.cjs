@@ -58,21 +58,6 @@ const imageHostInput=(value={})=>({enabled:true,endpoint:'https://example.com/up
     const repliesBefore=(await page.evaluate(()=>window.clip.state())).snippets.map(item=>item.id);
     await page.locator('.row-sort-grip').first().dragTo(page.locator('.clip-row').nth(1));
     await expect.poll(async()=>(await page.evaluate(()=>window.clip.state())).snippets[0]?.id).toBe(repliesBefore[1]);
-    await page.evaluate(async id=>window.clip.pinToDesktop(id),note);
-    await expect.poll(()=>application.windows().some(window=>window.url().includes('sticker.html'))).toBe(true);
-      const sticker=application.windows().find(window=>window.url().includes('sticker.html'));
-      await expect(sticker.locator('#content')).toContainText('note only');
-      const stickerMenu=await application.evaluate(({BrowserWindow,Menu})=>{const window=BrowserWindow.getAllWindows().find(window=>window.webContents.getURL().includes('sticker.html')),original=Menu.buildFromTemplate,labels=[];Menu.buildFromTemplate=template=>{labels.push(...template.map(item=>item.label||item.type));return {popup(){}}};try{window.webContents.emit('context-menu',{},{});return labels;}finally{Menu.buildFromTemplate=original;}});
-      assert.deepEqual(stickerMenu,['复制','separator','关闭']);
-      await sticker.screenshot({path:path.join(output,'oneclip-note-sticker.png')});
-    const beforeMove=await application.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(window=>window.webContents.getURL().includes('sticker.html')).getBounds());
-    await sticker.mouse.move(100,100);await sticker.mouse.down();await sticker.mouse.move(160,140,{steps:5});await sticker.mouse.up();
-      const afterMove=await application.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().find(window=>window.webContents.getURL().includes('sticker.html')).getBounds());
-      assert(afterMove.x!==beforeMove.x||afterMove.y!==beforeMove.y,'sticker did not move');
-      assert(Math.abs(afterMove.width-beforeMove.width)<=1,'drag changed sticker width');
-      assert(Math.abs(afterMove.height-beforeMove.height)<=1,'drag changed sticker height');
-    await sticker.locator('#content').dblclick({position:{x:80,y:80}});
-    await expect.poll(()=>application.windows().some(window=>window.url().includes('sticker.html'))).toBe(false);
     await page.evaluate(value=>window.clip.configureImageHost(value),imageHostInput({token:'fixture'}));
     assert.deepEqual(await page.evaluate(()=>window.clip.imageHostState()),{...imageHostInput(),hasToken:true});
     await page.locator('[data-page=settings]').click();
@@ -87,6 +72,6 @@ const imageHostInput=(value={})=>({enabled:true,endpoint:'https://example.com/up
     await expect(page.locator('#image-host-config')).toHaveCount(0);
     await page.screenshot({path:path.join(output,'oneclip-image-host-settings.png')});
     assert.deepEqual(errors,[]);
-    console.log(JSON.stringify({result:'PASS',profile,screenshots:['oneclip-card-grid.png','oneclip-card-horizontal.png','oneclip-note-sticker.png','oneclip-image-host-settings.png']}));
+    console.log(JSON.stringify({result:'PASS',profile,screenshots:['oneclip-card-grid.png','oneclip-card-horizontal.png','oneclip-image-host-settings.png']}));
   }finally{await application.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});

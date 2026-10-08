@@ -15,16 +15,16 @@ const {setup,measure}=require('./renderer-fixture.cjs');
   await page.screenshot({path:path.join(out,file.split('.')[0]+(file.includes('?')?'-quick':'')+`-${width}x${height}.png`)});
   }
  }
- for(const [file,size,selectors,scrollable] of [['unlock',[480,570],['#unlock-submit','#use-recovery','#recover','#quit'],true],['recovery',[700,600],['#retry','#choose-database','#choose-backup','#quit'],true],['recorder',[680,520],['#start','#refresh','#resolution','#microphone'],true],['image-editor',[760,620],['#viewport','#rotate','#flip','#undo','#redo','#copy','#save','#zoom'],false],['capture',[860,600],['#capture-hint'],false]]){
+ for(const [file,size,selectors,scrollable] of [['unlock',[480,570],['#unlock-submit','#use-recovery','#recover','#quit'],true],['recovery',[700,600],['#retry','#choose-database','#choose-backup','#quit'],true]]){
   await page.setViewportSize({width:size[0],height:size[1]});await page.goto('https://clip.test/'+file+'.html');await page.waitForSelector(selectors[0]);
   for(const font of ['system','sans','mono'])for(const scale of [100,110,125,150])for(const density of ['comfortable','compact']){
    await page.evaluate(v=>fixture.appearance(v),{font,scale,density});await page.evaluate(()=>new Promise(requestAnimationFrame));const label=`${file} ${size.join('x')} ${font} ${scale} ${density}`;let metrics={};
    for(const selector of selectors){if(scrollable)await page.locator(selector).scrollIntoViewIfNeeded();const m=await measure(page,[selector]);metrics={...metrics,...m};}
    results.push({label,metrics});for(const [key,value] of Object.entries(metrics)){if(value===false||typeof value==='object'&&(value.missing||!value.visible||key!=='#capture-hint'&&!value.reachable))failures.push({label,key,value});}
    if(file==='recovery'){const warning=await page.locator('#startup-error').evaluate(node=>{const style=getComputedStyle(node);return {height:node.getBoundingClientRect().height,min:Number.parseFloat(style.lineHeight)+Number.parseFloat(style.paddingTop)+Number.parseFloat(style.paddingBottom),text:node.textContent?.trim()};});if(warning.text&&warning.height+1<warning.min)failures.push({label,key:'recovery warning clipped',warning});}
-   if(file==='image-editor')assert.deepEqual(await page.locator('#image').evaluate(c=>[c.width,c.height]),[640,360],'font scaling must not resample image canvas');
+
   }
-  if(file==='recorder'){await page.locator('.recording-layout').evaluate(node=>node.scrollTop=0);const source=await page.locator('#video-settings').boundingBox();assert(source&&source.y<size[1]&&source.height>100,'The selected recording source must be visible on initial setup');}
+
   await page.screenshot({path:path.join(out,file+'-minimum.png')});
  }
  for(const theme of ['light','dark'])for(const view of ['text','image','files','stack','shelf','replies','batch','grid'])for(const scale of [100,150])for(const density of ['comfortable','compact']){

@@ -5,7 +5,7 @@ const path=require('node:path');
 
 const entries=[
  ['open','打开 Clip','primary','app-window'],['recent','最近记录','primary','history'],
- ['replies','快捷回复','tools','message-square-text'],['shelf','浮动拖放窗口','tools','panel-top'],['record','录屏与录音','tools','circle-play'],
+ ['replies','快捷回复','tools','message-square-text'],['shelf','浮动拖放窗口','tools','panel-top'],
  ['stack','开始自动加入堆栈','header','layers-2'],['pause','暂停记录','header','pause'],['lock','锁定历史','privacy','lock-keyhole'],['startup','开机自启动','system','monitor'],['restart','重启 Clip','system','rotate-cw'],['quit','退出 Clip','system','power']
 ].map(([id,label,group,icon])=>({id,label,group,icon,...(id==='quit'?{tone:'danger'}:{})}));
 async function run(){

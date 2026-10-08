@@ -5,7 +5,7 @@ import {randomUUID} from 'node:crypto';
 import {MAX_ITEM,MAX_TOTAL} from '../shared/core';
 import {t as tr} from '../shared/i18n';
 import {writeBase64} from './base64-file';
-import {commitImageFile} from './recording-move';
+import {commitImageFile} from './file-commit';
 
 const image=/^Clip-[0-9a-f]{64}\.(png|jpg|gif|webp|tif|bmp|dib)$/;
 const temporary=/^\.Clip-drag-[0-9a-f-]{36}\.part$/;

@@ -33,10 +33,10 @@ function groupDetailActions(root:HTMLElement){
  const text=more.querySelector('.text-tool-actions');if(text){container.append(...Array.from(text.children));text.remove();}
  const buttons=Array.from(container.querySelectorAll<HTMLButtonElement>('button'));
  const groups:[string,string,string[]][]=[
-  ['image',t('图片处理'),['edit-image','ai-image']],
+  ['image',t('图片处理'),['ai-image']],
   ['text',t('文字处理'),['plain','translate','summarize','rewrite','run-command','run-script']],
   ['hosting',t('图床'),['upload-image','reupload-image']],
-  ['organize',t('整理与收纳'),['enqueue','dequeue','queue-up','queue-down','split','save-reply','shelf-item','organize-manual-categories','sticker-open']],
+  ['organize',t('整理与收纳'),['enqueue','dequeue','queue-up','queue-down','split','save-reply','shelf-item','organize-manual-categories']],
   ['share',t('分享与导出'),['share-record','private-record','export-image']],
   ['record',t('记录管理'),['show-context','content-info','delete']],
  ];

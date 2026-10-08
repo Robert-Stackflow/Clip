@@ -37,13 +37,8 @@ export * from '../src/main/history-vault';
 export * from '../src/main/database';
 
 export * from '../src/shared/desktop';
-export * from '../src/shared/recording';
-export * from '../src/main/recording-file';
 
-export * from '../src/shared/region';
 export * from './image-fixture';
-
-export * from '../src/shared/image-edit';
 
 export * from '../src/shared/formats';
 
@@ -82,7 +77,7 @@ export * from '../src/main/collection-window';
 
 export * from '../src/main/image-drag-files';
 
-export * from '../src/main/recording-move';
+export * from '../src/main/file-commit';
 
 export * from '../src/main/clipboard-blocks';
 
@@ -96,11 +91,7 @@ export * from '../src/main/window-state';
 
 export * from '../src/shared/renderer-assets';
 
-
 export * from '../src/main/sync-item-reader';
-export * from '../src/shared/image-marks';
-
-export * from '../src/main/recording-sources-protocol';
 
 export * from '../src/main/tray-query';
 export * from '../src/main/tray-search';

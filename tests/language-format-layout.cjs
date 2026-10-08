@@ -9,8 +9,7 @@ function setupFormatting({epoch,raw}){
  const base=window.clip;
  window.clip=new Proxy({settings:async value=>{fixture.formatCalls.push(['settings',value.paused]);fixture.state.settings=value;fixture.refresh();}}, {get:(obj,key)=>key in obj?obj[key]:base[key]});
  const tray=window.clipTray,trayState=tray.state;window.clipTray={...tray,state:async()=>({...await trayState(),total:12345,counts:{all:12345,text:1,image:1,files:1,link:0,code:0}})};
- fixture.recording={phase:'recording',dark:true,bytes:0,seconds:65,message:raw,token:'fixture-only'};
- window.clipRecorder={...window.clipRecorder,state:async()=>fixture.recording,onChange:fn=>{fixture.recordingRefresh=fn;return()=>{};}};
+
 }
 (async()=>{
  await fs.mkdir('work/language-format',{recursive:true});const browser=await chromium.launch({channel:'msedge',headless:true}),results=[],failures=[],errors=[];let context;
@@ -58,16 +57,7 @@ function setupFormatting({epoch,raw}){
     const metrics=await measure(page,['#filters [data-kind="all"]','#copy-selected','#paste-selected']);results.push({language,surface:'tray-count',scale,text:count,metrics});
     for(const [key,value]of Object.entries(metrics))if(value===false||typeof value==='object'&&(value.missing||!value.visible||!value.reachable||value.overflow))failures.push({language,scale,key,value});
    }
-   await page.setViewportSize({width:680,height:520});await page.goto('https://clip.test/recorder.html');await page.waitForSelector('#size');
-   for(const bytes of [0,1572864,1074266112,2146435072]){
-    await page.evaluate(bytes=>{fixture.recording.bytes=bytes;fixture.recordingRefresh();},bytes);
-    const expected=await page.evaluate(bytes=>new Intl.NumberFormat(document.documentElement.lang==='en'?'en-US':'zh-CN',{minimumFractionDigits:1,maximumFractionDigits:1}).format(bytes/1048576)+' MB',bytes);
-    await page.waitForFunction(expected=>document.querySelector('#size').textContent===expected,expected);
-    const metrics=await measure(page,['#size','#pause','#stop']);results.push({language,surface:'recording-size',bytes,expected,metrics});
-    for(const [key,value]of Object.entries(metrics))if(value===false||typeof value==='object'&&(value.missing||!value.visible||!value.reachable||value.overflow))failures.push({language,bytes,key,value});
-    assert.equal(await page.evaluate(()=>fixture.recording.bytes),bytes);assert.equal(await page.locator('#message').textContent(),raw);
-   }
-   await page.screenshot({path:`work/language-format/recording-size-${language}.png`});await context.close();context=undefined;
+   await context.close();context=undefined;
   }
   await fs.writeFile('work/language-format/layout-results.json',JSON.stringify({scope:'Built pages, synthetic IPC; full English words, 4/1000 counts, fonts/scales/densities, legacy date output compatibility and MB precision; no native/clipboard/recording actions.',cases:results.length,failures,errors,results},null,2));
   console.log(JSON.stringify({cases:results.length,failures:failures.length,firstFailures:failures.slice(0,10),errors},null,2));assert.deepEqual(errors,[]);assert.deepEqual(failures,[]);

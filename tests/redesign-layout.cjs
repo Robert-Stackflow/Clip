@@ -77,7 +77,7 @@ const output=deviceScaleFactor===1?'work/redesign':`work/redesign-dpi-${deviceSc
  await category.click();
  assert.equal(await category.getAttribute('aria-current'),'page');
  assert.equal(await page.locator('#content h1').textContent(),'工作');
- for(const [name,size,selectors]of [['tray',[740,560],['#search','#copy-selected']],['shelf',[420,440],['#items','#choose']],['recorder',[960,780],['#sources','#start']],['image-editor',[960,780],['#viewport','#save']],['unlock',[680,760],['#unlock-submit']],['recovery',[840,780],['#retry']],['capture',[1000,700],['#capture-hint']]]){
+ for(const [name,size,selectors]of [['tray',[740,560],['#search','#copy-selected']],['shelf',[420,440],['#items','#choose']],['unlock',[680,760],['#unlock-submit']],['recovery',[840,780],['#retry']]]){
   await page.setViewportSize({width:size[0],height:size[1]});await page.goto(`https://clip.test/${name}.html`);await page.waitForTimeout(150);const geometry=await measure(page,selectors);results.push({language,theme,name,geometry});if(Object.values(geometry).some(v=>v===false||typeof v==='object'&&(v.missing||!v.visible||(name!=='capture'&&!v.reachable))))failures.push({language,theme,name,geometry});if(language==='zh-CN'&&theme==='light')await page.screenshot({path:`${output}/${name}.png`});
  }
  await context.close();

@@ -25,11 +25,11 @@ test('A non-activating panel pastes without touching an editor whose focus was p
  assert.deepEqual(state.focused,[]);assert.deepEqual(state.attached,[]);assert.equal(state.sent.length,1);
 });
 function mainFunctions(names,context){const file=ts.createSourceFile('index.ts',fs.readFileSync('src/main/index.ts','utf8'),ts.ScriptTarget.Latest,true),code=file.statements.filter(node=>ts.isFunctionDeclaration(node)&&names.includes(node.name?.text)).map(node=>node.getText(file)).join('\n');return vm.runInNewContext(ts.transpile(code)+'\n({'+names.join(',')+'})',context);}
-test('Recording allows panels and replies while capture selection and protected sessions still block them',()=>{
- const context={updateService:{},programRollback:{},secured:false,quitting:false,systemPaused:false,changingStore:false,recordingShortcut:false,captureService:{active:false},recorder:{active:true}};
- const functions=mainFunctions(['panelsBlocked','repliesBlocked'],context);assert(!functions.panelsBlocked());assert(functions.repliesBlocked());
+test('Protected sessions and data operations block panels and replies',()=>{
+ const context={updateService:{},programRollback:{},secured:false,quitting:false,systemPaused:false,changingStore:false,recordingShortcut:false};
+ const functions=mainFunctions(['panelsBlocked','repliesBlocked'],context);assert(!functions.panelsBlocked());assert(!functions.repliesBlocked());
  for(const flag of ['secured','quitting','systemPaused','changingStore','recordingShortcut']){context[flag]=true;assert(functions.panelsBlocked());context[flag]=false;}
- context.captureService.active=true;assert(functions.panelsBlocked());context.captureService.active=false;context.updateService.installing=true;assert(functions.panelsBlocked());
+ context.updateService.installing=true;assert(functions.panelsBlocked());
 });
 test('Explicit Win+V prepares the native hook even when the additional interception option is off',async()=>{
  let shortcut='Super+V',intercept=false,prepared=0,stopped=0;const context={developmentHidden:false,store:{meta:key=>key==='quick-panel-shortcut'?shortcut:intercept},quickShortcut:value=>value,QUICK_SHORTCUT:'Control+Alt+V',winVShortcut:{prepare:async()=>{prepared++;},stop:async()=>{stopped++;}}};

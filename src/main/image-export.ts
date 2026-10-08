@@ -6,7 +6,7 @@ import {randomUUID} from 'node:crypto';
 import type {Detail} from '../shared/types';
 import {t as tr} from '../shared/i18n';
 import {writeBase64} from './base64-file';
-import {commitImageFile} from './recording-move';
+import {commitImageFile} from './file-commit';
 
 async function destination(path:string){try{const file=await lstat(path);if(file.isSymbolicLink()||!file.isFile())throw new Error(tr('目标文件不能是文件夹或链接'));return file;}catch(e){if((e as NodeJS.ErrnoException).code==='ENOENT')return undefined;throw e;}}
 const unchanged=(a:Stats|undefined,b:Stats|undefined)=>!a?!b:!!b&&a.dev===b.dev&&a.ino===b.ino&&a.size===b.size&&a.mtimeMs===b.mtimeMs&&a.ctimeMs===b.ctimeMs;
