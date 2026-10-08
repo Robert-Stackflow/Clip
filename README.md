@@ -2,7 +2,7 @@
 
 Windows 剪贴板工作台，使用 Electron、TypeScript、SQLite 和 Windows 原生组件。功能参考 OneClip，界面组件、页面骨架和开发工作流参考本地 `D:\Repositories\One`。
 
-当前源码版本为 **0.51.0**，应用名称为 **Clip**，应用标识为 `com.cloudchewie.clip`。正式资料默认存放在 `%APPDATA%\Clip`，开发资料在 `work/Clip/dev-profile`；会话、日志、崩溃记录、备份与后台服务资料分别保存在所属 Clip 目录内。不读取或迁移旧应用资料，不提供旧协议和旧备份格式的兼容。Codex 继续使用本机已有程序，安装包不携带 Codex 运行时。功能状态见 [当前状态与待办](docs/development/当前状态与待办.md)，历史设计与验收见 [文档索引](docs/README.md)。
+当前源码版本为 **0.51.1**，应用名称为 **Clip**，应用标识为 `com.cloudchewie.clip`。正式资料默认存放在 `%APPDATA%\Clip`，开发资料在 `work/Clip/dev-profile`；会话、日志、崩溃记录、备份与后台服务资料分别保存在所属 Clip 目录内。不读取或迁移旧应用资料，不提供旧协议和旧备份格式的兼容。Codex 继续使用本机已有程序，安装包不携带 Codex 运行时。截图、录制、图片编辑和贴图由 Frame 负责，Clip 保留剪贴板图片采集、预览、复制、导出和元数据读取。功能状态见 [当前状态与待办](docs/development/当前状态与待办.md)，历史设计与验收见 [文档索引](docs/README.md)。
 
 ## 开发与运行
 
