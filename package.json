@@ -1,6 +1,6 @@
 {
   "name": "clip-desktop",
-  "version": "0.51.1",
+  "version": "0.51.2",
   "private": true,
   "description": "Windows 本地剪贴板工作台",
   "author": "Clip",
@@ -95,7 +95,7 @@
     "productName": "Clip",
     "electronDist": "node_modules/electron/dist",
     "directories": {
-      "output": "release/0.51.1"
+      "output": "release/0.51.2"
     },
     "files": [
       "dist/**/*",
