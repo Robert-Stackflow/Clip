@@ -1,12 +1,12 @@
 # Clip
 
-Windows 剪贴板工作台，使用 Electron、TypeScript、SQLite 和 Windows 原生组件。功能参考 OneClip，界面组件、页面骨架和开发工作流参考本地 `D:\Repositories\One`。
+Windows 剪贴板工作台，使用 Electron、TypeScript、SQLite 和 Windows 原生组件。功能参考 OneClip，界面组件、页面骨架和开发工作流参考 One，来源见 [组件迁移记录](docs/research/ONE-UI-MIGRATION.md)。
 
 当前源码版本为 **0.51.2**，应用名称为 **Clip**，应用标识为 `com.cloudchewie.clip`。正式资料默认存放在 `%APPDATA%\Clip`，开发资料在 `work/Clip/dev-profile`；会话、日志、崩溃记录、备份与后台服务资料分别保存在所属 Clip 目录内。不读取或迁移旧应用资料，不提供旧协议和旧备份格式的兼容。Codex 继续使用本机已有程序，安装包不携带 Codex 运行时。截图、录制、图片编辑和贴图由 Frame 负责，Clip 保留剪贴板图片采集、预览、复制、导出和元数据读取。功能状态见 [当前状态与待办](docs/development/当前状态与待办.md)，历史设计与验收见 [文档索引](docs/README.md)。
 
 ## 开发与运行
 
-开发目录固定为 `D:\Repositories\Clip`。双击 [Start-Clip-Dev.cmd](Start-Clip-Dev.cmd)，或在该目录执行：
+在当前仓库根目录开发。双击 [Start-Clip-Dev.cmd](Start-Clip-Dev.cmd)，或在仓库根目录执行：
 
 ```powershell
 npm run dev
@@ -34,7 +34,7 @@ Codex AI 服务使用本机已有的 Codex，安装包不携带 Codex 运行时�
 | `verification` | 固定位置的检查报告 |
 | `release` | 最新两个可运行版本 |
 
-生成目录和依赖不提交 Git。不再复制小版本源码、依赖或完整工作区。发布脚本使用单个暂存目录，校验后保留最新两版。
+生成目录和依赖不提交 Git。不再复制小版本源码、依赖或完整工作区。发布脚本使用单个暂存目录，校验后保留最新两版。按功能定位代码见 [源码导航](src/README.md)，各专项规格见 [文档索引](docs/README.md)。
 
 ## 常用检查
 
@@ -48,6 +48,6 @@ npm run package
 
 `npm test` 运行逻辑回归；`test:dev` 验证实际 Electron 刷新与正常重启；`verify` 使用固定测试目录并清理该次生成样本。真实剪贴板、键鼠、跨设备和安装回退检查按各自范围单独执行。
 
-目录包的构建一致性校验不能代替全部功能验收。双实体设备同步、局域网组播、混合 DPI 及日常目标应用的完整桌面兼容性仍需单独验收。已清理可确认的旧生成物，保留未标记的旧工作目录与最新两个可运行版本；构建直接生成到新的版本目录，不覆盖正在运行的版本。开发入口持续复用 `dist` 和 `work/Clip/dev-profile`，不复制完整工作区。
+目录包的构建一致性校验不能代替全部功能验收。双实体设备同步、局域网组播、混合 DPI 及日常目标应用的完整桌面兼容性仍需单独验收，详见 [当前状态与待办](docs/development/当前状态与待办.md)。开发入口持续复用 `dist` 和 `work/Clip/dev-profile`，不复制完整工作区。清理前检查用途、占用与保留边界，规则见 [代码与构建管理](docs/development/代码与构建管理.md)。
 
 [文档索引](docs/README.md) · [使用说明](docs/user-guide/使用.md) · [开发与存储规则](docs/development/代码与构建管理.md) · [One 组件来源](docs/research/ONE-UI-MIGRATION.md)

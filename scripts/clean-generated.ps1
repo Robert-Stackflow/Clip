@@ -36,7 +36,6 @@ if(Test-Path -LiteralPath $failedCandidate){
  Add-ClipTarget $failedCandidate $releaseRoot 'Failed generated package candidate; no running version is removed'
 }
 Add-ClipTarget (Join-Path $clipRoot 'work\obsolete-node_modules') (Join-Path $clipRoot 'work') 'Obsolete dependency tree, replaced by the current node_modules'
-Add-ClipTarget (Join-Path $clipRoot 'dist\main\index.cjs.map') (Join-Path $clipRoot 'dist') 'Unused legacy debug map; production and development builds do not emit it'
 if($Caches){
  $usingWorkspace=$active | Where-Object {$_.ExecutablePath -and $_.ExecutablePath.StartsWith((Join-Path $clipRoot 'node_modules')+'\',[StringComparison]::OrdinalIgnoreCase) -or $_.CommandLine -and $_.CommandLine.Contains($clipRoot) -and $_.CommandLine -match 'scripts[\\/]|tests[\\/]'}
  foreach($lock in Get-ChildItem -LiteralPath (Join-Path $clipRoot 'work\current') -Filter '.active' -File -Recurse -ErrorAction SilentlyContinue){$testProcess=[int](Get-Content -LiteralPath $lock.FullName);if(Get-Process -Id $testProcess -ErrorAction SilentlyContinue){throw 'Verification is running; close it before clearing caches.'}}

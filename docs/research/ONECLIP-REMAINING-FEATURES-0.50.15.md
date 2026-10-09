@@ -1,5 +1,7 @@
 # 对照 OneClip 的功能缺口与实施进展（Clipper 0.50.15）
 
+> 基线说明（2026-10-10）：保留调研日期和当时的实施状态；不继续维护本篇的进度或待办。当前实现及后续工作统一见 [当前状态与待办](../development/当前状态与待办.md)。
+
 初次核对日期：2026-10-05；实施更新：2026-10-06。对照基准为 [OneClip README](https://github.com/One-Clip/OneClip)、截至 [2.1.0](https://github.com/One-Clip/OneClip/releases/tag/2.1.0) 的公开发布说明、用户此前提供的 OneClip 界面截图，以及 Clipper 工作区源码。下表记录的是**实施前的缺口**，保留原始判断作为追溯依据；当前进展见其后的实施状态。源码核对不等于真实 Windows 应用兼容性验收。
 
 ## 初次核对的明确缺口
